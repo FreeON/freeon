@@ -401,6 +401,9 @@ case ${FC_COMPILERNAME} in
     ;;
 esac
 
+# Change to C.
+AC_LANG(C)
+
 # Check for libtool.
 AC_PROG_LIBTOOL
 
@@ -408,7 +411,6 @@ AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
 
 # Check for some standard headers.
-AC_LANG(C)
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/types.h \
   math.h sys/wait.h)
