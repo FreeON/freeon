@@ -34,7 +34,6 @@ libMondoMods_la_SOURCES = \
   DerivedTypes.f90 \
   FastMat.f90 \
   FileCopy.c \
-  CWrappers.f90 \
   Functionals.f90 \
   GetAddress.c \
   GetHostname.c \
@@ -427,6 +426,7 @@ MondoLogger.lo : \
   GlobalCharacters.lo \
   ParsingConstants.lo
 
-CWrappers.lo : \
+Utilities.lo : \
+  MondoLogger.lo \
   ParsingConstants.lo \
-  MondoLogger.lo
+  Parse.lo

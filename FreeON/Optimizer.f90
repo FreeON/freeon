@@ -12,7 +12,10 @@ MODULE Optimizer
   USE GlobalScalars
   USE HessianMod
   USE SetXYZ
+  USE Utilities
+
   IMPLICIT NONE
+
 CONTAINS
   !=====================================================================================
   !

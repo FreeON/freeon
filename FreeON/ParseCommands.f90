@@ -34,7 +34,7 @@ MODULE ParseCommands
 #endif
   USE ControlStructures
   USE GlobalCharacters
-  USE CWrappers
+  USE Utilities
 
   IMPLICIT NONE
 

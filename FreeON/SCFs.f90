@@ -43,6 +43,7 @@ MODULE SCFs
   USE SetXYZ
   USE PrettyPrint
   USE MondoLogger
+  USE Utilities
 
   IMPLICIT NONE
 
@@ -1843,11 +1844,11 @@ CONTAINS
     chGEO = IntToChar(iGEO)
     RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"
     CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
-    CALL SYSTEM('/bin/rm -f  '//RemoveFile)
+    CALL FileRemove(RemoveFile)
     IF(DoingMD) THEN
       RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*"
       !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
-      CALL SYSTEM('/bin/rm -f  '//RemoveFile)
+      CALL FileRemove(RemoveFile)
     ENDIF
 
     !IF(iGEO >= 2) THEN

@@ -39,7 +39,7 @@ MODULE MDynamics
   USE GlobalScalars
   USE SetXYZ
   USE DynamicsKeys
-  USE CWrappers
+  USE Utilities
   USE MondoLogger
 
   IMPLICIT NONE

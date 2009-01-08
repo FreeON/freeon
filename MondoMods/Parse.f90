@@ -156,6 +156,41 @@ CONTAINS
 
   END SUBROUTINE RemoveComments
 
+  ! Properly escape a file name so that a system call will take it.
+  FUNCTION EscapeFilename(filename)
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: EscapeFilename
+    CHARACTER(LEN=*), INTENT(IN) :: filename
+    INTEGER :: i, j, start
+
+    ! Reset result.
+    EscapeFilename = ""
+
+    ! Remove leading whitespaces.
+    start = 1
+    DO i = 1, LEN(TRIM(filename))
+      IF(filename(i:i) == " " .OR. filename(i:i) == "\t") THEN
+        start = start+1
+      ELSE
+        EXIT
+      ENDIF
+    ENDDO
+
+    ! Escape problematic characters.
+    j = 1
+    DO i = start, LEN(TRIM(filename))
+      IF(filename(i:i) == "(" .OR. &
+         filename(i:i) == ")" .OR. &
+         filename(i:i) == " ") THEN
+        EscapeFilename(j:j) = "\\"
+        j = j+1
+      ENDIF
+      EscapeFilename(j:j) = filename(i:i)
+      j = j+1
+      IF(j > DEFAULT_CHR_LEN) EXIT
+    ENDDO
+
+  END FUNCTION EscapeFilename
+
   !======================================================================
   !     Determine if an option has a defined key set.
   !======================================================================
