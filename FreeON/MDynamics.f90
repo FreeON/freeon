@@ -487,7 +487,7 @@ CONTAINS
     ! Update the Positions
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
           Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
           Pos(1:3) =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
           Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
@@ -505,7 +505,7 @@ CONTAINS
     ! Update the Velocity.
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
           Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
           Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
           Acc(1:3) = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
@@ -649,7 +649,7 @@ CONTAINS
     !IF(iGEO > 1) THEN
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
           Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
           Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
           Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
@@ -671,7 +671,7 @@ CONTAINS
     ! Update the Positions.
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
           Mass     =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
           Pos(1:3) =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
           Vel(1:3) =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
@@ -701,7 +701,7 @@ CONTAINS
     Jmax = 20
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
           Mass  = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
           TVel  = SQRT(Three*Temp0*KelvinToHartrees/Mass)
           VX = Zero
@@ -744,7 +744,7 @@ CONTAINS
     PZ = Zero
     nATOMS = 0
     DO iATS=1,GM%NAtms
-      IF(GM%CConstrain%I(iATS)==0)THEN
+      IF(GM%CConstrain%I(iATS) == 0)THEN
         nATOMS = nATOMS + 1
         Mass = GM%AtMss%D(iATS)
         PX  = PX + Mass*GM%Velocity%D(1,iATS)
@@ -754,7 +754,7 @@ CONTAINS
     ENDDO
     ! Reset Linear Momentum
     DO iATS=1,GM%NAtms
-      IF(GM%CConstrain%I(iATS)==0)THEN
+      IF(GM%CConstrain%I(iATS) == 0)THEN
         Mass = GM%AtMss%D(iATS)
         GM%Velocity%D(1,iATS) = GM%Velocity%D(1,iATS)-(PX-PX0)/(nATOMS*Mass)
         GM%Velocity%D(2,iATS) = GM%Velocity%D(2,iATS)-(PY-PY0)/(nATOMS*Mass)
@@ -774,7 +774,7 @@ CONTAINS
 
     Scale = SQRT(Temp0/Temp)
     DO iATS=1,GM%NAtms
-      IF(GM%CConstrain%I(iATS)==0)THEN
+      IF(GM%CConstrain%I(iATS) == 0)THEN
         GM%Velocity%D(1,iATS) = Scale*GM%Velocity%D(1,iATS)
         GM%Velocity%D(2,iATS) = Scale*GM%Velocity%D(2,iATS)
         GM%Velocity%D(3,iATS) = Scale*GM%Velocity%D(3,iATS)
@@ -836,7 +836,7 @@ CONTAINS
     Kin = Zero
     nATOMS = 0
     DO iATS=1,GM%NAtms
-      IF(GM%CConstrain%I(iATS)==0)THEN
+      IF(GM%CConstrain%I(iATS) == 0)THEN
         nATOMS = nATOMS + 1
         Mass = GM%AtMss%D(iATS)
         Kin  = Kin + Half*GM%AtMss%D(iATS) &

@@ -70,7 +70,10 @@ CONTAINS
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
+      CALL MondoLog(DEBUG_MAXIMUM, "ParseTheInput", "loading dynamics")
       CALL LoadDynamics(C%Nams,C%Opts,C%Dyns)
+    ELSE
+      C%Dyns%DoingMD = .FALSE.
     ENDIF
 
     ! Parse geometry or get from restart HDF
