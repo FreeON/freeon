@@ -26,6 +26,12 @@
 
 MODULE Utilities
 
+  USE MondoLogger
+  USE ParsingConstants
+  USE Parse
+
+  IMPLICIT NONE
+
   INTERFACE
 
     SUBROUTINE GetMemoryUsage_Wrapper(virtualMemorySize)
@@ -42,6 +48,24 @@ MODULE Utilities
     END SUBROUTINE GetStacksizeLimit
 
   END INTERFACE
+
+  INTERFACE FileCopyWrapper
+
+    SUBROUTINE FileCopyWrapper (lenA, fileA, lenB, fileB)
+      INTEGER :: lenA, lenB
+      CHARACTER(LEN=*) :: fileA, fileB
+    END SUBROUTINE FileCopyWrapper
+
+  END INTERFACE FileCopyWrapper
+
+  INTERFACE GetPWDWrapper
+
+    SUBROUTINE GetPWDWrapper (pwd, max_length)
+      INTEGER :: max_length
+      CHARACTER(LEN=*) :: pwd
+    END SUBROUTINE GetPWDWrapper
+
+  END INTERFACE GetPWDWrapper
 
 CONTAINS
 
@@ -60,5 +84,22 @@ CONTAINS
     RETURN
 
   END FUNCTION GetMemoryUsage
+
+  SUBROUTINE FileCopy(fileA, fileB)
+    CHARACTER(LEN=*) :: fileA, fileB
+    CALL MondoLog(DEBUG_NONE, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
+    CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
+  END SUBROUTINE FileCopy
+
+  SUBROUTINE FileRemove(filename)
+    CHARACTER(LEN=*), INTENT(IN) :: filename
+    CALL MondoLog(DEBUG_NONE, "FileRemove", "removing "//TRIM(filename)//" -> "//TRIM(EscapeFilename(filename)))
+    CALL SYSTEM("rm -f "//TRIM(EscapeFilename(filename)))
+  END SUBROUTINE
+
+  SUBROUTINE GetPWD(pwd)
+    CHARACTER(LEN=*) :: pwd
+    CALL GetPWDWrapper(pwd, LEN(pwd))
+  END SUBROUTINE GetPWD
 
 END MODULE Utilities
