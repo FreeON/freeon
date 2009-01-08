@@ -413,7 +413,7 @@ PROGRAM DIIS
 
   ! And do the summation
   DO I=1,N-1
-    CALL MondoLog(DEBUG_NONE, Prog, "Adding "//TRIM(FltToChar(DIISCo%D(Idx%I(I))))//" * F["//TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "Adding "//TRIM(FltToChar(DIISCo%D(Idx%I(I))))//" * F["//TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
     IF(DIISCo%D(Idx%I(I)) /= Zero) THEN
 #ifdef SUM_AO
       CALL Get(Tmp1,TrixFile('F',Args,SCFOff%I(Idx%I(I))))
