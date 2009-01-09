@@ -243,9 +243,9 @@ PROGRAM JForce
   ! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero 
 
-  CALL MondoLog(DEBUG_NONE, "JForce", 'Total='//TRIM(DblToMedmChar(MTimer()-JFORCE_TotalTime_Start)) & 
+  CALL MondoLog(DEBUG_MAXIMUM, "JForce", 'Total='//TRIM(DblToMedmChar(MTimer()-JFORCE_TotalTime_Start)) &
     //'; Bisect='//TRIM(DblToShrtChar(Decompose_Time))//', Tree='//TRIM(DblToShrtChar(TreeMake_Time)), "Timing")
-  CALL MondoLog(DEBUG_NONE, "JForce", 'Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
+  CALL MondoLog(DEBUG_MAXIMUM, "JForce", 'Walk='//TRIM(DblToShrtChar(JWalk_Time))//', Ints='//TRIM(DblToShrtChar(Integral_Time)) &
     //', Mults='//TRIM(DblToShrtChar(Multipole_Time)), "Timing")
 
   CALL ShutDown(Prog)

@@ -920,7 +920,7 @@ CONTAINS
     iBAS = C%Stat%Current%I(2)
     iGEO = C%Stat%Current%I(3)
 
-    CALL MondoLog(DEBUG_NONE, "CopyMatrices", "Current state = "//TRIM(IntVectToChar(C%Stat%Current)))
+    CALL MondoLog(DEBUG_MAXIMUM, "CopyMatrices", "Current state = "//TRIM(IntVectToChar(C%Stat%Current)))
 
     IF(Tilde) THEN
       SELECT CASE(C%Dyns%MDGeuss)
@@ -963,7 +963,7 @@ CONTAINS
           CALL FileCopy(PoldFile, PnewFile)
         ENDDO
       CASE DEFAULT
-        CALL MondoLog(DEBUG_NONE, "CopyMatrices", "in default case with tilde")
+        CALL MondoLog(DEBUG_MAXIMUM, "CopyMatrices", "in default case with tilde")
       ENDSELECT
     ELSE
       SELECT CASE(C%Dyns%MDGeuss)
@@ -1005,7 +1005,7 @@ CONTAINS
           CALL FileCopy(PoldFile, PnewFile)
         ENDDO
       CASE DEFAULT
-        CALL MondoLog(DEBUG_NONE, "CopyMatrices", "in default case without tilde")
+        CALL MondoLog(DEBUG_MAXIMUM, "CopyMatrices", "in default case without tilde")
       END SELECT
     ENDIF
 

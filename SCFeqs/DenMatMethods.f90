@@ -70,8 +70,6 @@ MODULE DenMatMethods
   REAL(DOUBLE)            :: CurThresh
 CONTAINS
 
-
-
   FUNCTION CnvrgChck_BCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2,StartingFromP_O,NPurMin_O)
 
     LOGICAL,SAVE         :: CnvrgChck_RelErrE=.FALSE.
@@ -165,6 +163,10 @@ CONTAINS
       NPurMin = 15
     ENDIF
 
+    ! [FIXME]
+    !
+    ! Check first for convergence in N_e and then on convergence in energy as
+    ! opposed to NPur > NPurMin.
     IF(NPur > NPurMin) THEN
       ! Test for the asymptotic regime
       IF(RelErrE<Thresholds%ETol*1D-1.AND.AbsErrP<Thresholds%DTol)THEN
@@ -190,7 +192,7 @@ CONTAINS
        Mssg='dP='//TRIM(DblToShrtChar(AbsErrP))   &
             //', dNel='//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne)))//', %Non0s='//TRIM(DblToShrtChar(PNon0))//', TrFP='//TRIM(DblToMedmChar(Energy))
     ENDIF
-    CALL MondoLog(DEBUG_NONE,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
+    CALL MondoLog(DEBUG_MEDIUM,Prog,TRIM(Mssg),'Pure '//TRIM(IntToChar(NPur)))
 
     ! Look for convergence
     IF(.NOT.CnvrgChck_BCSR)THEN
