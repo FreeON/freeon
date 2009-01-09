@@ -87,13 +87,13 @@ CONTAINS
 
   SUBROUTINE FileCopy(fileA, fileB)
     CHARACTER(LEN=*) :: fileA, fileB
-    CALL MondoLog(DEBUG_NONE, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
+    CALL MondoLog(DEBUG_MAXIMUM, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
     CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
   END SUBROUTINE FileCopy
 
   SUBROUTINE FileRemove(filename)
     CHARACTER(LEN=*), INTENT(IN) :: filename
-    CALL MondoLog(DEBUG_NONE, "FileRemove", "removing "//TRIM(filename)//" -> "//TRIM(EscapeFilename(filename)))
+    CALL MondoLog(DEBUG_MAXIMUM, "FileRemove", "removing "//TRIM(filename)//" -> "//TRIM(EscapeFilename(filename)))
     CALL SYSTEM("rm -f "//TRIM(EscapeFilename(filename)))
   END SUBROUTINE
 
