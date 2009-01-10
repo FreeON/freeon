@@ -88,3 +88,13 @@ validate :
 	$(MAKE) -C Validate validate
 
 TESTS = /bin/true
+
+# dependency checks.
+depcheck :
+	$(MAKE) -C MondoMods depcheck-lib
+	$(MAKE) -C FreeON  depcheck-bin
+	$(MAKE) -C SCFeqs  depcheck-bin
+	$(MAKE) -C OneE  depcheck-bin
+	$(MAKE) -C QCTC  depcheck-bin
+	$(MAKE) -C HiCu  depcheck-bin
+	$(MAKE) -C ONX  depcheck-bin
