@@ -199,7 +199,6 @@ LIBRARY_DEPENDENCY_FILES_MODS = \
   $(top_builddir)/MondoMods/derivedtypes.mod \
   $(top_builddir)/MondoMods/erffunk.mod \
   $(top_builddir)/MondoMods/fastmatrices.mod \
-  $(top_builddir)/MondoMods/cwrappers.mod \
   $(top_builddir)/MondoMods/functionals.mod \
   $(top_builddir)/MondoMods/gammaassymp.mod \
   $(top_builddir)/MondoMods/gammaf0.mod \
