@@ -554,17 +554,20 @@ CONTAINS
 
       ! Calculate total acceleration.
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
+
       CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "flying ice-cube correction: [ " &
         //TRIM(DblToChar(Acc(1)))//" " &
         //TRIM(DblToChar(Acc(2)))//" " &
         //TRIM(DblToChar(Acc(3)))//" ]")
 
-      ! Make sure the total force on the system is zero.
-      DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
-          C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
-        ENDIF
-      ENDDO
+      IF(numberUnconstrainedAtoms == C%Geos%Clone(iCLONE)%NAtms) THEN
+        ! Make sure the total force on the system is zero.
+        DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+            C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
+          ENDIF
+        ENDDO
+      ENDIF
     ENDDO
 
     ! Get the symplectic counter.
