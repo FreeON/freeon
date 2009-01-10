@@ -363,7 +363,7 @@ CONTAINS
     dT2   = Half*dT
     dTSq2 = Half*dT*dT
 
-    ! Set the Sum of the Forces equal to zero
+    ! Set the Sum of the Forces equal to zero in case of no constraint atoms.
     numberUnconstrainedAtoms = 0
     DO iCLONE = 1,C%Geos%Clones
       Acc(1:3) = Zero
@@ -376,17 +376,21 @@ CONTAINS
 
       ! Calculate total acceleration.
       Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
+
       CALL MondoLog(DEBUG_NONE, "MD:Verlet", "flying ice-cube correction: [ " &
         //TRIM(DblToChar(Acc(1)))//" " &
         //TRIM(DblToChar(Acc(2)))//" " &
         //TRIM(DblToChar(Acc(3)))//" ]")
 
-      ! Make sure the total force on the system is zero.
-      DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
-          C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
-        ENDIF
-      ENDDO
+      IF(numberUnconstrainedAtoms == C%Geos%Clone(iCLONE)%NAtms) THEN
+        ! Make sure the total force on the system is zero.
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "setting total force to zero")
+        DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+            C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
+          ENDIF
+        ENDDO
+      ENDIF
     ENDDO
 
     ! Update the Velocity if not the first step
