@@ -1,9 +1,9 @@
 MODULE MemMan
    USE DerivedTypes
-   USE GlobalScalars   
+   USE GlobalScalars
    USE GlobalCharacters
    USE GlobalObjects
-   USE ProcessControl    
+   USE ProcessControl
    IMPLICIT NONE
    INTERFACE New
       MODULE PROCEDURE New_INT_VECT, New_INT_RNK2, &
@@ -15,9 +15,9 @@ MODULE MemMan
                        New_BONDDATA, New_ATOMBONDS,&
                        New_PBCInfo,  New_CRDS,     &
                        New_PBCFit ,                &
-#ifdef PARALLEL 
+#ifdef PARALLEL
                        New_DBCSR,    New_MPI_INDX, &
-#endif    
+#endif
                        New_INTC,     New_BMATR,    &
                        New_Chol,                   &
                        New_IntCBox,  New_ANGLEDATA,&
@@ -40,9 +40,9 @@ MODULE MemMan
                        Delete_BONDDATA, Delete_ATOMBONDS,&
                        Delete_PBCInfo,  Delete_CRDS,     &
                        Delete_PBCFit  ,                   &
-#ifdef PARALLEL 
+#ifdef PARALLEL
                        Delete_DBCSR,    Delete_MPI_INDX, &
-#endif    
+#endif
                        Delete_INTC,     Delete_BMATR,    &
                        Delete_Chol,                      &
                        Delete_IntCBox,  Delete_ANGLEDATA,&
@@ -59,7 +59,7 @@ MODULE MemMan
       MODULE PROCEDURE SetBig_INT_VECT, SetBig_DBL_VECT
    END INTERFACE
 !
-!-------------------------------------------------  
+!-------------------------------------------------
 !  Allocation keys
 !
    INTEGER                :: MemStatus
@@ -70,7 +70,7 @@ MODULE MemMan
    INTEGER, PARAMETER     :: ALLOCATED_FALSE=STATUS_FALSE
 !------------------------------------------------------------------------
 
-   CONTAINS 
+   CONTAINS
 
       SUBROUTINE SetBig_INT_VECT(A)
          TYPE(INT_VECT) :: A
@@ -81,8 +81,8 @@ MODULE MemMan
          TYPE(DBL_VECT) :: A
          A%D=BIG_DBL
       END SUBROUTINE SetBig_DBL_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_INT_VECT(A,N,M_O)
          TYPE(INT_VECT),  INTENT(INOUT) :: A
@@ -97,8 +97,8 @@ MODULE MemMan
          A%Alloc=ALLOCATED_TRUE
          CALL SetToBig(A)
       END SUBROUTINE New_INT_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_INT_RNK2(A,N,M_O)
          TYPE(INT_RNK2),  INTENT(INOUT)  :: A
@@ -113,8 +113,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INT_RNK2
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_INT_RNK3(A,N,M_O)
          TYPE(INT_RNK3),  INTENT(INOUT)  :: A
@@ -130,8 +130,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INT_RNK3
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_INT_RNK4(A,N,M_O)
          TYPE(INT_RNK4),  INTENT(INOUT)  :: A
@@ -148,8 +148,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INT_RNK4
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_DBL_VECT(A,N,M_O)
          TYPE(DBL_VECT),  INTENT(INOUT) :: A
@@ -164,8 +164,8 @@ MODULE MemMan
          A%Alloc=ALLOCATED_TRUE
          CALL SetToBig(A)
       END SUBROUTINE New_DBL_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_DBL_RNK2(A,N,M_O)
          TYPE(DBL_RNK2),  INTENT(INOUT)  :: A
@@ -180,8 +180,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_DBL_RNK2
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_DBL_RNK3(A,N,M_O)
          TYPE(DBL_RNK3),  INTENT(INOUT)  :: A
@@ -197,8 +197,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_DBL_RNK3
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_DBL_RNK4(A,N,M_O)
          TYPE(DBL_RNK4),  INTENT(INOUT)  :: A
@@ -216,8 +216,8 @@ MODULE MemMan
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_DBL_RNK4
 
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_DBL_RNK6(A,N,M_O)
          TYPE(DBL_RNK6),  INTENT(INOUT)  :: A
@@ -236,8 +236,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_DBL_RNK6
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE New_CHR10_VECT(A,N,M_O)
          TYPE(CHR10_VECT),  INTENT(OUT) :: A
          INTEGER,         INTENT(IN)  :: N
@@ -249,8 +249,8 @@ MODULE MemMan
          CALL IncMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_CHR10_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE New_CHR_VECT(A,N,M_O)
          TYPE(CHR_VECT),  INTENT(OUT) :: A
          INTEGER,         INTENT(IN)  :: N
@@ -275,7 +275,7 @@ MODULE MemMan
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_LOG_VECT
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
       SUBROUTINE New_INTC(A,N)
          TYPE(INTC),      INTENT(OUT) :: A
@@ -307,9 +307,9 @@ MODULE MemMan
            A%InvHess%D=Zero
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INTC
-!     
+!
 !------------------------------------------------------
-!     
+!
       SUBROUTINE New_BMATR(A,N)
          TYPE(BMATR) :: A
          INTEGER     :: N
@@ -367,14 +367,14 @@ MODULE MemMan
         INTEGER        :: NBox,NatmsLoc,NX,NY,NZ
         TYPE(IntCBox)  :: A
         A%N=NBox
-        A%NX=NX  
-        A%NY=NY  
-        A%NZ=NZ  
+        A%NX=NX
+        A%NY=NY
+        A%NZ=NZ
         A%NatmsLoc=NatmsLoc
         CALL New(A%I,NBox+1)
         CALL New(A%J,NatmsLoc)
         A%Alloc=ALLOCATED_TRUE
-      END SUBROUTINE New_IntCBox 
+      END SUBROUTINE New_IntCBox
 !
 !-----------------------------------------------------
 !
@@ -414,8 +414,8 @@ MODULE MemMan
         TYPE(ATOMBONDS) :: A
         !
         IF(A%N1==0) RETURN
-        A%N1=0        
-        A%N2=0        
+        A%N1=0
+        A%N2=0
         CALL Delete(A%Count)
         CALL Delete(A%Bonds)
         CALL Delete(A%Atoms)
@@ -467,7 +467,7 @@ MODULE MemMan
          CALL New(A%LonelyAtom,NBond)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BONDDATA
-!     
+!
 !-----------------------------------------------------
 !
       SUBROUTINE Delete_BONDDATA(A)
@@ -476,7 +476,7 @@ MODULE MemMan
            A%Alloc=ALLOCATED_FALSE
            RETURN
          ENDIF
-         A%N=0       
+         A%N=0
          CALL Delete(A%IJ)
          CALL Delete(A%Length)
          CALL Delete(A%Type)
@@ -485,9 +485,9 @@ MODULE MemMan
          CALL Delete(A%LonelyAtom)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BONDDATA
-!     
+!
 !-----------------------------------------------------
-!  
+!
       SUBROUTINE New_Chol(A,NCart,ChNon0)
          INTEGER NCart,ChNon0
          TYPE(Cholesky) :: A
@@ -500,7 +500,7 @@ MODULE MemMan
          CALL New(A%ChFact,ChNon0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_Chol
-!     
+!
 !-----------------------------------------------------
 !
       SUBROUTINE Delete_Chol(A)
@@ -514,9 +514,9 @@ MODULE MemMan
          CALL Delete(A%ChFact)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_Chol
-!     
+!
 !-----------------------------------------------------
-!  
+!
       SUBROUTINE New_PBCInfo(A)
          TYPE(PBCInfo),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
@@ -529,9 +529,9 @@ MODULE MemMan
          CALL New(A%LatFrc    ,(/3,3/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_PBCInfo
-!     
+!
 !-----------------------------------------------------
-!     
+!
       SUBROUTINE New_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
@@ -553,13 +553,13 @@ MODULE MemMan
          !
          CALL New(A%ETotalPerSCF, 256, 0)
          A%ETotalPerSCF%D = 0.0D0
-         !         
+         !
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE New_BCSR(A,N_O,OnAll_O,NSMat_O)
          TYPE(BCSR),INTENT(INOUT)             :: A
          INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
@@ -579,7 +579,7 @@ MODULE MemMan
             IF(PRESENT(NSMat_O))A%NSMat=NSMat_O
             IF(PRESENT(N_O))THEN
                A%NAtms=N_O(1)
-               A%NBlks=N_O(2) 
+               A%NBlks=N_O(2)
                A%NNon0=N_O(3)
                CALL New(A%RowPt,A%NAtms+1)
                CALL New(A%ColPt,A%NBlks  )
@@ -601,7 +601,7 @@ MODULE MemMan
       END SUBROUTINE New_BCSR
 #ifdef PARALLEL
 !----------------------------------------------------------------------------
-!     
+!
 !
       SUBROUTINE New_DBCSR(A,N_O,NoGlobals_O,Node_O,NSMat_O)
          TYPE(DBCSR),INTENT(INOUT)      :: A
@@ -633,13 +633,13 @@ MODULE MemMan
             CALL New(A%MTrix,MaxNon0Node*A%NSMat)
          ENDIF
 !        Allocate global variables
-         IF(PRESENT(NoGlobals_O))THEN 
+         IF(PRESENT(NoGlobals_O))THEN
             IF(NoGlobals_O)THEN
                RETURN
             ELSE
                CALL Halt(' Logic error in New_DBCSR ')
             ENDIF
-         ELSE         
+         ELSE
             CALL New(A%GRwPt,NAtoms+1 )
             CALL New(A%GClPt,MaxBlks  )
             A%GRwPt%I(1:NAtoms+1)=BIG_INT
@@ -757,8 +757,8 @@ MODULE MemMan
         CALL New(A%GDrv5,(/6,10/))
         A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_GradD
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE New_ARGMT(A,N_O)
          TYPE(ARGMT)                    :: A
@@ -772,8 +772,8 @@ MODULE MemMan
          CALL New(A%I,A%NI)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_ARGMT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_INT_VECT(A)
          TYPE(INT_VECT),INTENT(INOUT) :: A
@@ -783,8 +783,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INT_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_INT_RNK2(A)
          TYPE(INT_RNK2),INTENT(INOUT) :: A
@@ -794,8 +794,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INT_RNK2
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_INT_RNK3(A)
          TYPE(INT_RNK3),INTENT(INOUT) :: A
@@ -805,8 +805,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INT_RNK3
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_INT_RNK4(A)
          TYPE(INT_RNK4),INTENT(INOUT) :: A
@@ -816,8 +816,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,Ints,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INT_RNK4
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBL_VECT(A)
          TYPE(DBL_VECT),INTENT(INOUT) :: A
@@ -827,8 +827,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DBL_VECT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBL_RNK2(A)
          TYPE(DBL_RNK2),INTENT(INOUT) :: A
@@ -838,8 +838,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DBL_RNK2
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBL_RNK3(A)
          TYPE(DBL_RNK3),INTENT(INOUT) :: A
@@ -849,8 +849,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DBL_RNK3
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBL_RNK4(A)
          TYPE(DBL_RNK4),INTENT(INOUT) :: A
@@ -860,8 +860,8 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,Dbls)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DBL_RNK4
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBL_RNK6(A)
          TYPE(DBL_RNK6),INTENT(INOUT) :: A
@@ -872,8 +872,8 @@ MODULE MemMan
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_DBL_RNK6
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE Delete_CHR10_VECT(A)
          TYPE(CHR10_VECT) :: A
          INTEGER        :: MemStatus
@@ -882,18 +882,18 @@ MODULE MemMan
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CHR10_VECT
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE Delete_CHR_VECT(A)
          TYPE(CHR_VECT) :: A
          INTEGER        :: MemStatus
          DEALLOCATE(A%C,STAT=MemStatus)
-         CALL DecMem(MemStatus,0,0)
+         CALL DecMem(MemStatus,SIZE(A%C)*DEFAULT_CHR_LEN,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CHR_VECT
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
       SUBROUTINE Delete_LOG_VECT(A)
          TYPE(LOG_VECT) :: A
          INTEGER        :: MemStatus
@@ -902,7 +902,7 @@ MODULE MemMan
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_LOG_VECT
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
       SUBROUTINE Delete_INTC(A)
          TYPE(INTC)     :: A
@@ -922,7 +922,7 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INTC
-!     
+!
       SUBROUTINE Delete_BMATR(A)
          TYPE(BMATR)    :: A
          CALL Delete(A%IB)
@@ -931,9 +931,9 @@ MODULE MemMan
          CALL Delete(A%BLI)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BMATR
-!     
+!
 !-----------------------------------------------------
-!  
+!
       SUBROUTINE Delete_PBCInfo(A)
          TYPE(PBCInfo),INTENT(INOUT)       :: A
          CALL Delete(A%AutoW)
@@ -956,7 +956,7 @@ MODULE MemMan
          CALL Delete(A%AtNam)
          CALL Delete(A%DoFreq)
          CALL Delete(A%AtMss)
-         CALL Delete(A%CConstrain)         
+         CALL Delete(A%CConstrain)
          CALL Delete(A%Carts)
          CALL Delete(A%Velocity)
          CALL Delete(A%Gradients)
@@ -970,9 +970,9 @@ MODULE MemMan
          CALL Delete(A%OvCells)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
-      END SUBROUTINE Delete_CRDS 
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+      END SUBROUTINE Delete_CRDS
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_BCSR(A,OnAll_O)
          TYPE(BCSR),INTENT(INOUT) :: A
@@ -993,14 +993,14 @@ MODULE MemMan
             A%NAtms=0
             A%NBlks=0
             A%NNon0=0
-            A%Alloc=ALLOCATED_FALSE            
+            A%Alloc=ALLOCATED_FALSE
 #ifdef PARALLEL
          ENDIF
 #endif
       END SUBROUTINE Delete_BCSR
 #ifdef PARALLEL
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
 !
       SUBROUTINE Delete_DBCSR(A)
          TYPE(DBCSR),INTENT(INOUT) :: A
@@ -1015,7 +1015,7 @@ MODULE MemMan
          A%NAtms=0
          A%NBlks=0
          A%NNon0=0
-         A%Alloc=ALLOCATED_FALSE            
+         A%Alloc=ALLOCATED_FALSE
          A%Node=BIG_INT
       END SUBROUTINE Delete_DBCSR
 
@@ -1024,10 +1024,10 @@ MODULE MemMan
          INTEGER                      :: IErr
          CALL Delete(A%Blks)
          CALL Delete(A%Disp)
-         A%Alloc=ALLOCATED_FALSE            
+         A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_MPI_INDX
 #endif
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
       SUBROUTINE Delete_BSET(A)
@@ -1122,7 +1122,7 @@ MODULE MemMan
         CALL Delete(A%GDrv5)
         A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_GradD
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
       SUBROUTINE Delete_ARGMT(A)
@@ -1238,7 +1238,7 @@ MODULE MemMan
     ENDIF
 !
   END SUBROUTINE Delete_HGRho
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
      FUNCTION AllocQ(Alloc)
@@ -1250,7 +1250,7 @@ MODULE MemMan
          ENDIF
          RETURN
      END FUNCTION AllocQ
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
      SUBROUTINE AllocChk(Alloc)
@@ -1269,7 +1269,7 @@ MODULE MemMan
 #endif
          ENDIF
       END SUBROUTINE AllocChk
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
       SUBROUTINE InitMEMS(A_O)
@@ -1288,10 +1288,10 @@ MODULE MemMan
             MemStats%MaxAlloc=0
          ENDIF
       END SUBROUTINE InitMEMS
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
-      SUBROUTINE IncMem(Stats,Ints,Dbls,Proc_O) 
+      SUBROUTINE IncMem(Stats,Ints,Dbls,Proc_O)
          INTEGER, INTENT(IN)                  :: Stats,Ints,Dbls
          INTEGER                              :: MemInBytes
          CHARACTER(LEN=*), OPTIONAL           :: Proc_O
@@ -1303,19 +1303,19 @@ MODULE MemMan
             WRITE(ChMem,INTERNAL_INT_FMT)MemInBytes
             WRITE(ChTab,INTERNAL_DBL_FMT)BToMB(MemStats%MemTab)
             IF(PRESENT(Proc_O))THEN
-               Mssg='>>>ALLOCATE error at '//TRIM(Proc_O)//' : '& 
+               Mssg='>>>ALLOCATE error at '//TRIM(Proc_O)//' : '&
                   //' Attempting to allocate '//ChMem           &
                   //' bytes.'//Rtrn//'    To here, '//ChTab     &
                   //' MB were in use.'
             ELSE
-               Mssg='>>>ALLOCATE error: '                       & 
+               Mssg='>>>ALLOCATE error: '                       &
                   //' Attempting to allocate '//ChMem           &
                   //' bytes.'//Rtrn//'    To here, '//ChTab     &
                   //' MB were in use.'
             ENDIF
             CALL Halt(Mssg)
          ENDIF
-         MemStats%Allocs=MemStats%Allocs+1         
+         MemStats%Allocs=MemStats%Allocs+1
          MemStats%MemTab=MemStats%MemTab+MemInBytes
          MemStats%MaxMem=MAX(MemStats%MaxMem,MemStats%MemTab)
          MemStats%MaxAlloc=MAX(MemStats%MaxAlloc,MemInBytes)
@@ -1327,10 +1327,10 @@ MODULE MemMan
          REAL(DOUBLE),PARAMETER :: Ten24Inv2=1.0D0/(1024.D0)**2
          BToMB=DBLE(Bytes)*Ten24Inv2
       END FUNCTION BToMB
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-      SUBROUTINE DecMem(MemStatus,Ints,Dbls) 
+!
+      SUBROUTINE DecMem(MemStatus,Ints,Dbls)
          INTEGER, INTENT(IN)                  :: MemStatus,Ints,Dbls
          INTEGER                              :: MemInBytes
          CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
@@ -1346,7 +1346,7 @@ MODULE MemMan
                //' bytes.'//Rtrn//'    To here, '//TRIM(ChTab)      &
                //' bytes were in use.'
 #else
-            Mssg='>>>DEALLOCATE error:'                        & 
+            Mssg='>>>DEALLOCATE error:'                        &
                //' Attempting to deallocate '//TRIM(ChMem)     &
                //' bytes.'//Rtrn//'    To here, '//TRIM(ChTab) &
                //' bytes were in use.'
@@ -1354,7 +1354,7 @@ MODULE MemMan
             CALL Halt(Mssg)
          ENDIF
          MemStats%MemTab=MemStats%MemTab-MemInBytes
-         MemStats%DeAllocs=MemStats%DeAllocs+1         
+         MemStats%DeAllocs=MemStats%DeAllocs+1
       END SUBROUTINE DecMem
 !----------------------------------------------------------------------------
 !
@@ -1364,7 +1364,7 @@ MODULE MemMan
          INTEGER            :: ToBytes
          ToBytes=NInt*BytesPerInt()+NDbl*BytesPerDbl()
       END FUNCTION ToBytes
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
      FUNCTION ToMB(NInt,NDbl)
@@ -1372,7 +1372,7 @@ MODULE MemMan
          REAL(DOUBLE)       :: ToMB
          ToMB=NInt*IntToMB+NDbl*DblToMB
       END FUNCTION ToMB
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
       FUNCTION BytesPerInt()
@@ -1385,7 +1385,7 @@ MODULE MemMan
             CALL Halt('Unkown byte count in BytesPerInt.')
          ENDIF
       END FUNCTION BytesPerInt
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
       FUNCTION BytesPerDbl()
@@ -1396,11 +1396,11 @@ MODULE MemMan
 ! Create the CellSet
 !--------------------------------------------------------------------------
   SUBROUTINE New_CellSet(CS,NCELL)
-    TYPE(CellSet)                    :: CS   
+    TYPE(CellSet)                    :: CS
     INTEGER                          :: NCELL
 !
     CS%NCells = NCELL
-    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
+    CALL New(CS%CellCarts,(/3,CS%NCells/))
     CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet

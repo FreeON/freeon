@@ -81,10 +81,6 @@ CONTAINS
     IF(isOpen) THEN
       ! The log file was opened somewhere else in the code and not closed
       ! properly. This indicates a possible bug.
-      WRITE(*,"(A,I3,A)") "[MondoLog] logfile already open (fd = ", fd_old, ")"
-      IF(fd /= fd_old) THEN
-        WRITE(*,"(A)") "[MondoLog] WARNING: fd != fd_old"
-      ENDIF
       CLOSE(fd_old)
       isOpen = .FALSE.
 
@@ -92,7 +88,7 @@ CONTAINS
       ! MondoLogger itself to properly log this event.
       WRITE(UNIT=fd_string, FMT="(I3)") fd_old
       fd_string = ADJUSTL(fd_string)
-      CALL MondoLog(DEBUG_NONE, "OpenLogFile", "logfile already open (fd = "//TRIM(fd_string)//")")
+      CALL MondoLog(DEBUG_NONE, "OpenLogfile", "logfile already open (fd(old) = "//TRIM(fd_string)//")")
     ENDIF
 
     IF(exists.AND.(.NOT.isOpen)) THEN

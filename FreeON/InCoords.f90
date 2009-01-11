@@ -2145,11 +2145,10 @@ CONTAINS
      CALL POffHardGc(VectInt,ISpB,JSpB,ASpB,CholData, &
                      NCart,IntCs%N,Fact)
      IF(Print2) THEN
-       WRITE(*,100) Fact
-       WRITE(Out,100) Fact
-       100 FORMAT('Percentage of Hard Constraints Projected Out= ',F6.2)
+       CALL MondoLog(DEBUG_MEDIUM, "ProjectBCol", "Percentage of Hard Constraints Projected Out = " &
+         //TRIM(FltToChar(Fact)))
      ENDIF
-     !
+
      CALL Delete(B)
      CALL Delete(BS)
      CALL Delete(ISpB)
