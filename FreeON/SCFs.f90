@@ -1180,7 +1180,7 @@ CONTAINS
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     ! Done with this sucka
     CALL Delete(S%Action)
-    !
+
     IF(O%Grad==GRAD_ONE_FORCE) THEN
        DO iCLONE=1,G%Clones
           ! Print Total Forces and Lattice Forces
