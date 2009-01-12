@@ -436,16 +436,13 @@ CONTAINS
       ENDDO
     ENDDO
     IF(GlbOrder) THEN
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*)' ... ning Warning  Warning  Warning Wa ... '
-      WRITE(Out,*)' The primitive functions have been automatically '
-      WRITE(Out,*)' reordered in a decreasing way!'
-      CLOSE(Out)
+      CALL MondoLog(DEBUG_NONE, "OrderExpnt", " ... ning Warning  Warning  Warning Wa ... ")
+      CALL MondoLog(DEBUG_NONE, "OrderExpnt", "The primitive functions have been automatically reordered in a decreasing way!")
     ENDIF
     CALL Delete(IA)
     CALL Delete(RA)
   END SUBROUTINE OrderExpnt
-  !
+
   SUBROUTINE BlockBuild2(G,B,BS,OS)
     TYPE(CRDS)      :: G
     TYPE(BSET)      :: B

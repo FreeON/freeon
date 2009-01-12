@@ -68,7 +68,7 @@ CONTAINS
        CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
     ENDDO
 
-!    CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+    !CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
 
     iBAS=C%Sets%NBSets
     IStart=iGEO
@@ -651,7 +651,7 @@ CONTAINS
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      CALL GetLattGrads(IntCL,CartGrad%D, &
                        XYZ,Gopt%LattIntC%Grad%D,PBCDim)
-   ! CALL SYMMSTRESS(CartGrad%D(NCart-8),XYZ,PBCDim)
+     ! CALL SYMMSTRESS(CartGrad%D(NCart-8),XYZ,PBCDim)
      CALL TotalLattGrad(XYZ,PBCDim,CartGrad%D)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
@@ -661,12 +661,11 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoRotOff) &
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
      CALL Delete(Carts)
-     !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
                       GOpt%GOptStat%LMaxCGrad,PBCDim)
-     !
-   ! CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+
+     ! CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
      ! Do we have to refresh internal coord defs?
      !
@@ -678,16 +677,13 @@ CONTAINS
        CALL GetIntCs(XYZ,AtNum,IntCs,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GConvCrit, &
                      GOpt%GDIIS%MaxMem,GOpt%ExtIntCs,PBCDim,iGEO)
-       IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
-                    'optimizer has not found any internal coordinates.')
+       IF(IntCs%N==0) CALL Halt('Molecule has dissociated, optimizer has not found any internal coordinates.')
      ENDIF
      IF(IntCs%N/=0) THEN
-       CALL INTCValue(IntCs,XYZ,PBCDim, &
-                      GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
+       CALL INTCValue(IntCs,XYZ,PBCDim,GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
        CALL New(IntOld,IntCs%N)
        IntOld%D=IntCs%Value%D
-       CALL INTCValue(IntCL,XYZ,PBCDim,GOpt%CoordCtrl%LinCrit, &
-                      GOpt%CoordCtrl%TorsLinCrit)
+       CALL INTCValue(IntCL,XYZ,PBCDim,GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
        CALL New(LatOld,IntCL%N)
        IF(IntCL%N>0) LatOld%D=IntCL%Value%D
      ENDIF
@@ -701,8 +697,7 @@ CONTAINS
      ! Print current set of internals for debugging
      !
      IF(Print==DEBUG_GEOP_MAX) THEN
-       CALL PrtIntCoords(IntCs,IntCs%Value%D,&
-           'Internals at step #'//TRIM(IntToChar(iGEO)),PBCDim_O=PBCDim)
+       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals at step #'//TRIM(IntToChar(iGEO)),PBCDim_O=PBCDim)
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
      !
@@ -724,16 +719,14 @@ CONTAINS
      CALL TurnOnGDIIS(GOpt%GOptStat%MaxCGrad,GOpt%GDIIS%On)
 
      ! tidy up
-     !
      CALL Delete(CartGrad)
      CALL Delete(LatOld)
      CALL Delete(IntCL)
      CALL Delete(Gopt%LattIntC%Grad)
      CALL Delete(Gopt%LattIntC%Displ)
      CALL Delete(IntOld)
-     ! MC 08
      CALL Delete(IntCs)
-     !
+
    END SUBROUTINE ModifyGeom
 !
 !--------------------------------------------------------------------
@@ -829,10 +822,12 @@ CONTAINS
      IF(DoMix) THEN
        CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
        CALL Sp1x1ToFull(ISpB%I,JSpB%I,ASpB%D,IntCs%N,NCart,FullB)
-       CALL Delete(ISpB) ; CALL Delete(JSpB) ; CALL Delete(ASpB)
+       CALL Delete(ISpB)
+       CALL Delete(JSpB)
+       CALL Delete(ASpB)
        CALL UnitaryTR(IntCs,FullB%D,IntCValues%D,MixMat,NMix)
        CALL Delete(FullB)
-      !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
+       !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
                   iGEO,GOpt%DoGradNorm,GOpt%Pictures,MixMat_O=MixMat%D)
@@ -947,7 +942,7 @@ CONTAINS
                          GOpt%CoordCtrl,GOpt%GConvCrit,GOpt%Constr, &
                          PBCDim,SCRPath, &
                          PWDPath,GOpt%ExtIntCs,iGEO_O=iGEO)
-     !
+
      CALL Delete(RefPoints)
      CALL Delete(Displ)
      CALL Delete(Grad)
@@ -1180,8 +1175,6 @@ CONTAINS
      !
      IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
      !
-400 FORMAT('Total Energy at Current Geometry = ',F20.8)
-401 FORMAT('                    Total Energy = ',F20.8)
 410 FORMAT('                   Max intl Grad = ',F12.6,' between atoms ',4I4)
 140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
 145 FORMAT('     Max Unconstrained Latt Grad = ',F12.6,'      on vect  ',A4)
@@ -2292,8 +2285,8 @@ CONTAINS
     CALL DBL_VECT_EQ_DBL_SCLR(9,ITheta%D(1,1),0.0D0)
     IF(ABS(EigenV%D(1)*EigenV%D(2)*EigenV%D(3)).LT.1.0D-8) THEN
        IF(ABS(EigenV%D(1))+ABS(EigenV%D(2))+ABS(EigenV%D(3)).LT.1.0D-8) THEN
-          WRITE(*,*) 'Is it an atom?'
-          WRITE(*,*) 'STOPPED in ProjOut'
+          CALL MondoLog(DEBUG_NONE, "Optimizer:ProjOut", "Is it an atom?")
+          CALL MondoLog(DEBUG_NONE, "Optimizer:ProjOut", "STOPPED in ProjOut")
           STOP
        ENDIF
        ! Linear systems.

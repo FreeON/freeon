@@ -1675,16 +1675,17 @@ CONTAINS
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      IF(Print2) THEN
-       WRITE(*,111) NIntC 
-       WRITE(Out,111) NIntC
-       111 FORMAT('Gradient transformation, No. Int. Coords= ',I7)
+       CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Gradient transformation, No. Int. Coords = "//TRIM(IntToChar(NIntC)))
        IF(.NOT.CtrlTrf%DoClssTrf) THEN
-         WRITE(*,112) CtrlTrf%ThreeAt
-         WRITE(*,112) CtrlTrf%ThreeAt_2
-         WRITE(Out,112) CtrlTrf%ThreeAt
-         WRITE(Out,112) CtrlTrf%ThreeAt_2
+         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt(1)))//" "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt(2)))//" "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt(3))))
+         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt_2(1)))//" "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt_2(2)))//" "// &
+           TRIM(IntToChar(CtrlTrf%ThreeAt_2(3))))
        ENDIF
-       112 FORMAT('Three-atoms reference system used, atoms are ',3I4)
      ENDIF
      !
      ! Cartesian --> Internal transformation
@@ -1719,8 +1720,7 @@ CONTAINS
        !
        IF(DiffMax>TrfGrd%MaxGradDiff) THEN
          IF(Print2) THEN
-           WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',TrfGrd%MaxGradDiff
-           WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',TrfGrd%MaxGradDiff
+           CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Rescale Step from "//TRIM(FltToChar(DiffMax))//" to "//TRIM(FltToChar(TrfGrd%MaxGradDiff)))
          ENDIF
          SumU=TrfGrd%MaxGradDiff/DiffMax
          VectIntAux%D(:)=SumU*VectIntAux%D(:)
@@ -4787,46 +4787,46 @@ CONTAINS
      CHARACTER(LEN=*)          :: SCRPath
      CHARACTER(LEN=*),OPTIONAL :: Messg_O
      CHARACTER(LEN=DCL)        :: Messg
-     !
-write(*,*) 'RedundancyOff hardwired to return'
-return
+
+     CALL MondoLog(DEBUG_NONE, "RedundancyOff", "RedundancyOff hardwired to return")
+     RETURN
+
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)  
      NIntC=SIZE(ISpB%I)-1
-     IF(NIntC/=SIZE(Displ)) &
+     IF(NIntC/=SIZE(Displ)) THEN
        CALL Halt('Dimension error in RedundancyOff')
+     ENDIF
      NCart=SIZE(CholData%IPerm%I)
      CALL New(Vect1,NCart)
      CALL New(Displ2,NIntC)
      Displ2%D=Displ
-     !
+
      CALL CALC_BxVect(ISpB,JSpB,ASpB,Displ,Vect1%D,Trp_O=.TRUE.)
      CALL GcInvIter(Vect1%D,ISpB,JSpB,ASpB,CholData,NIntC)
      CALL CALC_BxVect(ISpB,JSpB,ASpB,Displ,Vect1%D)
-     !
+
      Perc=DOT_PRODUCT(Displ,Displ2%D)/DOT_PRODUCT(Displ2%D,Displ2%D) 
      Perc=(One-ABS(Perc))*100.D0
      IF(PRESENT(Messg_O)) THEN
        Messg=TRIM(Messg_O)// &
-         " Percentage of Redundancy projected out= " &
+         " Percentage of Redundancy projected out = " &
          //TRIM(IntToChar(INT(Perc)))
      ELSE
        Messg= &
-         " Percentage of Redundancy projected out= " &
+         " Percentage of Redundancy projected out = " &
          //TRIM(IntToChar(INT(Perc)))
      ENDIF
      IF(Print>=DEBUG_GEOP_MAX) THEN
-       WRITE(*,*) TRIM(Messg)
-       WRITE(Out,*) TRIM(Messg)
+       CALL MondoLog(DEBUG_MEDIUM, "RedundancyOff", Messg)
      ENDIF
-100  FORMAT(F8.2)
-     !
+
      CALL Delete(Displ2)
      CALL Delete(Vect1)
      CALL Delete(ISpB)
      CALL Delete(JSpB)
      CALL Delete(ASpB)
      CALL Delete(CholData)
-     ! 
+
    END SUBROUTINE RedundancyOff
 ! 
 !-------------------------------------------------------------------
@@ -7832,7 +7832,7 @@ write(*,*) ii,fact,tol
      CALL CleanLattGradRatio(PBCDim,XYZ,GOpt%Constr,CartGrad)
      CALL IntCsConstr(GOpt%ExtIntCs,IntCsX,DoReturn)
      IF(DoReturn) RETURN
-     !
+
      IntCsX%Constraint%L=.FALSE.
      IntCsX%Active%L=.TRUE.
      NCart=SIZE(CartGrad)
@@ -7869,17 +7869,15 @@ write(*,*) ii,fact,tol
                           PBCDim,Print,SCRPath,Gi_O=.TRUE., &
                           Shift_O=1.D-4,DoCleanCol_O=.FALSE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-     !
+
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA1%D,CartGrad)
-     CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1%D,IntA2%D, &
-                    NCart,IntCsX%N)
+     CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1%D,IntA2%D,NCart,IntCsX%N)
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA2%D,CartA1%D,Trp_O=.TRUE.)
-     !
+
      Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
      Fact=Fact*100.D0
-     WRITE(*,100) Fact
-     WRITE(Out,100) Fact
-     100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F8.4)
+     CALL MondoLog(DEBUG_MEDIUM, "CleanConstrCart", &
+       "Percentage of Constraint Force That is Projected Out = "//TRIM(FltToChar(Fact)))
      CartGrad=CartGrad-CartA1%D
      IF(PBCDim>0) THEN
        DO I=1,NatmsLoc-3
@@ -7890,7 +7888,7 @@ write(*,*) ii,fact,tol
          CartGrad(K:L)=Vect2
        ENDDO
      ENDIF
-     !
+
      CALL Delete(IntCsX)
      CALL Delete(IntA2)
      CALL Delete(IntA1)

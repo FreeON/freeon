@@ -47,7 +47,6 @@ CONTAINS
     CHARACTER(LEN=DCL) :: Line
     !---------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
-    CALL OpenASCII(N%OFile,Out)
 
     ! Initialize
     D%DoingMD        = .TRUE.
@@ -262,8 +261,6 @@ CONTAINS
         CALL MondoHalt(PRSE_ERROR,MC_TEMP//' not found in input.')
       ENDIF
     ENDIF
-
-    CLOSE(Out)
 
   END SUBROUTINE LoadDynamics
   !---------------------------------------------------------------------------------------!
