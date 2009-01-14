@@ -791,8 +791,7 @@ CONTAINS
      INTEGER            :: DimNew,DimOld,Incr
      !
      DimNew=DimOld+Incr
-     CALL Set_BONDDATA_EQ_BONDDATA(Bond2,Bond, &
-                                   NewDim_O=DimNew,OldDim_O=DimOld)
+     CALL Set_BONDDATA_EQ_BONDDATA(Bond2,Bond,NewDim_O=DimNew,OldDim_O=DimOld)
      CALL Delete(Bond)
      CALL New(Bond,DimNew)
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,Bond2)

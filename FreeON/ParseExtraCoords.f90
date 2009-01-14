@@ -28,7 +28,6 @@ MODULE ParseExtraCoords
   USE ControlStructures
   USE DerivedTypes
   USE GlobalScalars
-  !  USE Macros
   USE OptionKeys
   USE GeometryKeys
   USE ParseGeometries

@@ -115,6 +115,9 @@ CONTAINS
     CALL MondoLogPlain("with C-compiler version "//TRIM(HAVE_CC_VERSION_STRING))
     CALL MondoLogPlain("with F77-compiler version "//TRIM(HAVE_F77_VERSION_STRING))
     CALL MondoLogPlain("with F90-compiler version "//TRIM(HAVE_FC_VERSION_STRING))
+    CALL MondoLogPlain("CFLAGS  = "//TRIM(HAVE_CFLAGS_STRING))
+    CALL MondoLogPlain("FFLAGS  = "//TRIM(HAVE_FFLAGS_STRING))
+    CALL MondoLogPlain("FCFLAGS = "//TRIM(HAVE_FCFLAGS_STRING))
     CALL MondoLogPlain("using HDF5 library version " &
       //TRIM(IntToChar(HDF5_majnum))//"." &
       //TRIM(IntToChar(HDF5_minnum))//"." &

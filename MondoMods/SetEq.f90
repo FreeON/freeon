@@ -6,7 +6,9 @@ MODULE SetXYZ
 #ifdef PARALLEL
    USE MondoMPI
 #endif
+
    IMPLICIT NONE
+
    INTERFACE SetEq
       MODULE PROCEDURE Set_TIME_EQ_TIME,          &
                        Set_BCSR_EQ_BCSR,          &
@@ -924,13 +926,22 @@ MODULE SetXYZ
 !
         TYPE(INTC) :: IntCs,IntCsCopy
         INTEGER    :: I,J,From,To,Start,NSize,To2
-!
+
         NSize=IntCsCopy%N
         IF(NSize<Start+(To-From)) THEN
           CALL Halt('Dimensionality error in IntCCopy')
         ENDIF
-!
-         To2=Start+(To-From)
+
+        To2=Start+(To-From)
+
+        IF(To2 < Start) THEN
+          CALL MondoLog(DEBUG_MAXIMUM, "Set_INTC_EQ_INTC", "To2 < Start")
+          RETURN
+        ELSE IF(To < From) THEN
+          CALL MondoLog(DEBUG_MAXIMUM, "Set_INTC_EQ_INTC", "To < From")
+          RETURN
+        ENDIF
+
         IntCsCopy%Def%C(Start:To2)        =IntCs%Def%C(From:To)
         IntCsCopy%Atoms%I(Start:To2,1:4)  =IntCs%Atoms%I(From:To,1:4)
         IntCsCopy%Cells%I(Start:To2,1:12) =IntCs%Cells%I(From:To,1:12)

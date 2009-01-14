@@ -128,12 +128,11 @@ MODULE PBCFarField
 
          ENDDO
          IF(Ell2Use==MaxPFFFEll.AND.ETotal.NE.1D2)THEN
-            CALL Warn(' Maximum angular symmetry in periodic far-field expansion of the energy is too low,'//RTRN//     & 
-                 '    resulting in a relative error '//TRIM(DblToShrtChar(DeltaPFF/ETotal))//" in the total energy, "//RTRN// &
-                 '    which is larger than the requested accuracy goal of '//TRIM(DblToShrtChar(Thresholds%ETol))      &
-                 //'. '//RTRN// &
-                 '    Please consider increasing the value of PFFMaxEll from '//TRIM(IntToChar(MaxPFFFEll))//'. '//RTRN// &
-                 '    Note that increasing PFFMaxEll can actually decrease the cost of QCTC ')
+            CALL Warn('Maximum angular symmetry in periodic far-field expansion of the energy is too low,'//RTRN//     &
+                 'resulting in a relative error '//TRIM(DblToShrtChar(DeltaPFF/ETotal))//" in the total energy, "//RTRN// &
+                 'which is larger than the requested accuracy goal of '//TRIM(DblToShrtChar(Thresholds%ETol))//'. '//RTRN// &
+                 'Please consider increasing the value of PFFMaxEll from '//TRIM(IntToChar(MaxPFFFEll))//'. '//RTRN// &
+                 'Note that increasing PFFMaxEll can actually decrease the cost of QCTC ')
          ENDIF
       ELSE
         ! The crystal field contribution to the lattice forces

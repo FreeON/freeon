@@ -932,6 +932,11 @@ AC_DEFINE(LOG_MEMORY_USAGE,
           [CALL MondoLog(DEBUG_NONE, __FILE__, "memory at "//TRIM(IntToChar(__LINE__))//": "//TRIM(IntToChar(GetMemoryUsage()))//" kiB")],
           [A helper macro to print out memory usage.])
 
+# Store the compiler flags used somewhere.
+AC_DEFINE_UNQUOTED(HAVE_CFLAGS_STRING,  ["${CFLAGS}"],  [The C-compiler flags used])
+AC_DEFINE_UNQUOTED(HAVE_FFLAGS_STRING,  ["${FFLAGS}"],  [The F77-compiler flags used])
+AC_DEFINE_UNQUOTED(HAVE_FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags used])
+
 # Print out a summary of options used to compile.
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC                       = ${CC}])
