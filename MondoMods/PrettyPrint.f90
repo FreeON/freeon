@@ -551,10 +551,10 @@ MODULE PrettyPrint
                    Mssg=IntToChar(GM%NAtms)
                    WRITE(PU,*)TRIM(Mssg)
                    IF(PRESENT(Remark_O))THEN
-                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
+                      Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(DblToChar(GM%ETotal))//' Hartree, '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
                    ELSE
                       Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                           //', <SCF> = '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
+                           //', <SCF> = '//TRIM(DblToChar(GM%ETotal))//' Hartree, '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
                    ENDIF
                    IF(PRESENT(Clone_O)) &
                         Mssg='Clone # '//TRIM(IntToChar(Clone_O))//" / "//TRIM(Mssg)
