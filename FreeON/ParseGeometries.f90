@@ -253,6 +253,7 @@ CONTAINS
     DO
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
       CALL RemoveComments(Line)
+      IF(LEN(TRIM(Line)) == 0) CYCLE
       LineLowCase = Line
       IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
       N=N+1
@@ -263,19 +264,17 @@ CONTAINS
     ! Parse the coordinates
     CALL Align(BeginDelimiter,Inp)
 
-    !!    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing coordinates")
-
     DO
-      READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+      READ(Inp,DEFAULT_CHR_FMT,END=1) Line
       CALL RemoveComments(Line)
+      IF(LEN(TRIM(Line)) == 0) CYCLE
       LineLowCase = Line
       IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
       Call LowCase(LineLowCase)
       N=N+1
       CALL LineToChars(LineLowCase,C)
 
-      IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, &
-           'bad data on parsing goemetry at line = <<'//TRIM(LineLowCase)//'>>')
+      IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, 'Bad data on parsing geometry at line = <<'//TRIM(LineLowCase)//'>>')
       ! Set the atom for freq calculation
       G%DoFreq%I(N)   = 0
       G%Fext%D(1:3,N) = Zero
