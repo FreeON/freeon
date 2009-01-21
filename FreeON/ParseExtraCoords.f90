@@ -121,11 +121,10 @@ CONTAINS
            INDEX(LineLowCase,'cartz')/=0) THEN
           NIntCs=NIntCs+1
         ENDIF
-        !
+
         IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
       ENDDO
-1     CALL MondoHalt(PRSE_ERROR, &
-           ' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
+1     CALL MondoHalt(PRSE_ERROR, ' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
 2     CONTINUE
       !
       ! Generate an addition to the IntC set!
@@ -138,8 +137,9 @@ CONTAINS
       NIntCs=0
       CALL AlignLowCase('begin_add_internals',Inp)
       DO
-        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+        READ(Inp,DEFAULT_CHR_FMT,END=11)Line
         CALL RemoveComments(Line)
+        IF(LEN(TRIM(Line)) == 0) CYCLE
         LineLowCase = Line
         Call LowCase(LineLowCase)
         !
@@ -150,14 +150,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'stre_b')/=0) THEN
           !--------------------
@@ -167,14 +163,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'stre_c')/=0) THEN
           !--------------------
@@ -184,14 +176,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          NConstr=NConstr+1
         ELSE IF(INDEX(LineLowCase,'stre')/=0) THEN
           !--------------------
           NIntCs=NIntCs+1
@@ -257,14 +245,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'area_l')/=0) THEN
           !--------------------
@@ -274,15 +258,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,0,0,1,0,0,0,1,0/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)= &
-                 Value*AngstromsToAu**2
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)= Value*AngstromsToAu**2
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'volm_l')/=0) THEN
           !--------------------
@@ -292,14 +271,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu**3
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu**3
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'beta')/=0) THEN
           !--------------------
@@ -309,14 +284,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'alpha')/=0) THEN
           !--------------------
@@ -326,14 +297,10 @@ CONTAINS
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
           GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
-          IF(INDEX(LineLowCase,'.')==0) THEN
-          ELSE
-            READ(LineLowCase,*) &
-                 CHAR,Value
-            GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-            GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
-            NConstr=NConstr+1
-          ENDIF
+          READ(LineLowCase,*) CHAR,Value
+          GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
+          NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN
           !--------------------
@@ -467,18 +434,15 @@ CONTAINS
           GOpt%ExtIntCs%ConstrValue%D(NIntCs+1)=Vect1(3)
           NIntCs=NIntCs+1
           NCartConstr=NCartConstr+1
+        ELSE IF(INDEX(LineLowCase,'end_add_internals')/=0) THEN
+          GO TO 12
         ELSE
           ! dont do anything with non-conform lines
-          !
+          Call Warn("illegal input: "//TRIM(Line))
         ENDIF
-        !
-        IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 12
       ENDDO
-11    CALL MondoHalt(PRSE_ERROR, &
-           ' Found no <end_add_internals> in inPut file '&
-           //TRIM(InpFile))
+11    CALL MondoHalt(PRSE_ERROR, ' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
 12    CONTINUE
-      !
     ELSE
       NIntCs=0
       CALL New(GOpt%ExtIntCs,NIntCs)
