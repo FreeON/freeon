@@ -637,9 +637,9 @@ MODULE PrettyPrint
                 WRITE(PU,11)GM%Confg
 11              FORMAT('MODEL  ',I6)
                 IF(PRESENT(Remark_O))THEN
-                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
+                   Mssg=TRIM(Remark_O)//', <SCF> = '//TRIM(DblToChar(GM%ETotal))//' Hartree, '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
                 ELSE
-                   Mssg=' <SCF> = '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
+                   Mssg=' <SCF> = '//TRIM(DblToChar(GM%ETotal))//' Hartree, '//TRIM(DblToChar(GM%ETotal*au2eV))//' eV'
                 ENDIF
                 WRITE(PU,22) TRIM(Mssg)
 22              FORMAT('REMARK   1  ', A)
