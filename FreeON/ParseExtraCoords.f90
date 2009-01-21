@@ -97,7 +97,7 @@ CONTAINS
     NCartConstr=0
     !
     IF(FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
-      !
+      CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "reading internals")
       CALL AlignLowCase('begin_add_internals',Inp)
       DO
         READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -142,9 +142,8 @@ CONTAINS
         IF(LEN(TRIM(Line)) == 0) CYCLE
         LineLowCase = Line
         Call LowCase(LineLowCase)
-        !
+
         IF(INDEX(LineLowCase,'stre_a')/=0) THEN
-          !--------------------
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_A    '
           GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
@@ -154,9 +153,8 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
           NConstr=NConstr+1
-          !--------------------
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_A = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre_b')/=0) THEN
-          !--------------------
           IF(Geos%Clone(1)%PBC%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_B    '
@@ -167,9 +165,8 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
           NConstr=NConstr+1
-          !--------------------
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_B = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre_c')/=0) THEN
-          !--------------------
           IF(Geos%Clone(1)%PBC%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_C    '
@@ -180,6 +177,7 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
           NConstr=NConstr+1
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_C = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre')/=0) THEN
           !--------------------
           NIntCs=NIntCs+1
@@ -238,7 +236,6 @@ CONTAINS
           ENDIF
           !--------------------
         ELSE IF(INDEX(LineLowCase,'gamma')/=0) THEN
-          !--------------------
           IF(Geos%Clone(1)%PBC%Dimen<2) CALL Halt('Extra coord gamma while PBC dimension is 1')
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='GAMMA     '
@@ -249,7 +246,7 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
           NConstr=NConstr+1
-          !--------------------
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "Gamma = "//TRIM(FltToChar(Value))//" degree")
         ELSE IF(INDEX(LineLowCase,'area_l')/=0) THEN
           !--------------------
           IF(Geos%Clone(1)%PBC%Dimen/=2) CALL Halt('Extra coord area_l while PBC dimension is 1')
@@ -277,7 +274,6 @@ CONTAINS
           NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'beta')/=0) THEN
-          !--------------------
           IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord beta while PBC dimension is /= 3')
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BETA      '
@@ -288,9 +284,8 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
           NConstr=NConstr+1
-          !--------------------
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "Beta = "//TRIM(FltToChar(Value))//" degree")
         ELSE IF(INDEX(LineLowCase,'alpha')/=0) THEN
-          !--------------------
           IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord alpha while PBC dimension is /= 3')
           NIntCs=NIntCs+1
           GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='ALPHA     '
@@ -301,7 +296,7 @@ CONTAINS
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
           GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad
           NConstr=NConstr+1
-          !--------------------
+          CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "Alpha = "//TRIM(FltToChar(Value))//" degree")
         ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN
           !--------------------
           NIntCs=NIntCs+1
