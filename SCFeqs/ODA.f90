@@ -246,7 +246,7 @@ PROGRAM ODA
   IF(MyId==ROOT)THEN
 #endif
     ODATag='Mix = '//TRIM(FltToShrtChar(L))
-    ODAMssg="<SCF> = "//TRIM(FltToChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
+    ODAMssg="<SCF> = "//TRIM(DblToChar(EMin))//" hartree, "//TRIM(DblToChar(EMin*au2eV))//' eV, 3 = '//TRIM(DblToShrtChar(d3))
     CALL MondoLog(DEBUG_MEDIUM,Prog,ODAMssg,ODATag)
 #ifdef PARALLEL
   ENDIF

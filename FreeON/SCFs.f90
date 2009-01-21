@@ -1041,6 +1041,7 @@ CONTAINS
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
       CALL Invoke('LowdinO',N,S,M)
       ! CALL Invoke('IRInv',N,S,M)
+      ! CALL Invoke('AInv',N,S,M)
     ELSE
       CALL Invoke('AInv',N,S,M)
     ENDIF
