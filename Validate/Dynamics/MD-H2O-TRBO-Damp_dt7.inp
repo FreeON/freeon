@@ -10,7 +10,7 @@ Grad=(MolecularDynamics)
 DebugAll=(MaxDebug,CheckSums)
 
 Guess=SuperPos
-SCFMethod=(RH)
+SCFMethod=(TC2)
 BasisSets=(3-21G-SPLIT)
 
 ModelChem=(HF)
