@@ -10,6 +10,7 @@ PROGRAM DIIS
   USE SetXYZ
   USE LinAlg
   USE MatFunk
+  USE MondoLogger
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -37,6 +38,7 @@ PROGRAM DIIS
   !-------------------------------------------------------------------------------------
   !  Initial setup
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+  CALL MondoLog(DEBUG_NONE, Prog, "This is a really old version of DIIS (2004-01-16)")
   ISCF=Args%I%I(1)
   !  Parse for DIIS options
   CALL OpenASCII(InpFile,Inp)
