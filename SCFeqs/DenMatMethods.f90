@@ -70,6 +70,22 @@ MODULE DenMatMethods
   REAL(DOUBLE)            :: CurThresh
 CONTAINS
 
+  FUNCTION IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)
+    LOGICAL              :: IdmpCnvrgChck
+    REAL(DOUBLE)         :: Occ0,Occ1,Occ2,Occ3,IdmpErrCurr,IdmpErrOld
+    INTEGER              :: Imin,I
+    IdmpCnvrgChck=.FALSE.
+    IF (I.GE.Imin) THEN
+       IdmpErrCurr = ABS(Occ0-Occ1) ! |Tr(P*Q)|
+       IF (IdmpErrCurr.LT.0.01D0) THEN
+          IdmpErrOld = ABS(Occ2-Occ3)
+          IF (IdmpErrCurr.GE.IdmpErrOld) THEN
+                IdmpCnvrgChck=.TRUE.
+          ENDIF
+       ENDIF
+    ENDIF
+  END FUNCTION IdmpCnvrgChck
+
   FUNCTION CnvrgChck_BCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2,StartingFromP_O,NPurMin_O)
 
     LOGICAL,SAVE         :: CnvrgChck_RelErrE=.FALSE.
@@ -553,8 +569,36 @@ CONTAINS
     CALL Delete(T3)
   END FUNCTION CommutatorErrors
   !-------------------------------------------------------------------------------
-
-
+  !
+  !-------------------------------------------------------------------------------
+  SUBROUTINE TC2(P,P2,Tmp1,Norm,TrP,I)
+#ifdef PARALLEL
+    TYPE(DBCSR)  :: P,P2,Tmp1
+#else
+    TYPE(BCSR)   :: P,P2,Tmp1
+#endif
+    REAL(DOUBLE) :: Norm, CR1, CR2, TrP, TrP2
+    INTEGER      :: I
+    !-------------------------------------------------------------------------------
+    IF (I.EQ.1) THEN
+      TrP=Trace(P)
+    ENDIF
+    CALL Multiply(P,P,P2)             ! The only multiplication is a square
+    TrP2=Trace(P2)
+    CR1 = ABS(TrP2-Norm)              ! CR1 = Occupation error criteria
+    CR2 = ABS(2.D0*TrP - TrP2 - Norm) ! CR2 = Occupation error criteria
+    IF (CR1 < CR2) THEN               ! Too many states
+      CALL Filter(P,P2)               ! P = P^2
+    ELSE                              ! Too few states
+      CALL Multiply(P,Two)
+      CALL Multiply(P2,-One)
+      CALL Add(P,P2,Tmp1)             ! P = 2P-P^2
+      CALL Filter(P,Tmp1)
+    ENDIF
+    TrP=Trace(P)
+  END SUBROUTINE TC2
+  !-------------------------------------------------------------------------------
+  !
   !-------------------------------------------------------------------------------
   SUBROUTINE SP2(P,P2,Tmp1,Norm,MMMs)
 #ifdef PARALLEL
