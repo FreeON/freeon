@@ -26,7 +26,7 @@
 MODULE BoundingBox
    USE DerivedTypes
    IMPLICIT NONE
-   CONTAINS 
+   CONTAINS
 !===============================================================================
 !
 !===============================================================================
@@ -41,7 +41,7 @@ MODULE BoundingBox
 !===============================================================================
       SUBROUTINE SetBBox(A,B)
          TYPE(BBox) :: A,B
-!--------------------------------------------------------------------------------      
+!--------------------------------------------------------------------------------
          B%BndBox=A%BndBox
          B%Center=A%Center
          B%Half  =A%Half
@@ -55,14 +55,14 @@ MODULE BoundingBox
          REAL(DOUBLE)                       :: DHalf,LeftWall,RightWall
          INTEGER,                  OPTIONAL :: ISplit_O
          INTEGER                            :: ISplit
-!--------------------------------------------------------------------------------      
+!--------------------------------------------------------------------------------
          CALL SetBBox(Node,Left)
          CALL SetBBox(Node,Right)
-!        Split the bounding box 
+!        Split the bounding box
          IF(PRESENT(ISplit_O))THEN
             ISplit=ISplit_O
          ELSE
-            ISplit=MOD(Node%Tier,3)+1 
+            ISplit=MOD(Node%Tier,3)+1
          ENDIF
          IF(PRESENT(NewWall_O))THEN
             LeftWall=NewWall_O(1)
@@ -78,7 +78,7 @@ MODULE BoundingBox
 !        New sides
          Left%Half(ISplit)=Half*(Left%BndBox(ISplit,2)-Left%BndBox(ISplit,1))
          Right%Half(ISplit)=Half*(Right%BndBox(ISplit,2)-Right%BndBox(ISplit,1))
-!        New centers 
+!        New centers
          Left%Center(ISplit)=Half*(Left%BndBox(ISplit,2)+Left%BndBox(ISplit,1))
          Right%Center(ISplit)=Half*(Right%BndBox(ISplit,2)+Right%BndBox(ISplit,1))
       END SUBROUTINE SplitBox
@@ -157,11 +157,11 @@ MODULE BoundingBox
 !===============================================================================
 !     Determine if a BBox A with extent overlaps with BBox B
 !===============================================================================
-      FUNCTION BoxOutSideBox(A,B) 
+      FUNCTION BoxOutSideBox(A,B)
          LOGICAL                  :: BoxOutSideBox
          TYPE(BBox),INTENT(IN)    :: A,B
          REAL(DOUBLE)             :: Tx,Ty,Tz
-         BoxOutSideBox=.TRUE.        
+         BoxOutSideBox=.TRUE.
          Tx=ABS(A%Center(1)-B%Center(1))
          IF(Tx>A%Half(1)+B%Half(1))RETURN
          Ty=ABS(A%Center(2)-B%Center(2))
@@ -171,9 +171,9 @@ MODULE BoundingBox
          BoxOutSideBox=.FALSE.
      END FUNCTION BoxOutSideBox
 !============================================================================
-!     Generate an expanded BBox 
+!     Generate an expanded BBox
 !============================================================================
-      FUNCTION ExpandPoint(Point,Extent,Box_O) RESULT(Expando) 
+      FUNCTION ExpandPoint(Point,Extent,Box_O) RESULT(Expando)
          Type(BBox)     :: Expando
          Type(BBox),OPTIONAL  :: Box_O
          REAL(DOUBLE),DIMENSION(3) :: Point
@@ -189,7 +189,7 @@ MODULE BoundingBox
          Expando%Center(1:3)  =Half*(Expando%BndBox(1:3,2)+Expando%BndBox(1:3,1))
        END FUNCTION ExpandPoint
 
-      FUNCTION ExpandBox(Box,Extent) RESULT(Expando) 
+      FUNCTION ExpandBox(Box,Extent) RESULT(Expando)
          Type(BBox)     :: Box,Expando
          Real(Double)   :: Extent
          Integer        :: I
@@ -206,7 +206,7 @@ MODULE BoundingBox
          REAL(Double)   :: Vol
          Vol=(Box%BndBox(1,2)-Box%BndBox(1,1)) &
             *(Box%BndBox(2,2)-Box%BndBox(2,1)) &
-            *(Box%BndBox(3,2)-Box%BndBox(3,1)) 
+            *(Box%BndBox(3,2)-Box%BndBox(3,1))
        END FUNCTION BoxVolume
        !
        FUNCTION BoxMargin(Box) RESULT(Mrg)
@@ -214,7 +214,7 @@ MODULE BoundingBox
          REAL(Double)   :: Mrg
          Mrg=(Box%BndBox(1,2)-Box%BndBox(1,1)) &
             +(Box%BndBox(2,2)-Box%BndBox(2,1)) &
-            +(Box%BndBox(3,2)-Box%BndBox(3,1)) 
+            +(Box%BndBox(3,2)-Box%BndBox(3,1))
        END FUNCTION BoxMargin
        !
        FUNCTION BoxOverlap(Left,Right) RESULT(Vol)

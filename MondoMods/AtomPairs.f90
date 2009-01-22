@@ -1,5 +1,5 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
+!--  This source code is part of the MondoSCF suite of
+!--  linear scaling electronic structure codes.
 !--  Matt Challacombe and  C. J. Tymczak
 !--  Los Alamos National Laboratory
 !--  Copyright 2000, The University of California
@@ -31,18 +31,18 @@ CONTAINS
     TYPE(BBox),OPTIONAL       :: Box_O
 
 !!========================================================================
-!!  OMG WTF IS THIS KRAP?? AND WHY IS IT HERE? 
+!!  OMG WTF IS THIS KRAP?? AND WHY IS IT HERE?
    Pair%AB2  = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
 
-!!$!!  
+!!$!!
 !!$!!========================================================================
 
     Pair%KA   = GM%AtTyp%I(I)
     Pair%KB   = GM%AtTyp%I(J)
     Pair%NA   = BS%BFKnd%I(Pair%KA)
     Pair%NB   = BS%BFKnd%I(Pair%KB)
-    Pair%A(:) = GM%Carts%D(:,I) 
-    Pair%B(:) = GM%Carts%D(:,J) 
+    Pair%A(:) = GM%Carts%D(:,I)
+    Pair%B(:) = GM%Carts%D(:,J)
 
 
 !!$    WRITE(*,*)' ------------------------------------------------'
@@ -50,7 +50,7 @@ CONTAINS
 !!$    WRITE(*,*)' B = ',Pair%B(:)
 !!$    WRITE(*,*)' AB2 = ',Pair%AB2
 !!$
-    IF(I==J) THEN 
+    IF(I==J) THEN
        Pair%SameAtom = .TRUE.
     ELSE
        Pair%SameAtom = .FALSE.
@@ -58,7 +58,7 @@ CONTAINS
 !
     SetAtomPair=TestAtomPair(Pair,Box_O)
 
- 
+
     Pair%AB2  = DOT_PRODUCT(GM%Carts%D(1:3,I)-GM%Carts%D(1:3,J),GM%Carts%D(1:3,I)-GM%Carts%D(1:3,J))
 
   END FUNCTION SetAtomPair
@@ -124,9 +124,9 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(:) :: Coef
 !
     PiExpt = (Pi/Expt)**1.5D0
-    RX2 = Half/Expt + RX*RX 
-    RY2 = Half/Expt + RY*RY    
-    RZ2 = Half/Expt + RZ*RZ 
+    RX2 = Half/Expt + RX*RX
+    RY2 = Half/Expt + RY*RY
+    RZ2 = Half/Expt + RZ*RZ
     SELECT CASE(LQ)
     CASE(0)
        CalculateQuadruPole(1) = PiExpt*Coef(1)*RX2
@@ -150,10 +150,10 @@ CONTAINS
        CalculateQuadruPole(5) = PiExpt*(Coef(1)*RX*RZ + Coef(2)*RZ + Coef(4)*RX + Coef(8))
        CalculateQuadruPole(6) = PiExpt*(Coef(1)*RY*RZ + Coef(3)*RZ + Coef(4)*RY + Coef(9))
     END SELECT
-!  
+!
   END FUNCTION CalculateQuadruPole
 !-------------------------------------------------------------------------------
-! Calculate the Minmiun Image Distance Between Atoms I and J 
+! Calculate the Minmiun Image Distance Between Atoms I and J
 !-------------------------------------------------------------------------------
   FUNCTION MinImageDist(GM,Carts1,Carts2)
     TYPE(CRDS)                :: GM
@@ -162,7 +162,7 @@ CONTAINS
     INTEGER,DIMENSION(3)      :: NRgn
     REAL(DOUBLE),DIMENSION(3) :: Carts1,Carts2
     REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
-!  
+!
     NRgn = 0
     DO K=1,3
        IF(GM%PBC%AutoW%I(K)==1) NRgn(K) = 1
@@ -295,7 +295,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      REAL(DOUBLE),DIMENSION(3)   :: VectA,VectB,VectC,VectAux
      REAL(DOUBLE),DIMENSION(3,27):: TrPos
-     REAL(DOUBLE),DIMENSION(27)  :: Dist 
+     REAL(DOUBLE),DIMENSION(27)  :: Dist
      REAL(DOUBLE)                :: Dist0,DistCrit
      INTEGER                     :: PBCDim,NA,NB,NC
      INTEGER                     :: NatmsLoc,I,J,III,IA,IB,IC,ICrit
@@ -327,9 +327,9 @@ CONTAINS
      DO I=1,NatmsLoc
        III=0
        DistCrit=Dist0
-       DO IA=-NA,NA   
-         DO IB=-NB,NB   
-           DO IC=-NC,NC   
+       DO IA=-NA,NA
+         DO IB=-NB,NB
+           DO IC=-NC,NC
              III=III+1
              TrPos(1:3,III)=XYZ(1:3,I)+IA*VectA+IB*VectB+IC*VectC
              VectAux=TrPos(1:3,III)-RefXYZ(1:3,I)
@@ -341,7 +341,7 @@ CONTAINS
            ENDDO
          ENDDO
        ENDDO
-       XYZ(1:3,I)=TrPos(1:3,ICrit) 
+       XYZ(1:3,I)=TrPos(1:3,ICrit)
      ENDDO
      !
    END SUBROUTINE ConvertToXYZRef

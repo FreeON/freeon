@@ -29,7 +29,7 @@
 MODULE GammaAssymp
   USE DerivedTypes
   IMPLICIT NONE
-  INCLUDE "GammaAssymptotics.Inc"    
+  INCLUDE "GammaAssymptotics.Inc"
 END MODULE
 
 MODULE SpecFunMesh
@@ -216,7 +216,7 @@ CONTAINS
     IF(W<0.0D0)THEN
        Sgn=-1.0D0
     ELSE
-       Sgn=1.0D0 
+       Sgn=1.0D0
     ENDIF
     X=Sgn*W
     IF(X>Erf_Switch)THEN
@@ -228,7 +228,7 @@ CONTAINS
     Erf=Sgn*Erf
   END FUNCTION Erf
   !========================================================================================
-  !     The complimentary error function 
+  !     The complimentary error function
   !========================================================================================
   FUNCTION ERFC(X)
     REAL(DOUBLE) :: ERFC,X
@@ -257,8 +257,8 @@ CONTAINS
   END FUNCTION ProductLog1
 END MODULE ErfFunk
 !-------------------------------------------------------------------------------------
-! Incomplete Associated Gamma Functions I. Shavitt ""The Gaussian function in 
-! calculations of statistical mechanics and quantum mechanics" 
+! Incomplete Associated Gamma Functions I. Shavitt ""The Gaussian function in
+! calculations of statistical mechanics and quantum mechanics"
 ! Meth. Comp. Phys. 2, p.1 (1963)
 !-------------------------------------------------------------------------------------
 MODULE GammaFunctions
@@ -280,12 +280,12 @@ MODULE GammaFunctions
   USE ProcessControl
   IMPLICIT NONE
 CONTAINS
-  FUNCTION GammaF(M,T)   
+  FUNCTION GammaF(M,T)
     INTEGER,      INTENT(IN) :: M
     REAL(DOUBLE), INTENT(IN) :: T
     INTEGER                  :: J
     REAL(DOUBLE)             :: GammaF
-    !-------------------------------------------------------------------------         
+    !-------------------------------------------------------------------------
     IF(T<Gamma_Switch)THEN
        J=AINT(T*Gamma_Grid)
        SELECT CASE(M)
@@ -343,12 +343,12 @@ CONTAINS
          6.9446208774383175D-2,6.7674950532187841D-2,6.5992809342867331D-2,&
          6.4393175806982839D-2,6.2870081828999622D-2,6.1418124351705448D-2,&
          6.0032399758875509D-2,5.8708447239769698D-2,5.7442199714798083D-2,&
-         5.6229941167024131D-2,5.5068269422098354D-2,5.3954063579712824D-2,& 
-         5.2884455430455434D-2,5.1856804299020200D-2,5.0868674842786776D-2,& 
-         4.9917817407506679D-2,4.9002150602140566D-2,4.8119745805096224D-2,& 
-         4.7268813356069430D-2,4.6447690222872336D-2,4.5654828962240815D-2,& 
-         4.4888787818609763D-2,4.4148221826018521D-2,4.3431874796297674D-2,& 
-         4.2738572092017457D-2,4.2067214095777623D-2,4.1416770298643776D-2,& 
+         5.6229941167024131D-2,5.5068269422098354D-2,5.3954063579712824D-2,&
+         5.2884455430455434D-2,5.1856804299020200D-2,5.0868674842786776D-2,&
+         4.9917817407506679D-2,4.9002150602140566D-2,4.8119745805096224D-2,&
+         4.7268813356069430D-2,4.6447690222872336D-2,4.5654828962240815D-2,&
+         4.4888787818609763D-2,4.4148221826018521D-2,4.3431874796297674D-2,&
+         4.2738572092017457D-2,4.2067214095777623D-2,4.1416770298643776D-2,&
          4.0786273940179798D-2,4.0174817140833709D-2 /)
     IF(L > 64) CALL MondoHalt(-100,"L > 64 in GammaHalf")
     SqrtX      = SQRT(X)

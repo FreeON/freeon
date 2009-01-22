@@ -41,7 +41,7 @@ MODULE Order
    INTERFACE Random
       MODULE PROCEDURE RANDOM_INT,RANDOM_DBL
    END INTERFACE
-   INTERFACE 
+   INTERFACE
       SUBROUTINE DblIntSort77(N,X,Y,Ordr)
          USE DerivedTypes
          INTEGER                      :: N,Ordr
@@ -52,15 +52,15 @@ MODULE Order
          USE DerivedTypes
          INTEGER                      :: N
          LOGICAL                      :: Hilbert
-         REAL(DOUBLE), DIMENSION(3,N) :: R 
-         INTEGER(INT8),DIMENSION(N)   :: Key 
+         REAL(DOUBLE), DIMENSION(3,N) :: R
+         INTEGER(INT8),DIMENSION(N)   :: Key
          INTEGER,      DIMENSION(N)   :: Point
       END SUBROUTINE
 
-!      FUNCTION Interleave(Ix,Iy,Iz)       
+!      FUNCTION Interleave(Ix,Iy,Iz)
 !         IMPLICIT NONE
 !         INTEGER,INTENT(IN) :: Ix,Iy,Iz
-!         INTEGER, PARAMETER :: INT8=SELECTED_INT_KIND(18)    
+!         INTEGER, PARAMETER :: INT8=SELECTED_INT_KIND(18)
 !         INTEGER(INT8)            :: Interleave
 !       END FUNCTION Interleave
 
@@ -105,7 +105,7 @@ MODULE Order
 
 !--------------------------------------------------------------
 !    F90 wrapper for SFCOrder77, which circumvents the lack
-!    of INTEGER(KIND=8) (INTEGER*8) support for cheazy 
+!    of INTEGER(KIND=8) (INTEGER*8) support for cheazy
 !    F90 compilers (pgf,nag...)
      SUBROUTINE SFCOrder(N,R,Point,SFC_KEY)
         INTEGER                       :: N
@@ -118,16 +118,16 @@ MODULE Order
         TYPE(DBL_VECT)                :: RKey
         INTEGER                       :: I
         INTEGER::N_Neighbor
-        REAL(DOUBLE)::Gamma,Alpha,NLFac 
+        REAL(DOUBLE)::Gamma,Alpha,NLFac
 
         IF(SFC_KEY==SFC_RANDOM)THEN
            CALL New(RKey,N)
            DO I=1,N
               Point%I(I)=I
               CALL RANDOM_NUMBER(RKey%D(I))
-           ENDDO            
+           ENDDO
            CALL Sort_DBL_INT(RKey,Point,N)
-           CALL Delete(RKey)           
+           CALL Delete(RKey)
         ELSEIF(SFC_KEY==SFC_PEANO)THEN
            ALLOCATE(IKey(N))
            CALL SFCOrder77(N,R%D,Point%I,IKey,.FALSE.)
@@ -166,8 +166,8 @@ MODULE Order
      SUBROUTINE Sort_DBL_INT(X,Y,N_O,Ordr_O)
         TYPE(DBL_VECT)     :: X
         TYPE(INT_VECT)     :: Y
-        INTEGER,OPTIONAL   :: N_O,Ordr_O 
-        INTEGER                       :: N,Ordr 
+        INTEGER,OPTIONAL   :: N_O,Ordr_O
+        INTEGER                       :: N,Ordr
         Ordr=-2
         N=MIN(SIZE(X%D),SIZE(Y%I))
         IF(PRESENT(N_O))THEN
@@ -182,8 +182,8 @@ MODULE Order
      SUBROUTINE Sort_INT_INT(X,Y,N_O,Ordr_O)
         TYPE(INT_VECT)     :: X
         TYPE(INT_VECT)     :: Y
-        INTEGER,OPTIONAL   :: N_O,Ordr_O 
-        INTEGER            :: N,Ordr 
+        INTEGER,OPTIONAL   :: N_O,Ordr_O
+        INTEGER            :: N,Ordr
         Ordr=-1
         N=MIN(SIZE(X%I),SIZE(Y%I))
         IF(PRESENT(N_O))THEN
@@ -197,8 +197,8 @@ MODULE Order
 
      SUBROUTINE Sort_INT_VECT(X,N_O,Ordr_O)
         TYPE(INT_VECT)     :: X
-        INTEGER,OPTIONAL   :: N_O,Ordr_O 
-        INTEGER            :: N,Ordr 
+        INTEGER,OPTIONAL   :: N_O,Ordr_O
+        INTEGER            :: N,Ordr
         Ordr=-1
         N=SIZE(X%I)
         IF(PRESENT(N_O))THEN
@@ -220,9 +220,9 @@ MODULE Order
     INTEGER(INT8),EXTERNAL:: Interleave,HilbertKey
     REAL(DOUBLE)::R(3,N),RMin(3),Ratio,MaxDiff,Diff
     LOGICAL::Hilbert
-    
+
     RMin(1)=1.D10; RMin(2)=1.D10; RMin(3)=1.D10
-    
+
     DO J=1,N
        Point(J)=J
        RMin(1)=DMIN1(RMin(1),R(1,J))
@@ -245,7 +245,7 @@ MODULE Order
       STOP 'ERROR: MaxDiff must be positive!'
     ENDIF
     Ratio = (2**BitNum-1.0)/MaxDiff
-          
+
     IMax = -Big_Int
     IF(Hilbert)THEN
        DO J=1,N
@@ -258,11 +258,11 @@ MODULE Order
           Key(J)=Interleave(BitNum,Ix,Iy,Iz)
           Key(J)=HilbertKey(BitNum,Key(J))
        END DO
-       
+
        IF( IMax /= (2**BitNum-1)) THEN
 !        stop 'ERROR: numerical accuracy problem !!'
        END IF
-    ELSE ! Peano option 
+    ELSE ! Peano option
        DO J=1,N
           Ix=DNINT((R(1,J)-RMin(1))*Ratio)
           Iy=DNINT((R(2,J)-RMin(2))*Ratio)
@@ -293,7 +293,7 @@ MODULE Order
 
 !-----------------------------------------------------------------
 ! Hilbert ordering for three-dimensional data, (3*BitNum)-bit
-! implementation (stored in 64-bit integer). 
+! implementation (stored in 64-bit integer).
 ! Interleaved key based on Algortithm H2 of Faloutsos and Roseman, PODS 89.
   FUNCTION HilbertKey(BitNum,Key)
      USE DerivedTypes
@@ -304,19 +304,19 @@ MODULE Order
      INTEGER SubKey(21)
      INTEGER ToState(0:7,12)
      INTEGER ToBinry(0:7,12)
-!--------------------------------------------------------------        
-!  State table, based on Fig 3 , T. Bially, 
+!--------------------------------------------------------------
+!  State table, based on Fig 3 , T. Bially,
 !  IEEE Trans. on Information Theory, 1969, pp. 658, vol. IT-15
-!                                 0, 1, 2, 3, 4, 5, 6, 7    
+!                                 0, 1, 2, 3, 4, 5, 6, 7
      DATA (ToState(I,1 ),I=0,7) / 9,12, 2, 1, 2, 3, 9, 1/
      DATA (ToBinry(I,1 ),I=0,7) / 0, 1, 3, 2, 7, 6, 4, 5/
      DATA (ToState(I,2 ),I=0,7) / 5, 3, 2, 2, 3, 5, 1, 4/
      DATA (ToBinry(I,2 ),I=0,7) / 4, 3, 5, 2, 7, 0, 6, 1/
-     DATA (ToState(I,3 ),I=0,7) / 2, 3, 6, 3, 1, 7, 7, 1/     
+     DATA (ToState(I,3 ),I=0,7) / 2, 3, 6, 3, 1, 7, 7, 1/
      DATA (ToBinry(I,3 ),I=0,7) / 6, 5, 1, 2, 7, 4, 0, 3/
      DATA (ToState(I,4 ),I=0,7) /10, 9, 4, 2, 5, 2, 4, 9/
      DATA (ToBinry(I,4 ),I=0,7) / 6, 7, 5, 4, 1, 0, 2, 3/
-     DATA (ToState(I,5 ),I=0,7) / 5, 2, 5, 6, 8, 4, 4, 8/      
+     DATA (ToState(I,5 ),I=0,7) / 5, 2, 5, 6, 8, 4, 4, 8/
      DATA (ToBinry(I,5 ),I=0,7) / 2, 1, 5, 6, 3, 0, 4, 7/
      DATA (ToState(I,6 ),I=0,7) / 6, 6, 5, 3, 7, 8, 3, 5/
      DATA (ToBinry(I,6 ),I=0,7) / 2, 5, 3, 4, 1, 6, 0, 7/
@@ -324,9 +324,9 @@ MODULE Order
      DATA (ToBinry(I,7 ),I=0,7) / 4, 5, 7, 6, 3, 2, 0, 1/
      DATA (ToState(I,8 ),I=0,7) / 8, 6,10,11, 8,11, 5, 6/
      DATA (ToBinry(I,8 ),I=0,7) / 2, 3, 1, 0, 5, 4, 6, 7/
-     DATA (ToState(I,9 ),I=0,7) /12,10, 1, 4,10,12, 9, 9/ 
+     DATA (ToState(I,9 ),I=0,7) /12,10, 1, 4,10,12, 9, 9/
      DATA (ToBinry(I,9 ),I=0,7) / 0, 7, 1, 6, 3, 4, 2, 5/
-     DATA (ToState(I,10),I=0,7) / 8, 4, 4, 8,10, 9,10,11/ 
+     DATA (ToState(I,10),I=0,7) / 8, 4, 4, 8,10, 9,10,11/
      DATA (ToBinry(I,10),I=0,7) / 4, 7, 3, 0, 5, 6, 2, 1/
      DATA (ToState(I,11),I=0,7) / 7, 8,12,10,11,11,10,12/
      DATA (ToBinry(I,11),I=0,7) / 6, 1, 7, 0, 5, 2, 4, 3/
@@ -355,8 +355,8 @@ MODULE Order
         SubKey(K)=ToBinry(L,I)
         I        =ToState(L,I)
      ENDDO
- 
-! Reassemble key from sub keys, with SubKey(21) 
+
+! Reassemble key from sub keys, with SubKey(21)
 ! the rightmost 3 bits (Step 5 of H2)
      HilbertKey=0
      I=0

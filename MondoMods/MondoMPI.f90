@@ -24,14 +24,14 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 MODULE MondoMPI
-   USE DerivedTypes  
+   USE DerivedTypes
    USE GlobalScalars
    USE GlobalObjects
    USE ProcessControl
    USE MPIInclude
    USE MemMan
    USE Parse
-   IMPLICIT NONE   
+   IMPLICIT NONE
 #ifdef PARALLEL
 !    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
 !    AUXILIARY INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN
@@ -40,11 +40,11 @@ MODULE MondoMPI
    INTEGER,SAVE :: MONDO_COMM
    INTERFACE BCast          ! Wrappers for MPI_BCAST
       MODULE PROCEDURE BCast_DBL_SCLR, BCast_DBL_VECT,  BCast_DBL_RNK2, &
-                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, & 
+                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, &
                        BCast_INT_SCLR,                                  &
                        BCast_INT_VECT, BCast_INT_RNK2,  BCast_INT_RNK3, &
                        BCast_INT_RNK4, BCast_CHR_SCLR,  BCast_LOG_SCLR, &
-                       BCast_DEBG, Bcast_LOG_VECT        
+                       BCast_DEBG, Bcast_LOG_VECT
    END INTERFACE
    INTERFACE AllReduce   ! Wrappers for MPI_ALLREDUCE
       MODULE PROCEDURE AllReduce_DBL_SCLR,AllReduce_INT_SCLR
@@ -57,17 +57,17 @@ MODULE MondoMPI
                        Gather_DBL_SCLR, Gather_DBL_VECT
    END INTERFACE
    INTERFACE Send       ! Wrappers for MPI_SEND (Blocking)
-      MODULE PROCEDURE Send_INT_SCLR, Send_INT_VECT, & 
+      MODULE PROCEDURE Send_INT_SCLR, Send_INT_VECT, &
                        Send_DBL_SCLR, Send_DBL_VECT, &
-                       Send_INT_VECTOR 
+                       Send_INT_VECTOR
    END INTERFACE
    INTERFACE Recv       ! Wrappers for MPI_RECV (Blocking)
       MODULE PROCEDURE Recv_INT_SCLR, Recv_INT_VECT, &
                        Recv_DBL_SCLR, Recv_DBL_VECT, &
-                       Recv_INT_VECTOR 
+                       Recv_INT_VECTOR
    END INTERFACE
    INTERFACE ISend       ! Wrappers for MPI_ISEND (Non-Blocking)
-      MODULE PROCEDURE ISend_INT_SCLR, ISend_INT_VECT, & 
+      MODULE PROCEDURE ISend_INT_SCLR, ISend_INT_VECT, &
                        ISend_DBL_SCLR, ISend_DBL_VECT
    END INTERFACE
    INTERFACE IRecv       ! Wrappers for MPI_IRECV (Non-Blocking)
@@ -105,7 +105,7 @@ MODULE MondoMPI
 #ifdef MPI2
         INTEGER                    :: PARENT, ALL
 !
-        ! Get the parent communicator 
+        ! Get the parent communicator
         CALL MPI_COMM_GET_PARENT(PARENT,IErr)
         ! Merge the parent and current local communicators
         CALL MPI_INTERCOMM_MERGE(PARENT,.TRUE.,ALL,IErr)
@@ -255,7 +255,7 @@ MODULE MondoMPI
          INTEGER, INTENT(INOUT) :: A
          INTEGER, OPTIONAL      :: Id_O
          INTEGER                :: IErr,Id
-         Id=ROOT; IF(PRESENT(Id_O))Id=Id_O   
+         Id=ROOT; IF(PRESENT(Id_O))Id=Id_O
          CALL MPI_BCAST(A,1,MPI_INTEGER,Id,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
             CALL HaltMPI(' MPI_BCAST failed in Bcast_INT',IErr)
@@ -296,7 +296,7 @@ MODULE MondoMPI
 !===============================================================================
 
 !     RANK N -> RANK 1 BCAST
-!  
+!
 !===============================================================================
 
       SUBROUTINE CRNIAV(L,A)               ! Bcast RANK N Integer As VECTOR
@@ -314,7 +314,7 @@ MODULE MondoMPI
          IF(IErr/=MPI_SUCCESS) &
             CALL HaltMPI(' MPI_BCAST failed for double vector ',IErr)
       END SUBROUTINE CRNDAV
-!-------------------------------------------------- 
+!--------------------------------------------------
        SUBROUTINE Bcast_DEBG(A)
          TYPE(DEBG) :: A
          CALL Bcast(A%Key)
@@ -394,7 +394,7 @@ MODULE MondoMPI
       END FUNCTION Reduce_INT_SCLR
 
 !===============================================================================
-!     GATHERS (Note, be carefull to avoid 
+!     GATHERS (Note, be carefull to avoid
 !     reference to uninitialised POINTERs
 !===============================================================================
 
@@ -403,7 +403,7 @@ MODULE MondoMPI
          TYPE(INT_VECT),INTENT(INOUT) :: B
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Gather_INT_SCLR'
-         IF(MyId==ROOT)THEN 
+         IF(MyId==ROOT)THEN
             CALL MPI_GATHER(  A,1,MPI_INTEGER, &
                             B%I,1,MPI_INTEGER, &
                             ROOT,MONDO_COMM,IErr)
@@ -411,13 +411,13 @@ MODULE MondoMPI
             CALL MPI_GATHER(  A,1,MPI_INTEGER, &        ! Non-root nodes may not have
                               1,1,MPI_INTEGER, &        ! B allocated, need to protect
                             ROOT,MONDO_COMM,IErr)   ! against refrencing a pointer
-         ENDIF            
+         ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_INT_SCLR
 
       SUBROUTINE Gather_INT_VECT(Send,Recv,NSnd,NRcv,Disp)
          TYPE(INT_VECT),INTENT(IN)    :: Send,NRcv,Disp
-         INTEGER,       INTENT(IN)    :: NSnd        
+         INTEGER,       INTENT(IN)    :: NSnd
          TYPE(INT_VECT),INTENT(INOUT) :: Recv
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Gather_INT_VECT'
@@ -426,7 +426,7 @@ MODULE MondoMPI
                              Recv%I,NRcv%I,Disp%I,MPI_INTEGER, &
                              ROOT,MONDO_COMM,IErr)
          ELSE
-            CALL MPI_GATHERV(Send%I,NSnd,         MPI_INTEGER, &  
+            CALL MPI_GATHERV(Send%I,NSnd,         MPI_INTEGER, &
                                   1,   1,       1,MPI_INTEGER, &
                              ROOT,MONDO_COMM,IErr)
          ENDIF
@@ -438,7 +438,7 @@ MODULE MondoMPI
          TYPE(DBL_VECT),INTENT(INOUT) :: B
          INTEGER                      :: IErr
          CHARACTER(LEN=*),PARAMETER  :: Sub='Gather_DBL_SCLR'
-         IF(MyId==ROOT)THEN 
+         IF(MyId==ROOT)THEN
             CALL MPI_GATHER(  A,1,MPI_DOUBLE_PRECISION, &
                             B%D,1,MPI_DOUBLE_PRECISION, &
                             ROOT,MONDO_COMM,IErr)
@@ -453,11 +453,11 @@ MODULE MondoMPI
       SUBROUTINE Gather_DBL_VECT(Send,Recv,NSnd,NRcv,Disp)
          TYPE(DBL_VECT),INTENT(IN)    :: Send
          TYPE(INT_VECT),INTENT(IN)    :: NRcv,Disp
-         INTEGER,       INTENT(IN)    :: NSnd        
+         INTEGER,       INTENT(IN)    :: NSnd
          TYPE(DBl_VECT),INTENT(INOUT) :: Recv
          INTEGER                      :: IErr
          CHARACTER(LEN=*),PARAMETER  :: Sub='Gather_DBL_VECT'
-         IF(MyId==ROOT)THEN 
+         IF(MyId==ROOT)THEN
             CALL MPI_GATHERV(Send%D,NSnd,         MPI_DOUBLE_PRECISION, &
                              Recv%D,NRcv%I,Disp%I,MPI_DOUBLE_PRECISION, &
                              ROOT,MONDO_COMM,IErr)
@@ -752,7 +752,7 @@ MODULE MondoMPI
 !     WRAPERS FOR WAIT ROUTINES
 !
       SUBROUTINE WaitAll(Reqs,Mssg)
-         TYPE(INT_VECT),INTENT(INOUT)    :: Reqs     
+         TYPE(INT_VECT),INTENT(INOUT)    :: Reqs
          TYPE(INT_RNK2)                  :: Stats
          INTEGER                         :: I,J,N,IErr
          CHARACTER(LEN=*), OPTIONAL      :: Mssg
@@ -770,7 +770,7 @@ MODULE MondoMPI
                GOTO 10 ! Old habits die hard ...
          ENDDO
          RETURN
-      10 CONTINUE 
+      10 CONTINUE
 !        Wait ...
          CALL New(Stats,(/MPI_STATUS_SIZE,N/))
          CALL MPI_WAITALL(N,Reqs%I(1:N),Stats%I,IErr)
@@ -781,7 +781,7 @@ MODULE MondoMPI
 
 
       SUBROUTINE WaitSome(Reqs,ToDo)
-         TYPE(INT_VECT),             INTENT(INOUT)  :: Reqs,ToDo            
+         TYPE(INT_VECT),             INTENT(INOUT)  :: Reqs,ToDo
          TYPE(INT_VECT)                             :: Indxs
          TYPE(INT_RNK2)                             :: Stats
          INTEGER                                    :: I,J,L,N,IErr
@@ -798,11 +798,11 @@ MODULE MondoMPI
          CALL New(ToDo,1)
          ToDo%I=FAIL
          RETURN
-      10 CONTINUE 
+      10 CONTINUE
 !        Wait ...
          CALL New(Indxs,N)
          CALL New(Stats,(/MPI_STATUS_SIZE,N/))
-         CALL MPI_WAITSOME(N,Reqs%I,L,Indxs%I,Stats%I,IErr)         
+         CALL MPI_WAITSOME(N,Reqs%I,L,Indxs%I,Stats%I,IErr)
          CALL ErrChk(IErr,Sub)
          CALL New(ToDo,L)
          ToDo%I(1:L)=Indxs%I(1:L)
@@ -829,7 +829,7 @@ MODULE MondoMPI
       SUBROUTINE AlignNodes(String_O)
          INTEGER                        :: IErr
          CHARACTER(LEN=*),OPTIONAL      :: String_O
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String 
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
          CHARACTER(LEN=*),PARAMETER :: Sub='AlignNodes'
          CALL MPI_BARRIER(MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
@@ -845,7 +845,7 @@ MODULE MondoMPI
       SUBROUTINE AlignClones(String_O)
          INTEGER                        :: IErr
          CHARACTER(LEN=*),OPTIONAL      :: String_O
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String 
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
          CHARACTER(LEN=*),PARAMETER :: Sub='AlignNodes'
          CALL MPI_BARRIER(MPI_COMM_WORLD,IErr)
          CALL ErrChk(IErr,Sub)
@@ -865,12 +865,12 @@ MODULE MondoMPI
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Seqnce_O
          IF(IErr/=MPI_SUCCESS)THEN
             IF(PRESENT(Seqnce_O))THEN
-               CALL HaltMPI('>>>MondoMPI error:  '  & 
+               CALL HaltMPI('>>>MondoMPI error:  '  &
                          //TRIM(Seqnce_O)//'$'    &
                          //TRIM(Caller)//'.',IErr)
 
             ELSE
-               CALL HaltMPI('>>>MondoMPI error:  '  & 
+               CALL HaltMPI('>>>MondoMPI error:  '  &
                          //TRIM(Caller)//'.',IErr)
 
             ENDIF
@@ -890,7 +890,7 @@ MODULE MondoMPI
             IF(MyId==I)WRITE(*,*)' MyId = ',MyId,'$',TRIM(Mssg)
             CALL MPI_BARRIER(MONDO_COMM,IErr)
             CALL ErrChk(IErr,Sub)
-         ENDDO  
+         ENDDO
       END SUBROUTINE InTurn
 
 
@@ -899,7 +899,7 @@ MODULE MondoMPI
          TYPE(INT_VECT)   :: A
          INTEGER          :: I
          DO I=0,NPrc-1
-            CALL AlignNodes()         
+            CALL AlignNodes()
             IF(MyId==I)WRITE(*,55)MyId,TRIM(Name),A%I
          ENDDO
       55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(I20,', '))
@@ -910,7 +910,7 @@ MODULE MondoMPI
          TYPE(DBL_VECT)   :: A
          INTEGER          :: I
          DO I=0,NPrc-1
-            CALL AlignNodes()         
+            CALL AlignNodes()
             IF(MyId==I)WRITE(*,55)MyId,TRIM(Name),A%D
          ENDDO
       55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(D9.3,', '))

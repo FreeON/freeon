@@ -27,7 +27,7 @@ MODULE GeomOptKeys
    USE GlobalScalars
    USE GlobalCharacters
    IMPLICIT NONE
-!------------------------------------------------  
+!------------------------------------------------
 !
    CHARACTER(LEN=3),  PARAMETER :: OPTIMIZATION     ='Opt'
    CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW        ='QuNew'
@@ -47,8 +47,8 @@ MODULE GeomOptKeys
    CHARACTER(LEN=12), PARAMETER :: OPT_LatticeStart ='LatticeStart'
    CHARACTER(LEN=8),  PARAMETER :: OPT_RatioABC     ='RatioABC'
    CHARACTER(LEN=14), PARAMETER :: OPT_RatioAlpBetGam  ='RatioAlpBetGam'
-   CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
-   CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'    
+   CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'
    CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'
    CHARACTER(LEN=12), PARAMETER :: OPT_DoLattBackTr ='DoLattBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
@@ -58,12 +58,12 @@ MODULE GeomOptKeys
    CHARACTER(LEN=9),  PARAMETER :: OPT_HBondOnly    ='HBondOnly'
    CHARACTER(LEN=14), PARAMETER :: OPT_NoFragmConnect ='NoFragmConnect'
 !  Perform quasi-newton geometry optimization for each basis set in turn
-   INTEGER, PARAMETER           :: GRAD_QNEW_OPT    = 3489343 
+   INTEGER, PARAMETER           :: GRAD_QNEW_OPT    = 3489343
 !  Optimizer type is set to Steepest Descent
-   INTEGER, PARAMETER           :: GRAD_STPDESC_OPT = 3876123 
-!  Optimizer type is set to Diagonal Hessian 
-   INTEGER, PARAMETER           :: GRAD_DIAGHESS_OPT = 8942901 
-   INTEGER, PARAMETER           :: GRAD_BISECT_OPT   = 8942902 
+   INTEGER, PARAMETER           :: GRAD_STPDESC_OPT = 3876123
+!  Optimizer type is set to Diagonal Hessian
+   INTEGER, PARAMETER           :: GRAD_DIAGHESS_OPT = 8942901
+   INTEGER, PARAMETER           :: GRAD_BISECT_OPT   = 8942902
 !--------------------------------------------------------------------------------------
 !
     CHARACTER(LEN=9),  PARAMETER :: COORDTYPE='CoordType'

@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 MODULE NEB
   !===============================================================================
-  ! Module for calculating reaction (minimum energy) paths between known 
+  ! Module for calculating reaction (minimum energy) paths between known
   ! reactant and product states.  This module impliments the climbing image
   ! NEB so that the highest energy image will converge to a saddle point.
   !
@@ -33,25 +33,25 @@ MODULE NEB
   ! Email: graeme@lanl.gov
   !
   ! NEB References:
-  !  H. Jonsson, G. Mills, and K.W. Jacobsen, "Nudged elastic band method 
+  !  H. Jonsson, G. Mills, and K.W. Jacobsen, "Nudged elastic band method
   !    for finding minimum energy paths of transitions," in Classical and
   !    Quantum Dynamics in Condensed Phase Simulations, edited by B.J.Berne,
   !    G. Ciccotti, and D. F. Coker (World Scientific, Singapore, 1998), p.385
   !  G. Henkelman, B.P. Uberuaga, and H. Jonsson, "A climbing-image NEB method
   !     for finding saddle points and minimum energy paths", J. Chem. Phys,
   !     v113, 9901 (2000).
-  !        
+  !
   !===============================================================================
   USE InOut
   USE ls_rmsd
   USE PrettyPrint
   USE ControlStructures
-  IMPLICIT NONE  
+  IMPLICIT NONE
   SAVE
 CONTAINS
   !===============================================================================
   ! Initialize the NEB by generating an linear interpolation between intial
-  ! and final states. 
+  ! and final states.
   !===============================================================================
   SUBROUTINE NEBInit(G)
     TYPE(Geometries) :: G
@@ -79,7 +79,7 @@ CONTAINS
   END SUBROUTINE NEBInit
   !===============================================================================
   ! Make a deep copy of the CRDS structure
-  ! (This should move.  Also figure out PBC issue.) 
+  ! (This should move.  Also figure out PBC issue.)
   !===============================================================================
   SUBROUTINE SetEq_CRDS(G1,G2)
     TYPE(CRDS) :: G1,G2
@@ -92,13 +92,13 @@ CONTAINS
     G2%NBeta=G1%NBeta
     G2%Carts%D=G1%Carts%D
     G2%Carts%D=G1%Carts%D
-    G2%NAtms=G1%NAtms      
-    G2%Nkind=G1%Nkind 
-    G2%AtNum%D=G1%AtNum%D 
-    G2%AtMss%D=G1%AtMss%D 
-    G2%AtNam%C=G1%AtNam%C 
-    G2%AtTyp%I=G1%AtTyp%I      
-    G2%CConstrain%I=G1%CConstrain%I 
+    G2%NAtms=G1%NAtms
+    G2%Nkind=G1%Nkind
+    G2%AtNum%D=G1%AtNum%D
+    G2%AtMss%D=G1%AtMss%D
+    G2%AtNam%C=G1%AtNam%C
+    G2%AtTyp%I=G1%AtTyp%I
+    G2%CConstrain%I=G1%CConstrain%I
     !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
   END SUBROUTINE SetEq_CRDS
 
@@ -131,13 +131,13 @@ CONTAINS
        eCLONE=G%Clones+1
     ENDIF
     !
-!!$    ! Scale the coordinates by Z 
+!!$    ! Scale the coordinates by Z
 !!$    DO I=1,G%Clone(0)%NAtms
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
 !!$    ENDDO
 
 
-#ifdef NEB_DEBUG       
+#ifdef NEB_DEBUG
     WRITE(*,*)' bCLONE = ',bCLONE
     WRITE(*,*)' eCLONE = ',eCLONE
     WRITE(*,*)' CLONE ZERO AFTER SCALING = '
@@ -145,7 +145,7 @@ CONTAINS
 #endif
     !
     DO iCLONE=bCLONE,eCLONE
-#ifdef NEB_DEBUG       
+#ifdef NEB_DEBUG
        WRITE(*,*)'==========',iclone,'============='
 #endif
 
@@ -155,11 +155,11 @@ CONTAINS
 !!$       DO I=1,G%Clone(0)%NAtms
 !!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)*G%Clone(iCLONE)%AtNum%D(I)
 !!$       ENDDO
-       ! Find the transformation that minimizes the RMS deviation between the 
+       ! Find the transformation that minimizes the RMS deviation between the
        ! reactants (clone 0), the clones (1-N) and the products (N+1)
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
             1, U, center2, center1, error )! , calc_g, grad)
-#ifdef NEB_DEBUG       
+#ifdef NEB_DEBUG
        WRITE(*,333)1,center1
        WRITE(*,333)2,center2
        WRITE(*,333)-1,-(center2-center1)
@@ -257,7 +257,7 @@ CONTAINS
 
     Mssg=ProcessName('NEBForce','Reactant')//' D = '//TRIM(FltToShrtChar(Dist)) &
          //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal))
-    WRITE(*,*)TRIM(Mssg) 
+    WRITE(*,*)TRIM(Mssg)
     DO I=1,G%Clones
        ! Are the neighboring images higher in energy?
        IF(I==1)THEN
@@ -270,8 +270,8 @@ CONTAINS
        ELSE
           UPp=G%Clone(I+1)%ETotal>G%Clone(I)%ETotal
        ENDIF
-       IF(UPm.NEQV.UPp)THEN 
-          ! If we are not at an extrema of energy, 
+       IF(UPm.NEQV.UPp)THEN
+          ! If we are not at an extrema of energy,
           ! the tangent is the vector to the lower energy neighbour
           IF(UPm)THEN
              N=G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D
@@ -279,7 +279,7 @@ CONTAINS
              N=G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D
           ENDIF
        ELSE
-          ! At an extrema of energy, 
+          ! At an extrema of energy,
           ! interpolate the tangent linearly with the energy
           Um=G%Clone(I-1)%ETotal-G%Clone(I)%ETotal
           Up=G%Clone(I+1)%ETotal-G%Clone(I)%ETotal
@@ -333,14 +333,14 @@ CONTAINS
             //' D = '//TRIM(FltToShrtChar(Dist))                 &
             //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal))   &
             //', F = '//TRIM(DblToMedmChar(FProj))
-       WRITE(*,*)TRIM(Mssg) 
+       WRITE(*,*)TRIM(Mssg)
     ENDDO
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))
     Dist=Dist+Rm
     Mssg=ProcessName('NEBForce','Product')   &
          //' D = '//TRIM(FltToShrtChar(Dist)) &
-         //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal)) 
-    WRITE(*,*)TRIM(Mssg) 
+         //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal))
+    WRITE(*,*)TRIM(Mssg)
   END SUBROUTINE NEBForce
 
   !===============================================================================

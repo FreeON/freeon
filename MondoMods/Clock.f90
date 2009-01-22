@@ -29,7 +29,7 @@ MODULE Clock
    USE MondoMPI
 #endif
    IMPLICIT NONE
-   INTERFACE 
+   INTERFACE
 
       FUNCTION CPU_Seconds()
          USE DerivedTypes
@@ -52,7 +52,7 @@ MODULE Clock
       FUNCTION MTimer()
         REAL(DOUBLE) MTimer
 #if defined (IPM) || defined (PARALLEL)
-        MTimer=MondoTimer()   
+        MTimer=MondoTimer()
 #else
         MTimer=Wall_Seconds()
 #endif

@@ -37,7 +37,7 @@ MODULE Conflicted
   PRIVATE :: PBCConflictCheck1
   PRIVATE :: BStConflictCheck1
 
-CONTAINS 
+CONTAINS
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ConflictCheck1(C)
 !H  Checking of conflicts for options, PBCs, geometries, etc etc.
@@ -56,23 +56,23 @@ CONTAINS
     TYPE(Options) :: O
     IF(O%NModls==0) &
          CALL MondoHalt(PRSE_ERROR,'Option '//MODEL_OPTION//' not set in input.'//RTRN   &
-         //'Options include '//        &      
-         MODEL_ExactX//', '//          &      
-         MODEL_SD//', '//              &       
-         MODEL_XA//', '//              &      
-         MODEL_B88x//', '//            &      
-         MODEL_PBEx//', '//            &      
-         MODEL_PW91x//', '//           &      
-         MODEL_VWN3//', '//            &      
-         MODEL_VWN5//', '//            &      
-         MODEL_PW91PW91//', '//        &      
-         MODEL_PW91LYP//', '//         &      
-         MODEL_BLYP//', '//            &      
-         MODEL_PBEPBE//', '//          &      
-         MODEL_B3LYP_VWN3//', '//      &      
-         MODEL_B3LYP_VWN5//', '//      &      
-         MODEL_PBE0//', '//            &      
-         MODEL_X3LYP)      
+         //'Options include '//        &
+         MODEL_ExactX//', '//          &
+         MODEL_SD//', '//              &
+         MODEL_XA//', '//              &
+         MODEL_B88x//', '//            &
+         MODEL_PBEx//', '//            &
+         MODEL_PW91x//', '//           &
+         MODEL_VWN3//', '//            &
+         MODEL_VWN5//', '//            &
+         MODEL_PW91PW91//', '//        &
+         MODEL_PW91LYP//', '//         &
+         MODEL_BLYP//', '//            &
+         MODEL_PBEPBE//', '//          &
+         MODEL_B3LYP_VWN3//', '//      &
+         MODEL_B3LYP_VWN5//', '//      &
+         MODEL_PBE0//', '//            &
+         MODEL_X3LYP)
   END SUBROUTINE OptConflictCheck
   !
   SUBROUTINE GlbConflictCheck(C)
@@ -81,8 +81,8 @@ CONTAINS
   END SUBROUTINE GlbConflictCheck
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE GlbConflictCheck1(C)
-!H  Check that the number of options in the progression of 
-!H  models/methods/accuracies/basissets are consistent with each other 
+!H  Check that the number of options in the progression of
+!H  models/methods/accuracies/basissets are consistent with each other
 !H---------------------------------------------------------------------------------
   SUBROUTINE GlbConflictCheck1(C)
     TYPE(Controls) :: C
@@ -104,7 +104,7 @@ CONTAINS
     !vw BSCR DIMENSIONS IN LoadBasisSets! THE TEST MAY BE DONE IN LoadBasisSets
     !vw OR WE CAN SET A DEFAULT THRESHOLD ARRAY AND THEN DO THE TEST HERE...
     IF(N/=C%Opts%NThrsh) &
-           CALL MondoHalt(PRSE_ERROR,' Accuracies in sequence is short.') 
+           CALL MondoHalt(PRSE_ERROR,' Accuracies in sequence is short.')
     IF(N/=C%Sets%NBSets) &
            CALL MondoHalt(PRSE_ERROR,' Basis sets in sequence is short.')
   END SUBROUTINE GlbConflictCheck1
@@ -131,7 +131,7 @@ CONTAINS
        NClone(1)=1
        NClone(2)=1
     ELSE
-       ! We have several clones, check pairs 
+       ! We have several clones, check pairs
        ! only for reactant and product.
        MaxClone=2
        NClone(1)=0             ! reactant.

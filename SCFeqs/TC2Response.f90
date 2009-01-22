@@ -73,7 +73,7 @@ PROGRAM TC2R
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
   !
   ! Open input
-  CALL OpenASCII(InpFile,Inp)  
+  CALL OpenASCII(InpFile,Inp)
   !
   ! Switching.
   IF(.NOT.OptDblQ(Inp,'TC2RSwitchingThresh',SwitchThresh)) SwitchThresh=DEFAULT_SWITCHTHRESH

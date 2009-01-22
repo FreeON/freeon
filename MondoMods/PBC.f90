@@ -53,7 +53,7 @@ CONTAINS
     !====================================================================================
     IF(GM%PBC%Dimen>0)THEN
        !====================================================================================
-       !  IF RESCALE==TRUE, THEN IT IS GENERALLY ASSUMED THAT (1) THE COORDINATES 
+       !  IF RESCALE==TRUE, THEN IT IS GENERALLY ASSUMED THAT (1) THE COORDINATES
        !  DEPEND ON THE LATTICE AND (2) THE LATTICE MAY HAVE CHANGED WHEN THIS ROUTINE IS CALLED,
        !  NESSITATING THAT THE ATOMIC COORDINATES BE RECOMPUTED WITH THE NEW, PUTATIVE LATTICE.
        !  AND EXAMPLE OF WHERE THIS IS IMPORTANT IS IN THE COMPUTATION OF LATTICE FINITE DIFFERENCES.
@@ -65,24 +65,24 @@ CONTAINS
        ENDIF
        IF(Rescale)THEN
           !
-          ! Rescale: It is assumed that we shold first compute fractional atomic coordinates 
-          ! cooresponding to (1) an OLD INVERSE and (2) NEW ATOMIC POSITIONS.  Then compute a 
+          ! Rescale: It is assumed that we shold first compute fractional atomic coordinates
+          ! cooresponding to (1) an OLD INVERSE and (2) NEW ATOMIC POSITIONS.  Then compute a
           ! NEW INVERSE cooresponding to a potentially NEW LATTICE, and then recompute atomic
-          ! positions.  This is useful for, eg finite differences of lattice coordinates. 
+          ! positions.  This is useful for, eg finite differences of lattice coordinates.
           ! However, this option will severely hose the geometry optimizer.
           !
-          ! For finite difference schemes and analytic derivatives, this cooresponds to variation 
-          ! of the coordinates as follows:  A_new = Box_new.[InverseBox_old.A].  Thus, the 
+          ! For finite difference schemes and analytic derivatives, this cooresponds to variation
+          ! of the coordinates as follows:  A_new = Box_new.[InverseBox_old.A].  Thus, the
           ! InverseBox should be assumed constant, while Box_new and A hold all the active variables,
           ! FOR THE ATOMIC POSITIONS (ONLY).  For other items, such as the wrapped distribution center,
-          ! we must consider that the wrapping function is entirely variational with respect to the 
-          ! lattice.  That is,  WRAPED P = Box_new.MOD[InverseBox_new.P].  
-          ! 
+          ! we must consider that the wrapping function is entirely variational with respect to the
+          ! lattice.  That is,  WRAPED P = Box_new.MOD[InverseBox_new.P].
+          !
           DO I=1,GM%NAtms
              ! Overwrite the atomic positions with fractionals based on OLD INVERSE AND NEW LATTICE/COORDINATES
              GM%Carts%D(:,I)=AtomToFrac(GM,GM%Carts%D(:,I))
              ! wrap the fractionals
-             !          WRITE(*,*)I,'FRACTED CARTS = ',GM%Carts%D(:,I) 
+             !          WRITE(*,*)I,'FRACTED CARTS = ',GM%Carts%D(:,I)
              CALL FracCyclic(GM,GM%Carts%D(:,I))
              ! Boxcarts are the fractional coordinates
              GM%BoxCarts%D(:,I)=GM%Carts%D(:,I)
@@ -91,13 +91,13 @@ CONTAINS
           OldInvBox=GM%PBC%InvBoxSh%D
           ! ... then generate the possibly new inverse lattice coordinates
           GM%PBC%InvBoxSh%D=InverseBoxShape(GM%PBC%BoxShape%D,GM%PBC%Dimen)
-          ! Now, regenerate the possibly dialated or contracted atomic positions from the fractionals              
+          ! Now, regenerate the possibly dialated or contracted atomic positions from the fractionals
           DO I=1,GM%NAtms
              GM%Carts%D(:,I)=FracToAtom(GM,GM%Carts%D(:,I))
           ENDDO
        ELSE
-          ! No rescale: Here, we just recompute the inverse lattice vectors 
-          ! and wrap atoms back into the unit cell. 
+          ! No rescale: Here, we just recompute the inverse lattice vectors
+          ! and wrap atoms back into the unit cell.
           OldInvBox=GM%PBC%InvBoxSh%D
           GM%PBC%InvBoxSh%D=InverseBoxShape(GM%PBC%BoxShape%D,GM%PBC%Dimen)
           DO I=1,GM%NAtms
@@ -112,7 +112,7 @@ CONTAINS
     ! CELL CENTER
     !====================================================================================
     ! Compute the cell center with the modified positions (Zero for no PBCs)
-    GM%PBC%CellCenter%D=CellCenter(GM%PBC) 
+    GM%PBC%CellCenter%D=CellCenter(GM%PBC)
     ! Recompute the bounding box and ITS cell center (May be different from the PBC cell center)
     GM%BndBox%D(1:3,1)=GM%Carts%D(1:3,1)
     GM%BndBox%D(1:3,2)=GM%Carts%D(1:3,1)
@@ -123,15 +123,15 @@ CONTAINS
     !====================================================================================
     ! CELL SETS
     !====================================================================================
-    ! To here we have set (or reset) the unit cell.  Now we set (or reset) the different 
-    ! sets of periodic images (cellsets) for the sum over basis functions (outer==overlap) and 
-    ! the inner sum over Coulomb boxes (inner==penetration). 
+    ! To here we have set (or reset) the unit cell.  Now we set (or reset) the different
+    ! sets of periodic images (cellsets) for the sum over basis functions (outer==overlap) and
+    ! the inner sum over Coulomb boxes (inner==penetration).
     !====================================================================================
     !  IF SoftReset==TRUE, THEN WE WILL NOT RECOMPUTE THE NUMBER OF CELL SETS.
     !  WITH SoftReset==TRUE, ONLY THE NUMERICAL VALUES OF THE CELL SETS WILL CHANGE.
     !  This option is not fully implemented, as it currently needs the optional basis
-    !  set info, so the hard/soft is controlled by that option.  This should be ok, 
-    !  except in situations where the lattice changes a lot.  
+    !  set info, so the hard/soft is controlled by that option.  This should be ok,
+    !  except in situations where the lattice changes a lot.
     !====================================================================================
     IF(PRESENT(SoftReset_O))THEN
        SoftReset=SoftReset_O
@@ -155,17 +155,17 @@ CONTAINS
              ENDDO
           ENDDO
        ENDDO
-       ! Generally, the minimum Gaussian exponent (MinExpt)in this basis set determines the periodic 
+       ! Generally, the minimum Gaussian exponent (MinExpt)in this basis set determines the periodic
        ! images to be summed over in the Coulomb sums and in the periodic sum over basis functions:
        CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Overlap',Dist_O,MinExpt,GM%NElec)
        !       CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=1)
-       ! If WellSeperated (WS) criteria is not zero, then we use a strict FMM definition to 
+       ! If WellSeperated (WS) criteria is not zero, then we use a strict FMM definition to
        ! determine the penetration cell sets.  NOTE: use of WS criteria can lead to errors for small cells,
        ! and also for non-cubic cells, but is usefull in debugging Coulomb sums.
        IF(GM%PBC%PFFWelSep.NE.0)THEN
           CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','HardCell',HardCell_O=GM%PBC%PFFWelSep)
           CALL Warn(' Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))//Rtrn &
-               //', may lead to errors for small or non-cubic cells ') 
+               //', may lead to errors for small or non-cubic cells ')
        ELSE
           !          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=2)
           CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Penetration', &
@@ -178,7 +178,7 @@ CONTAINS
        IF(.NOT.AllocQ(GM%InCells%Alloc))CALL MondoHalt(DRIV_ERROR,' Resetting of non allocated cell sets ')
        ! OK, basis set is already allocated, stick with existing number
        ! of cells, but reset the existing displacements etc
-       DO N=1,GM%InCells%NCells          
+       DO N=1,GM%InCells%NCells
           X=GM%InCells%CellCarts%D(1,N)
           Y=GM%InCells%CellCarts%D(2,N)
           Z=GM%InCells%CellCarts%D(3,N)
@@ -190,7 +190,7 @@ CONTAINS
           Z=I*GM%PBC%BoxShape%D(3,1)+J*GM%PBC%BoxShape%D(3,2)+K*GM%PBC%BoxShape%D(3,3)
           GM%InCells%CellCarts%D(:,N)=(/X,Y,Z/)
        ENDDO
-       DO N=1,GM%OvCells%NCells          
+       DO N=1,GM%OvCells%NCells
           X=GM%OvCells%CellCarts%D(1,N)
           Y=GM%OvCells%CellCarts%D(2,N)
           Z=GM%OvCells%CellCarts%D(3,N)
@@ -211,7 +211,7 @@ CONTAINS
   END SUBROUTINE MkGeomPeriodic
   !--------------------------------------------------------------------------
   ! Here is the new Cell Sets routine. This should become the only routine
-  ! used for setting the CellSet data structure.   
+  ! used for setting the CellSet data structure.
   !--------------------------------------------------------------------------
   SUBROUTINE SetCellSets(CS,AW,MAT,Prog,Option, &
        CellSetsThreshold_O,MinExpt_O,NElect_O,MaxEll_O,Rmin_O,HardCell_O)
@@ -232,8 +232,8 @@ CONTAINS
     REAL(DOUBLE)                         :: X,Y,Z,PQx,PQy,PQz,PQ,PQ2,PQMinSep,PQ2MinSep, &
          R,R2,R2Max,MaxTranslation
     LOGICAL                              :: InCell,MAC,PAC
-    !    
-    HardCell=20       
+    !
+    HardCell=20
     !
     IF(Option=="Radial")THEN
        IF(PRESENT(RMin_O))THEN
@@ -298,12 +298,12 @@ CONTAINS
           ENDDO
        ENDDO
     ENDIF
-       
+
     IF(Option=='HardCell')THEN
        !----------------------------------------------------------------------------------------
-       ! HardCell sets a fixed cell set with rectalinear integer shape based on input parameters  
+       ! HardCell sets a fixed cell set with rectalinear integer shape based on input parameters
        ! >>This option will give horrible results for strongly non-orthorombic cells<<
-       !----------------------------------------------------------------------------------------- 
+       !-----------------------------------------------------------------------------------------
        NCell=(2*IXM+1)*(2*IYM+1)*(2*IZM+1)
        CALL New_CellSet(CS,NCELL)
        CS%NCells=NCELL
@@ -321,8 +321,8 @@ CONTAINS
        ENDDO
     ELSEIF(Option=="Radial")THEN
        !------------------------------------------------------------------------------------
-       ! Radial sets a fixed cell set with spherical shape based on input parameters  
-       !----------------------------------------------------------------------------------- 
+       ! Radial sets a fixed cell set with spherical shape based on input parameters
+       !-----------------------------------------------------------------------------------
        NCELL=0
        DO I=-IXM,IXM
           DO J=-IYM,IYM
@@ -361,13 +361,13 @@ CONTAINS
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
-                ! 
+                !
                 PQx=DBLE(I)*MAT(1,1)+DBLE(J)*MAT(1,2)+DBLE(K)*MAT(1,3)
                 PQy=DBLE(I)*MAT(2,1)+DBLE(J)*MAT(2,2)+DBLE(K)*MAT(2,3)
                 PQz=DBLE(I)*MAT(3,1)+DBLE(J)*MAT(3,2)+DBLE(K)*MAT(3,3)                !
                 !-----------------------------------------------------------------------------------
                 ! PQ is the cell-cell distance measured center to center, which is used
-                ! in the multipole error criteria, while PQMinSep is the min cell-cell distance measured 
+                ! in the multipole error criteria, while PQMinSep is the min cell-cell distance measured
                 ! between closest corners, used for the penetration error criteria and the overlap
                 !-----------------------------------------------------------------------------------
                 PQ2=PQx**2+PQy**2+PQz**2
@@ -398,11 +398,11 @@ CONTAINS
                       MAC=.TRUE.
                    ENDIF
                    !-----------------------------------------------------------------------------------
-                   ! The penetration error, due to overlaping charge distributions must also be 
+                   ! The penetration error, due to overlaping charge distributions must also be
                    ! considered.  Here, a simple s-s Coulomp error is used, with furthest corner
-                   ! to closest corner distance 
+                   ! to closest corner distance
                    !-----------------------------------------------------------------------------------
-                   PAC=NElect*EXP(-MinExpt*PQ2MinSep)/PQ2MinSep>CellSetsThreshold                     
+                   PAC=NElect*EXP(-MinExpt*PQ2MinSep)/PQ2MinSep>CellSetsThreshold
                    !-----------------------------------------------------------------------------------
                    ! A false MAC or PAC adds this cell.
                    ! Note, this is the converse of MAC and PAC used in QCTC/TreeWalk.
@@ -410,7 +410,7 @@ CONTAINS
                    InCell=MAC.OR.PAC
                    IF(InCell)R2Min=MAX(PQ2,R2Min)
 
-               ELSEIF(Option=='Overlap')THEN 
+               ELSEIF(Option=='Overlap')THEN
                    !-----------------------------------------------------------------------------------
                    ! For the Overlap, PQ is the min separation that can occur between atom pairs A and B.
                    ! Note that due to periodic translation, this is not quite as simple as it
@@ -437,7 +437,7 @@ CONTAINS
           ENDDO
        ENDDO
        !-------------------------------------------------------------------------------------
-       ! Now allocate the CellSet data structure that was just counted out. 
+       ! Now allocate the CellSet data structure that was just counted out.
        !-------------------------------------------------------------------------------------
        CALL New_CellSet(CS,NCELL)
        CS%NCells=NCELL
@@ -447,13 +447,13 @@ CONTAINS
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
-                ! 
+                !
                 PQx=DBLE(I)*MAT(1,1)+DBLE(J)*MAT(1,2)+DBLE(K)*MAT(1,3)
                 PQy=DBLE(I)*MAT(2,1)+DBLE(J)*MAT(2,2)+DBLE(K)*MAT(2,3)
                 PQz=DBLE(I)*MAT(3,1)+DBLE(J)*MAT(3,2)+DBLE(K)*MAT(3,3)                !
                 !----------------------------------------------------------------------
                 ! Here we have same logic as above, but instead of just counting
-                ! we now fill in the cell sets data structure. Any changes to the logic 
+                ! we now fill in the cell sets data structure. Any changes to the logic
                 ! must be propigated both above and below, or there will be a mis-counting.
                 ! Certainly, this double counting could be avoided with a more
                 ! advanced data structure, like a linked list!  Cost for this double count
@@ -481,24 +481,24 @@ CONTAINS
                 ELSEIF(Option=='Penetration')THEN
                    IF(PQ>Two*MaxTranslation)THEN
 
-                      MAC=(NElect/(PQ-MaxTranslation))*(MaxTranslation/PQ)**(MaxEll) > CellSetsThreshold *1D5 
+                      MAC=(NElect/(PQ-MaxTranslation))*(MaxTranslation/PQ)**(MaxEll) > CellSetsThreshold *1D5
 
                    ELSE
                       MAC=.TRUE.
                    ENDIF
                    !-----------------------------------------------------------------------------------
-                   ! The penetration error, due to overlaping charge distributions must also be 
+                   ! The penetration error, due to overlaping charge distributions must also be
                    ! considered.  Here, a simple s-s Coulomp error is used, with furthest corner
-                   ! to closest corner distance 
+                   ! to closest corner distance
                    !-----------------------------------------------------------------------------------
-                   PAC=NElect*EXP(-MinExpt*PQ2MinSep)/PQ2MinSep>CellSetsThreshold                     
+                   PAC=NElect*EXP(-MinExpt*PQ2MinSep)/PQ2MinSep>CellSetsThreshold
                    !-----------------------------------------------------------------------------------
                    ! A false MAC or PAC adds this cell.
                    ! Note, this is the converse of MAC and PAC used in QCTC/TreeWalk.
                    !-----------------------------------------------------------------------------------
                    InCell=MAC.OR.PAC
                    IF(InCell)R2Min=MAX(PQ2,R2Min)
-               ELSEIF(Option=='Overlap')THEN 
+               ELSEIF(Option=='Overlap')THEN
                    !-----------------------------------------------------------------------------------
                    ! For the Overlap, PQ is the min separation that can occur between atom pairs A and B.
                    ! Note that due to periodic translation, this is not quite as simple as it
@@ -600,7 +600,7 @@ CONTAINS
     !
   END SUBROUTINE Sort_CellSet
   !--------------------------------------------------------------------------
-  ! Test if a Cell in CS has Coordinates (x,y,z) 
+  ! Test if a Cell in CS has Coordinates (x,y,z)
   !--------------------------------------------------------------------------
   FUNCTION InCell_CellSet(CS,X,Y,Z)
     TYPE(CellSet)      :: CS
@@ -608,7 +608,7 @@ CONTAINS
     REAL(DOUBLE)       :: X,Y,Z
     LOGICAL            :: InCell_CellSet
     !
-    InCell_CellSet = .FALSE.    
+    InCell_CellSet = .FALSE.
     DO NC = 1,CS%NCells
        IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-10 .AND. &
             ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-10 .AND. &
@@ -623,7 +623,7 @@ CONTAINS
   ! Convert from Atomic Coordinates  to Fractional Coordinates
   !-------------------------------------------------------------------------------
   FUNCTION AtomToFrac(GM,VecA) RESULT(VecF)
-    TYPE(CRDS)                 :: GM 
+    TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
     VecF=MATMUL(GM%PBC%InvBoxSh%D,VecA)
   END FUNCTION AtomToFrac
@@ -643,20 +643,20 @@ CONTAINS
     VecA(3) = VecF(1)*GM%PBC%BoxShape%D(3,1) + VecF(2)*GM%PBC%BoxShape%D(3,2) + VecF(3)*GM%PBC%BoxShape%D(3,3)
   END FUNCTION FracToAtom
   !-----------------------------------------------------------------------------------
-  ! Subroutine PWrap wraps and cell-centers a the position of a primitive distribution 
+  ! Subroutine PWrap wraps and cell-centers a the position of a primitive distribution
   !-----------------------------------------------------------------------------------
   SUBROUTINE PWrap(GM,P,Wrap)
     TYPE(CRDS)     :: GM
     TYPE(PrimPair) :: P
     LOGICAL        :: Wrap
     REAL(DOUBLE),DIMENSION(3):: PT1,PT2,PT3,PT4
-    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     IF(GM%PBC%Dimen>0.AND.Wrap)THEN
        ! Fractional coordinates:
        P%Pw=AtomToFrac(GM,P%P)
        ! Wrapped fractional coordinates:
        CALL FracCyclic(GM,P%Pw)
-       ! Convert back to wrapped atomic coordinates 
+       ! Convert back to wrapped atomic coordinates
        P%Pw=FracToAtom(GM,P%Pw)
        PwMax=MAX(PwMax,SQRT(DOT_PRODUCT(P%PW,P%PW) ))
        ! DOUBLE CHECK: WRAPPED VECTORS SHOULD NOW BE STATIONARY WRT TO WRAPPING
@@ -676,20 +676,20 @@ CONTAINS
           WRITE(*,*)' P3 = ',PT3
           WRITE(*,*)' P4 = ',PT4
           STOP
-       ENDIF       
+       ENDIF
        ! Cell centering: Note, cell centered primitives are implicit throughout
        ! the new QCTC, and changing this policy will break the code badly!
        P%Pw=P%Pw-GM%PBC%CellCenter%D
     ELSE
        ! Nothing to do here, just fill the vector.
-       P%Pw=P%P       
+       P%Pw=P%P
     ENDIF
   END SUBROUTINE PWrap
   !-------------------------------------------------------------------------------
   ! In Perodic Systems, Cyclically put positions back in the Fracional Box (in Frac Coord)
   !-------------------------------------------------------------------------------
   SUBROUTINE FracCyclic(GM,VecF)
-    TYPE(CRDS)                 :: GM        
+    TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecF
     INTEGER                    :: I
     REAL(DOUBLE),PARAMETER     :: Delta=1D-15
@@ -701,8 +701,8 @@ CONTAINS
   ! In Perodic Systems, Cyclically put positions back in the Atomic Box (in Atom Coord)
   !-------------------------------------------------------------------------------
   SUBROUTINE AtomCyclic(GM,VecA)
-    TYPE(CRDS)                 :: GM        
-    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF    
+    TYPE(CRDS)                 :: GM
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
     VecF = AtomToFrac(GM,VecA)
     CALL FracCyclic(GM,VecF)
     VecA = FracToAtom(GM,VecF)
@@ -719,7 +719,7 @@ CONTAINS
     DO I=1,G%NAtms
        CALL FracCyclic(G,G%BoxCarts%D(:,I))
     ENDDO
-    !   Wrap Atomic  coordinates 
+    !   Wrap Atomic  coordinates
     DO I=1,G%NAtms
        CALL AtomCyclic(G,G%Carts%D(:,I))
     ENDDO
@@ -770,7 +770,7 @@ CONTAINS
   ! Test to See if in the Box (Fractional Coordinates)
   !-------------------------------------------------------------------------------
   FUNCTION InFracBox(GM,VecF)
-    TYPE(CRDS)                 :: GM     
+    TYPE(CRDS)                 :: GM
     LOGICAL                    :: InFracBox
     INTEGER                    :: I
     REAL(DOUBLE),DIMENSION(3)  :: VecF
@@ -790,9 +790,9 @@ CONTAINS
   ! Test to See if in the Box (Atomic Coordinates)
   !-------------------------------------------------------------------------------
   FUNCTION InAtomBox(GM,VecA)
-    TYPE(CRDS)                 :: GM   
+    TYPE(CRDS)                 :: GM
     LOGICAL                    :: InAtomBox
-    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF     
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 
     VecF = AtomToFrac(GM,VecA)
     InAtomBox = InFracBox(GM,VecF)
@@ -803,10 +803,10 @@ CONTAINS
     TYPE(PBCInfo)                     :: PBC
     REAL(DOUBLE),DIMENSION(3)   :: CellCenter
     INTEGER                     :: I,J
-    !   Find the center of the cell     
+    !   Find the center of the cell
     CellCenter=0D0
     DO I=1,3
-       IF(PBC%AutoW%I(I)==1)THEN           
+       IF(PBC%AutoW%I(I)==1)THEN
           DO J=1,3
              IF(PBC%AutoW%I(J)==1)THEN
                 CellCenter(I)=CellCenter(I)+Half*PBC%BoxShape%D(I,J)
@@ -891,7 +891,7 @@ CONTAINS
              Temp       = BoxShape
              Temp(:,J)  = Zero
              Temp(I,J)  = One
-             DivCV(I,J) = CellVolume(Temp,AutoW)             
+             DivCV(I,J) = CellVolume(Temp,AutoW)
           ENDDO
        ENDDO
 
@@ -923,8 +923,8 @@ CONTAINS
     BoxShape(2,2)=Vec(2)*SIN(Vec(6))
     BoxShape(1,3)=Vec(3)*COS(Vec(5))
     BoxShape(2,3)=(Vec(2)*Vec(3)*COS(Vec(4)) &
-         -BoxShape(1,2)*BoxShape(1,3))/BoxShape(2,2) 
-    BoxShape(3,3)=SQRT(Vec(3)**2-BoxShape(1,3)**2-BoxShape(2,3)**2) 
+         -BoxShape(1,2)*BoxShape(1,3))/BoxShape(2,2)
+    BoxShape(3,3)=SQRT(Vec(3)**2-BoxShape(1,3)**2-BoxShape(2,3)**2)
   END SUBROUTINE BoxParsToCart
   !--------------------------------------------------------------------
   SUBROUTINE CalcBoxPars(Vec,BoxShape)
@@ -941,14 +941,14 @@ CONTAINS
     Vec(4)=DOT_PRODUCT(VecB,VecC)
     Vec(5)=DOT_PRODUCT(VecC,VecA)
     Vec(6)=DOT_PRODUCT(VecA,VecB)
-    Vec(4)=ACOS(Vec(4)) 
-    Vec(5)=ACOS(Vec(5)) 
-    Vec(6)=ACOS(Vec(6)) 
+    Vec(4)=ACOS(Vec(4))
+    Vec(5)=ACOS(Vec(5))
+    Vec(6)=ACOS(Vec(6))
   END SUBROUTINE CalcBoxPars
   !-------------------------------------------------------------------------------
   !  Calculate Inverse of the Box Shape (Transpose of the reciprocal lattice vectors)
-  !  Note:  For 1-D and 2-D periodicity, there is an assumption of a 90 degree 
-  !  lattice vector, of unit 1 if not specified, so that the iverse box shape works 
+  !  Note:  For 1-D and 2-D periodicity, there is an assumption of a 90 degree
+  !  lattice vector, of unit 1 if not specified, so that the iverse box shape works
   !  out. See MondoSCF/ParsePeriodic for details.
   !-------------------------------------------------------------------------------
   FUNCTION InverseBoxShape(Mat,Dim) RESULT(InvMat)
@@ -1013,12 +1013,12 @@ CONTAINS
 
 
     ! Oh god, I hate this routine. It is not as bad as MakeDivTensor2D tho,
-    ! which is the only routine that calls this one.  Its clear how to 
+    ! which is the only routine that calls this one.  Its clear how to
     ! go forward, but it will take some effort.
 
 
     !
-    IF(PRESENT(Rmin_O)) THEN 
+    IF(PRESENT(Rmin_O)) THEN
        Radius_min = Rmin_O
     ELSE
        Radius_min = Zero
@@ -1048,7 +1048,7 @@ CONTAINS
           ENDDO
        ENDDO
     ENDDO
-    !  
+    !
     !
     IF(PRESENT(MaxCell_O)) THEN
        IF(NCELL > MaxCell_O) THEN

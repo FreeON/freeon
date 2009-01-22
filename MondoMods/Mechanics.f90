@@ -35,31 +35,31 @@ MODULE Mechanics
 CONTAINS
   SUBROUTINE InitMMech()
 #ifdef MMech
-    CALL GET(MechFlag(1),'Ctrl_Mechanics1') 
-    CALL GET(MechFlag(2),'Ctrl_Mechanics2') 
+    CALL GET(MechFlag(1),'Ctrl_Mechanics1')
+    CALL GET(MechFlag(2),'Ctrl_Mechanics2')
 #else
-    ! Hardwire QM only 
+    ! Hardwire QM only
     MechFlag(1)=.FALSE.
     MechFlag(2)=.TRUE.
 #endif
   END SUBROUTINE InitMMech
 
-  FUNCTION HasMM() 
+  FUNCTION HasMM()
     LOGICAL :: HasMM
     HasMM=MechFlag(1)
   END FUNCTION HasMM
   !
-  FUNCTION HasQM() 
+  FUNCTION HasQM()
     LOGICAL :: HasQM
     HasQM=MechFlag(2)
   END FUNCTION HasQM
   !
-  FUNCTION MMOnly() 
+  FUNCTION MMOnly()
     LOGICAL :: MMOnly
     MMOnly=MechFlag(1).AND..NOT.MechFlag(2)
   END FUNCTION MMOnly
   !
-  FUNCTION QMOnly() 
+  FUNCTION QMOnly()
     LOGICAL :: QMOnly
     QMOnly=MechFlag(2).AND..NOT.MechFlag(1)
   END FUNCTION QMOnly
