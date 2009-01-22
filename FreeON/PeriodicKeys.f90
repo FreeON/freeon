@@ -28,7 +28,7 @@ MODULE PeriodicKeys
    CHARACTER(LEN=*), PARAMETER :: BEGIN_PERIODIC='<BeginPeriodic>'
    CHARACTER(LEN=*), PARAMETER :: END_PERIODIC  ='<EndPeriodic>'
 !
-   CHARACTER(LEN=*),  PARAMETER :: PBOUNDRY     ='Periodic' 
+   CHARACTER(LEN=*),  PARAMETER :: PBOUNDRY     ='Periodic'
    CHARACTER(LEN=*),  PARAMETER :: PBCWRAP      ='PBC'
 !
    CHARACTER(LEN=10), PARAMETER :: ATOMW_OFF    ='NoAtomWrap'

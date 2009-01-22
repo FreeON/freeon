@@ -45,7 +45,7 @@ CONTAINS
      INTEGER :: NCart,I,J,K,L,NDim
      ! pass in ordered matrix A !
      DO I=1,NDim
-       IF(IA(I+1)==IA(I)) THEN 
+       IF(IA(I+1)==IA(I)) THEN
          Border(I)=I
        ELSE
          Border(I)=JA(IA(I))
@@ -85,7 +85,7 @@ CONTAINS
      INTEGER,DIMENSION(:) :: IA,JA,IU,JU
      INTEGER              :: I,J,K,L,N
      INTEGER              :: NM,NH,JP,JPI,JPP,MIN,IAA,IAB,JJ
-     INTEGER              :: LAST,LH,IUA,IUB 
+     INTEGER              :: LAST,LH,IUA,IUB
      !
      CALL New(IP,N)
      NM=N-1
@@ -107,8 +107,8 @@ CONTAINS
          JP=JP+1
          IF(JJ.LT.MIN) MIN=JJ
          IU(JJ)=I
-       20 CONTINUE   
-       30 LAST=IP%I(I) 
+       20 CONTINUE
+       30 LAST=IP%I(I)
        IF(LAST.EQ.0) GO TO 60
        L=LAST
        40 L=IP%I(L)
@@ -227,7 +227,7 @@ CONTAINS
      TYPE(INT_VECT)            :: IAT1,JAT1
      TYPE(DBL_VECT)            :: ANT1
      INTEGER                   :: I,J,NZ,N,K,L
-     CHARACTER(LEN=DCL)        :: Char    
+     CHARACTER(LEN=DCL)        :: Char
      LOGICAL,OPTIONAL          :: Symb_O
      !
      Char='full'
@@ -244,7 +244,7 @@ CONTAINS
          K=JA(J)
          JA(J)=Perm(K)
        ENDDO
-     ENDDO 
+     ENDDO
      CALL New(IAT1,N+1)
      CALL New(JAT1,NZ)
      CALL New(ANT1,NZ)
@@ -254,7 +254,7 @@ CONTAINS
          K=JAT1%I(J)
          JAT1%I(J)=Perm(K)
        ENDDO
-     ENDDO 
+     ENDDO
      CALL TransPose1x1(IAT1%I,JAT1%I,ANT1%D,N,N,IA,JA,AN,TRIM(Char))
      CALL Delete(IAT1)
      CALL Delete(JAT1)
@@ -271,7 +271,7 @@ CONTAINS
      ! transpose an NxM matrix 'A'
      MH=M+1
      NH=N+1
-     IAT(:)=0       
+     IAT(:)=0
      IAB=IA(NH)-1
      DO 20 I=1,IAB
        J=JA(I)+2
@@ -287,7 +287,7 @@ CONTAINS
      IAB=IA(I+1)-1
      IF(IAB.LT.IAA) GO TO 60
      IF(Char=='full') THEN
-       DO 50 JP=IAA,IAB !!!! symbolic and numeric 
+       DO 50 JP=IAA,IAB !!!! symbolic and numeric
          J=JA(JP)+1
          K=IAT(J)
          JAT(K)=I
@@ -301,7 +301,7 @@ CONTAINS
        51 IAT(J)=K+1
      ENDIF
      60 CONTINUE
-     !        
+     !
    END SUBROUTINE ITransPose1x1
 !
 !---------------------------------------------------------------------
@@ -314,7 +314,7 @@ CONTAINS
      ! transpose an NxM matrix 'A'
      MH=M+1
      NH=N+1
-     IAT(:)=0       
+     IAT(:)=0
      IAB=IA(NH)-1
      DO 20 I=1,IAB
        J=JA(I)+2
@@ -330,7 +330,7 @@ CONTAINS
      IAB=IA(I+1)-1
      IF(IAB.LT.IAA) GO TO 60
      IF(Char=='full') THEN
-       DO 50 JP=IAA,IAB !!!! symbolic and numeric 
+       DO 50 JP=IAA,IAB !!!! symbolic and numeric
          J=JA(JP)+1
          K=IAT(J)
          JAT(K)=I
@@ -344,12 +344,12 @@ CONTAINS
        51 IAT(J)=K+1
      ENDIF
      60 CONTINUE
-     !        
+     !
    END SUBROUTINE TransPose1x1
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE SymbOrder(IA,JA,N,M) 
+   SUBROUTINE SymbOrder(IA,JA,N,M)
      INTEGER,DIMENSION(:) :: IA,JA
      TYPE(INT_VECT) :: IAT1,JAT1,IAT2,JAT2
      INTEGER :: I,J,K,L,M,N,NZ
@@ -383,7 +383,7 @@ CONTAINS
      WRITE(6,*) Char
      CALL ISp1x1ToFull(GcSRowPt,GcSColPt,GcSMTrix,N,M,Aux)
      DO I=1,N
-       WRITE(6,100) (Aux%I(I,J),J=1,M) 
+       WRITE(6,100) (Aux%I(I,J),J=1,M)
      ENDDO
      100 FORMAT(100I5)
      CALL Delete(Aux)
@@ -417,7 +417,7 @@ CONTAINS
      ! CALL PPrint(Aux,Char,Unit_O=6)
        WRITE(*,*) TRIM(Char)
        DO I=1,N
-         WRITE(*,123) (Aux%D(I,J),J=1,M) 
+         WRITE(*,123) (Aux%D(I,J),J=1,M)
        ENDDO
        123 FORMAT(20F6.3)
      ENDIF
@@ -463,21 +463,21 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE TopToSp1x1(Top,IA,JA)
-     INTEGER,DIMENSION(:,:)      :: Top     
+     INTEGER,DIMENSION(:,:)      :: Top
      TYPE(INT_VECT)              :: IA,JA
      INTEGER                     :: I,J,Dim1,NZ
      !
      Dim1=SIZE(Top,1)
      CALL New(IA,Dim1+1)
      IA%I(1)=1
-     DO I=1,Dim1 
+     DO I=1,Dim1
        IA%I(I+1)=IA%I(I)+Top(I,1)
      ENDDO
-     NZ=IA%I(Dim1+1)-1 
+     NZ=IA%I(Dim1+1)-1
      CALL New(JA,NZ)
      JA%I=0
      NZ=0
-     DO I=1,Dim1 
+     DO I=1,Dim1
        DO J=1,Top(I,1)
          NZ=NZ+1
          JA%I(NZ)=Top(I,J+1)
@@ -516,16 +516,16 @@ CONTAINS
 !
    SUBROUTINE Sp1x1ToTop(Top,IA,JA)
      TYPE(INT_RNK2)  :: Top
-     TYPE(INT_VECT)  :: IA,JA 
+     TYPE(INT_VECT)  :: IA,JA
      INTEGER         :: Dim1,NZ,Max2,I,J
      !
-     Dim1=SIZE(IA%I)-1 
+     Dim1=SIZE(IA%I)-1
      Max2=0
      DO I=1,Dim1 ; Max2=MAX(Max2,IA%I(I+1)-IA%I(I)) ; ENDDO
      CALL New(Top,(/Dim1,Max2+1/))
      Top%I=0
      DO I=1,Dim1
-       Top%I(I,1)=IA%I(I+1)-IA%I(I) 
+       Top%I(I,1)=IA%I(I+1)-IA%I(I)
        NZ=IA%I(I)
        DO J=1,Top%I(I,1)
          Top%I(I,J+1)=JA%I(NZ+J-1)
@@ -537,7 +537,7 @@ CONTAINS
 !
    SUBROUTINE FillInto1x1(Gc,GcSRowPt,GcSColPt,GcSDiag,GcSMTrix, &
        GcSNon0,NCart,Char)
-     TYPE(BCSR) :: Gc 
+     TYPE(BCSR) :: Gc
      TYPE(INT_VECT) :: GcSRowPt,GcSColPt,AuxI
      TYPE(DBL_VECT) :: GcSMTrix,GcSDiag
      TYPE(DBL_RNK2) :: Aux
@@ -630,14 +630,14 @@ CONTAINS
        CALL Delete(Aux)
      ENDDO
    END SUBROUTINE FillInto1x1
-!        
+!
 !--------------------------------------------------------------------
 !
    SUBROUTINE UpperTr(IA,JA,AN,IA2,JA2,AN2,AD2)
      INTEGER,DIMENSION(:) :: IA,JA,IA2,JA2
      REAL(DOUBLE),DIMENSION(:) :: AN,AN2,AD2
      INTEGER :: I,J,K,L,N,NZ
-     N=SIZE(IA)-1 
+     N=SIZE(IA)-1
      NZ=0
      AD2=Zero
      IA2(1)=1
@@ -645,9 +645,9 @@ CONTAINS
        DO J=IA(I),IA(I+1)-1
          K=JA(J)
          IF(K==I) AD2(I)=AN(J)
-         IF(K<=I) CYCLE 
+         IF(K<=I) CYCLE
          NZ=NZ+1
-         JA2(NZ)=K 
+         JA2(NZ)=K
          AN2(NZ)=AN(J)
        ENDDO
        IA2(I+1)=NZ+1
@@ -667,10 +667,10 @@ CONTAINS
        DO J=IA(I),IA(I+1)-1
          K=JA(J)
          FactK=Scale(K)
-         AN(J)=FactI*FactK*AN(J) 
+         AN(J)=FactI*FactK*AN(J)
        ENDDO
      ENDDO
-   END SUBROUTINE Scale1x1 
+   END SUBROUTINE Scale1x1
 !
 !--------------------------------------------------------------------
 !
@@ -704,8 +704,8 @@ CONTAINS
      60 XX=XX-UN(I)*X(JU(I))
      X(K)=XX
      70 K=K-1
-     IF(K.GT.0) GO TO 50 
-   END SUBROUTINE CholFactSolve      
+     IF(K.GT.0) GO TO 50
+   END SUBROUTINE CholFactSolve
 !
 !-----------------------------------------------------------------
 !
@@ -715,8 +715,8 @@ CONTAINS
      REAL(DOUBLE)                       :: Aux1(2),Aux2(2)
      TYPE(INT_VECT)                     :: ITr,JTr
      TYPE(DBL_VECT)                     :: ATr
-     TYPE(INT_VECT)                     :: IC,JC  
-     TYPE(DBL_VECT)                     :: CN  
+     TYPE(INT_VECT)                     :: IC,JC
+     TYPE(DBL_VECT)                     :: CN
      INTEGER                            :: N,NZ
      !
      N=SIZE(IA%I)-1
@@ -731,8 +731,8 @@ CONTAINS
        CALL TransPose1x1(IA%I,JA%I,Aux1,N,N,ITr%I,JTr%I,Aux2,'symb')
        CALL AddMat_1x1(IA%I,JA%I,Aux1,ITr%I,JTr%I,Aux2,IC,JC,CN,N,N,SymbOnly_O=.TRUE.)
      ENDIF
-     CALL Delete(IA) 
-     CALL Delete(JA) 
+     CALL Delete(IA)
+     CALL Delete(JA)
      CALL New(IA,SIZE(IC%I))
      CALL New(JA,SIZE(JC%I))
      CALL SetEq(IA,IC)
@@ -764,11 +764,11 @@ CONTAINS
       CALL OpenASCII(TRIM(Name)//'_PlotFile_1',Plt,NewFile_O=.TRUE.)
       DO I=1,NAtmsLoc
         DO K=IA(I),IA(I+1)-1
-          WRITE(Plt,1)JA(K),NAtmsLoc-I            
+          WRITE(Plt,1)JA(K),NAtmsLoc-I
         ENDDO
       ENDDO
       CLOSE(Plt)
- 
+
       CALL OpenASCII(TRIM(Name)//'_GnuPlotMe',Plt,NewFile_O=.TRUE.)
       WRITE(Plt,2)
       WRITE(Plt,3)TRIM(Name)//'.eps'
@@ -789,11 +789,11 @@ CONTAINS
      8   FORMAT('set noytics ')
      9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
      10  FORMAT('                    ',I12,', \\')
-   END SUBROUTINE Plot_1x1 
+   END SUBROUTINE Plot_1x1
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE RCMOrder(Perm,Iperm,NDim,IA,JA) 
+   SUBROUTINE RCMOrder(Perm,Iperm,NDim,IA,JA)
      INTEGER,DIMENSION(:) :: Perm,Iperm,IA,JA
      INTEGER :: I,J,K,L,NDim
      TYPE(INT_VECT) :: XLs
@@ -810,7 +810,7 @@ CONTAINS
 !
    SUBROUTINE NoOrder(Perm,IPerm,NDim)
      INTEGER,DIMENSION(:) :: Perm,IPerm
-     INTEGER              :: I,NDim  
+     INTEGER              :: I,NDim
      DO I=1,NDim
        Perm(I)=I
        IPerm(I)=I
@@ -830,7 +830,7 @@ CONTAINS
      TYPE(DBL_VECT) :: GcScale
      CHARACTER(LEN=*):: Char
      !
-     NIntC=SIZE(B%IB%I,1) 
+     NIntC=SIZE(B%IB%I,1)
      NDim=NIntC+NCart
      CALL New(IA2,NDim+1)
      CALL New(JA2,12*NIntC+NDim)
@@ -882,19 +882,19 @@ CONTAINS
        JA%I(1:NZ)=JA2%I(1:NZ)
        AN%D(1:NZ)=AN2%D(1:NZ)
      ENDIF
-     CALL Delete(IA2) 
-     CALL Delete(JA2) 
-     CALL Delete(AN2) 
+     CALL Delete(IA2)
+     CALL Delete(JA2)
+     CALL Delete(AN2)
      !
      ! Prepare factor with unit diagonals
      !
      IF(Char=='Gc') THEN
        AD%D(1:NintC)=1.D-6
-       AD%D(NintC+1:NDim)=1.D-3 
+       AD%D(NintC+1:NDim)=1.D-3
      ENDIF
      IF(Char=='Gi') THEN
-       AD%D(1:NCart)=1.D-3 
-       AD%D(NCart+1:NDim)=1.D-6 
+       AD%D(1:NCart)=1.D-3
+       AD%D(NCart+1:NDim)=1.D-6
      ENDIF
      !
      CALL New(Perm,NDim)
@@ -976,11 +976,11 @@ CONTAINS
      REAL(DOUBLE) :: Sum,UDI
      !
      N=SIZE(IU)-1
-     DO I=1,N       
+     DO I=1,N
        UDI=UD(I)
        Sum=VectIn(I)
        DO J=IU(I),IU(I+1)-1
-         Sum=Sum-UN(J)*VectIn(JU(J)) 
+         Sum=Sum-UN(J)*VectIn(JU(J))
        ENDDO
        VectOut(I)=Sum/UDI
      ENDDO
@@ -1023,16 +1023,16 @@ CONTAINS
                      IGc,JGc,AGc,NCart,NIntC,NCart,SymbOnly_O=SymbOnly_O)
      IF(PRESENT(SymbOnly_O)) THEN
        IF(SymbOnly_O) THEN
-         CALL Delete(ISpBt) 
-         CALL Delete(JSpBt) 
-         CALL Delete(ASpBt) 
+         CALL Delete(ISpBt)
+         CALL Delete(JSpBt)
+         CALL Delete(ASpBt)
          RETURN
        ENDIF
      ELSE
        CALL ThreshMatr(IGc,JGc,AGc,1.D-7)
-       CALL Delete(ISpBt) 
-       CALL Delete(JSpBt) 
-       CALL Delete(ASpBt) 
+       CALL Delete(ISpBt)
+       CALL Delete(JSpBt)
+       CALL Delete(ASpBt)
      ENDIF
    END SUBROUTINE GetGc
 !
@@ -1049,9 +1049,9 @@ CONTAINS
      !
      NIntC=SIZE(B%IB%I,1)
      NZSpB=(12+9)*NIntC
-     CALL New(ISpB,NIntC+1) 
-     CALL New(JSpB2,NZSpB) 
-     CALL New(ASpB2,NZSpB) 
+     CALL New(ISpB,NIntC+1)
+     CALL New(JSpB2,NZSpB)
+     CALL New(ASpB2,NZSpB)
      NZSpB=0
      ISpB%I(1)=1
      DO I=1,NIntC
@@ -1061,7 +1061,7 @@ CONTAINS
          JJ=3*(J-1)
          KK=3*(K-1)
          DO L=1,3
-           NZSpB=NZSpB+1 
+           NZSpB=NZSpB+1
            KK=KK+1
            JJ=JJ+1
            JSpB2%I(NZSpB)=KK
@@ -1074,20 +1074,20 @@ CONTAINS
        IF(B%BLI%I(I)/=0) THEN
          NCart=B%BLI%I(I)
          DO J=1,9
-           NZSpB=NZSpB+1 
+           NZSpB=NZSpB+1
            JSpB2%I(NZSpB)=NCart+J
            ASpB2%D(NZSpB)=B%BL%D(I,J)
          ENDDO
        ENDIF
        ISpB%I(I+1)=NZSpB+1
      ENDDO
-     CALL New(JSpB,NZSpB) 
-     CALL New(ASpB,NZSpB) 
+     CALL New(JSpB,NZSpB)
+     CALL New(ASpB,NZSpB)
        JSpB%I(1:NZSpB)=JSpB2%I(1:NZSpB)
        ASpB%D(1:NZSpB)=ASpB2%D(1:NZSpB)
      CALL Delete(JSpB2)
      CALL Delete(ASpB2)
-     ! 
+     !
      CALL ThreshMatr(ISpB,JSpB,ASpB,1.D-8)
    END SUBROUTINE BtoSpB_1x1
 !
@@ -1152,7 +1152,7 @@ CONTAINS
          K=JA(J)
          ColSum%I(K)=ColSum%I(K)+1
        ENDDO
-     ENDDO 
+     ENDDO
      NZC=0
      DO I=1,NQ
        NZC=NZC+ColSum%I(I)*(IB(I+1)-IB(I))
@@ -1180,9 +1180,9 @@ CONTAINS
      !
      INTEGER      :: NP,NQ,NR
      INTEGER      :: IA(NP+1),JA(*)
-     INTEGER      :: IB(NQ+1),JB(*) 
-     INTEGER      :: IC(NP+1),JC(*) 
-     INTEGER      :: I,J,K,L          
+     INTEGER      :: IB(NQ+1),JB(*)
+     INTEGER      :: IC(NP+1),JC(*)
+     INTEGER      :: I,J,K,L
      INTEGER      :: IP,IAA,IAB,JP,IBA,IBB,KP
      TYPE(INT_VECT):: IX
      !
@@ -1210,7 +1210,7 @@ CONTAINS
 40   CONTINUE
      IC(NP+1)=IP
      CALL Delete(IX)
-   END SUBROUTINE MatMulSymb 
+   END SUBROUTINE MatMulSymb
 !
 !--------------------------------------------------------------------
 !
@@ -1220,7 +1220,7 @@ CONTAINS
      ! all numbers are integer
      !
      ! NP: the number of rows of the first and result matrices
-     ! NR: the number of coulumns of the result matrix 
+     ! NR: the number of coulumns of the result matrix
      ! from matrix size data
      ! X: scratch array
      !
@@ -1229,8 +1229,8 @@ CONTAINS
      INTEGER                   :: I,J,K,L
      INTEGER                   :: NP,NR,ICA,ICB,IAA,IAB,JP,IBA,IBB,KP
      INTEGER                   :: A
-     TYPE(INT_VECT)            :: X 
-     ! 
+     TYPE(INT_VECT)            :: X
+     !
      CALL New(X,NR)
      DO 50 I=1,NP
      ICA=IC(I)
@@ -1264,7 +1264,7 @@ CONTAINS
      ! Numerical multiplication of two matrices: C = A*B
      !
      ! NP: the number of rows of the first and result matrices
-     ! NR: the number of coulumns of the result matrix 
+     ! NR: the number of coulumns of the result matrix
      ! from matrix size data
      ! X: scratch array
      !
@@ -1273,8 +1273,8 @@ CONTAINS
      INTEGER                   :: I,J,K,L
      INTEGER                   :: NP,NR,ICA,ICB,IAA,IAB,JP,IBA,IBB,KP
      REAL(DOUBLE)              :: A
-     TYPE(DBL_VECT)            :: X 
-     ! 
+     TYPE(DBL_VECT)            :: X
+     !
      CALL New(X,NR)
      DO 50 I=1,NP
      ICA=IC(I)
@@ -1304,11 +1304,11 @@ CONTAINS
 !--------------------------------------------------------------------
 !
    SUBROUTINE CholXMatrXChol(CholData,IB,JB,BN,N,IX,JX,XN)
-     ! 
+     !
      ! X= (D^-1/2)*(U^-T)*B*(U^-1)*(D^-1/2) (E.g. for preconditioning)
      ! B,X: NxN matrix
-     ! UT : NxN upper triangle, with unit diagonals (diags not stored)! 
-     ! 
+     ! UT : NxN upper triangle, with unit diagonals (diags not stored)!
+     !
      TYPE(Cholesky) :: CholData
      TYPE(INT_VECT) :: IB,JB,IX,JX,IX2,JX2
      TYPE(DBL_VECT) :: BN,XN,X2N
@@ -1324,17 +1324,17 @@ CONTAINS
      !
      CALL MatrXUInv(CholData%ChRowPt%I,CholData%ChColPt%I, &
                     CholData%ChFact%D, &
-                    IB%I,JB%I,BN%D,IX2,JX2,X2N,N,NC) 
+                    IB%I,JB%I,BN%D,IX2,JX2,X2N,N,NC)
      !
      CALL MatrXD(IX2%I,JX2%I,X2N%D,Diag12%D,N,NC)
      !
      CALL UTInvXMatr(CholData%ChRowPt%I,CholData%ChColPt%I, &
                      CholData%ChFact%D, &
-                     IX2%I,JX2%I,X2N%D,IX,JX,XN,N,NC) 
+                     IX2%I,JX2%I,X2N%D,IX,JX,XN,N,NC)
      CALL DxMatr(Diag12%D,IX%I,JX%I,XN%D,N,NC)
      !
      CALL Delete(IX2) ; CALL Delete(JX2) ; CALL Delete(X2N)
-     CALL Delete(Diag12) 
+     CALL Delete(Diag12)
      !
      CALL Perm1x1(CholData%IPerm%I,IX%I,JX%I,XN%D)
      !
@@ -1346,7 +1346,7 @@ CONTAINS
      !
      ! X=(U^-1* D^-1 * U^-T) B
      ! B,X: NxNC matrix
-     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      TYPE(Cholesky)            :: CholData
      INTEGER,DIMENSION(:)      :: IB,JB
@@ -1389,9 +1389,9 @@ CONTAINS
 !
    SUBROUTINE MatrXUInv(IU,JU,UN,IB,JB,BN,IX,JX,XN,N,NC)
      !
-     ! X=B * U^-1 
+     ! X=B * U^-1
      ! B,X: NCxN matrix
-     ! UT : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! UT : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      INTEGER,DIMENSION(:)      :: IU,JU,IB,JB
      REAL(DOUBLE),DIMENSION(:) :: UN,BN
@@ -1410,7 +1410,7 @@ CONTAINS
      CALL Delete(JBT)
      CALL Delete(BNT)
      !
-     NZX=SIZE(JXT%I)      
+     NZX=SIZE(JXT%I)
      CALL New(IX,NC+1)
      CALL New(JX,NZX)
      CALL New(XN,NZX)
@@ -1432,7 +1432,7 @@ CONTAINS
      !
      ! X=UT^-1 * B
      ! B,X: NxNC matrix
-     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      NZX=((IB(N+1)-1)+(IU(N+1)-1))*4 !!! this is an estimate of the numb. of nonzeros in X
      CALL New(IX,N+1)
@@ -1460,10 +1460,10 @@ CONTAINS
      !
      ! X=UT^-1 * B
      ! B,X: NxNC matrix
-     ! UT : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! UT : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      NZU=SIZE(JU)
-     NZB=SIZE(JB) 
+     NZB=SIZE(JB)
      !
      CALL New(IUT,N+1)
      CALL New(JUT,NZU)
@@ -1487,7 +1487,7 @@ CONTAINS
      CALL Delete(IUT)
      CALL Delete(JUT)
      CALL Delete(UNT)
-     ! 
+     !
    END SUBROUTINE UTInvXMatr
 !
 !--------------------------------------------------------------------
@@ -1499,7 +1499,7 @@ CONTAINS
      !
      ! X=UT^-1 * B
      ! B,X: NxNC matrix
-     ! UT : NxN lower triangle, with unit diagonals (diags not stored)! 
+     ! UT : NxN lower triangle, with unit diagonals (diags not stored)!
      !
      CALL New(IP,NC)
      IP%I(:)=0
@@ -1546,7 +1546,7 @@ CONTAINS
      !
      ! X=UT^-1 * B
      ! B,X: NxNC matrix
-     ! UT : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! UT : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      CALL New(X,NC)
      !
@@ -1592,7 +1592,7 @@ CONTAINS
      !
      ! X=U^-1 * B
      ! B,X: NxNC matrix
-     ! U : NxN lower triangle, with unit diagonals (diags not stored)! 
+     ! U : NxN lower triangle, with unit diagonals (diags not stored)!
      !
      CALL New(IP,NC)
      NZMax=SIZE(JX)
@@ -1601,15 +1601,15 @@ CONTAINS
      IX(N+1)=NZMax+1
      DO I=N,1,-1  ! reversing the order
        IBA=IB(I)   ! reverse order
-       IBB=IB(I+1)-1  
+       IBB=IB(I+1)-1
        IF(IBB<IBA) GO TO 30
        DO JJ=IBA,IBB
          J=JB(JJ)
          IP%I(J)=I  ! initialize elements of IP
          JX(JP)=J   ! all elements of B contribute to X
          JP=JP-1    ! count back for sure nonzeros of X
-       ENDDO     
-       30 CONTINUE 
+       ENDDO
+       30 CONTINUE
        IUA=IU(I)      ! row of U starts here
        IUB=IU(I+1)-1  ! ends here
        IF(IUB<IUA) GO TO 60
@@ -1617,25 +1617,25 @@ CONTAINS
          J=JU(JJ)   ! in the Jth colmn of U there is a non-zero
          IXA=IX(J)  ! scan the Jth row of the solution (J<I for sure)
          IXB=IX(J+1)-1
-         IF(IXB<IXA) CYCLE    
+         IF(IXB<IXA) CYCLE
          DO KP=IXA,IXB
            K=JX(KP)
-           IF(IP%I(K)==I) CYCLE   
+           IF(IP%I(K)==I) CYCLE
            IP%I(K)=I
            JX(JP)=K
            JP=JP-1
-         ENDDO       
-       ENDDO         
+         ENDDO
+       ENDDO
        60 CONTINUE
        IX(I)=JP+1
-     ENDDO         
+     ENDDO
      CALL Delete(IP)
      !
      ! Now, pull back numbering, so that IX(1)=1
      !
      IStart=IX(1)
      J=IStart-1
-     DO I=1,N+1 
+     DO I=1,N+1
        IX(I)=IX(I)-J
      ENDDO
      JJ=0
@@ -1656,7 +1656,7 @@ CONTAINS
      !
      ! X=U^-1 * B
      ! B,X: NxNC matrix
-     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)!
      !
      CALL New(X,NC)
      !
@@ -1664,7 +1664,7 @@ CONTAINS
        IH=I+1
        IXA=IX(I)
        IXB=IX(IH)-1
-       IF(IXB<IXA) CYCLE     
+       IF(IXB<IXA) CYCLE
        DO IP=IXA,IXB
          X%D(JX(IP))=Zero ! zero expanded accumulator for actual row of X
        ENDDO
@@ -1674,22 +1674,22 @@ CONTAINS
        DO IP=IBA,IBB
          X%D(JB(IP))=BN(IP) ! Put contribution of B into X
        ENDDO
-       30 CONTINUE 
+       30 CONTINUE
        !
        IUA=IU(I)
        IUB=IU(IH)-1
        IF(IUB<IUA) GO TO 60
        DO JP=IUA,IUB
-         J=JU(JP)   
+         J=JU(JP)
          IXC=IX(J)
          IXD=IX(J+1)-1
-         IF(IXD<IXC) CYCLE      
+         IF(IXD<IXC) CYCLE
          A=UN(JP)
          DO KP=IXC,IXD  ! scan the Jth row of the solution
            K=JX(KP)
            X%D(K)=X%D(K)-A*XN(KP)
          ENDDO
-       ENDDO       
+       ENDDO
        60 CONTINUE
        !
        DO IP=IXA,IXB
@@ -1735,18 +1735,18 @@ CONTAINS
      !
      CALL Show1x1(IGc%I,JGc%I,AGc%D,'identity? ',NCart,NCart)
      !
-     CALL Delete(IGc) 
-     CALL Delete(JGc) 
-     CALL Delete(AGc) 
-!    CALL Delete(IUtrT) 
-!    CALL Delete(JUtrT) 
-!    CALL Delete(AUtrT) 
-!    CALL Delete(IUtr) 
-!    CALL Delete(JUtr) 
-!    CALL Delete(AUtr) 
-     CALL Delete(ISpB) 
-     CALL Delete(JSpB) 
-     CALL Delete(ASpB) 
+     CALL Delete(IGc)
+     CALL Delete(JGc)
+     CALL Delete(AGc)
+!    CALL Delete(IUtrT)
+!    CALL Delete(JUtrT)
+!    CALL Delete(AUtrT)
+!    CALL Delete(IUtr)
+!    CALL Delete(JUtr)
+!    CALL Delete(AUtr)
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
    END SUBROUTINE CHKGcInv
 !
 !--------------------------------------------------------------------
@@ -1754,18 +1754,18 @@ CONTAINS
    SUBROUTINE DxMatr(D,IA,JA,AN,N,NC)
      INTEGER,DIMENSION(:)      :: IA,JA
      REAL(DOUBLE),DIMENSION(:) :: AN,D
-     REAL(DOUBLE)              :: Sum      
+     REAL(DOUBLE)              :: Sum
      INTEGER                   :: I,J,K,N,NC
      !
      ! A=D*A
-     ! A : NxNC matrix 
+     ! A : NxNC matrix
      ! D : NxN
      !
      DO I=1,N
        Sum=D(I)
        DO J=IA(I),IA(I+1)-1
-         AN(J)=Sum*AN(J) 
-       ENDDO 
+         AN(J)=Sum*AN(J)
+       ENDDO
      ENDDO
    END SUBROUTINE DxMatr
 !
@@ -1774,18 +1774,18 @@ CONTAINS
    SUBROUTINE MatrXD(IA,JA,AN,D,N,NC)
      INTEGER,DIMENSION(:)      :: IA,JA
      REAL(DOUBLE),DIMENSION(:) :: AN,D
-     REAL(DOUBLE)              :: Sum      
+     REAL(DOUBLE)              :: Sum
      INTEGER                   :: I,J,JJ,K,N,NC
      !
      ! A=A*D
-     ! A : NCxN matrix 
+     ! A : NCxN matrix
      ! D : NCxNC
      !
      DO I=1,N
        DO J=IA(I),IA(I+1)-1
          JJ=JA(J)
-         AN(J)=D(JJ)*AN(J) 
-       ENDDO 
+         AN(J)=D(JJ)*AN(J)
+       ENDDO
      ENDDO
    END SUBROUTINE MatrXD
 !
@@ -1801,7 +1801,7 @@ CONTAINS
      INTEGER               :: NZ,NCart,NIntC
      REAL(DOUBLE),OPTIONAL :: Shift_O
      LOGICAL               :: Print2
-     ! 
+     !
      NZ=SIZE(JSpB%I)
      CALL New(ISpBt,NCart+1)
      CALL New(JSpBt,NZ)
@@ -1837,11 +1837,11 @@ CONTAINS
      CALL GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
      !
      IF(PRESENT(Shift_O)) THEN
-       CALL SpectrShift_1x1(IGc,JGc,AGc,Shift_O) 
+       CALL SpectrShift_1x1(IGc,JGc,AGc,Shift_O)
      ENDIF
      IF(PRESENT(ILow_O)) THEN
       !CALL Plot_1x1(IGc%I,JGc%I,'Gc_1',NCart)
-       CALL CompleteDiag_1x1(IGc,JGc,AGc,ILow_O) 
+       CALL CompleteDiag_1x1(IGc,JGc,AGc,ILow_O)
       !CALL Plot_1x1(IGc%I,JGc%I,'Gc_2',NCart)
      ENDIF
      NZGc=IGc%I(NCart+1)-1
@@ -1867,7 +1867,7 @@ CONTAINS
 !
    SUBROUTINE TestChFact(ChDiag,ChRowPt,ChColPt,ChFact)
      TYPE(INT_VECT) :: ChRowPt,ChColPt
-     TYPE(DBL_VECT) :: ChDiag,ChFact   
+     TYPE(DBL_VECT) :: ChDiag,ChFact
      INTEGER        :: I,J,K,L,NDim
      TYPE(DBL_RNK2) :: Aux,Aux2,Aux3
      REAL(DOUBLE)   :: Sum
@@ -1879,7 +1879,7 @@ CONTAINS
      Aux%D=Zero
      Aux3%D=Zero
      DO I=1,NDim
-         Aux3%D(I,I)=One/ChDiag%D(I) 
+         Aux3%D(I,I)=One/ChDiag%D(I)
          Aux%D(I,I)=One
        DO J=ChRowPt%I(I),ChRowPt%I(I+1)-1
          K=ChColPt%I(J)
@@ -1890,20 +1890,20 @@ CONTAINS
     !CALL PPrint(Aux,'Cholesky factor',unit_o=6)
      WRITE(*,*) 'Cholesky factors'
      DO I=1,NDim
-       WRITE(*,123) (Aux%D(I,J),J=1,NDim) 
+       WRITE(*,123) (Aux%D(I,J),J=1,NDim)
      ENDDO
      CALL DGEMM_NNc(NDim,NDim,NDim,One,Zero,Aux3%D,Aux%D, &
                          Aux2%D)
 WRITE(*,*) 'aux2'
 DO I=1,NDim
-  WRITE(*,123) (Aux2%D(I,J),J=1,NDim) 
+  WRITE(*,123) (Aux2%D(I,J),J=1,NDim)
 ENDDO
      CALL DGEMM_TNc(NDim,NDim,NDim,One,Zero,Aux%D,Aux2%D, &
                          Aux3%D)
     !CALL PPrint(Aux3,'check Cholesky factors',unit_o=6)
      WRITE(*,*) 'check Cholesky factors'
      DO I=1,NDim
-       WRITE(*,123) (Aux3%D(I,J),J=1,NDim) 
+       WRITE(*,123) (Aux3%D(I,J),J=1,NDim)
      ENDDO
      123 FORMAT(20F6.3)
      !
@@ -1999,7 +1999,7 @@ ENDDO
      N=SIZE(Scale)
      DO I=1,N
        Vect(I)=Vect(I)*Scale(I)
-     ENDDO 
+     ENDDO
    END SUBROUTINE ScaleVect
 !
 !--------------------------------------------------------------------
@@ -2070,7 +2070,7 @@ ENDDO
      integer root
      integer xadj(n+1)
      !
-     !  Find the degrees of the nodes in the 
+     !  Find the degrees of the nodes in the
      !  component specified by MASK and ROOT.
      !
      call degree ( root, xadj, iadj, mask, deg, iccsze, perm, n )
@@ -2097,7 +2097,7 @@ ENDDO
        !
        !  Find the unnumbered neighbors of NODE.
        !
-       !  FNBR and LNBR point to the first and last unnumbered neighbors 
+       !  FNBR and LNBR point to the first and last unnumbered neighbors
        !  of the current node in PERM.
        !
        fnbr = lnbr+1
@@ -2351,7 +2351,7 @@ ENDDO
      nlvl = nlvl + 1
      xls(nlvl) = lbegin
      !
-     !  Generate the next level by finding all the 
+     !  Generate the next level by finding all the
      !  masked neighbors of nodes
      !  in the current level.
      !
@@ -2403,7 +2403,7 @@ ENDDO
      !
      CALL AddSymb(IA,JA,IB,JB,N,M,IC%I,JC1%I)
      !
-     NZC=IC%I(N+1)-1 
+     NZC=IC%I(N+1)-1
      CALL New(JC,NZC)
      JC%I(1:NZC)=JC1%I(1:NZC)
      CALL Delete(JC1)
@@ -2424,7 +2424,7 @@ ENDDO
      TYPE(INT_VECT)       :: IX
      INTEGER              :: N,M,IP,I,J,IAA,IAB,JP,IBA,IBB
      !
-     CALL New(IX,M) 
+     CALL New(IX,M)
      !
      IP=1
      IX%I=0
@@ -2448,7 +2448,7 @@ ENDDO
          IP=IP+1
        40 CONTINUE
      50 CONTINUE
-       IC(N+1)=IP 
+       IC(N+1)=IP
      !
      CALL Delete(IX)
    END SUBROUTINE AddSymb
@@ -2465,7 +2465,7 @@ ENDDO
      CALL New(W,M)
      DO 100 I=1,N
        DO 200 K=iC(I),iC(I+1)-1
-         W%D(jC(K))=Zero 
+         W%D(jC(K))=Zero
        200     CONTINUE
        DO 300 K=iA(I),iA(I+1)-1
          W%D(jA(K))=sA(K)
@@ -2494,7 +2494,7 @@ ENDDO
      CALL New(IGc2,NRow+1)
      CALL New(JGc2,NZ)
      CALL New(AGc2,NZ)
-     NZ=0 
+     NZ=0
      IGc2%I(1)=1
      DO I=1,NRow
        DO J=IGc%I(I),IGc%I(I+1)-1
@@ -2519,15 +2519,15 @@ ENDDO
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SpectrShift_1x1(IGc,JGc,AGc,Shift) 
+   SUBROUTINE SpectrShift_1x1(IGc,JGc,AGc,Shift)
      TYPE(INT_VECT)      :: IGc,JGc,IUnit,JUnit,IC,JC
      TYPE(DBL_VECT)      :: AGc,AUnit,CN
      REAL(DOUBLE)        :: Shift
      INTEGER             :: NDim,I,J,NZ
      !
      NDim=SIZE(IGc%I)-1
-     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
-     AUnit%D=Shift*AUnit%D 
+     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim)
+     AUnit%D=Shift*AUnit%D
      CALL AddMat_1x1(IGc%I,JGc%I,AGc%D,IUnit%I,JUnit%I,AUnit%D,IC,JC,CN,NDim,NDim)
      CALL Delete(IGc)
      CALL Delete(JGc)
@@ -2550,7 +2550,7 @@ ENDDO
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
+   SUBROUTINE GetUnit_1x1(IUnit,JUnit,AUnit,NDim)
      TYPE(INT_VECT)      :: IUnit,JUnit
      TYPE(DBL_VECT)      :: AUnit
      INTEGER             :: NDim,I,J
@@ -2569,14 +2569,14 @@ ENDDO
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE CompleteDiag_1x1(IGc,JGc,AGc,ILow) 
+   SUBROUTINE CompleteDiag_1x1(IGc,JGc,AGc,ILow)
      TYPE(INT_VECT)      :: IGc,JGc,IUnit,JUnit,IC,JC
      TYPE(DBL_VECT)      :: AGc,AUnit,CN
      REAL(DOUBLE)        :: Shift
      INTEGER             :: NDim,I,J,NZ,K,ILow
      !
      NDim=SIZE(IGc%I)-1
-     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
+     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim)
      AUnit%D=Zero
      DO I=ILow+1,NDim
        AUnit%D(I)=One
@@ -2617,7 +2617,7 @@ ENDDO
      INTEGER        :: N,I,J,K,I1,I2,J1,J2,K1,K2,R,S,NZ
      INTEGER        :: NCart,GcSNon0,ChFillEst,NIntC
      INTEGER        :: NZSpB,NZGc,NZCh
-     ! 
+     !
      NZGc=SIZE(JGc%I)
      NCart=SIZE(IGc%I)-1
      !
@@ -2639,10 +2639,10 @@ ENDDO
      ! Reduce Gc to upper triangle
      !
      NZ=(IGc%I(NCart+1)-1-NCart)/2
-     CALL New(IGcU,NCart+1) 
-     CALL New(JGcU,NZ) 
-     CALL New(AGcU,NZ) 
-     CALL New(DGcU ,NCart) 
+     CALL New(IGcU,NCart+1)
+     CALL New(JGcU,NZ)
+     CALL New(AGcU,NZ)
+     CALL New(DGcU ,NCart)
        CALL UpperTr(IGc%I,JGc%I,AGc%D,IGcU%I,JGcU%I,AGcU%D,DGcU%D)
      CALL Delete(IGc)
      CALL Delete(JGc)
@@ -2658,11 +2658,11 @@ ENDDO
      !
      ! Allocate storage for symbolic Cholesky factor
      !
-     ChFillEst=NCart*500         
+     ChFillEst=NCart*500
      CALL New(CholData%ChRowPt,NCart+1)
      CALL New(ChColPt1,ChFillEst)
      !
-     ! Determine symbolic structure of the Cholesky factor 
+     ! Determine symbolic structure of the Cholesky factor
      !
      CALL SymbCholComplete(BorderLine%I,NCart,&
                CholData%ChRowPt%I,ChColPt1%I)

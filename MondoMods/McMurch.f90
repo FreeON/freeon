@@ -25,19 +25,19 @@
 !------------------------------------------------------------------------------
 !    MODULE FOR GENERIC THE McMurchie Davidson APPROACH TO COMPUTATION OF
 !    HERMITE GAUSSIAN ERIS VIA RECURENCE RELATIONS
-!    Author: Matt Challacombe 
+!    Author: Matt Challacombe
 !------------------------------------------------------------------------------
 MODULE McMurchie
    USE DerivedTypes
    USE GlobalScalars
    USE MemMan
    IMPLICIT NONE
-   CONTAINS 
-!-----------------------------------------------------------     
+   CONTAINS
+!-----------------------------------------------------------
 !     McMurchie-Davidson 2-term recurence relation
 !
       SUBROUTINE MD2TRR(NASym,MD0,MaxLA,MaxLB,EtaAB,MD, &
-                        PAx,PBx,PAy,PBy,PAz,PBz) 
+                        PAx,PBx,PAy,PBy,PAz,PBz)
          REAL(DOUBLE), INTENT(IN)  :: EtaAB,PAx,PBx,PAy,PBy,PAz,PBz
          REAL(DOUBLE)              :: RL1,TwoZ
          INTEGER,      INTENT(IN)  :: NASym,MD0,MaxLA,MaxLB
@@ -52,48 +52,48 @@ MODULE McMurchie
                   MD(3,LA,LB,LAB)=Zero
                ENDDO
             ENDDO
-         ENDDO                                                          
+         ENDDO
          MD(1,0,0,0)=One
          MD(2,0,0,0)=One
          MD(3,0,0,0)=One
          IF(LTot.EQ.0)RETURN
          TwoZ=Half/EtaAB
- 
+
          DO LA=1,MaxLA
             MD(1,LA,0,0)=PAx*MD(1,LA-1,0,0)+MD(1,LA-1,0,1)
             MD(2,LA,0,0)=PAy*MD(2,LA-1,0,0)+MD(2,LA-1,0,1)
             MD(3,LA,0,0)=PAz*MD(3,LA-1,0,0)+MD(3,LA-1,0,1)
-            DO LAB=1,LA-1           
-               RL1=DBLE(LAB+1)                                      
+            DO LAB=1,LA-1
+               RL1=DBLE(LAB+1)
                MD(1,LA,0,LAB)=TwoZ*MD(1,LA-1,0,LAB-1) &
-                             + PAx*MD(1,LA-1,0,LAB  ) &           
-                             + RL1*MD(1,LA-1,0,LAB+1)                         
+                             + PAx*MD(1,LA-1,0,LAB  ) &
+                             + RL1*MD(1,LA-1,0,LAB+1)
                MD(2,LA,0,LAB)=TwoZ*MD(2,LA-1,0,LAB-1) &
-                             + PAy*MD(2,LA-1,0,LAB  ) &            
-                             + RL1*MD(2,LA-1,0,LAB+1)                         
+                             + PAy*MD(2,LA-1,0,LAB  ) &
+                             + RL1*MD(2,LA-1,0,LAB+1)
                MD(3,LA,0,LAB)=TwoZ*MD(3,LA-1,0,LAB-1) &
-                             + PAz*MD(3,LA-1,0,LAB  ) &            
-                             + RL1*MD(3,LA-1,0,LAB+1)                         
+                             + PAz*MD(3,LA-1,0,LAB  ) &
+                             + RL1*MD(3,LA-1,0,LAB+1)
             ENDDO
-            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)               
-            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)               
-            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)               
-         ENDDO 
+            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)
+            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)
+            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)
+         ENDDO
          DO LB=1,MaxLB
-            DO LA=0,MaxLA  
+            DO LA=0,MaxLA
                MD(1,LA,LB,0)=PBx*MD(1,LA,LB-1,0)+MD(1,LA,LB-1,1)
                MD(2,LA,LB,0)=PBy*MD(2,LA,LB-1,0)+MD(2,LA,LB-1,1)
                MD(3,LA,LB,0)=PBz*MD(3,LA,LB-1,0)+MD(3,LA,LB-1,1)
                DO LAB=1,LTot-1
                   RL1=DBLE(LAB+1)
                   MD(1,LA,LB,LAB)=TwoZ*MD(1,LA,LB-1,LAB-1) &
-                                 + PBx*MD(1,LA,LB-1,LAB  ) &        
+                                 + PBx*MD(1,LA,LB-1,LAB  ) &
                                  + RL1*MD(1,LA,LB-1,LAB+1)
                   MD(2,LA,LB,LAB)=TwoZ*MD(2,LA,LB-1,LAB-1) &
-                                 + PBy*MD(2,LA,LB-1,LAB  ) &         
+                                 + PBy*MD(2,LA,LB-1,LAB  ) &
                                  + RL1*MD(2,LA,LB-1,LAB+1)
-                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) & 
-                                 + PBz*MD(3,LA,LB-1,LAB  ) &        
+                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) &
+                                 + PBz*MD(3,LA,LB-1,LAB  ) &
                                  + RL1*MD(3,LA,LB-1,LAB+1)
                ENDDO
                MD(1,LA,LB,LTot)=TwoZ*MD(1,LA,LB-1,LAB-1)+PBx*MD(1,LA,LB-1,LAB)
@@ -111,13 +111,13 @@ MODULE McMurchie
 !               22 FORMAT(3(I3,","),3(D14.6,","))
 !               ENDDO
 !            ENDDO
-!         ENDDO                                                          
+!         ENDDO
       END SUBROUTINE MD2TRR
 !
 !!%======================================================================================================
 !
-!    NOTE THAT D[e,a] is NOT the same as f!!  SEE FOR EXAMPLE Helgaker and Taylor, TCA 83, p177 (1992), 
-!    Eq (14) VS. Eqs. (19) and (20).  
+!    NOTE THAT D[e,a] is NOT the same as f!!  SEE FOR EXAMPLE Helgaker and Taylor, TCA 83, p177 (1992),
+!    Eq (14) VS. Eqs. (19) and (20).
 !
 !!$  e[0,0,0]:=Exp[-chi(a-b)^2];
 !!$  e[i_,j_,n_]:=0/;(TrueQ[n>i+j]||TrueQ[n<0]);
@@ -130,10 +130,10 @@ MODULE McMurchie
 !!$  de[i_,j_,n_]:=(de[i,j-1,n-1]/(2z)+(PB*de[i,j-1,n]+(za/z)e[i,j-1,n])+(n+1)*de[i,j-1,n+1])/;TrueQ[j!=0];
 !!$
 !!$  f[i_, j_, n_] := 2 za e[i + 1, j, n] - i*e[i - 1, j, n];
-!!$  
+!!$
 !!%======================================================================================================
       SUBROUTINE dMD2TRR(NASym,MD0,MaxLA,MaxLB,Za,Zb,EtaAB,MD,dMD, &
-                         PAx,PBx,PAy,PBy,PAz,PBz) 
+                         PAx,PBx,PAy,PBy,PAz,PBz)
          REAL(DOUBLE), INTENT(IN)  :: EtaAB,PAx,PBx,PAy,PBy,PAz,PBz
          REAL(DOUBLE)              :: RL1,TwoZ,Za,Zb,ChiAB,ZaZ,ZbZ
          INTEGER,      INTENT(IN)  :: NASym,MD0,MaxLA,MaxLB
@@ -141,7 +141,7 @@ MODULE McMurchie
          REAL(DOUBLE), INTENT(OUT) ::dMD(3,MD0:NASym,MD0:NASym,MD0:2*NASym)
          INTEGER                   :: LTot,LA,LB,LAB
          !
-         ChiAB=Za*Zb/EtaAB        
+         ChiAB=Za*Zb/EtaAB
          !
          LTot=MaxLA+MaxLB
          DO LAB=MD0,LTot
@@ -155,7 +155,7 @@ MODULE McMurchie
                   dMD(3,LA,LB,LAB)=Zero
                ENDDO
             ENDDO
-         ENDDO          
+         ENDDO
 
          !
          MD(1,0,0,0)=One
@@ -182,49 +182,49 @@ MODULE McMurchie
             dMD(2,LA,0,0)=PAy*dMD(2,LA-1,0,0)-ZbZ*MD(2,LA-1,0,0)+dMD(2,LA-1,0,1)
             dMD(3,LA,0,0)=PAz*dMD(3,LA-1,0,0)-ZbZ*MD(3,LA-1,0,0)+dMD(3,LA-1,0,1)
             !
-            DO LAB=1,LA-1           
+            DO LAB=1,LA-1
                !
-               RL1=DBLE(LAB+1)                                      
+               RL1=DBLE(LAB+1)
                !
                MD(1,LA,0,LAB)=TwoZ*MD(1,LA-1,0,LAB-1) &
-                             + PAx*MD(1,LA-1,0,LAB  ) &           
-                             + RL1*MD(1,LA-1,0,LAB+1)                         
+                             + PAx*MD(1,LA-1,0,LAB  ) &
+                             + RL1*MD(1,LA-1,0,LAB+1)
                MD(2,LA,0,LAB)=TwoZ*MD(2,LA-1,0,LAB-1) &
-                             + PAy*MD(2,LA-1,0,LAB  ) &            
-                             + RL1*MD(2,LA-1,0,LAB+1)                         
+                             + PAy*MD(2,LA-1,0,LAB  ) &
+                             + RL1*MD(2,LA-1,0,LAB+1)
                MD(3,LA,0,LAB)=TwoZ*MD(3,LA-1,0,LAB-1) &
-                             + PAz*MD(3,LA-1,0,LAB  ) &            
-                             + RL1*MD(3,LA-1,0,LAB+1)                         
+                             + PAz*MD(3,LA-1,0,LAB  ) &
+                             + RL1*MD(3,LA-1,0,LAB+1)
                !
                dMD(1,LA,0,LAB)=TwoZ*dMD(1,LA-1,0,LAB-1) &
-                             +  PAx*dMD(1,LA-1,0,LAB  ) &    
-                             -  ZbZ* MD(1,LA-1,0,LAB  ) &           
-                             +  RL1*dMD(1,LA-1,0,LAB+1)                         
+                             +  PAx*dMD(1,LA-1,0,LAB  ) &
+                             -  ZbZ* MD(1,LA-1,0,LAB  ) &
+                             +  RL1*dMD(1,LA-1,0,LAB+1)
 
                dMD(2,LA,0,LAB)=TwoZ*dMD(2,LA-1,0,LAB-1) &
-                             +  PAy*dMD(2,LA-1,0,LAB  ) &            
-                             -  ZbZ* MD(2,LA-1,0,LAB  ) &            
-                             +  RL1*dMD(2,LA-1,0,LAB+1)                         
+                             +  PAy*dMD(2,LA-1,0,LAB  ) &
+                             -  ZbZ* MD(2,LA-1,0,LAB  ) &
+                             +  RL1*dMD(2,LA-1,0,LAB+1)
 
                dMD(3,LA,0,LAB)=TwoZ*dMD(3,LA-1,0,LAB-1) &
-                             +  PAz*dMD(3,LA-1,0,LAB  ) &            
-                             -  ZbZ* MD(3,LA-1,0,LAB  ) &            
-                             +  RL1*dMD(3,LA-1,0,LAB+1)                         
+                             +  PAz*dMD(3,LA-1,0,LAB  ) &
+                             -  ZbZ* MD(3,LA-1,0,LAB  ) &
+                             +  RL1*dMD(3,LA-1,0,LAB+1)
                !
-            ENDDO                                                
+            ENDDO
             !
-            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)               
-            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)               
-            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)               
+            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)
+            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)
+            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)
             !
-            dMD(1,LA,0,LA)=TwoZ*dMD(1,LA-1,0,LA-1)+PAx*dMD(1,LA-1,0,LA)-ZbZ*MD(1,LA-1,0,LA)               
-            dMD(2,LA,0,LA)=TwoZ*dMD(2,LA-1,0,LA-1)+PAy*dMD(2,LA-1,0,LA)-ZbZ*MD(2,LA-1,0,LA)               
-            dMD(3,LA,0,LA)=TwoZ*dMD(3,LA-1,0,LA-1)+PAz*dMD(3,LA-1,0,LA)-ZbZ*MD(3,LA-1,0,LA)               
+            dMD(1,LA,0,LA)=TwoZ*dMD(1,LA-1,0,LA-1)+PAx*dMD(1,LA-1,0,LA)-ZbZ*MD(1,LA-1,0,LA)
+            dMD(2,LA,0,LA)=TwoZ*dMD(2,LA-1,0,LA-1)+PAy*dMD(2,LA-1,0,LA)-ZbZ*MD(2,LA-1,0,LA)
+            dMD(3,LA,0,LA)=TwoZ*dMD(3,LA-1,0,LA-1)+PAz*dMD(3,LA-1,0,LA)-ZbZ*MD(3,LA-1,0,LA)
             !
-         ENDDO 
+         ENDDO
          !
          DO LB=1,MaxLB
-            DO LA=0,MaxLA  
+            DO LA=0,MaxLA
                !
                MD(1,LA,LB,0)=PBx*MD(1,LA,LB-1,0)+MD(1,LA,LB-1,1)
                MD(2,LA,LB,0)=PBy*MD(2,LA,LB-1,0)+MD(2,LA,LB-1,1)
@@ -239,26 +239,26 @@ MODULE McMurchie
                   RL1=DBLE(LAB+1)
                   !
                   MD(1,LA,LB,LAB)=TwoZ*MD(1,LA,LB-1,LAB-1) &
-                                 + PBx*MD(1,LA,LB-1,LAB  ) &        
+                                 + PBx*MD(1,LA,LB-1,LAB  ) &
                                  + RL1*MD(1,LA,LB-1,LAB+1)
                   MD(2,LA,LB,LAB)=TwoZ*MD(2,LA,LB-1,LAB-1) &
-                                 + PBy*MD(2,LA,LB-1,LAB  ) &         
+                                 + PBy*MD(2,LA,LB-1,LAB  ) &
                                  + RL1*MD(2,LA,LB-1,LAB+1)
-                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) & 
-                                 + PBz*MD(3,LA,LB-1,LAB  ) &        
+                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) &
+                                 + PBz*MD(3,LA,LB-1,LAB  ) &
                                  + RL1*MD(3,LA,LB-1,LAB+1)
                   !
                   dMD(1,LA,LB,LAB)=TwoZ*dMD(1,LA,LB-1,LAB-1) &
-                                  + PBx*dMD(1,LA,LB-1,LAB  ) &        
-                                  + ZaZ* MD(1,LA,LB-1,LAB  ) &        
+                                  + PBx*dMD(1,LA,LB-1,LAB  ) &
+                                  + ZaZ* MD(1,LA,LB-1,LAB  ) &
                                   + RL1*dMD(1,LA,LB-1,LAB+1)
                   dMD(2,LA,LB,LAB)=TwoZ*dMD(2,LA,LB-1,LAB-1) &
-                                  + PBy*dMD(2,LA,LB-1,LAB  ) &         
-                                  + ZaZ* MD(2,LA,LB-1,LAB  ) &         
+                                  + PBy*dMD(2,LA,LB-1,LAB  ) &
+                                  + ZaZ* MD(2,LA,LB-1,LAB  ) &
                                   + RL1*dMD(2,LA,LB-1,LAB+1)
-                  dMD(3,LA,LB,LAB)=TwoZ*dMD(3,LA,LB-1,LAB-1) & 
-                                  + PBz*dMD(3,LA,LB-1,LAB  ) &        
-                                  + ZaZ* MD(3,LA,LB-1,LAB  ) &        
+                  dMD(3,LA,LB,LAB)=TwoZ*dMD(3,LA,LB-1,LAB-1) &
+                                  + PBz*dMD(3,LA,LB-1,LAB  ) &
+                                  + ZaZ* MD(3,LA,LB-1,LAB  ) &
                                   + RL1*dMD(3,LA,LB-1,LAB+1)
                   !
                ENDDO
@@ -281,13 +281,13 @@ MODULE McMurchie
 !!$               22 FORMAT(3(I3,","),3(D14.6,","))
 !!$               ENDDO
 !!$            ENDDO
-!!$         ENDDO                                                          
+!!$         ENDDO
 
       END SUBROUTINE dMD2TRR
 
 
       SUBROUTINE MD2TRR2(NASym,MD0,MaxLA,MaxLB,EtaAB,MD, &
-                        PAx,PBx,PAy,PBy,PAz,PBz) 
+                        PAx,PBx,PAy,PBy,PAz,PBz)
          REAL(DOUBLE), INTENT(IN)  :: EtaAB,PAx,PBx,PAy,PBy,PAz,PBz
          REAL(DOUBLE)              :: RL1,TwoZ
          INTEGER,      INTENT(IN)  :: NASym,MD0,MaxLA,MaxLB
@@ -305,48 +305,48 @@ MODULE McMurchie
                   MD(3,LA,LB,LAB)=Zero
                ENDDO
             ENDDO
-         ENDDO                                                          
+         ENDDO
          MD(1,0,0,0)=One
          MD(2,0,0,0)=One
-         MD(3,0,0,0)=One         
+         MD(3,0,0,0)=One
          IF(LTot.EQ.0)RETURN
          TwoZ=Half/EtaAB
- 
+
          DO LA=1,MaxLA
             MD(1,LA,0,0)=PAx*MD(1,LA-1,0,0)+MD(1,LA-1,0,1)
             MD(2,LA,0,0)=PAy*MD(2,LA-1,0,0)+MD(2,LA-1,0,1)
             MD(3,LA,0,0)=PAz*MD(3,LA-1,0,0)+MD(3,LA-1,0,1)
-            DO LAB=1,LA-1           
-               RL1=DBLE(LAB+1)                                      
+            DO LAB=1,LA-1
+               RL1=DBLE(LAB+1)
                MD(1,LA,0,LAB)=TwoZ*MD(1,LA-1,0,LAB-1) &
-                             + PAx*MD(1,LA-1,0,LAB  ) &           
-                             + RL1*MD(1,LA-1,0,LAB+1)                         
+                             + PAx*MD(1,LA-1,0,LAB  ) &
+                             + RL1*MD(1,LA-1,0,LAB+1)
                MD(2,LA,0,LAB)=TwoZ*MD(2,LA-1,0,LAB-1) &
-                             + PAy*MD(2,LA-1,0,LAB  ) &            
-                             + RL1*MD(2,LA-1,0,LAB+1)                         
+                             + PAy*MD(2,LA-1,0,LAB  ) &
+                             + RL1*MD(2,LA-1,0,LAB+1)
                MD(3,LA,0,LAB)=TwoZ*MD(3,LA-1,0,LAB-1) &
-                             + PAz*MD(3,LA-1,0,LAB  ) &            
-                             + RL1*MD(3,LA-1,0,LAB+1)                         
+                             + PAz*MD(3,LA-1,0,LAB  ) &
+                             + RL1*MD(3,LA-1,0,LAB+1)
             ENDDO
-            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)               
-            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)               
-            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)               
-         ENDDO 
+            MD(1,LA,0,LA)=TwoZ*MD(1,LA-1,0,LA-1)+PAx*MD(1,LA-1,0,LA)
+            MD(2,LA,0,LA)=TwoZ*MD(2,LA-1,0,LA-1)+PAy*MD(2,LA-1,0,LA)
+            MD(3,LA,0,LA)=TwoZ*MD(3,LA-1,0,LA-1)+PAz*MD(3,LA-1,0,LA)
+         ENDDO
          DO LB=1,MaxLB
-            DO LA=0,MaxLA  
+            DO LA=0,MaxLA
                MD(1,LA,LB,0)=PBx*MD(1,LA,LB-1,0)+MD(1,LA,LB-1,1)
                MD(2,LA,LB,0)=PBy*MD(2,LA,LB-1,0)+MD(2,LA,LB-1,1)
                MD(3,LA,LB,0)=PBz*MD(3,LA,LB-1,0)+MD(3,LA,LB-1,1)
                DO LAB=1,LTot-1
                   RL1=DBLE(LAB+1)
                   MD(1,LA,LB,LAB)=TwoZ*MD(1,LA,LB-1,LAB-1) &
-                                 + PBx*MD(1,LA,LB-1,LAB  ) &        
+                                 + PBx*MD(1,LA,LB-1,LAB  ) &
                                  + RL1*MD(1,LA,LB-1,LAB+1)
                   MD(2,LA,LB,LAB)=TwoZ*MD(2,LA,LB-1,LAB-1) &
-                                 + PBy*MD(2,LA,LB-1,LAB  ) &         
+                                 + PBy*MD(2,LA,LB-1,LAB  ) &
                                  + RL1*MD(2,LA,LB-1,LAB+1)
-                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) & 
-                                 + PBz*MD(3,LA,LB-1,LAB  ) &        
+                  MD(3,LA,LB,LAB)=TwoZ*MD(3,LA,LB-1,LAB-1) &
+                                 + PBz*MD(3,LA,LB-1,LAB  ) &
                                  + RL1*MD(3,LA,LB-1,LAB+1)
                ENDDO
                MD(1,LA,LB,LTot)=TwoZ*MD(1,LA,LB-1,LAB-1)+PBx*MD(1,LA,LB-1,LAB)
@@ -368,14 +368,14 @@ MODULE McMurchie
 !               22 FORMAT(3(I3,","),3(D14.6,","))
 !               ENDDO
 !            ENDDO
-!         ENDDO                                                          
+!         ENDDO
       END SUBROUTINE MD2TRR2
-!-----------------------------------------------------------     
+!-----------------------------------------------------------
 !     McMurchie-Davidson 3-term recurence relation
 !
       SUBROUTINE MD3TRR(MaxL,LTot,R,AuxR,Upq,PQx,PQy,PQz)
          INTEGER,                                INTENT(IN)    :: LTot,MaxL
-         REAL(DOUBLE), DIMENSION(0:LTot),        INTENT(IN)    :: AuxR 
+         REAL(DOUBLE), DIMENSION(0:LTot),        INTENT(IN)    :: AuxR
          REAL(DOUBLE), DIMENSION(0:MaxL,0:MaxL, &
                                  0:MaxL,0:MaxL), INTENT(INOUT) :: R
          REAL(DOUBLE),                           INTENT(IN)    :: PQx,PQy,PQz,Upq
@@ -436,7 +436,7 @@ MODULE McMurchie
 !
       SUBROUTINE AuxInts(MaxL,LTot,AuxR,Omega,T)
          REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
-         INTEGER,                       INTENT(IN)  :: MaxL,LTot 
+         INTEGER,                       INTENT(IN)  :: MaxL,LTot
          REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: AuxR
          REAL(DOUBLE),PARAMETER                     :: Switch=26.0D0
          INTEGER,PARAMETER                          :: LPlus=300
@@ -455,7 +455,7 @@ MODULE McMurchie
                AuxR(J)=OmegaJ/DBLE(2*J+1)
                OmegaJ=TwoO*OmegaJ
             ENDDO
-            RETURN            
+            RETURN
          ELSEIF(T.LT.Switch) THEN
 !---------------------------------------------------
 !           Downward recursion:
@@ -474,13 +474,13 @@ MODULE McMurchie
 !
             SqrtT=SQRT(T)
             OneOvT=One/T
-            F(0)=SqrtPi/(Two*SqrtT) 
+            F(0)=SqrtPi/(Two*SqrtT)
             DO J=1,LTot
                F(J)=F(J-1)*(DBLE(J)-Half)*OneOvT
             ENDDO
          ENDIF
 !------------------------------------------------------
-!        Generate the auxiliary integrals 
+!        Generate the auxiliary integrals
 !        R_{000j}=(-2*omega)^j F_{j}(T)
 !
          OmegaJ=One
@@ -493,7 +493,7 @@ MODULE McMurchie
 
       SUBROUTINE OvrInts(MaxL,LTot,AuxR,Omega,T)
          REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
-         INTEGER,                       INTENT(IN)  :: MaxL,LTot 
+         INTEGER,                       INTENT(IN)  :: MaxL,LTot
          REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: AuxR
          REAL(DOUBLE),PARAMETER                     :: Switch=26.0D0
          INTEGER,PARAMETER                          :: LPlus=50
@@ -512,7 +512,7 @@ MODULE McMurchie
                AuxR(J)=OmegaJ*ET
                OmegaJ=TwoO*OmegaJ
             ENDDO
-            RETURN            
+            RETURN
           END SUBROUTINE OvrInts
 
 
@@ -523,7 +523,7 @@ MODULE McMurchie
 !
       SUBROUTINE ErrInts(MaxL,LTot,ErrR,Omega,T)
          REAL(DOUBLE),                  INTENT(IN)  :: Omega,T
-         INTEGER,                       INTENT(IN)  :: MaxL,LTot 
+         INTEGER,                       INTENT(IN)  :: MaxL,LTot
          REAL(DOUBLE),DIMENSION(0:MaxL),INTENT(OUT) :: ErrR
          REAL(DOUBLE),PARAMETER                     :: Switch=35.0D0
          INTEGER,PARAMETER                          :: LPlus=250
@@ -556,12 +556,12 @@ MODULE McMurchie
 !        Multipole approx and upward recursion
          SqrtT=SQRT(T)
          OneOvT=One/T
-         M(0)=SqrtPi/(Two*SqrtT) 
+         M(0)=SqrtPi/(Two*SqrtT)
          DO J=1,LTot
             M(J)=M(J-1)*(DBLE(J)-Half)*OneOvT
          ENDDO
 !------------------------------------------------------
-!        Generate the auxiliary error integrals 
+!        Generate the auxiliary error integrals
 !        R_{000j}=(-2*omega)^j [F_{j}(T)-M_{j}(T)]
          OmegaJ=One
          TwoO=-Two*Omega
@@ -655,7 +655,7 @@ SUBROUTINE Integrals2E(BS,GM,TwoE)
 
         IndexC1 = 0
         DO AtC=1,NAtoms
-           Cx=GM%Carts%D(1,AtC) 
+           Cx=GM%Carts%D(1,AtC)
            Cy=GM%Carts%D(2,AtC)
            Cz=GM%Carts%D(3,AtC)
            KC=GM%AtTyp%I(AtC)
@@ -690,7 +690,7 @@ SUBROUTINE Integrals2E(BS,GM,TwoE)
                  StartLA=BS%LStrt%I(CFA,KA)
                  StopLA =BS%LStop%I(CFA,KA)
                  StrideA=StopLA-StartLA+1
-                 MaxLA=BS%ASymm%I(2,CFA,KA)                 
+                 MaxLA=BS%ASymm%I(2,CFA,KA)
 
                  IndexB=IndexB1
                  DO CFB=1,BS%NCFnc%I(KB)
@@ -804,7 +804,7 @@ SUBROUTINE Integrals2E(BS,GM,TwoE)
                                                            DO LCD=0,LC+LD
                                                               DO MCD=0,MC+MD
                                                                  DO NCD=0,NC+ND
- 
+
                                                                    TwoE(IA,IB,IC,ID)=TwoE(IA,IB,IC,ID)+CCoAB*CCoCD &
                                                                          *Eab(1,LA,LB,LAB)       &
                                                                          *Eab(2,MA,MB,MAB)       &

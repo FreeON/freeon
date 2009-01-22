@@ -1,6 +1,6 @@
 MODULE SetXYZ
    USE DerivedTypes
-   USE GlobalScalars   
+   USE GlobalScalars
    USE GlobalObjects
    USE MemMan
 #ifdef PARALLEL
@@ -27,7 +27,7 @@ MODULE SetXYZ
                        Set_RNK2_EQ_DBCSR,         &
                        Set_DBCSR_EQ_DBCSR,        &
 #endif
-                       Set_INT_VECT_EQ_INT_SCLR,  &  
+                       Set_INT_VECT_EQ_INT_SCLR,  &
                        Set_DBL_VECT_EQ_DBL_SCLR,  &
                        Set_INT_VECT_EQ_INT_VECT,  &
                        Set_DBL_VECT_EQ_DBL_VECT
@@ -76,15 +76,15 @@ MODULE SetXYZ
         C = SQRT(PBC%BoxShape%D(1,3)**2 + PBC%BoxShape%D(2,3)**2+ PBC%BoxShape%D(3,3)**2)
         Gamma = ACOS((PBC%BoxShape%D(1,1)*PBC%BoxShape%D(1,2))/(A*B))/DegToRad
         Beta  = ACOS((PBC%BoxShape%D(1,1)*PBC%BoxShape%D(1,3))/(A*C))/DegToRad
-        Alpha = PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3)+PBC%BoxShape%D(2,2)*PBC%BoxShape%D(2,3)   
+        Alpha = PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3)+PBC%BoxShape%D(2,2)*PBC%BoxShape%D(2,3)
         Alpha = ACOS(Alpha/(B*C))/DegToRad
       END SUBROUTINE VecToAng
 !======================================================================
 !     Copy a Timer
 !======================================================================
       SUBROUTINE Set_TIME_EQ_TIME(T2,T1)
-         TYPE(TIME), INTENT(IN)  :: T1        
-         TYPE(TIME), INTENT(OUT) :: T2        
+         TYPE(TIME), INTENT(IN)  :: T1
+         TYPE(TIME), INTENT(OUT) :: T2
          T2%CPUS=T1%CPUS
          T2%Wall=T1%Wall
          T2%FLOP=T1%FLOP
@@ -105,7 +105,7 @@ MODULE SetXYZ
 	    KK=B%BlkPt%I(I)
 	    DO M=1,L
 	      A%D(K+M-1)=B%MTrix%D(KK+M-1)
-	    ENDDO 
+	    ENDDO
 	  ENDIF
 	  ENDDO
 	ENDDO
@@ -114,11 +114,11 @@ MODULE SetXYZ
 !     Copy a BCSR matrix
 !======================================================================
       SUBROUTINE Set_BCSR_EQ_BCSR(B,A)
-         TYPE(BCSR), INTENT(INOUT) :: A        
-         TYPE(BCSR), INTENT(INOUT) :: B        
+         TYPE(BCSR), INTENT(INOUT) :: A
+         TYPE(BCSR), INTENT(INOUT) :: B
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
-#endif 
+#endif
             IF(AllocQ(B%Alloc).AND. &
                  & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
                CALL Delete(B)
@@ -141,8 +141,8 @@ MODULE SetXYZ
 !     Copy a DBCSR matrix
 !======================================================================
       SUBROUTINE Set_DBCSR_EQ_DBCSR(B,A)
-         TYPE(DBCSR), INTENT(INOUT) :: A        
-         TYPE(DBCSR), INTENT(INOUT) :: B        
+         TYPE(DBCSR), INTENT(INOUT) :: A
+         TYPE(DBCSR), INTENT(INOUT) :: B
          LOGICAL                    :: LimitsQ
          IF(AllocQ(B%Alloc).AND. &
               & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
@@ -156,7 +156,7 @@ MODULE SetXYZ
          B%NAtms=A%NAtms
          B%NBlks=A%NBlks
          B%NNon0=A%NNon0
-         B%Node=A%Node        
+         B%Node=A%Node
          CALL SetEq(B%RowPt,A%RowPt,A%NAtms+1)
          CALL SetEq(B%ColPt,A%ColPt,A%NBlks)
          CALL SetEq(B%BlkPt,A%BlkPt,A%NBlks)
@@ -168,13 +168,13 @@ MODULE SetXYZ
       END SUBROUTINE Set_DBCSR_EQ_DBCSR
 #endif
 !======================================================================
-!     Transform a BCSR matrix into a dense matrix (Rank 2 array) 
+!     Transform a BCSR matrix into a dense matrix (Rank 2 array)
 !======================================================================
       SUBROUTINE Set_RNK2_EQ_BCSR(B,A)
-         TYPE(BCSR),    INTENT(IN)    :: A        
-         TYPE(DBL_RNK2),INTENT(INOUT) :: B        
+         TYPE(BCSR),    INTENT(IN)    :: A
+         TYPE(DBL_RNK2),INTENT(INOUT) :: B
          INTEGER                      :: NRow,NCol
-         INTERFACE 
+         INTERFACE
             SUBROUTINE BCSR_TO_DENS(NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0,BSiz,OffS, &
                                     A,MTrix,RowPt,ColPt,BlkPt)
               INTEGER                            ,INTENT(IN)  :: NRow,NCol,NBasF,NSMat,NAtoms, &
@@ -182,7 +182,7 @@ MODULE SetXYZ
               INTEGER, PARAMETER                              :: DOUBLE=KIND(0.D0)
               REAL(DOUBLE),DIMENSION(NRow,NCol),  INTENT(OUT) :: A
               REAL(DOUBLE),DIMENSION(NNon0),      INTENT(IN)  :: MTrix
-              INTEGER     ,DIMENSION(NAtoms+1),   INTENT(IN)  :: RowPt  
+              INTEGER     ,DIMENSION(NAtoms+1),   INTENT(IN)  :: RowPt
               INTEGER     ,DIMENSION(NBlks),      INTENT(IN)  :: ColPt
               INTEGER     ,DIMENSION(NBlks*NSMat),INTENT(IN)  :: BlkPt
               INTEGER     ,DIMENSION(NAtoms),     INTENT(IN)  :: BSiz,OffS
@@ -251,9 +251,9 @@ MODULE SetXYZ
             IF(OffS%I(L)>Dim) CYCLE
             KK=A%BlkPt%I(J)
             II=0
-            DO M=1,BSiz%I(L) 
+            DO M=1,BSiz%I(L)
               MM=OffS%I(L)-1+M
-              DO N=1,BSiz%I(I) 
+              DO N=1,BSiz%I(I)
                 NN=OffS%I(I)-1+N
                 II=II+1
                 B%D(MM,NN)=A%MTrix%D(KK-1+II)
@@ -266,11 +266,11 @@ MODULE SetXYZ
 !---------------------------------------------------------------------
 !
 !======================================================================
-!     Transform a dense matrix (Rank 2 array) into a BCSR matrix 
+!     Transform a dense matrix (Rank 2 array) into a BCSR matrix
 !======================================================================
       SUBROUTINE Set_BCSR_EQ_RNK2(B,A,NSMat_O)
-         TYPE(DBL_RNK2), INTENT(INOUT) :: A        
-         TYPE(BCSR),     INTENT(INOUT) :: B  
+         TYPE(DBL_RNK2), INTENT(INOUT) :: A
+         TYPE(BCSR),     INTENT(INOUT) :: B
          INTEGER,OPTIONAL              :: NSMat_O
          INTEGER                       :: I,J,P,Q,OI,OJ,OI0,OJ0,MA,NA,NSMat,iSMat
          NSMat=1
@@ -281,10 +281,10 @@ MODULE SetXYZ
          P=1
          Q=1
          OI0=0
-         B%RowPt%I(1)=1 
+         B%RowPt%I(1)=1
          DO I=1,NAtoms
             OJ0=0
-            MA=BSiz%I(I) 
+            MA=BSiz%I(I)
             DO J=1,NAtoms
                NA=BSiz%I(J)
                B%BlkPt%I(P)=Q
@@ -308,7 +308,7 @@ MODULE SetXYZ
                   CALL BlockToBlock_(MA,NA,OI,OJ,A,B%MTrix%D(Q))
                   Q=Q+MA*NA
                ENDDO
-               B%ColPt%I(P)=J               
+               B%ColPt%I(P)=J
                P=P+1
                B%RowPt%I(I+1)=P
                OJ0=OJ0+NA
@@ -319,7 +319,7 @@ MODULE SetXYZ
          B%NBlks=P-1
          B%NNon0=Q-1
       END SUBROUTINE Set_BCSR_EQ_RNK2
- 
+
       SUBROUTINE BlockToBlock_(M,N,OI,OJ,A,B)
         IMPLICIT NONE
         INTEGER :: M,N,OI,OJ
@@ -363,22 +363,22 @@ MODULE SetXYZ
 !
       SUBROUTINE Set_BCSR_EQ_VECT(B,A)
 	! turn column vector into sparse matrix (BCSR) form
-         TYPE(DBL_VECT), INTENT(INOUT) :: A        
-         TYPE(BCSR),     INTENT(INOUT) :: B        
+         TYPE(DBL_VECT), INTENT(INOUT) :: A
+         TYPE(BCSR),     INTENT(INOUT) :: B
          INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA
          IF(AllocQ(B%Alloc))  &
          CALL Delete(B)
          CALL New(B)
          P=1
          Q=1
-         B%RowPt%I(1)=1 
+         B%RowPt%I(1)=1
          DO I=1,NAtoms
             OI=OffS%I(I)
-            MA=BSiz%I(I) 
+            MA=BSiz%I(I)
             NA=BSiz%I(1)
             CALL VectToBlock2(MA,NA,A%D(OI:),B%MTrix%D(Q:))
             B%BlkPt%I(P)=Q
-            B%ColPt%I(P)=1 
+            B%ColPt%I(P)=1
             Q=Q+MA*NA
             P=P+1
             B%RowPt%I(I+1)=P
@@ -401,12 +401,12 @@ MODULE SetXYZ
       END SUBROUTINE VectToBlock2
 !
       SUBROUTINE Set_VECT_EQ_BCSR(B,A)
-         TYPE(BCSR),     INTENT(INOUT) :: A        
-         TYPE(DBL_VECT), INTENT(INOUT) :: B        
+         TYPE(BCSR),     INTENT(INOUT) :: A
+         TYPE(DBL_VECT), INTENT(INOUT) :: B
          INTEGER                       :: I,J,P,Q,OI,JP,MA,NA
          DO I=1,NAtoms
             OI=OffS%I(I)
-            MA=BSiz%I(I) 
+            MA=BSiz%I(I)
             NA=BSiz%I(1)
             DO JP=A%RowPt%I(I),A%RowPt%I(I+1)-1
                J=A%ColPt%I(JP)
@@ -453,7 +453,7 @@ MODULE SetXYZ
 !     Zero out the Global Row Pointer
 !===================================================================
       SUBROUTINE Clear(A,RowPt,Id_O)
-         TYPE(DBCSR),     INTENT(IN)    :: A 
+         TYPE(DBCSR),     INTENT(IN)    :: A
          TYPE(INT_VECT),  INTENT(INOUT) :: RowPt
          INTEGER,OPTIONAL,INTENT(IN)    :: Id_O
          INTEGER                        :: I,Id,I1,I2
@@ -466,22 +466,22 @@ MODULE SetXYZ
          ENDDO
       END SUBROUTINE Clear
 !======================================================================
-!     Transform a DBCSR matrix into locally a dense matrices, 
-!     one for each node.  Usefull only for printing.  
+!     Transform a DBCSR matrix into locally a dense matrices,
+!     one for each node.  Usefull only for printing.
 !======================================================================
       SUBROUTINE Set_RNK2_EQ_DBCSR(B,A,Id_O)
-         TYPE(DBCSR),    INTENT(INOUT)       :: A        
-         TYPE(DBL_RNK2),INTENT(INOUT)     :: B        
+         TYPE(DBCSR),    INTENT(INOUT)       :: A
+         TYPE(DBL_RNK2),INTENT(INOUT)     :: B
          INTEGER,OPTIONAL                 :: Id_O
          INTEGER                          :: K,L,JP,P,II,JJ,MA,MA1,NA, &
-                                             MOff,KOff,IStrt,IStop     
+                                             MOff,KOff,IStrt,IStop
          INTEGER                          :: IL,IG,JG,Id
          IF(B%Alloc/=ALLOCATED_TRUE.AND.B%Alloc/=ALLOCATED_TEMP)THEN
             CALL New(B,(/NBasF,NBasF/))
          ELSEIF(SIZE(B%D,1)/=NBasF.OR.SIZE(B%D,2)/=NBasF)THEN
             CALL Delete(B)
             CALL New(B,(/NBasF,NBasF/))
-         ENDIF          
+         ENDIF
          Id=A%Node; IF(PRESENT(Id_O))Id=Id_O
          B%D(1:NBasF,1:NBasF)=Zero
          DO IL=1,A%NAtms
@@ -501,7 +501,7 @@ MODULE SetXYZ
                   KOff=JJ+K
                   MOff=P+K*MA
                   DO L=0,MA1
-                     B%D(II+L,KOff)=A%MTrix%D(MOff+L)                 
+                     B%D(II+L,KOff)=A%MTrix%D(MOff+L)
                   ENDDO
                ENDDO
             ENDDO
@@ -515,7 +515,7 @@ MODULE SetXYZ
          TYPE(DBCSR), INTENT(INOUT) :: A
          TYPE(BCSR),  INTENT(INOUT) :: B
          INTEGER                    :: I,K,NAtms
-         TYPE(INT_VECT)             :: MA,MB,MN,NA,NB,NN 
+         TYPE(INT_VECT)             :: MA,MB,MN,NA,NB,NN
 !-----------------------------------------------------------------------
 !        Allocate indecies
 !
@@ -535,7 +535,7 @@ MODULE SetXYZ
          B%NBlks=Reduce(A%NBlks)
          B%NNon0=Reduce(A%NNon0)
 !-1
-!MINUS     
+!MINUS
          CALL New(B,(/B%NAtms,B%NBlks,B%NNon0/))
          B%NSMat=A%NSMat
 !------------------------------------
@@ -575,18 +575,18 @@ MODULE SetXYZ
             CALL SetEq(B%RowPt,A%RowPt,  NAtms)
             CALL SetEq(B%ColPt,A%ColPt,A%NBlks)
             CALL SetEq(B%BlkPt,A%BlkPt,A%NBlks)
-            CALL SetEq(B%MTrix,A%MTrix,A%NNon0)           
+            CALL SetEq(B%MTrix,A%MTrix,A%NNon0)
          ENDIF
 !----------------------------------
 !        Gather the matrix to ROOT
-!        
+!
          CALL Gather(A%RowPt,B%RowPt,  NAtms,MA,NA)
          CALL Gather(A%ColPt,B%ColPt,A%NBlks,MB,NB)
          CALL Gather(A%BlkPt,B%BlkPt,A%NBlks,MB,NB)
          CALL Gather(A%MTrix,B%MTrix,A%NNon0,MN,NN)
 !--------------------------------------------------
 !        Add offsets to achieve correct indexing
-!        
+!
          IF(MyId==ROOT)THEN
             DO I=1,NPrc-1
                DO K=NA%I(I)+1,NA%I(I+1)
@@ -646,41 +646,41 @@ MODULE SetXYZ
                      B%NBlks=B%NBlks+1
                      MN=M*BSiz%I(JG)     *A%NSMat !<<< SPIN
                      MN1=MN-1
-                     P=A%BlkPt%I(J)         
-                     B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
+                     P=A%BlkPt%I(J)
+                     B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1)
                      B%NNon0=B%NNon0+MN
                   ENDDO
                   B%RowPt%I(B%NAtms+1)=B%NBlks
                ENDDO
                B%NBlks=B%NBlks-1
                B%NNon0=B%NNon0-1
-! MINUS 
+! MINUS
                IF(Id/=ROOT)THEN
-                  CALL Send(B%NAtms,Id,1)               
-                  CALL Send(B%NBlks,Id,2)               
+                  CALL Send(B%NAtms,Id,1)
+                  CALL Send(B%NBlks,Id,2)
                   CALL Send(B%NNon0,Id,3)
-                  CALL Send(B%RowPt,B%NAtms+1,Id,4)               
-                  CALL Send(B%ColPt,B%NBlks,Id,5)               
-                  CALL Send(B%BlkPt,B%NBlks,Id,6)               
+                  CALL Send(B%RowPt,B%NAtms+1,Id,4)
+                  CALL Send(B%ColPt,B%NBlks,Id,5)
+                  CALL Send(B%BlkPt,B%NBlks,Id,6)
                   CALL Send(B%MTrix,B%NNon0,Id,7)
-               ENDIF               
+               ENDIF
             ELSEIF(MyId==Id)THEN
-               CALL Recv(B%NAtms,ROOT,1)               
-               CALL Recv(B%NBlks,ROOT,2)               
+               CALL Recv(B%NAtms,ROOT,1)
+               CALL Recv(B%NBlks,ROOT,2)
                CALL Recv(B%NNon0,ROOT,3)
                ReAllocate=(SIZE(B%RowPt%I)<B%NAtms+1).OR. &
                           (SIZE(B%ColPt%I)<B%NBlks)  .OR. &
                           (SIZE(B%BlkPt%I)<B%NBlks)  .OR. &
                           (SIZE(B%MTrix%D)<B%NNon0)
-               IF(ReAllocate)THEN     
+               IF(ReAllocate)THEN
                   NAtms=B%NAtms; NBlks=B%NBlks; NNon0=B%NNon0
-                  CALL Delete(B)     
+                  CALL Delete(B)
                   CALL New(B,(/NAtms,NBlks,NNon0/))
                ENDIF
-               CALL Recv(B%RowPt,B%NAtms+1,ROOT,4)               
-               CALL Recv(B%ColPt,B%NBlks,ROOT,5)               
-               CALL Recv(B%BlkPt,B%NBlks,ROOT,6)               
-               CALL Recv(B%MTrix,B%NNon0,ROOT,7)               
+               CALL Recv(B%RowPt,B%NAtms+1,ROOT,4)
+               CALL Recv(B%ColPt,B%NBlks,ROOT,5)
+               CALL Recv(B%BlkPt,B%NBlks,ROOT,6)
+               CALL Recv(B%MTrix,B%NNon0,ROOT,7)
             ENDIF
          ENDDO
 !-------------------------------------------------------
@@ -700,13 +700,13 @@ MODULE SetXYZ
 !===================================================================
       SUBROUTINE Load_DBCSR_GRwPt(A,Id_O)
          TYPE(DBCSR),     INTENT(INOUT) :: A
-         INTEGER,OPTIONAL,INTENT(IN)    :: Id_O          
+         INTEGER,OPTIONAL,INTENT(IN)    :: Id_O
          INTEGER                        :: I,K,Id,I1,I2
 !--------------------------------------------------------------------
          IF(PRESENT(Id_O))THEN
             Id=Id_O
          ELSE
-            Id=MyId 
+            Id=MyId
          ENDIF
          K=1
          I1=OffSt%I(Id)+1
@@ -723,13 +723,13 @@ MODULE SetXYZ
 !===================================================================
       SUBROUTINE Clear_DBCSR_GRwPt(A,Id_O)
          TYPE(DBCSR),     INTENT(INOUT) :: A
-         INTEGER,OPTIONAL,INTENT(IN)    :: Id_O          
+         INTEGER,OPTIONAL,INTENT(IN)    :: Id_O
          INTEGER                        :: I,Id,I1,I2
 !--------------------------------------------------------------------
          IF(PRESENT(Id_O))THEN
             Id=Id_O
          ELSE
-            Id=MyId 
+            Id=MyId
          ENDIF
          I1=OffSt%I(Id)+1
          I2=I1+A%NAtms
@@ -742,20 +742,20 @@ MODULE SetXYZ
 !     Copy a double vector to a double vector: Y(1:N)=X(1:N)
 !===============================================================
       SUBROUTINE Set_DBL_VECT_EQ_DBL_VECT(Y,X,N_O)
-         TYPE(DBL_VECT), INTENT(IN)  :: X        
-         TYPE(DBL_VECT), INTENT(INOUT) :: Y        
+         TYPE(DBL_VECT), INTENT(IN)  :: X
+         TYPE(DBL_VECT), INTENT(INOUT) :: Y
          INTEGER,OPTIONAL,INTENT(IN) :: N_O
-         INTEGER                     :: N         
-         INTERFACE 
+         INTEGER                     :: N
+         INTERFACE
             SUBROUTINE DBL_VECT_EQ_DBL_VECT(N,Y,X)
                INTEGER, INTENT(IN)                   :: N
                INTEGER, PARAMETER                    :: DOUBLE=KIND(0.D0)
                REAL(DOUBLE),DIMENSION(N),INTENT(IN)  :: X
                REAL(DOUBLE),DIMENSION(N),INTENT(OUT) :: Y
             END SUBROUTINE DBL_VECT_EQ_DBL_VECT
-         END INTERFACE            
+         END INTERFACE
          N=SIZE(Y%D); IF(PRESENT(N_O))N=N_O
-         IF(SIZE(X%D)<N.OR.SIZE(Y%D)<N) & 
+         IF(SIZE(X%D)<N.OR.SIZE(Y%D)<N) &
             CALL Halt(' Dimensions off in Set_DBL_VECT_DBL_VECT')
          CALL DBL_VECT_EQ_DBL_VECT(N,Y%D,X%D)
       END SUBROUTINE Set_DBL_VECT_EQ_DBL_VECT
@@ -763,19 +763,19 @@ MODULE SetXYZ
 !     Copy an integer vector to an integer vector: Y(1:N)=X(1:N)
 !===============================================================
       SUBROUTINE Set_INT_VECT_EQ_INT_VECT(Y,X,N_O)
-         TYPE(INT_VECT), INTENT(IN)    :: X        
-         TYPE(INT_VECT), INTENT(INOUT) :: Y        
+         TYPE(INT_VECT), INTENT(IN)    :: X
+         TYPE(INT_VECT), INTENT(INOUT) :: Y
          INTEGER,OPTIONAL,INTENT(IN)   :: N_O
-         INTEGER                       :: N         
-         INTERFACE 
+         INTEGER                       :: N
+         INTERFACE
             SUBROUTINE INT_VECT_EQ_INT_VECT(N,Y,X)
                INTEGER, INTENT(IN)              :: N
                INTEGER,DIMENSION(N),INTENT(IN)  :: X
                INTEGER,DIMENSION(N),INTENT(OUT) :: Y
             END SUBROUTINE INT_VECT_EQ_INT_VECT
-         END INTERFACE            
+         END INTERFACE
          N=SIZE(Y%I); IF(PRESENT(N_O))N=N_O
-         IF(SIZE(X%I)<N.OR.SIZE(Y%I)<N) & 
+         IF(SIZE(X%I)<N.OR.SIZE(Y%I)<N) &
             CALL Halt(' Dimensions off in Set_INT_VECT_INT_VECT')
          CALL INT_VECT_EQ_INT_VECT(N,Y%I,X%I)
       END SUBROUTINE Set_INT_VECT_EQ_INT_VECT
@@ -783,19 +783,19 @@ MODULE SetXYZ
 !     Set an integer scalar to an integer vector: Y(1:N)=X
 !===============================================================
       SUBROUTINE Set_INT_VECT_EQ_INT_SCLR(Y,X,N_O)
-         INTEGER,        INTENT(IN)    :: X        
-         TYPE(INT_VECT), INTENT(INOUT) :: Y        
+         INTEGER,        INTENT(IN)    :: X
+         TYPE(INT_VECT), INTENT(INOUT) :: Y
          INTEGER,OPTIONAL,INTENT(IN)   :: N_O
-         INTEGER                       :: N         
-         INTERFACE 
+         INTEGER                       :: N
+         INTERFACE
             SUBROUTINE INT_VECT_EQ_INT_SCLR(N,Y,X)
                INTEGER,INTENT(IN)               :: N
                INTEGER,INTENT(IN)               :: X
                INTEGER,DIMENSION(N),INTENT(OUT) :: Y
             END SUBROUTINE INT_VECT_EQ_INT_SCLR
-         END INTERFACE            
+         END INTERFACE
          N=SIZE(Y%I); IF(PRESENT(N_O))N=N_O
-         IF(SIZE(Y%I)<N) & 
+         IF(SIZE(Y%I)<N) &
             CALL Halt(' Dimensions off in Set_INT_SCLR_INT_VECT')
          CALL INT_VECT_EQ_INT_SCLR(N,Y%I,X)
       END SUBROUTINE Set_INT_VECT_EQ_INT_SCLR
@@ -803,20 +803,20 @@ MODULE SetXYZ
 !     Set a double scalar to a double vector: Y(1:N)=X
 !===============================================================
       SUBROUTINE Set_DBL_VECT_EQ_DBL_SCLR(Y,X,N_O)
-         REAL(DOUBLE),   INTENT(IN)    :: X        
-         TYPE(DBL_VECT), INTENT(INOUT) :: Y        
+         REAL(DOUBLE),   INTENT(IN)    :: X
+         TYPE(DBL_VECT), INTENT(INOUT) :: Y
          INTEGER,OPTIONAL,INTENT(IN)   :: N_O
-         INTEGER                       :: N         
-         INTERFACE 
+         INTEGER                       :: N
+         INTERFACE
             SUBROUTINE DBL_VECT_EQ_DBL_SCLR(N,Y,X)
                INTEGER,INTENT(IN)                    :: N
                INTEGER, PARAMETER                    :: DOUBLE=KIND(0.D0)
                REAL(DOUBLE),INTENT(IN)               :: X
                REAL(DOUBLE),DIMENSION(N),INTENT(OUT) :: Y
             END SUBROUTINE DBL_VECT_EQ_DBL_SCLR
-         END INTERFACE            
+         END INTERFACE
          N=SIZE(Y%D); IF(PRESENT(N_O))N=N_O
-         IF(SIZE(Y%D)<N) & 
+         IF(SIZE(Y%D)<N) &
             CALL Halt(' Dimensions off in Set_DBL_SCLR_DBL_VECT')
          CALL DBL_VECT_EQ_DBL_SCLR(N,Y%D,X)
       END SUBROUTINE Set_DBL_VECT_EQ_DBL_SCLR
@@ -855,15 +855,15 @@ MODULE SetXYZ
        !OldDim=SIZE(B%Length%D)
         OldDim=B%N
         NewDim=OldDim
-        IF(PRESENT(NewDim_O)) NewDim=NewDim_O 
-        IF(PRESENT(OldDim_O)) OldDim=OldDim_O 
+        IF(PRESENT(NewDim_O)) NewDim=NewDim_O
+        IF(PRESENT(OldDim_O)) OldDim=OldDim_O
         IF(.NOT.AllocQ(A%Alloc)) THEN
           CALL New(A,NewDim)
         ELSE
           CALL Delete(A)
           CALL New(A,NewDim)
         ENDIF
-        A%N=NewDim      
+        A%N=NewDim
         DO I=1,OldDim
           CALL Set_Bond_EQ_Bond(A,I,B,I)
         ENDDO
@@ -876,8 +876,8 @@ MODULE SetXYZ
         INTEGER        :: IA,IB
         !
         A%IJ%I(1:2,IA)=B%IJ%I(1:2,IB)
-        A%Length%D(IA)=B%Length%D(IB)      
-        A%Type%C(IA)=B%Type%C(IB)      
+        A%Length%D(IA)=B%Length%D(IB)
+        A%Type%C(IA)=B%Type%C(IB)
       END SUBROUTINE Set_Bond_EQ_Bond
 !
 !---------------------------------------------------------------

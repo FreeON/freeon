@@ -25,16 +25,16 @@
 !------------------------------------------------------------------------------
 ! Author: C.K. Gan
 
-! a module to solve the travelling salesman problem with the begin 
+! a module to solve the travelling salesman problem with the begin
 ! and end cities as far as possible.
 ! Opt_Trav_Band contains the subroutine Anneal to obtain a band matrix S
-! by minimising the cost function 
+! by minimising the cost function
 ! F = (Alpha/DMax)*(Sum_i D_{i,i+1}) + &
-!     Sum_{i>j} exp( Gamma* [abs(i-j)*DMax/(2*NCity*Dij)]**NLFac] ) 
+!     Sum_{i>j} exp( Gamma* [abs(i-j)*DMax/(2*NCity*Dij)]**NLFac] )
 ! where i and j are the row and column indices, and Dij is the physical
 ! distance between atoms visited on the i-th and j-th time respectively.
 
-! abbreviation list --- 
+! abbreviation list ---
 ! TravO: Traverse Order ! NCity: Number of Cities ! MD: Main Diagonal
 ! OD: Off Diagonal ! SD: Store Distances
 
@@ -48,7 +48,7 @@ MODULE Opt_Trav_Band
   REAL(DOUBLE),PRIVATE::DMax,Beta,RCut,Gamma,Alpha,NLFac,Eta
   INTEGER,PRIVATE::NCity,FNumOpt,N_NEIGHBOR
 
-#define NLFacEq1 
+#define NLFacEq1
 #define SD ! #undef SD or #define SD
 #if defined(SD)
   TYPE(DBL_VECT)::DistArr
@@ -72,7 +72,7 @@ CONTAINS
     REAL(DOUBLE),PARAMETER::MaxCostFrac=0.50D0,TFacR=0.90D0
     INTEGER,PARAMETER::RunTravOU=49,Temp_Step=150
     LOGICAL::Ans,Okay
-  
+
     CALL OpenASCII(OutFile,Out)
 #ifdef SD
     WRITE(Out,*) 'SD is defined!'
@@ -105,12 +105,12 @@ CONTAINS
       'Parameters: NCity = ',NCity,', Alpha = ',Alpha,', Gamma = ', Gamma
     WRITE(Out,'(A,E8.3,A,I10)') 'NLFac = ',NLFac,', N_Neighbor =', N_Neighbor
     CLOSE(Out,STATUS='KEEP')
-    IF(NCity <= 4) THEN 
+    IF(NCity <= 4) THEN
       STOP 'Error in Anneal! Too few cities!'
     ENDIF
-  
+
 #if defined(SD)
-    ! Num_Pair is wrong if NCity is larger than (sqrt(2^31) = 2**15.5 = 46340 
+    ! Num_Pair is wrong if NCity is larger than (sqrt(2^31) = 2**15.5 = 46340
     IF(NCity > 46300) THEN
       STOP 'ERROR: Integer multiplication overflows, reduce NCity!'
     ENDIF
@@ -136,12 +136,12 @@ CONTAINS
     CALL GetEndCities1(RCoor,LeftCity,RightCity)
     DO I = 1, NCity
       TravO%I(I) = I
-    ENDDO  
+    ENDDO
     TravO%I(1) = LeftCity
     TravO%I(LeftCity) = 1
     TravO%I(NCity) = RightCity
     TravO%I(RightCity) = NCity
-  
+
     I = TravO%I(1)
     J = TravO%I(NCity)
     DMax = ALen(RCoor%D(1,I),RCoor%D(2,I),RCoor%D(3,I),&
@@ -155,17 +155,17 @@ CONTAINS
     WRITE(*,*) 'Eta = ',Eta
     WRITE(Out,*) 'Eta = ',Eta
     CLOSE(Out,STATUS='KEEP')
-  
+
     FNumOpt = Get_Opt_Num()
-    WRITE(*,*) 'NCity = ',NCity, ' FNumOpt = ',FNumOpt 
-  
+    WRITE(*,*) 'NCity = ',NCity, ' FNumOpt = ',FNumOpt
+
     IF(N_Neighbor > 0 .AND. N_Neighbor < NCity) THEN
       CALL New(NeighborDis,NCity-1)
       CALL AveNeighborDis(RCoor,NeighborDis)
     ENDIF
-  
+
     IF(N_Neighbor == 0) THEN
-      RCut = 0.0D0 ! No off-diagonal cost 
+      RCut = 0.0D0 ! No off-diagonal cost
     ELSEIF( N_Neighbor > 0 .AND. N_Neighbor < NCity) THEN
       RCut = NeighborDis%D(N_Neighbor)
     ELSEIF(N_Neighbor .GE. NCity) THEN
@@ -173,30 +173,30 @@ CONTAINS
     ELSE
       WRITE(*,*) 'ERROR: N_Neigbhor must be non-negative !'
     ENDIF
-    
+
     CALL OpenASCII(OutFile,Out)
     WRITE(Out,'(A,I10,A,E10.5)') 'N_Neighbor = ',N_Neighbor,', RCut = ',RCut
     WRITE(*,'(A,I10,A,E10.5)') 'N_Neighbor = ',N_Neighbor,', RCut = ',RCut
-    
+
     ! Calculate the length of the total path (main diagonal part)
     TotMDCost = CalTotMDCost(RCoor,TravO)
-  
+
     ! Calculate the length of the total path (off-diagonal part)
     TotODCost = CalTotODCost(RCoor,TravO)
     TotCost = TotMDCost+TotODCost
     WRITE(Out,*) 'TotMDCost =',TotMDCost,', TotODCost =',TotODCost,', TotCost =',TotCost
-    WRITE(*,*) 
+    WRITE(*,*)
     CLOSE(Out,STATUS='KEEP')
-  
+
     CALL New(ChosenCity,6)
     CALL New(XX,6); CALL New(YY,6); CALL New(ZZ,6)
     CALL New(NewTravO,NCity)
     CALL New(FCity,NCity)
     CALL New(MCity,NCity)
-  
+
     WRITE(*,*) 'Get MaxIncCost...'
     MaxIncCost = -BIG_DBL
-  
+
     Call Elapsed_Time(AnnealTime,'Init')
     DO I = 1,5000
       Dec = Random()
@@ -208,7 +208,7 @@ CONTAINS
           MaxIncCost = IncCost
         ENDIF
         CALL Revers(TravO,NewTravO,TotMDCost,IncMDCost,TotODCost,IncODCost)
-  
+
         IF(I < 100) THEN
           TotMDCost1 = CalTotMDCost(RCoor,TravO)
           Okay = Check_Accuracy(TotMDCost,TotMDCost1)
@@ -229,7 +229,7 @@ CONTAINS
           MaxIncCost = IncCost
         ENDIF
         CALL Trnspt(TravO,NewTravO,TotMDCost,IncMDCost,TotODCost,IncODCost)
-  
+
         IF(I < 100) THEN
           TotMDCost1 = CalTotMDCost(RCoor,TravO)
           Okay = Check_Accuracy(TotMDCost,TotMDCost1)
@@ -243,41 +243,41 @@ CONTAINS
           ENDIF
         ENDIF
       ENDIF
-    ENDDO      
+    ENDDO
     Call Elapsed_Time(AnnealTime,'Accum')
     Call PPrint(AnnealTime,Proc_O='Anneal:5000times took')
-  
+
     CALL OpenASCII(OutFile,Out)
     WRITE(Out,*) 'NCity,MaxIncCost =',NCity,MaxIncCost
     WRITE(*,*) 'NCity,MaxIncCost =',NCity,MaxIncCost
     CLOSE(Out,STATUS='KEEP')
-  
+
     CALL OpenASCII(OutFile,Out)
     WRITE(*,*) 'Use the last list for the annealing process.'
     WRITE(Out,*) 'Use the last list for the annealing process.'
     CLOSE(Out,STATUS='KEEP')
-  
-  
+
+
     NOver = 100*NCity
     NLimit = 10*NCity
     T = MaxIncCost*MaxCostFrac
     WRITE(*,*) 'Initial T is ', T
     WRITE(*,*) 'Start the annealing process...'
     Call Elapsed_Time(AnnealTime,'Init')
-    
+
     CALL OpenASCII(RunTravOFile//Trim(IntToChar(0))//TravOExt,RunTravOU,NewFile_O=.TRUE.)
     WRITE(RunTravOU,*) NCity
     WRITE(RunTravOU,*) (TravO%I(I),I=1,NCity)
     CLOSE(RunTravOU)
-    
+
     DO J = 1, Temp_Step
       NSucc = 0
       DO K = 1,NOver
-        Dec = Random() 
+        Dec = Random()
         IF(Dec < 0.5) THEN
           CALL RevCst(RCoor,TravO,NewTravO,ChosenCity,XX,YY,ZZ,&
             TotMDCost,IncMDCost,TotODCost,IncODCost,FCity,MCity)
-  
+
           IncCost = IncMDCost + IncODCost
           Ans = (IncCost < 0.0) .OR. (Random().LT.EXP(-IncCost/T))
           IF(Ans) THEN
@@ -294,7 +294,7 @@ CONTAINS
             CALL Trnspt(TravO,NewTravO,TotMDCost,IncMDCost,TotODCost,IncODCost)
           ENDIF
         ENDIF
-        IF(NSucc .GE. NLimit) Exit  
+        IF(NSucc .GE. NLimit) Exit
       ENDDO
       CALL OpenASCII(OutFile,Out)
       WRITE(Out,'(A,I5,A,F7.2,A,E10.5)') &
@@ -317,19 +317,19 @@ CONTAINS
       WRITE(RunTravOU,*) NCity
       WRITE(RunTravOU,*) (TravO%I(I),I=1,NCity)
       CLOSE(RunTravOU)
-  
+
       T = T*TFacR
       IF(NSucc == 0) EXIT
     ENDDO
     Call Elapsed_Time(AnnealTime,'Accum')
     Call PPrint(AnnealTime,Proc_O='Anneal:find min took')
-  
+
     CALL OpenASCII(OutFile,Out)
     WRITE(Out,*) 'Final temperature index J-1 = ', J-1
-    WRITE(Out,*) 'Final success number index K-1 = ', K-1  
+    WRITE(Out,*) 'Final success number index K-1 = ', K-1
     WRITE(*,*) 'Final temperature index J-1 = ', J-1
-    WRITE(*,*) 'Final success number index K-1 = ', K-1  
-  
+    WRITE(*,*) 'Final success number index K-1 = ', K-1
+
     ! stringent tests for the correctness of the subroutine.
     TotMDCost1 = CalTotMDCost(RCoor,TravO)
     WRITE(Out,*) 'Final main diagonal cost: TotMDCost,TotMDCost1 =',&
@@ -354,10 +354,10 @@ CONTAINS
 !---------------------------------------------------------------------------
   FUNCTION Check_Accuracy(Val1,Val2)
   REAL(DOUBLE)::Val1,Val2,MaxV,MinV,Abs1,Abs2
-  LOGICAL::Check_Accuracy  
+  LOGICAL::Check_Accuracy
   MaxV = Max(Val1,Val2)
   MinV = Min(Val1,Val2)
- 
+
   IF(MaxV == MinV) THEN
     Check_Accuracy = .TRUE.
   ELSE
@@ -371,14 +371,14 @@ CONTAINS
     ENDIF
   ENDIF
   END FUNCTION Check_Accuracy
-  
+
 !---------------------------------------------------------------------------
 #ifdef SD
   ! I and J are the indices of a city in RCoor, don't swap I and J!
   FUNCTION TableDist(I,J)
     INTEGER::I,J
     REAL(DOUBLE)::TableDist
-  
+
     IF(I == J) THEN
       STOP 'ERROR: I == J in TableDist!'
     ENDIF
@@ -386,17 +386,17 @@ CONTAINS
       TableDist = DistArr%D( ((I-2)*(I-1))/2 + J)
     ELSE
       TableDist = DistArr%D( ((J-2)*(J-1))/2 + I)
-    ENDIF 
+    ENDIF
     END FUNCTION TableDist
 #endif
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
 ! obtain the average distance for the n-th neighbour
   SUBROUTINE AveNeighborDis(RCoor,Dist)
     TYPE(DBL_RNK2)::RCoor
     INTEGER::I,J,IndexInt
     TYPE(DBL_VECT)::Dist,DisSum
-  
+
     CALL New(DisSum,NCity-1)
     DO I = 1, NCity-1
       DisSum%D(I) = 0.0
@@ -414,7 +414,7 @@ CONTAINS
       END IF
       CALL SortDouble(Dist,NCity-1)
       DO J = 1, NCity-1
-        DisSum%D(I) = DisSum%D(I) + Dist%D(I)      
+        DisSum%D(I) = DisSum%D(I) + Dist%D(I)
       END DO
     END DO
     DO I = 1,NCity-1
@@ -428,15 +428,15 @@ CONTAINS
     WRITE(*,*)
   END SUBROUTINE AveNeighborDis
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
   SUBROUTINE SortDouble(Dis,N)
     TYPE(DBL_VECT)::Dis
     INTEGER::N,I,IP
     REAL(DOUBLE)::Val
-    
+
     DO I = 2, N
       Val = Dis%D(I); IP = I
-      DO 
+      DO
         IF(.NOT. (IP > 1 .AND. Val < Dis%D(IP-1))) EXIT
         Dis%D(IP) = Dis%D(IP-1)
         IP = IP-1
@@ -445,13 +445,13 @@ CONTAINS
     ENDDO
   END SUBROUTINE SortDouble
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
   ! the cost-difference calculation switchs to Fix-Move Strategy
   ! when FCNum (the number of fixed cities) is greater or equal to Get_Opt_Num
   FUNCTION Get_Opt_Num()
     INTEGER::I,J,Get_Opt_Num
     REAL(DOUBLE)::A,B,Ratio,NewCost,ODCost
-    
+
     ODCost = NCity*(NCity*1.0-1.)/2.0
     DO I = 1, NCity
       A = I; B = NCity-I
@@ -462,13 +462,13 @@ CONTAINS
         EXIT
       END IF
     END DO
-    ! 0.05 is a value to compensate the array copying overhead, this value 
+    ! 0.05 is a value to compensate the array copying overhead, this value
     ! is not optimized.
     Get_Opt_Num = ( J/(NCity*1.0) + 0.05)*NCity
     WRITE(*,*) 'J = ', J, '  Get_Opt_Num = ', Get_Opt_Num
   END FUNCTION Get_Opt_Num
-    
-!---------------------------------------------------------------------  
+
+!---------------------------------------------------------------------
   SUBROUTINE TrnCst(RCoor,TravO,NewTravO,ChosenCity,&
     XX,YY,ZZ,TotMDCost,IncMDCost,TotODCost,IncODCost,FCity,MCity)
     TYPE(DBL_RNK2)::RCoor
@@ -477,33 +477,33 @@ CONTAINS
     TYPE(INT_VECT)::TravO,NewTravO,ChosenCity,FCity,MCity
     REAL(DOUBLE)::IncMDCost,TotODCost,TotMDCost,IncODCost
     REAL(DOUBLE),EXTERNAL::Random
-   
+
     ArrLen = NCity-2 ! the first and the last cities are fixed
     DO
       ChosenCity%I(1) = 2+ArrLen*Random()
       ChosenCity%I(2) = 2+ArrLen*Random()
       ChosenCity%I(3) = 2+ArrLen*Random()
-  
+
       DO I = 2, 3
         Val = ChosenCity%I(I); IP = I
-        DO 
+        DO
           IF(.NOT.(IP > 1 .AND. Val < ChosenCity%I(IP-1))) EXIT
           ChosenCity%I(IP) = ChosenCity%I(IP-1)
           IP = IP-1
         ENDDO
         ChosenCity%I(IP) = Val
       ENDDO
-  
+
       IF(ChosenCity%I(1) /= ChosenCity%I(2) .AND. &
          ChosenCity%I(2) /= ChosenCity%I(3)) EXIT
     ENDDO
     ChosenCity%I(4) = ChosenCity%I(3)+1
     ChosenCity%I(5) = ChosenCity%I(1)-1
     ChosenCity%I(6) = ChosenCity%I(2)+1
-  
+
     ! get NewTravO (i.e. new permutation)
     CALL NewTravO_Trnspt(TravO,ChosenCity,NewTravO)
-  
+
     ! calculate the increase in main diagonal cost
 #if !defined(SD)
     DO I = 1, 6
@@ -518,7 +518,7 @@ CONTAINS
                        +ALen(XX%D(1),YY%D(1),ZZ%D(1),XX%D(3),YY%D(3),ZZ%D(3)) &
                        +ALen(XX%D(2),YY%D(2),ZZ%D(2),XX%D(4),YY%D(4),ZZ%D(4)) &
                        +ALen(XX%D(5),YY%D(5),ZZ%D(5),XX%D(6),YY%D(6),ZZ%D(6)))
-#else 
+#else
     I = TravO%I(ChosenCity%I(2))
     J = TravO%I(ChosenCity%I(6))
     IncMDCost = -TableDist(I,J)
@@ -543,8 +543,8 @@ CONTAINS
     ! calculate the increase in off-diagonal cost
     MCNum = ChosenCity%I(3)-ChosenCity%I(1)+1
     FCNum = NCity-MCNum
-  
-    IF(FCNum < FNumOpt) THEN 
+
+    IF(FCNum < FNumOpt) THEN
       IncODCost = CalTotODCost(RCoor,NewTravO) - TotODCost
     ELSE
       Index = 0
@@ -557,7 +557,7 @@ CONTAINS
         FCity%I(Index) = I
       ENDDO
       FCNum = Index
-    
+
       Index = 0
       DO I = ChosenCity%I(1),ChosenCity%I(3)
         Index = Index + 1
@@ -567,17 +567,17 @@ CONTAINS
       IF( (FCNum + MCNum) /= NCity) THEN
         STOP 'ERROR: the numbers of cities differ!'
       END IF
-    
+
       IncODCost = FM_ODCostDiff(FCNum,MCNum,FCity,MCity,TravO,NewTravO,RCoor)
     END IF
   END SUBROUTINE TrnCst
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
   FUNCTION City2CityODCost(RCoor,M,N,I,J)
     TYPE(DBL_RNK2)::RCoor
     INTEGER::M,N,I,J
     REAL(DOUBLE)::City2CityODCost,Dij
-  
+
 #ifdef SD
     Dij = TableDist(M,N)
 #else
@@ -596,57 +596,57 @@ CONTAINS
     ENDIF
   END FUNCTION City2CityODCost
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
   SUBROUTINE NewTravO_Trnspt(TravO,ChosenCity,NewTravO)
     TYPE(INT_VECT)::TravO,ChosenCity,NewTravO
     INTEGER::NN,I,J,IndexInt
-  
+
     NN = ChosenCity%I(5)
     IndexInt = 1
     DO I = 1, NN
       NewTravO%I(IndexInt) = TravO%I(I)
       IndexInt = IndexInt + 1
     ENDDO
-  
+
     NN = ChosenCity%I(3)-ChosenCity%I(6)+1
     J = ChosenCity%I(6)
     DO I = 1,NN
       NewTravO%I(IndexInt) = TravO%I(J+I-1)
       IndexInt = IndexInt + 1
     ENDDO
-  
+
     NN = ChosenCity%I(2)-ChosenCity%I(1)+1
     J = ChosenCity%I(1)
     DO I = 1,NN
       NewTravO%I(IndexInt) = TravO%I(J+I-1)
       IndexInt = IndexInt + 1
     ENDDO
-  
+
     NN = NCity-ChosenCity%I(4)+1
     J = ChosenCity%I(4)
     DO I = 1, NN
       NewTravO%I(IndexInt) = TravO%I(J+I-1)
       IndexInt = IndexInt + 1
     ENDDO
-  
+
     IF(IndexInt /= (NCity+1)) THEN
       STOP 'missing cities !!'
-    ENDIF  
+    ENDIF
   END SUBROUTINE NewTravO_Trnspt
 
-!---------------------------------------------------------------------  
+!---------------------------------------------------------------------
   SUBROUTINE Trnspt(TravO,NewTravO,TotMDCost,IncMDCost,TotODCost,IncODCost)
     TYPE(INT_VECT)::TravO,NewTravO
     INTEGER::I
     REAL(DOUBLE)::TotMDCost,IncMDCost,TotODCost,IncODCost
-  
+
     DO I = 1, NCity
       TravO%I(I) = NewTravO%I(I)
     ENDDO
     TotODCost = TotODCost + IncODCost
     TotMDCost = TotMDCost + IncMDCost
   END SUBROUTINE Trnspt
-  
+
 !----------------------------------------------------------------------
   SUBROUTINE RevCst(RCoor,TravO,NewTravO,ChosenCity,XX,YY,ZZ,&
     TotMDCost,IncMDCost,TotODCost,IncODCost,FCity,MCity)
@@ -656,9 +656,9 @@ CONTAINS
     TYPE(INT_VECT)::TravO,NewTravO,ChosenCity,FCity,MCity
     REAL(DOUBLE)::TotODCost,IncODCost,TotMDCost,IncMDCost
     REAL(DOUBLE),EXTERNAL::Random
-  
+
     ArrLen = NCity-2
-    DO 
+    DO
       RanIndex1 = 2 + ArrLen*Random()
       RanIndex2 = 2 + ArrLen*Random()
       IF(RanIndex1 /= RanIndex2) EXIT
@@ -668,19 +668,19 @@ CONTAINS
       RanIndex1 = RanIndex2
       RanIndex2 = TmpInt
     ENDIF
-  
+
     ChosenCity%I(1) = RanIndex1
     ChosenCity%I(2) = RanIndex2
-  
+
     ChosenCity%I(3) = ChosenCity%I(1)-1
     ChosenCity%I(4) = ChosenCity%I(2)+1
-  
+
     ! Create a new TravO (i.e. Permutation)
     DO I = 1, NCity
       NewTravO%I(I) = TravO%I(I)
     END DO
     CALL NewTravO_Revers(NewTravO,ChosenCity)
-    
+
     ! calculate the increase in main diagonal cost
 #if !defined(SD)
     DO I = 1, 4
@@ -694,17 +694,17 @@ CONTAINS
                         +ALen(XX%D(1),YY%D(1),ZZ%D(1),XX%D(4),YY%D(4),ZZ%D(4)) &
                         +ALen(XX%D(2),YY%D(2),ZZ%D(2),XX%D(3),YY%D(3),ZZ%D(3)))
 #else
-    I = TravO%I(ChosenCity%I(1)) 
-    J = TravO%I(ChosenCity%I(3)) 
+    I = TravO%I(ChosenCity%I(1))
+    J = TravO%I(ChosenCity%I(3))
     IncMDCost = -TableDist(I,J)
-    I = TravO%I(ChosenCity%I(2)) 
-    J = TravO%I(ChosenCity%I(4)) 
+    I = TravO%I(ChosenCity%I(2))
+    J = TravO%I(ChosenCity%I(4))
     IncMDCost = IncMDCost - TableDist(I,J)
-    I = TravO%I(ChosenCity%I(1)) 
-    J = TravO%I(ChosenCity%I(4)) 
+    I = TravO%I(ChosenCity%I(1))
+    J = TravO%I(ChosenCity%I(4))
     IncMDCost = IncMDCost + TableDist(I,J)
-    I = TravO%I(ChosenCity%I(2)) 
-    J = TravO%I(ChosenCity%I(3)) 
+    I = TravO%I(ChosenCity%I(2))
+    J = TravO%I(ChosenCity%I(3))
     IncMDCost = IncMDCost + TableDist(I,J)
     IncMDCost = Eta*IncMDCost
 #endif
@@ -712,9 +712,9 @@ CONTAINS
     ! calculate the increase in off-diagonal cost
     MCNum = ChosenCity%I(2)-ChosenCity%I(1)+1
     FCNum = NCity-MCNum
-  
+
     IF(FCNum < FNumOpt) THEN
-      IncODCost = CalTotODCost(RCoor,NewTravO) - TotODCost 
+      IncODCost = CalTotODCost(RCoor,NewTravO) - TotODCost
     ELSE
       ! again, calculate the local change only
       Index = 0
@@ -727,20 +727,20 @@ CONTAINS
         FCity%I(Index) = I
       ENDDO
       FCNum = Index
-      
+
       Index = 0
       DO I = ChosenCity%I(1),ChosenCity%I(2)
         Index = Index + 1
         MCity%I(Index) = I
       ENDDO
-      
+
       MCNum = Index
       IF( (FCNum + MCNum) /= NCity) THEN
         STOP 'ERROR: the numbers of cities differ!'
       END IF
-  
+
       IncODCost = FM_ODCostDiff(FCNum,MCNum,FCity,MCity,TravO,NewTravO,RCoor)
-    
+
     ENDIF
   END SUBROUTINE RevCst
 
@@ -751,7 +751,7 @@ CONTAINS
     TYPE(INT_VECT)::FCity,MCity,TravO,NewTravO
     REAL(DOUBLE)::FM_ODCostDiff,OldODCost,NewODCost
     INTEGER::FCNum,MCNum,I,J,II,JJ,M,N,NewM,NewN
-  
+
     ! now calculate the F and M interaction energy
     OldODCost = 0.0
     NewODCost = 0.0
@@ -766,7 +766,7 @@ CONTAINS
         NewODCost = NewODCost + City2CityODCost(RCoor,M,NewN,II,JJ)
       END DO
     END DO
-  
+
     ! self-interacting cost
     DO I = 1,MCNum
       DO J = I+1,MCNum
@@ -780,7 +780,7 @@ CONTAINS
         NewODCost = NewODCost + City2CityODCost(RCoor,NewM,NewN,II,JJ)
       END DO
     END DO
-  
+
     FM_ODCostDiff = NewODCost - OldODCost
   END FUNCTION FM_ODCostDiff
 
@@ -788,7 +788,7 @@ CONTAINS
   SUBROUTINE NewTravO_Revers(TravO,ChosenCity)
     INTEGER::NN,I,TmpInt,Left,Right
     TYPE(INT_VECT)::TravO,ChosenCity
-    
+
     NN = (ChosenCity%I(2)-ChosenCity%I(1)+1)/2
     DO I = 1,NN
       Left = ChosenCity%I(1)+I-1
@@ -804,7 +804,7 @@ CONTAINS
     INTEGER::I
     TYPE(INT_VECT)::TravO,NewTravO
     REAL(DOUBLE)::TotODCost,IncODCost,TotMDCost,IncMDCost
-    
+
     DO I = 1,NCity
       TravO%I(I) = NewTravO%I(I)
     ENDDO
@@ -826,7 +826,7 @@ CONTAINS
     TYPE(INT_VECT)::TravO
     INTEGER::I,M,N
     REAL(DOUBLE)::CalTotMDCost
-    
+
     CalTotMDCost = 0.0
     DO I = 1, NCity-1
       M = TravO%I(I)
@@ -836,7 +836,7 @@ CONTAINS
         ALen(RCoor%D(1,M),RCoor%D(2,M),RCoor%D(3,M),&
              RCoor%D(1,N),RCoor%D(2,N),RCoor%D(3,N))
 #else
-      CalTotMDCost = CalTotMDCost + TableDist(M,N)     
+      CalTotMDCost = CalTotMDCost + TableDist(M,N)
 #endif
     END DO
     CalTotMDCost = Eta*CalTotMDCost
@@ -848,7 +848,7 @@ CONTAINS
     TYPE(INT_VECT)::TravO
     INTEGER::I,J,M,N
     REAL(DOUBLE)::CalTotODCost,Dij
-    
+
     CalTotODCost = 0.0
     DO I = 1, NCity
       M = TravO%I(I)
@@ -865,11 +865,11 @@ CONTAINS
     TYPE(DBL_RNK2)::RCoor
     REAL(DOUBLE)::Dis,MinLDis,MinRDis,X,Y,Z,XLEx,YLEx,ZLEx,XREx,YREx,ZREx
     INTEGER::I,LeftCity,RightCity
-    
+
     XLEx = Big_DBL;  XREx = -Big_DBL
     YLEx = Big_DBL;  YREx = -Big_DBL
     ZLEx = Big_DBL;  ZREx = -Big_DBL
-   
+
     DO I = 1, NCity
       X = RCoor%D(1,I); Y = RCoor%D(2,I); Z = RCoor%D(3,I)
       IF(X < XLEx) XLEx = X; IF(X > XREx) XREx = X
@@ -879,9 +879,9 @@ CONTAINS
     WRITE(*,*) 'XEx : ',XLEx, XREx
     WRITE(*,*) 'YEx : ',YLEx, YREx
     WRITE(*,*) 'ZEx : ',ZLEx, ZREx
-      
+
     MinLDis = Big_DBL; MinRDis = Big_DBL
-   
+
     DO I = 1, NCity
       Dis = ALen(RCoor%D(1,I),RCoor%D(2,I),RCoor%D(3,I),XLEx,YLEx,ZLEx)
       IF(Dis < MinLDis) THEN
@@ -894,7 +894,7 @@ CONTAINS
         RightCity = I
       ENDIF
     ENDDO
-  
+
     WRITE(*,*) 'MinLDis = ',MinLDis
     WRITE(*,*) 'MinRDis = ',MinRDis
     WRITE(*,*) 'LeftCity,RightCity = ',LeftCity,RightCity
@@ -906,7 +906,7 @@ CONTAINS
     TYPE(DBL_RNK2)::RCoor
     INTEGER::I,J,LeftCity,RightCity
     REAL(DOUBLE)::DisIJ,MaxDis
-  
+
     MaxDis = 0.0
     DO I = 1, NCity
       DO J = I+1, NCity
@@ -941,17 +941,17 @@ CONTAINS
 !#define USE_Final_TravO_Dat
 #undef USE_Final_TravO_Dat
 
-#ifdef  USE_Final_TravO_Dat 
+#ifdef  USE_Final_TravO_Dat
     INTEGER,PARAMETER::ReadU=30
     INTEGER,ALLOCATABLE::ReadTravO(:)
 #else
     INCLUDE 'Final_TravO.Inc'
 #endif
-   
+
 #ifdef  USE_Final_TravO_Dat
     write(*,*) 'Final_TravO.dat is used.'
 #else
-    write(*,*) 'Final_TravO.Inc is used.'  
+    write(*,*) 'Final_TravO.Inc is used.'
 #endif
 
     NCity = NCityV
@@ -998,7 +998,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-  
+
     DO I = 0,LM1
       DO J = 0, LM1
         DO K = 0, LM1
@@ -1009,7 +1009,7 @@ CONTAINS
 #ifdef USE_Final_TravO_Dat
     CLOSE(ReadU)
 #endif
-  
+
     RMin(1) = Big_DBL
     RMin(2) = Big_DBL
     RMin(3) = Big_DBL
@@ -1020,7 +1020,7 @@ CONTAINS
       TravO%I(I) = I
     ENDDO
     ! any -ve value for MaxDiff is okay, since we deal with the 1st quadrant
-    MaxDiff = -1.0D0 
+    MaxDiff = -1.0D0
     DO I = 1,NCity
       DO J = 1,3
         Diff = RCoor%D(J,I)-RMin(J)

@@ -30,8 +30,8 @@ MODULE MonteCarlo
   USE MatFunk
   USE Numerics
   USE AtomPairs
-  USE ControlStructures  
-  USE GeomOptKeys     
+  USE ControlStructures
+  USE GeomOptKeys
   USE PunchHDF
   USE GlobalScalars
   USE SetXYZ
@@ -47,12 +47,12 @@ MODULE MonteCarlo
 !--------------------------------------------------------------
 ! Main MD Subroutine
 !--------------------------------------------------------------
-  SUBROUTINE  HybridMC(C)  
+  SUBROUTINE  HybridMC(C)
     TYPE(Controls)  :: C
     INTEGER         :: iMC,iMD,iSTART,iSTATUS
     INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I
     REAL(DOUBLE)    :: DelEtot,ExpFac,RanFac
-    
+
 !--------------------------------------------------------------
 !   Intitialize
     C%Stat%Previous%I=(/0,1,1/)
@@ -87,7 +87,7 @@ MODULE MonteCarlo
     MCTemp0%D = Zero
     MCCarts0%D= Zero
 !
-!   Initial Guess     
+!   Initial Guess
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
        WRITE(*,*) 'Geuss==RESTART'
 !      Init the Time
@@ -99,7 +99,7 @@ MODULE MonteCarlo
           CALL Get(MCEtot0%D(iCLONE) ,"MCEtot0")
           CALL Get(MCTemp0%D(iCLONE) ,"MCTemp0")
           CALL Get(Carts,"MCCarts0")
-          MCCarts0%D(:,:,iCLONE)=Carts%D(:,:) 
+          MCCarts0%D(:,:,iCLONE)=Carts%D(:,:)
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
@@ -121,14 +121,14 @@ MODULE MonteCarlo
        CALL CloseHDF(HDFFileID)
 !      Do The initial SCF
        iBAS=C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ELSE
        WRITE(*,*) 'Geuss==SUPERPOS'
-!      Do The initial SCF: Build the SCF 
+!      Do The initial SCF: Build the SCF
        DO iBAS=1,C%Sets%NBSets
-          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos) 
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
           CALL SCF(iBAS,iGEO,C)
        ENDDO
@@ -180,7 +180,7 @@ MODULE MonteCarlo
     iBAS=C%Sets%NBSets
 !    CALL RenameDensityMatrix(C,C%Stat%Current%I(1),C%Stat%Current%I(2),C%Stat%Current%I(3))
 !    CALL CopyDensityMatrix(C,C%Stat%Current%I(3),C%Stat%Current%I(3)+C%Dyns%MDMaxSteps)
-    CALL OutputMD(C,0)   
+    CALL OutputMD(C,0)
     CALL OutputMC(C,0,1)
 !   Do MC
     iGEO = 0
@@ -214,7 +214,7 @@ MODULE MonteCarlo
           ENDDO
           CALL CloseHDF(HDFFileID)
 !         Archive Geometry for next step
-          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)     
+          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
 !         Evaluate energies at the new geometry
           CALL SCF(iBAS,iGEO+1,C)
 !         Store the Last P matrix
@@ -237,8 +237,8 @@ MODULE MonteCarlo
           RanFac = Random((/Zero,One/))
           IF(RanFac < ExpFac) THEN
 !            Accept Move, redue Max-Botz Temp Distribution
-             CALL SetTempMaxBoltDist(C,C%Dyns%MCTemp)     
-! 
+             CALL SetTempMaxBoltDist(C,C%Dyns%MCTemp)
+!
              MCEtot0%D(iCLONE) = MDEtot%D(iCLONE)
              MCCarts0%D(:,:,iCLONE)= C%Geos%Clone(iCLONE)%Carts%D(:,:)
              DO I=1,iREMOVE
@@ -247,7 +247,7 @@ MODULE MonteCarlo
              iSTATUS=1
           ELSE
 !            Reject Move, redue Max-Botz Temp Distribution
-             CALL SetTempMaxBoltDist(C,C%Dyns%MCTemp) 
+             CALL SetTempMaxBoltDist(C,C%Dyns%MCTemp)
              MCEtot0%D(iCLONE) = MDEtot%D(iCLONE)
              C%Geos%Clone(iCLONE)%Carts%D(:,:)=MCCarts0%D(:,:,iCLONE)
 !            Place old density matrices where they are needed
@@ -256,11 +256,11 @@ MODULE MonteCarlo
 !                CALL RemoveDensityMatrix(C,C%Stat%Current%I(3)+I)
              ENDDO
              iSTATUS=0
-          ENDIF 
+          ENDIF
        ENDDO
 !      Save to Current HDF
        HDFFileID=OpenHDF(C%Nams%HFile)
-       DO iCLONE=1,C%Geos%Clones  
+       DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MCEtot0%D(iCLONE),"MCEtot0")
           CALL Put(MCTemp0%D(iCLONE),"MCTemp0")
@@ -302,7 +302,7 @@ MODULE MonteCarlo
           WRITE(Out,97) Line
           Line = "# Maxium SCF   = "//TRIM(IntToChar(C%Opts%MaxSCF))
           WRITE(Out,97) Line
-          Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))//" au" 
+          Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))//" au"
           WRITE(Out,97) Line
           Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime*InternalTimeToSeconds))//" sec"
           WRITE(Out,97) Line
@@ -326,7 +326,7 @@ MODULE MonteCarlo
        ELSE
           WRITE(Out,*) "Move Accepted"
        ENDIF
-       WRITE(Out,85) 
+       WRITE(Out,85)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
                         C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
@@ -345,7 +345,7 @@ MODULE MonteCarlo
 99  FORMAT(a3,6(1x,F18.12))
 !
  END SUBROUTINE OutputMC
-      
+
 !
 !
 !

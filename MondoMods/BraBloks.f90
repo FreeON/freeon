@@ -72,7 +72,7 @@ CONTAINS
        ENDDO
      END SUBROUTINE NewBraBlok
      !-------------------------------------------------------------------------------
-     ! Delete the Global Objects 
+     ! Delete the Global Objects
      !-------------------------------------------------------------------------------
      SUBROUTINE DeleteBraBlok(Gradients_O)
        LOGICAL, OPTIONAL :: Gradients_O
@@ -89,7 +89,7 @@ CONTAINS
      !-------------------------------------------------------------------------------
      ! Generate a primative bra blok returning its extent
      !-------------------------------------------------------------------------------
-     SUBROUTINE SetBraBlocks(Prim,BS,CompPrim_O,Gradients_O,DerivativeE_O) 
+     SUBROUTINE SetBraBlocks(Prim,BS,CompPrim_O,Gradients_O,DerivativeE_O)
        TYPE(PrimPair)    :: Prim
        TYPE(BSET)        :: BS
        LOGICAL, OPTIONAL :: Gradients_O,CompPrim_O,DerivativeE_O
@@ -114,15 +114,15 @@ CONTAINS
        Xi=Prim%Xi
        ExpAB=EXP(-Xi*Prim%AB2)
        !       WRITE(*,*)" XiAB2 = ",-Xi*Prim%AB2," P = ",Prim%P(1),' OVERLAP = ',ExpAB
-       IF(.NOT.Present(CompPrim_O))  &       
+       IF(.NOT.Present(CompPrim_O))  &
             Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
        PA=Prim%P-Prim%A
        PB=Prim%P-Prim%B
        IndexA  = CFBlokDex(BS,CFA,KA)
        IndexB  = CFBlokDex(BS,CFB,KB)
-       StartLA = BS%LStrt%I(CFA,KA)        
+       StartLA = BS%LStrt%I(CFA,KA)
        StopLA  = BS%LStop%I(CFA,KA)
-       StartLB = BS%LStrt%I(CFB,KB)        
+       StartLB = BS%LStrt%I(CFB,KB)
        StopLB  = BS%LStop%I(CFB,KB)
        MaxLA=BS%ASymm%I(2,CFA,KA)
        MaxLB=BS%ASymm%I(2,CFB,KB)
@@ -130,9 +130,9 @@ CONTAINS
        !
        IF(.NOT.PRESENT(Gradients_O))THEN
           IF(.NOT.PRESENT(DerivativeE_O))THEN
-             ! DEFAULT: Compute McMurchie Davidson E coefficients for HG Primitives       
+             ! DEFAULT: Compute McMurchie Davidson E coefficients for HG Primitives
              !
-             CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+             CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
              !
              Ell=MaxLA+MaxLB
              Len=LHGTF(Ell)
@@ -150,7 +150,7 @@ CONTAINS
                 IA=IA+1
                 IB=IndexB
                 LA=BS%LxDex%I(LMNA)
-                MA=BS%LyDex%I(LMNA) 
+                MA=BS%LyDex%I(LMNA)
                 NA=BS%LzDex%I(LMNA)
                 CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
                 DO LMNB=StartLB,StopLB
@@ -177,12 +177,12 @@ CONTAINS
                 CALL Halt(' Bad logic in BraBlocks for DerivativeE_O ')
              ELSE
                 !
-                ! Compute derivatives of the McMurchie Davidson E coefficients with respect to 
-                ! nuclear center A.   See Helgaker and Taylor, TCA 83, p177 (1992), Eqs (20). 
-                ! NOTE: <<NOT>> THE SAME AS THE COEFFICIENTS FOR GRADIENTS OF THE 
+                ! Compute derivatives of the McMurchie Davidson E coefficients with respect to
+                ! nuclear center A.   See Helgaker and Taylor, TCA 83, p177 (1992), Eqs (20).
+                ! NOTE: <<NOT>> THE SAME AS THE COEFFICIENTS FOR GRADIENTS OF THE
                 ! DISTRIBUTIONS, GIVEN BY EQ. (15).
                 !
-                CALL dMD2TRR(BS%NASym,0,MaxLA,MaxLB,Za,Zb,Zeta,E%D,dE%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+                CALL dMD2TRR(BS%NASym,0,MaxLA,MaxLB,Za,Zb,Zeta,E%D,dE%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
                 !
                 Ell=MaxLA+MaxLB
                 Len=LHGTF(Ell)
@@ -203,7 +203,7 @@ CONTAINS
                    IA=IA+1
                    IB=IndexB
                    LA=BS%LxDex%I(LMNA)
-                   MA=BS%LyDex%I(LMNA) 
+                   MA=BS%LyDex%I(LMNA)
                    NA=BS%LzDex%I(LMNA)
                    CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
                    DO LMNB=StartLB,StopLB
@@ -242,13 +242,13 @@ CONTAINS
              ENDIF
           ENDIF
        ELSE
-          ! COEFFICIENTS FOR GRADIENTS OF CARTESIAN GAUSSIAN DISTRIBUTIONS  
-          ! See Helgaker and Taylor, TCA 83, p177 (1992), Eqs (14), (15), (18) 
+          ! COEFFICIENTS FOR GRADIENTS OF CARTESIAN GAUSSIAN DISTRIBUTIONS
+          ! See Helgaker and Taylor, TCA 83, p177 (1992), Eqs (14), (15), (18)
           ! and comments after Eq.(26).  Gradients_O==Pair%SameAtom
           ! IF GRADIENTS_O IS .TRUE. THEN, GET PARTIAL WITH RESPECT TO HGTF CENTER P.
           ! OTHERWISE, GET PARTIAL WITH RESPECT TO NUCLEAR CENTER A.
           !
-          CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,dD%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+          CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,dD%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
           !
           Ell=MaxLA+MaxLB+1
           Len=LHGTF(Ell)
@@ -269,7 +269,7 @@ CONTAINS
              IA=IA+1
              IB=IndexB
              LA=BS%LxDex%I(LMNA)
-             MA=BS%LyDex%I(LMNA) 
+             MA=BS%LyDex%I(LMNA)
              NA=BS%LzDex%I(LMNA)
              CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
              DO LMNB=StartLB,StopLB
@@ -354,9 +354,9 @@ CONTAINS
        PB=Prim%P-Prim%B
        IndexA  = CFBlokDex(BS,CFA,KA)
        IndexB  = CFBlokDex(BS,CFB,KB)
-       StartLA = BS%LStrt%I(CFA,KA)        
+       StartLA = BS%LStrt%I(CFA,KA)
        StopLA  = BS%LStop%I(CFA,KA)
-       StartLB = BS%LStrt%I(CFB,KB)        
+       StartLB = BS%LStrt%I(CFB,KB)
        StopLB  = BS%LStop%I(CFB,KB)
        MaxLA=BS%ASymm%I(2,CFA,KA)
        MaxLB=BS%ASymm%I(2,CFB,KB)
@@ -366,9 +366,9 @@ CONTAINS
           !-------------------------------------------------------------------------------
           !      Compute McMurchie Davidson E coefficients for HG Primitives
 
-          CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,dD%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+          CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,dD%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
 !!$          CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
-!!$               PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+!!$               PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
           !
           Ell=MaxLA+MaxLB+1
           Len=LHGTF(Ell)
@@ -389,7 +389,7 @@ CONTAINS
              IA=IA+1
              IB=IndexB
              LA=BS%LxDex%I(LMNA)
-             MA=BS%LyDex%I(LMNA) 
+             MA=BS%LyDex%I(LMNA)
              NA=BS%LzDex%I(LMNA)
              CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
              DO LMNB=StartLB,StopLB
@@ -398,7 +398,7 @@ CONTAINS
                 MB=BS%LyDex%I(LMNB)
                 NB=BS%LzDex%I(LMNB)
                 CAB=CA*BS%CCoef%D(LMNB,PFB,CFB,KB)
-                !            Naive gradients formulae:  See Helgaker and Taylor, TCA 83, p177 (1992), 
+                !            Naive gradients formulae:  See Helgaker and Taylor, TCA 83, p177 (1992),
                 !            Eqs (14), (15), (18) and comments after Eq.(26): Gradients_O==Pair%SameAtom
                 DO LAB=0,LA+LB+1
                    DO MAB=0,MA+MB
@@ -406,7 +406,7 @@ CONTAINS
                          LMN=LMNdex(LAB,MAB,NAB)
                          IF(Gradients_O)THEN
                             Fx=dD%D(1,LA,LB,LAB-1)
-                         ELSE                            
+                         ELSE
                             Fx=Two*ZA*dD%D(1,LA+1,LB,LAB)-DBLE(LA)*dD%D(1,LA-1,LB,LAB)
                          ENDIF
                          dHGBra%D(LMN,IA,IB,1)=dHGBra%D(LMN,IA,IB,1)+CAB*Fx*dD%D(2,MA,MB,MAB)*dD%D(3,NA,NB,NAB)
@@ -454,7 +454,7 @@ CONTAINS
                             ENDDO
                          ELSE
                             !      Compute McMurchie Davidson E coefficients for HG Primitives
-                            CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+                            CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
                             !
                             Ell=MaxLA+MaxLB
                             Len=LHGTF(Ell)
@@ -472,7 +472,7 @@ CONTAINS
                                IA=IA+1
                                IB=IndexB
                                LA=BS%LxDex%I(LMNA)
-                               MA=BS%LyDex%I(LMNA) 
+                               MA=BS%LyDex%I(LMNA)
                                NA=BS%LzDex%I(LMNA)
                                CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
                                DO LMNB=StartLB,StopLB
@@ -497,7 +497,7 @@ CONTAINS
                                   ENDDO
                                ENDDO
                             ENDDO
-                            Ext=Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O) 
+                            Ext=Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O)
                          ENDIF
                        END FUNCTION SetBraBlok
 

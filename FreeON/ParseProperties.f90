@@ -28,14 +28,14 @@ MODULE ParseProperties
 !H MODULE ParseProperties
 !H This MODULE contains:
 !H  PUBLIC:
-!H  o SUB 
+!H  o SUB
 !H
 !H  PRIVATE:
-!H  o SUB 
+!H  o SUB
 !H
 !H  OPTIONS:
-!H  DEBUGING: 
-!H  INFO    : 
+!H  DEBUGING:
+!H  INFO    :
 !H
 !H  Comments:
 !H
@@ -56,7 +56,7 @@ MODULE ParseProperties
 !---------------------------------------------------------------------------------
 ! PRIVATE DECLARATIONS
 !---------------------------------------------------------------------------------
-  !PRIVATE :: 
+  !PRIVATE ::
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BEGIN_PROPERTIES  = '<BeginProperties>'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: END_PROPERTIES    = '<EndProperties>'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_RESPONSE     = 'Response'
@@ -71,7 +71,7 @@ CONTAINS
   SUBROUTINE LoadPropertyOptions(N,Prp)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE LoadPropertyOptions(N,Prp)
-!H  
+!H
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
@@ -103,7 +103,7 @@ CONTAINS
   SUBROUTINE PPrp_Response(R)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE PPrp_Response(R)
-!H 
+!H
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
@@ -141,7 +141,7 @@ CONTAINS
     ENDIF
     !
     ! Look for First Static HyperPolarizability.
-    IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_BETA )) THEN 
+    IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_BETA )) THEN
        R%StcAlpha = .TRUE.
        R%StcBeta  = .TRUE.
        !
@@ -217,7 +217,7 @@ CONTAINS
     ENDIF
     !
     !write(*,*) 'PPrp_Response: R%StcAlpha=',R%StcAlpha
-    !write(*,*) 'PPrp_Response: R%StcBeta =',R%StcBeta 
+    !write(*,*) 'PPrp_Response: R%StcBeta =',R%StcBeta
     !write(*,*) 'PPrp_Response: R%StcGamma=',R%StcGamma
     !
   END SUBROUTINE PPrp_Response
@@ -240,7 +240,7 @@ CONTAINS
     Prp%Resp%AlphaAxis(:) = .TRUE.
     Prp%Resp%BetaAxis (:) = .TRUE.
     Prp%Resp%GammaAxis(:) = .TRUE.
-    ! 
+    !
     ! ...
     !
   END SUBROUTINE PPrp_Init

@@ -58,7 +58,7 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
   CALL StartUp(Args,Prog)
 #endif
   ! Suss for matrix threshold overide
-  CALL SussTrix('NTFourTrix',Prog)  
+  CALL SussTrix('NTFourTrix',Prog)
   ! Get the Fock matrix
   CALL New(F)
   FFile=TrixFile('F_DIIS',Args,0)
@@ -66,7 +66,7 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
   IF(Present)THEN
      CALL Get(F,FFile)
   ELSE
-     CALL Get(F,TrixFile('OrthoF',Args,0))   
+     CALL Get(F,TrixFile('OrthoF',Args,0))
   ENDIF
   ! Allocate some more matrices
   CALL New(P)
@@ -74,8 +74,8 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
   CALL New(Tmp1)
   CALL New(Tmp2)
   CALL New(Tmp3)
-  MM=0                        
-  Ne=Half*DBLE(NEl)    
+  MM=0
+  Ne=Half*DBLE(NEl)
   ! Guess P from F
 #ifdef PARALLEL
   CALL SetEq(F_BCSR,F)
@@ -84,9 +84,9 @@ PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
 #else
   CALL FockGuess(F,P,Ne,1)
 #endif
-  CALL SetEq(Pold,P)    
+  CALL SetEq(Pold,P)
   ! Do TS4 iterations
-  DO I=1,100 
+  DO I=1,100
      CALL TS4(P,Tmp1,Tmp2,Tmp3,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO

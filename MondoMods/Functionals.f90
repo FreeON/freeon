@@ -70,9 +70,9 @@ MODULE Functionals
    INTEGER, PARAMETER :: HAS_DFT          =10000000 ! Any key above this has DFT
    INTEGER, PARAMETER :: HYBRID_B3LYP_VWN3=10268305 ! Use Beckes B3LYP model with VWN3 LSD correlation
    INTEGER, PARAMETER :: HYBRID_B3LYP_VWN5=10429495 ! Use Beckes B3LYP model with VWN5 LSD correlation
-   INTEGER, PARAMETER :: HYBRID_X3LYP     =10685608 ! Xtended LYP hybrid   
+   INTEGER, PARAMETER :: HYBRID_X3LYP     =10685608 ! Xtended LYP hybrid
    INTEGER, PARAMETER :: HYBRID_PBE0      =14506981 ! Use Adamo and Barones PBE0 model
-   INTEGER, PARAMETER :: HAS_HF           =20000000 ! Any key below this has exact exchange   
+   INTEGER, PARAMETER :: HAS_HF           =20000000 ! Any key below this has exact exchange
    INTEGER, PARAMETER :: SD_EXCHANGE      =32098243 ! Slater-Dirac Uniform Electron Gas exchange
    INTEGER, PARAMETER :: XA_EXCHANGE      =33890824 ! X-Alpha LDA exchange
    INTEGER, PARAMETER :: B88_EXCHANGE     =34065852 ! Becke 88 exchange
@@ -130,13 +130,13 @@ MODULE Functionals
          CASE(PURE_B88_PW91)
             Name='B88x/PW91c'
          CASE(PURE_PBE_PBE)
-            Name='PBEx/PBEc'  
+            Name='PBEx/PBEc'
          CASE(PURE_XLYP)
             Name='XLYP'
          CASE(HYBRID_PBE0)
             Name='PBE0'
          CASE(HYBRID_B3LYP_VWN3)
-            Name='B3LYP(VWN3)' 
+            Name='B3LYP(VWN3)'
          CASE(HYBRID_B3LYP_VWN5)
             Name='B3LYP(VWN5)'
          CASE(HYBRID_X3LYP)
@@ -171,7 +171,7 @@ MODULE Functionals
          ELSE
             HasDFT=.FALSE.
          ENDIF
-      END FUNCTION HasDFT       
+      END FUNCTION HasDFT
 !
       FUNCTION HasHF(Key)
          INTEGER  :: Key
@@ -185,7 +185,7 @@ MODULE Functionals
 !====================================================================================
 !
 !====================================================================================
-      SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Buf,NSDen) 
+      SUBROUTINE ExcOnTheGrid_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Buf,NSDen)
          INTEGER                    :: NGrid,NSDen
          REAL(DOUBLE)               :: a0,ax,ac,Ax1,Ax2
          REAL(DOUBLE), DIMENSION(*) :: Rho,AbsGradRho2
@@ -193,7 +193,7 @@ MODULE Functionals
          INTEGER                    :: N1,N2,N3,N4,N5
 !---------------------------------------------------------------------------------------
          !E=Zero
-         !dEdRho=Zero 
+         !dEdRho=Zero
          !dEdGam=Zero
          IF(NSDen.EQ.1)THEN
             E(1:NGrid)=Zero
@@ -227,13 +227,13 @@ MODULE Functionals
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(B88_EXCHANGE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PW91_EXCHANGE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
-            CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PBE_EXCHANGE)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
-            CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_VWN3_LSD)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL XAx_ClSh  (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
@@ -261,11 +261,11 @@ MODULE Functionals
          CASE(PURE_PW91_LYP)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
             CALL PW91x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_B88_LYP)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted! '//IntToChar(ModelChem))
-            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
-            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+            CALL B88x_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+            CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
          CASE(PURE_B88_PW91)
             IF(NSDen.EQ.1)THEN
                Rho(1:NGrid)=2D0*Rho(1:NGrid)
@@ -368,8 +368,8 @@ MODULE Functionals
             ENDIF
          CASE(PURE_PBE_PBE)
             IF(NSDen.EQ.1)THEN
-               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
-               CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One) 
+               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
+               CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             ELSEIF(NSDen.EQ.3)THEN
                ! What follow sucks !
                ! Exchange part !
@@ -408,7 +408,7 @@ MODULE Functionals
 !           PBE0 Model, Adamo and Barone: JCP 110, p.6158 (1999)
 !           E^{PBE0}_{xc}=E^{PBE}_{xc}+(1/4)(E^{HF}_x-E^{GGA}_x)
 !                        =E^{PBE}_{c}+(3/4)E^{PBE}_x+(1/4)E^{HF}_x
-               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.75D0) 
+               CALL PBEx_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,0.75D0)
                CALL PBEc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,One)
             ELSEIF(NSDen.EQ.3)THEN
                ! What follow sucks !
@@ -443,8 +443,8 @@ MODULE Functionals
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
 !           P. J. Stevens et al, J. Phys. Chem. 98, p.11623 (1994)
 !           a0=0.2, ax=0.72, ac=0.81
-!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
-!                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
+!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c
+!                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x
             IF(NSDen.EQ.1)THEN
                a0=0.20D0
                ax=0.72D0
@@ -461,12 +461,12 @@ MODULE Functionals
             ENDIF
          CASE(HYBRID_B3LYP_VWN5)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
-!           Turbomolized B3LYP Model, 
+!           Turbomolized B3LYP Model,
 !           A. Becke: JCP 98, p.5648 (1993), uses VWN5 LSD correlation functional
 !           R. H. Hertwig and W. Koch: CPL 268, p.345 (1997)
 !           a0=0.2, ax=0.72, ac=0.81
-!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c 
-!                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x                 
+!           E^{B3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+(1-ac)E^{VWN5}_c
+!                         +ax*E^{B88}_x+ac*E^{LYP}_c+a0*E^{HF}_x
             a0=0.20D0
             ax=0.72D0
             ac=0.81D0
@@ -477,9 +477,9 @@ MODULE Functionals
          CASE(HYBRID_X3LYP)
             IF(NSDen.NE.1)CALL Halt('This functional is not available for unrestricted!'//IntToChar(ModelChem))
 !           Extended hybrid LYP functional
-!           Xu and Goddard, PNAS 101, p.2673 (2004)             
-!           E^{X3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+ac*E^{VWN3}_c 
-!                         +ax*E^{XG04}_x+(1-ac)*E^{LYP}_c+a0*E^{HF}_x                 
+!           Xu and Goddard, PNAS 101, p.2673 (2004)
+!           E^{X3LYP}_{xc}=(1-a0-ax)E^{LSD}_{x}+ac*E^{VWN3}_c
+!                         +ax*E^{XG04}_x+(1-ac)*E^{LYP}_c+a0*E^{HF}_x
             a0=0.218D0
             ax=0.709D0
             ac=0.129D0
@@ -491,13 +491,13 @@ MODULE Functionals
             CALL VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, ac )
             CALL LYPc_ClSh (NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam, One-ac )
          CASE DEFAULT
-            CALL Halt('Unknown functional requested ') 
+            CALL Halt('Unknown functional requested ')
          END SELECT
       END SUBROUTINE ExcOnTheGrid_ClSh
 !====================================================================================
 !     Closed shell version of X-alpha exchange
 !====================================================================================
-      SUBROUTINE XAx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE XAx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -515,7 +515,7 @@ MODULE Functionals
 !====================================================================================
 !     Closed shell version of Slater-Dirac exchange
 !====================================================================================
-      SUBROUTINE SDx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE SDx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -528,7 +528,7 @@ MODULE Functionals
                INCLUDE "SDx.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
-               dEdGam(I)=dEdGam(I)+Scale*dEdGami        
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
             ENDIF
          ENDDO
       END SUBROUTINE SDx_ClSh
@@ -536,7 +536,7 @@ MODULE Functionals
 !     Closed shell Becke 88 exchange engery functional
 !     Physical Review A 38, p.3098 (1988), Equation (8).
 !====================================================================================
-      SUBROUTINE B88x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE B88x_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -566,7 +566,7 @@ MODULE Functionals
          DO I=1,NGrid
             R=Rho(I)
             IF(NoNAN<R)THEN
-               A=AbsGradRho2(I) 
+               A=AbsGradRho2(I)
                INCLUDE "PW91x.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
@@ -587,7 +587,7 @@ MODULE Functionals
          DO I=1,NGrid
             R=Rho(I)
             IF(NoNAN<R)THEN
-               A=AbsGradRho2(I) 
+               A=AbsGradRho2(I)
                INCLUDE "XG04x.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
@@ -600,7 +600,7 @@ MODULE Functionals
 !     Physical Review Letters 77, p.3865 (1996)
 !     E_x=\rho \epsilon^{PBE}_x
 !====================================================================================
-      SUBROUTINE PBEx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE PBEx_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -620,7 +620,7 @@ MODULE Functionals
 !====================================================================================
 !     Closed shell version of the VWN3 LSD correlation functional
 !====================================================================================
-      SUBROUTINE VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE VWN3c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -633,14 +633,14 @@ MODULE Functionals
                INCLUDE "VWN3c.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
-               dEdGam(I)=dEdGam(I)+Scale*dEdGami        
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
             ENDIF
          ENDDO
       END SUBROUTINE VWN3c_ClSh
 !====================================================================================
 !     Closed shell version of the VWN5 LSD correlation functional
 !====================================================================================
-      SUBROUTINE VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE VWN5c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -658,12 +658,12 @@ MODULE Functionals
          ENDDO
       END SUBROUTINE VWN5c_ClSh
 !====================================================================================
-!     Closed shell Lee Yang Parr correlation engery functional 
+!     Closed shell Lee Yang Parr correlation engery functional
 !     Physical Review B 37, p.785 (1988)
 !     Rederived by Miehlich, Savin, Stoll, and Preuss
 !     Chemical Physics Letters 157, P.200 (1989), Equation (2).
 !====================================================================================
-      SUBROUTINE LYPc_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE LYPc_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -676,15 +676,15 @@ MODULE Functionals
                INCLUDE "LYPc.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
-               dEdGam(I)=dEdGam(I)+Scale*dEdGami        
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
             ENDIF
          ENDDO
       END SUBROUTINE LYPc_ClSh
 !====================================================================================
-!     Closed shell version Perdew Wang LSD correlation functional, beyond RPA (p=1) 
+!     Closed shell version Perdew Wang LSD correlation functional, beyond RPA (p=1)
 !     Perdew and Wang, Phys. Rev. B., p.13244 (1992)
 !====================================================================================
-      SUBROUTINE PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE PW91c_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -697,7 +697,7 @@ MODULE Functionals
                INCLUDE "PW91c.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
-               dEdGam(I)=dEdGam(I)+Scale*dEdGami        
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
             ENDIF
          ENDDO
       END SUBROUTINE PW91c_ClSh
@@ -705,7 +705,7 @@ MODULE Functionals
 !     Closed shell Perdew Burke Ernnzerhof correlation GGA
 !     Physical Review Letters 77, p.3865 (1996)
 !====================================================================================
-      SUBROUTINE PBEc_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale) 
+      SUBROUTINE PBEc_ClSh(NGrid,Rho,AbsGradRho2,E,dEdRho,dEdGam,Scale)
          INTEGER                        :: I,NGrid
          REAL(DOUBLE), DIMENSION(NGrid) :: Rho,AbsGradRho2,E,dEdRho,dEdGam
          REAL(DOUBLE)                   :: R,A,Scale,Ei,dEdRhoi,dEdGami,X,ASinh
@@ -718,8 +718,8 @@ MODULE Functionals
                INCLUDE "PBEc.Inc"
                E(I)=E(I)+Scale*Ei
                dEdRho(I)=dEdRho(I)+Scale*dEdRhoi
-               dEdGam(I)=dEdGam(I)+Scale*dEdGami        
+               dEdGam(I)=dEdGam(I)+Scale*dEdGami
             ENDIF
          ENDDO
-      END SUBROUTINE PBEc_ClSh                
+      END SUBROUTINE PBEc_ClSh
 END MODULE

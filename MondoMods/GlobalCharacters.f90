@@ -26,13 +26,13 @@
 MODULE GlobalCharacters
    USE GlobalScalars
    IMPLICIT NONE
-!------------------------------------------------  
-!  Lengths and formats for default character string stuff 
+!------------------------------------------------
+!  Lengths and formats for default character string stuff
 !
    INTEGER, PARAMETER          :: DEFAULT_CHR_LEN=256
    INTEGER, PARAMETER          :: DCL=DEFAULT_CHR_LEN
    CHARACTER(LEN=*), PARAMETER :: DEFAULT_CHR_FMT='(A256)'
-!-------------------------------------------------  
+!-------------------------------------------------
 !  Lengths and formats for internal IO
 !
    INTEGER, PARAMETER          :: INTERNAL_INT_LEN=22
@@ -42,19 +42,19 @@ MODULE GlobalCharacters
    CHARACTER(LEN=*),PARAMETER  :: INTERNAL_DBL_FMT='(D22.16)'
    CHARACTER(LEN=*), PARAMETER :: INTERNAL_FLT_FMT='(F22.16)'
 !   CHARACTER(LEN=*), PARAMETER :: INTERNAL_CHR_FMT='(A)'
-!-------------------------------------------------  
+!-------------------------------------------------
 !  Lengths and formats for basis sets
 !
-   INTEGER, PARAMETER          :: BASESET_CHR_LEN=16   
-!-------------------------------------------------  
-!  Lengths and formats for string output 
+   INTEGER, PARAMETER          :: BASESET_CHR_LEN=16
+!-------------------------------------------------
+!  Lengths and formats for string output
 !
    CHARACTER(LEN=*), PARAMETER :: OUTPUT_STR_FMT='(2x,A)'
 !-------------------------------------------------
 !  Environmental variables
 !
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PWD 
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOME   
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PWD
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOME
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SCRATCH
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_EXEC
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOST
@@ -62,9 +62,9 @@ MODULE GlobalCharacters
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SYST
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_VRSN
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PLAT
-!--------------------------------------------------------  
+!--------------------------------------------------------
 !  File names
-! 
+!
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: ScrName
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: PWDName
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: InpFile
@@ -75,8 +75,8 @@ MODULE GlobalCharacters
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: BasFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: Restart
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: H5File
-!-------------------------------------------------  
-!  File postfixes 
+!-------------------------------------------------
+!  File postfixes
 !
    CHARACTER(LEN=*), PARAMETER :: InpF='.inp'
    CHARACTER(LEN=*), PARAMETER :: OutF='.out'
@@ -84,7 +84,7 @@ MODULE GlobalCharacters
    CHARACTER(LEN=*), PARAMETER :: GeoF='.pdb'
    CHARACTER(LEN=*), PARAMETER :: LogF='.log'
    CHARACTER(LEN=*), PARAMETER :: BasF='.bas'
-!-------------------------------------------------  
+!-------------------------------------------------
 !  Title variable
 !
    INTEGER, PARAMETER          :: TITLE_LINES=10

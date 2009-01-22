@@ -43,14 +43,14 @@ CONTAINS
     INTEGER            :: I,J,ITmp
     CHARACTER(LEN=DCL) :: MFile,NodeFile
 #ifdef PARALLEL
-    !-------------------------------------------------------------------------!  
+    !-------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
 #if !defined(MPI2)
     ! We are doing MPI-1, where mpirun is spawned underneath MondoSCF
     ! Note that this does not work (so far anyway) on AIX with POE
     !
     ! Obtain MPI invocation: mpirun, mpiexe, prun, etc.
-    IF(.NOT.OptCharQ(Inp,MPI_INVOCATION,M%Invoking))  & 
+    IF(.NOT.OptCharQ(Inp,MPI_INVOCATION,M%Invoking))  &
          CALL MondoHalt(PRSE_ERROR,' MPI invocation not found. Check for option ' &
          //TRIM(MPI_INVOCATION))
     ! Obtain flag for the number of processors; -n, -np, -proc etc
@@ -60,9 +60,9 @@ CONTAINS
        M%NProc=2
        CALL Warn(' Parallel code defaulting to 2 processors ')
     ENDIF
-    ! Obtain the flag for the machine file; -machinefile, etc 
+    ! Obtain the flag for the machine file; -machinefile, etc
     IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FLAG,M%MachFlag))M%MachFlag=" "
-    ! Obtain the machine file  
+    ! Obtain the machine file
     IF(OptCharQ(Inp,MPI_MACHINE_FILE,M%MachFile))THEN
        ! Check for an environmental variable
        IF(SCAN(M%MachFile,'$')/=0)THEN
@@ -83,16 +83,16 @@ CONTAINS
 #else
     ! We are doing MPI-2, where MondoSCF must be invoked with mpirun.
     ! Note that this does not work (so far anyway) on True64 with LSF, since
-    ! COMPAQ MPI is just MPICH.  
-    M%NProc=MSize()    
+    ! COMPAQ MPI is just MPICH.
+    M%NProc=MSize()
 #endif
     ! Parse for the number of processors in the spatial dimension
     IF(.NOT.OptIntQ(Inp,MPI_SPATIAL_PROC,M%NSpace))THEN
        M%NSpace=M%NProc
        CALL Warn(' # of spatial proc not specified, defaulting to NSpace=NProc='//TRIM(IntToChar(M%NSpace)))
     ENDIF
-    CLOSE(UNIT=Inp,STATUS='KEEP')    
-    ! Set up parallelism in space and time    
+    CLOSE(UNIT=Inp,STATUS='KEEP')
+    ! Set up parallelism in space and time
     CALL SpaceTimeSetUp(M%NProc,M%NSpace,G%Clones,M%Clumps,M%Clump)
     ! Space for parallel sparse matrix indecies
     ALLOCATE(M%Beg(1:G%Clones,1:B%NBSets))
@@ -107,7 +107,7 @@ CONTAINS
 #endif
        ENDDO
     ENDDO
-    ! Just punt for now on setting DBCSR limits 
+    ! Just punt for now on setting DBCSR limits
     M%MxAtsNode=MIN(B%MxAts,CEILING(Two*DBLE(B%MxAts)))! /DBLE(M%NSpace)))
     M%MxBlkNode=MIN(B%MxBlk,CEILING(Two*DBLE(B%MxBlk)))! /DBLE(M%NSpace)))
     M%MxN0sNode=MIN(B%MxN0s,CEILING(Two*DBLE(B%MxN0s)))! /DBLE(M%NSpace)))
@@ -116,7 +116,7 @@ CONTAINS
 #endif
   END SUBROUTINE LoadParallel
   !============================================================================
-  ! BREAK PARALLELSIM IN SPACE AND TIME INTO GROUPS OF CLONES 
+  ! BREAK PARALLELSIM IN SPACE AND TIME INTO GROUPS OF CLONES
   !============================================================================
   SUBROUTINE SpaceTimeSetUp(NProc,NSPace,Clones,Clumps,Clump)
     TYPE(INT_RNK2) :: Clump
@@ -157,7 +157,7 @@ CONTAINS
   END SUBROUTINE SpaceTimeSetUp
   !============================================================================
   ! GREEDY LOOK AHEAD DOMAIN DECOMPOSITION TO PARTITION DBCSR MATRICES
-  !============================================================================      
+  !============================================================================
   SUBROUTINE GreedyDBCSRPartition(Atoms,NSpace,BlokSize,RowBeg,RowEnd,GLOffSet)
     TYPE(INT_VECT)                      :: BlokSize,RowBeg,RowEnd,GLOffSet
     INTEGER                             :: Atoms,NSpace,NAtsAv,I,K,IPrc,ISet
@@ -184,28 +184,28 @@ CONTAINS
        DO IPrc=0,NSpace-2
           ! Compute running average to section
           NAtsAv=DBLE(SUM(BlokSize%I(RowBeg%I(IPrc):Atoms)))/DBLE(NSpace-IPrc)
-          ! Forcast RowBeg and RowEnd for (de/inc)rements of (+/- 1) 
+          ! Forcast RowBeg and RowEnd for (de/inc)rements of (+/- 1)
           DO K=RowBeg%I(IPrc),Atoms
              IF(SUM(BlokSize%I(RowBeg%I(IPrc):K))>=NAtsAv)THEN
                 End2(Pls)=K
-                EXIT            
+                EXIT
              ENDIF
           ENDDO
           End2(Mns)=End2(Pls)-1
           Beg3(Pls)=End2(Pls)+1
           Beg3(Mns)=End2(Mns)+1
-          End3(Pls,Pls)=Atoms            
-          DO K=Beg3(Pls),Atoms   
+          End3(Pls,Pls)=Atoms
+          DO K=Beg3(Pls),Atoms
              IF(SUM(BlokSize%I(Beg3(Pls):K))>=NAtsAv)THEN
                 End3(Pls,Pls)=K
-                EXIT            
+                EXIT
              ENDIF
           ENDDO
           End3(Pls,Mns)=End3(Pls,Pls)-1
-          DO K=Beg3(Mns),Atoms    
+          DO K=Beg3(Mns),Atoms
              IF(SUM(BlokSize%I(Beg3(Mns):K))>=NAtsAv)THEN
                 End3(Mns,Pls)=K
-                EXIT            
+                EXIT
              ENDIF
           ENDDO
           End3(Mns,Mns)=End3(Mns,Pls)-1
@@ -213,16 +213,16 @@ CONTAINS
           ! of a place to section and the possilbe sectioning in the next iteration
           Dv(Pls,Pls)= &
                ABS(NAtsAv-SUM(BlokSize%I(RowBeg%I(IPrc):End2(Pls))))   &
-              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Pls):End3(Pls,Pls)))) 
+              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Pls):End3(Pls,Pls))))
           Dv(Pls,Mns)= &
                ABS(NAtsAv-SUM(BlokSize%I(RowBeg%I(IPrc):End2(Pls))))   &
-              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Pls):End3(Pls,Mns)))) 
+              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Pls):End3(Pls,Mns))))
           Dv(Mns,Pls)= &
                ABS(NAtsAv-SUM(BlokSize%I(RowBeg%I(IPrc):End2(Mns))))   &
-              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Mns):End3(Mns,Pls)))) 
+              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Mns):End3(Mns,Pls))))
           Dv(Mns,Mns)= &
                ABS(NAtsAv-SUM(BlokSize%I(RowBeg%I(IPrc):End2(Mns))))   &
-              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Mns):End3(Mns,Mns)))) 
+              +ABS(NAtsAv-SUM(BlokSize%I(Beg3(Mns):End3(Mns,Mns))))
           ! Pick the best section based on minimizing the I and I+1 deviation from the average
           IF(MIN(Dv(Pls,Pls),Dv(Pls,Mns))<MIN(Dv(Mns,Pls),Dv(Mns,Mns)))THEN
              RowEnd%I(IPrc)=End2(Pls)

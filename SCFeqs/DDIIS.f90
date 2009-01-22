@@ -98,7 +98,7 @@ PROGRAM DDIIS
   !
   ! Initial setup.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-  ! 
+  !
   CPSCFCycl=Args%I%I(1)
   !
   ! Get the response order.
@@ -123,7 +123,7 @@ PROGRAM DDIIS
   !-------------------------------------------------------------------
   !
   ! Open input
-  CALL OpenASCII(InpFile,Inp)  
+  CALL OpenASCII(InpFile,Inp)
   !
   ! Threshold for projection of small eigenvalues.
   IF(.NOT.OptDblQ(Inp,'DDIISThresh',EigThresh)) EigThresh=DEFAULT_EIGTHRESH ! EigThresh=1.0D-10
@@ -171,7 +171,7 @@ PROGRAM DDIIS
      DoDIIS=-1
   ELSEIF(BMax/=0)THEN
      ! We are doing DIIS, extrapolating non-extrapolated Fock matrices
-     DoDIIS=1   
+     DoDIIS=1
   ELSEIF(BMax==0)THEN
      ! We are purely damping, using previously extrapolated Fock matrices
      DoDIIS=0
@@ -699,7 +699,7 @@ PROGRAM DDIIS
      CALL New(BInv,(/N,N/))
      CALL New(V,N)
      !
-     ! Solve the linear system and remove 
+     ! Solve the linear system and remove
      ! linear dependancies if needed.
      DO
         V%D=Zero
@@ -865,16 +865,16 @@ PROGRAM DDIIS
   !CALL Put(BTmp,'DDIISBMtrix')
   !
   !-------------------------------------------------------------------
-  ! IO for the orthogonal, extrapolated FPrim 
+  ! IO for the orthogonal, extrapolated FPrim
   !-------------------------------------------------------------------
   !
-  CALL Put(TmpFPrm,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(3)),Args,0)) 
+  CALL Put(TmpFPrm,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(3)),Args,0))
   CALL PChkSum(TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
   CALL Plot(   TmpFPrm,'FPrime_DDIIS'//TRIM(Args%C%C(3))//'_'//TRIM(SCFCycl))
   !
   !-------------------------------------------------------------------
-  ! Tidy up 
+  ! Tidy up
   !-------------------------------------------------------------------
   !
   CALL Delete(Tmp1     )
@@ -884,22 +884,22 @@ PROGRAM DDIIS
   !
   !CALL Delete(BTmp)
   !
-  CALL ShutDown(Prog)   
+  CALL ShutDown(Prog)
   !
 CONTAINS
   !
   SUBROUTINE PrintMatrix(V,M,N,IOpt,IOut_O,SHFTM_O,SHFTN_O,TEXT_O)
     IMPLICIT NONE
 !    ++++ PRINT OUT A RECTANGULAR MATRIX +++++
-!    
+!
 !    V    : MATRIX MxN
 !    M    : NUMBER OF ROW
 !    N    : NUMBER OF COLUMN
 !
-!    IOpt = 0; MAX COLUMN = 10 
+!    IOpt = 0; MAX COLUMN = 10
 !    IOpt = 1; MAX COLUMN =  7
 !    IOpt = 2; MAX COLUMN =  5
-!    IOpt = 3; MAX COLUMN =  3 
+!    IOpt = 3; MAX COLUMN =  3
 !
     INTEGER                                  :: IMax,IMin,NMAX,I,J
     INTEGER                                  :: IOut,SHFTM,SHFTN
@@ -929,10 +929,10 @@ CONTAINS
     END SELECT
 !
     IF(N.EQ.0) RETURN
-! 
+!
     IF(PRESENT(TEXT_O)) WRITE(IOUT,*) TEXT_O
     IMAX = 0
-!    
+!
     DO WHILE (IMAX.LT.M)
        IMIN = IMAX+1
        IMAX = IMAX+NMAX
@@ -955,7 +955,7 @@ CONTAINS
     ENDDO
     !
     WRITE (IOUT,100)
-    !    
+    !
 100 FORMAT('')
 1000 FORMAT(6X,10(4X,I3,4X))
 1100 FORMAT(I5,1X,10F11.5  )

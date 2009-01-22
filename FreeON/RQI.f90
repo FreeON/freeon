@@ -83,7 +83,7 @@ CONTAINS
     TYPE(State)        :: S,RQIStat
     TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
-    TYPE(Geometries)   :: G 
+    TYPE(Geometries)   :: G
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
     !
@@ -119,7 +119,7 @@ CONTAINS
 !!$    CALL SetEq(Q,sP)
 !!$    P%D=Two*P%D
 !!$    Q%D=-Two*Q%D
-!!$    DO I=1,N 
+!!$    DO I=1,N
 !!$       Q%D(I,I)=Q%D(I,I)+Two
 !!$    ENDDO
 !!$    !
@@ -168,7 +168,7 @@ CONTAINS
              ! Compute L[Pk]
              CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI,PkThreshold,PkNon0s,PMax)
              ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
-             CALL RQLSBakEnd(I,Nam,S,Lambda)                    
+             CALL RQLSBakEnd(I,Nam,S,Lambda)
              ! Anhiliate and renorm Xk
              CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=DoTDA)
              ! Compute L[Xk]
@@ -184,7 +184,7 @@ CONTAINS
              CLOSE(Out,STATUS='KEEP')
              !
              IF(K>3.AND.dNorm<1D-2)THEN
-                ! Look for bad behavior 
+                ! Look for bad behavior
                 IF( Ek > EkOld .AND. ABS((Ek-EkOld)/Ek) > O%Thresholds(cBAS)%ETol )THEN
 
                    ! Sign of variational principle broken, ostensibly due to N-scaling
@@ -215,7 +215,7 @@ CONTAINS
     ENDDO
     !
 33  FORMAT('St=',I2,', It=',I3,', Ev=',F10.6,', dE=',D8.2,', dN=',D7.2, &
-           ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2) 
+           ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2)
 
 
 44  FORMAT(A4,' State=',I2,', Nk=',I3,', Ev=',F9.6,', dE=',D7.2,', WallSec=',D12.4)
@@ -242,22 +242,22 @@ CONTAINS
 !!$          Beta=Zero
 !!$          XkOld=Zero
 !!$          PkOld=Zero
-!!$          Ek=ThoulessQ(N,P%D,Xk,LXk) 
+!!$          Ek=ThoulessQ(N,P%D,Xk,LXk)
 !!$          DO K=0,200
 !!$             !
 !!$             Gk=Two*(LXk-Ek*Xk)
-!!$             IF(K>0)Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)    			
+!!$             IF(K>0)Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)
 !!$
-!!$             Pk=Gk+Beta*PkOld  
+!!$             Pk=Gk+Beta*PkOld
 !!$             !
 !!$             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-!!$             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+!!$             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)
 !!$             !
 !!$             EkOld=Ek
 !!$             XkOld=Xk
 !!$             EkOld=Ek
 !!$             GkOld=Gk
-!!$             PkOld=Pk	   
+!!$             PkOld=Pk
 !!$             !
 !!$             Xk=XkOld+Lambda*Pk
 !!$             !
@@ -266,7 +266,7 @@ CONTAINS
 !!$             CALL ReNorm(N,P%D,Xk)
 !!$             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
 !!$             CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
-!!$             Ek=ThoulessQ(N,P%D,Xk,LXk) 
+!!$             Ek=ThoulessQ(N,P%D,Xk,LXk)
 !!$             ErrAbs=Ek-EkOld
 !!$             ErrRel=-1D10
 !!$             DO U=1,N
@@ -280,7 +280,7 @@ CONTAINS
 !!$             !
 !!$          ENDDO
 !!$          WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
-!!$          Values(I)=Ek 
+!!$          Values(I)=Ek
 !!$          Vectors(:,:,I)=Xk
 !!$
 !!$       ENDDO
@@ -295,7 +295,7 @@ CONTAINS
     REAL(DOUBLE)          :: Norm
     TYPE(FileNames)       :: Nam
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR)            :: sP,sQ,sXk,sI,sT,sT1 ! Nihilate0 delete list
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,PName,QName
@@ -311,7 +311,7 @@ CONTAINS
     XkName=TrixFile('OrthoXk',PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=Cur,OffSet_O=0)
     PName= TrixFile("OrthoD", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
     QName= TrixFile("OrthoQ", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
-    ! Get occupied projector 
+    ! Get occupied projector
     CALL Get(sP,PName)
     ! Generate virtual space projector if first time through
     IF(I==1)THEN
@@ -358,7 +358,7 @@ CONTAINS
     ! Put guess Xk to disk
     CALL Put(sXk,XkName)
 
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sT)
     CALL Delete(sP)
     CALL Delete(sXk)
@@ -374,7 +374,7 @@ CONTAINS
     REAL(DOUBLE)          :: Ek
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR)            :: sP,sQ,sXk,sLXk,sT,sT1,sT2,sT3 ! Nihilate1 delete list
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,LXkName,PName,QName
@@ -393,7 +393,7 @@ CONTAINS
     LXkName=TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
     PName= TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
     QName= TrixFile("OrthoQ", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
-    ! Get occupied projector 
+    ! Get occupied projector
     CALL Get(sP,PName)
     CALL Get(sQ,QName)
     ! Kluge due to poor memory management:
@@ -446,7 +446,7 @@ CONTAINS
     REAL(DOUBLE)          :: Lambda,Norm,dNorm
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateXk delete list
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
@@ -527,7 +527,7 @@ CONTAINS
     REAL(DOUBLE)          :: dEk,Ek
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateLXk delete list
     INTEGER, DIMENSION(3) :: Cur
     CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
@@ -612,7 +612,7 @@ CONTAINS
     REAL(DOUBLE)          :: Ek
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR),SAVE       :: sXk,sLXk,sGk,sGkOld,sPkOld,sP,sT,sT1 ! NLCGradient delete list
     INTEGER, DIMENSION(3) :: Cur
     REAL(DOUBLE)          :: Num,Den,Beta
@@ -664,16 +664,16 @@ CONTAINS
     CALL Get(sGkOld,GkOldName)
 
 !    CALL PPrint(sGkOld,' GkOld ',Unit_O=6)
-   
+
 !
-    ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p    			
+    ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p
     sGkOld%MTrix%D=-sGkOld%MTrix%D
     CALL Add(sGk,sGkOld,sT1)
     sGkOld%MTrix%D=-sGkOld%MTrix%D
-    CALL XPose(sGk,sT)    
-    Num=OneDot(sP,sT1,sT) 
-    CALL XPose(sGkOld,sT)    
-    Den=OneDot(sP,sGkOld,sT) 
+    CALL XPose(sGk,sT)
+    Num=OneDot(sP,sT1,sT)
+    CALL XPose(sGkOld,sT)
+    Den=OneDot(sP,sGkOld,sT)
     Beta=Num/Den
 !    WRITE(*,*)' Beta = ',Beta
 
@@ -682,7 +682,7 @@ CONTAINS
     CALL Delete(sT)
     CALL Delete(sP)
     CALL Delete(sGkOld)
-    ! Pk=Gk+Beta*PkOld  
+    ! Pk=Gk+Beta*PkOld
     CALL Get(sPkOld,PkOldName)
 
     sPkOld%MTrix%D=Beta*sPkOld%MTrix%D
@@ -705,11 +705,11 @@ CONTAINS
     INTEGER                       :: N,I,J,K,MatrixNon0s
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
-    TYPE(Parallel)                :: MPI    
+    TYPE(Parallel)                :: MPI
     REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
     REAL(DOUBLE)                  :: Shift,MatrixThreshold,LocalThreshold,PMax
-    CHARACTER(LEN=*)              :: Trgt 
+    CHARACTER(LEN=*)              :: Trgt
     REAL(DOUBLE),OPTIONAL         :: PMax_O
     !----------------------------------------------------------------------------
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
@@ -719,13 +719,13 @@ CONTAINS
     CALL New(RQIStat%Previous,3)
     RQIStat%Current%I=S%Current%I
     RQIStat%Previous%I=S%Previous%I
-    ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk]) 
+    ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk])
     RQIStat%Action%C(1)="TD-SCF"
     RQIStat%Action%C(2)=TRIM(Trgt) !//TRIM(IntToChar(I))
-    ! "SCF cycle" is the RQI State number 
+    ! "SCF cycle" is the RQI State number
     RQIStat%Current%I(1)=I
     RQIStat%Previous%I(1)=I
-    ! Get the orthogonal transition density matrix Xk (or CG gradient Pk) corresponding to the 
+    ! Get the orthogonal transition density matrix Xk (or CG gradient Pk) corresponding to the
     ! resultant of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
     CALL New(sX) ! Kluge.  Somehow, dimensioning not quite right here:
     CALL Get(sX,TrixFile('Ortho'//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
@@ -736,10 +736,10 @@ CONTAINS
     CALL Multiply(sF,sX,sT2,-One)
     ! Done with F
     CALL Delete(sF)
-    ! Z is the sparse inverse factor of S  
-    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))    
-    ! Xao = Z^t.Xor.Z 
-    CALL Multiply(sZ,sX,sT1)        
+    ! Z is the sparse inverse factor of S
+    CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
+    ! Xao = Z^t.Xor.Z
+    CALL Multiply(sZ,sX,sT1)
     CALL Multiply(sT1,sZ,sX)
 
     IF(PRESENT(PMax_O))THEN
@@ -753,7 +753,7 @@ CONTAINS
     ! Filter small blocks and return the # of non zero elements
     CALL Filter(sX,Tol_O=LocalThreshold)
     MatrixNon0s=sX%NNon0
-    ! This is the AO transition density matrix (or CG gradient) 
+    ! This is the AO transition density matrix (or CG gradient)
     CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with sX
     CALL Delete(sX)
@@ -768,14 +768,14 @@ CONTAINS
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     ! Pick up J and K
     CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-    CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+    CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! JK=Jao[X]+Kao[X]
     CALL Add(sJ,sK,sJK)
     ! Done with J and K
     CALL Delete(sJ)
     CALL Delete(sK)
     ! JK[X]=Zt.JKao[X].Z==JKor
-    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sZ,sJK,sT1)
     CALL Multiply(sT1,sZ,sJK)
     ! Done with Z
     CALL Delete(sZ)
@@ -793,7 +793,7 @@ CONTAINS
     CALL Delete(sT1)
     CALL Delete(sT2)
     ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
-    CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+    CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
     ! Done with temp #3
     CALL Delete(sT3)
     ! Done with invokation parameters
@@ -805,11 +805,11 @@ CONTAINS
     IF(I>1)STOP
   END SUBROUTINE LOn2BakEnd
 
-  SUBROUTINE RQLSBakEnd(I,N,S,Lambda)          
+  SUBROUTINE RQLSBakEnd(I,N,S,Lambda)
     INTEGER               :: I
     TYPE(FileNames)       :: N
     TYPE(State)           :: S
-    TYPE(Parallel)        :: MPI    
+    TYPE(Parallel)        :: MPI
     TYPE(BCSR)            :: sP,sXk,sPk,sLXk,sLPk,sT
     INTEGER, DIMENSION(3) :: Cur
     REAL(DOUBLE)          :: Lambda,Lambda_p,Lambda_m
@@ -824,22 +824,22 @@ CONTAINS
     CALL Get(sP ,TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
     CALL Get(sXk,TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
     CALL Get(sPk,TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
-    !    
+    !
     CALL XPose(sXk,sT)
-    XX =OneDot(sP,sXk,sT) 
+    XX =OneDot(sP,sXk,sT)
     PX =OneDot(sP,sPk,sT)
     !
     CALL XPose(sPk,sT)
     PP =OneDot(sP,sPk,sT)
     XP =OneDot(sP,sXk,sT)
     !
-    CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+    CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
     CALL XPose(sLXk,sT)
     CALL Delete(sLXk)
     XLX=OneDot(sP,sXk,sT)
     PLX=OneDot(sP,sPk,sT)
     !
-    CALL Get(sLPk,TrixFile('LPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+    CALL Get(sLPk,TrixFile('LPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
     CALL XPose(sLPk,sT)
     CALL Delete(sLPk)
     PLP=OneDot(sP,sPk,sT)
@@ -855,7 +855,7 @@ CONTAINS
     CC=XX*(PLX+XLP)-XLX*(PX+XP)
     !
     lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
     !
     Lambda=Lambda_P
     !
@@ -863,13 +863,13 @@ CONTAINS
     !
   END SUBROUTINE RQLSBakEnd
   !===============================================================================
-  ! HERE ARE THE CONVENTIONAL DENSE MATRIX RQI ROUTINES 
+  ! HERE ARE THE CONVENTIONAL DENSE MATRIX RQI ROUTINES
   !===============================================================================
   !---------------------------------------------------------------------
   ! Calculates TD-SCF scalar product Tr=Tr([A,P],B^+)
   ! Assumes B^t on input
   !---------------------------------------------------------------------
-  FUNCTION OneDot(sP,sA,sBt) RESULT(Tr) 
+  FUNCTION OneDot(sP,sA,sBt) RESULT(Tr)
     TYPE(BCSR) :: sP,sA,sBt,sT1
     REAL(DOUBLE) :: Tr
     CALL Multiply(sP,sA,sT1)
@@ -902,9 +902,9 @@ CONTAINS
     REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
     REAL(DOUBLE),DIMENSION(:)     :: Values
     REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
-    LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
+    LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )
     IF(M==1)RETURN
-    WS=Values(M-1)-Values(1)+Shift 
+    WS=Values(M-1)-Values(1)+Shift
     Com=MATMUL(X,P)-MATMUL(P,X)
     DO J=1,M-1
        OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
@@ -913,7 +913,7 @@ CONTAINS
     ENDDO
   END SUBROUTINE LOn2
   !
-  Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda)          
+  Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda)
     INTEGER :: N
     REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
     REAL (DOUBLE),DIMENSION(N,N)::P,Pk,Xk,LXk,LPk,Tmp1
@@ -930,7 +930,7 @@ CONTAINS
     BB=2.0*PLP*XX-2.0*XLX*PP
     CC=XX*(PLX+XLP)-XLX*(PX+XP)
     lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
     Lambda=Lambda_P
   END Subroutine RQILineSearch
 
@@ -942,22 +942,22 @@ CONTAINS
     Ek=Pdot1(N,P,X,LX)
   END FUNCTION ThoulessQ
 
-  FUNCTION LiouvDot(N,BB,DSao,temp2)  RESULT(temp1) 
-    ! Calculates action of the Coulomb operator in AO space temp1=BB * (ij||kl) 
+  FUNCTION LiouvDot(N,BB,DSao,temp2)  RESULT(temp1)
+    ! Calculates action of the Coulomb operator in AO space temp1=BB * (ij||kl)
     IMPLICIT NONE
     INTEGER :: I,J,K,N,one
     REAL (DOUBLE),DIMENSION(N*N):: BB,temp2
     REAL (DOUBLE),DIMENSION(N,N):: temp1
-    REAL(DOUBLE),DIMENSION(N*N,N*N)::	DSao                
+    REAL(DOUBLE),DIMENSION(N*N,N*N)::	DSao
     REAL(DOUBLE) :: ddot
 
-    one=1 
-    K=0    
+    one=1
+    K=0
     DO I=1,N
        DO J=1,N
           K=K+1
           temp2=DSao(:,K)
-          !		temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is 
+          !		temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is
           temp1(J,I)=DOT_PRODUCT(BB,Temp2)           ! the most CPU consuming step
        ENDDO
     END DO
@@ -965,16 +965,16 @@ CONTAINS
   END FUNCTION LiouvDot
 
   FUNCTION LiouvAO(N,For,Por,X,DSao,AA)  RESULT(BB)
-    ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
+    ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl)
     IMPLICIT NONE
     INTEGER :: I,J,M,K,L,N,one
     REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,temp1,temp2,X
-    REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
+    REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao
     REAL(DOUBLE) :: E,ddot
 
     ! AA to AO
-    one=1 
-    BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
+    one=1
+    BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))
 !    CALL PPrint(BB,'INPUT 2',Unit_O=6)
     DO I=1,N
        DO J=1,N
@@ -986,7 +986,7 @@ CONTAINS
           END DO
        END DO
     END DO
- !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)    
+ !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)
     BB=MATMUL(For,AA)-MATMUL(AA,For)
     ! temp back to orthog
     temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
@@ -1003,7 +1003,7 @@ CONTAINS
           X(i,j)= One/Two**(I+J)
        enddo
     enddo
-!!$       temp1 = ProjectPH(N,Qor,Por,Xk)       
+!!$       temp1 = ProjectPH(N,Qor,Por,Xk)
 !!$       Xk = temp1/sqrt(abs(Pdot1(N,Por,temp1,temp1,tmp1)))
   END SUBROUTINE RPAGuess
 
@@ -1015,8 +1015,8 @@ CONTAINS
     X=X/Norm
   END SUBROUTINE ReNorm
 
-  !************************************************************************      
-  FUNCTION Pdot(N,P,AA,BB,CC) RESULT(Tr) 
+  !************************************************************************
+  FUNCTION Pdot(N,P,AA,BB,CC) RESULT(Tr)
     ! Calculates RPA scalar product Tr=Tr([AA^+,P],BB)
 
     IMPLICIT NONE
@@ -1029,8 +1029,8 @@ CONTAINS
 
   END FUNCTION Pdot
 
-  !************************************************************************      
-  FUNCTION Pdot1(N,P,AA,BB) RESULT(Tr) 
+  !************************************************************************
+  FUNCTION Pdot1(N,P,AA,BB) RESULT(Tr)
     ! Calculates RPA scalar product Tr=Tr([AA,P],BB^+)
 
     IMPLICIT NONE
@@ -1042,7 +1042,7 @@ CONTAINS
     Tr=0.5*Trace2(CC,N)
 
   END FUNCTION Pdot1
-  !-------------------------------------------------------------------------------      
+  !-------------------------------------------------------------------------------
   FUNCTION Project(N,P,Q,AA)  RESULT(BB)
     ! BB=P AA Q + Q AA P
     ! calculates  projection to p-h an h-p space using Q and P
@@ -1055,7 +1055,7 @@ CONTAINS
 
   END FUNCTION Project
 
-  !-------------------------------------------------------------------------------      
+  !-------------------------------------------------------------------------------
   FUNCTION ProjectPH(N,P,Q,AA)  RESULT(BB)
     ! BB=Q AA P (X-component, large)   (0  Y)
     ! BB=P AA Q (Y-component, small)   (X  0)

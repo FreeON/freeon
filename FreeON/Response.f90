@@ -28,8 +28,8 @@ MODULE Response
 !H MODULE Response
 !H
 !H  OPTIONS:
-!H  DEBUGING: 
-!H  INFO    : 
+!H  DEBUGING:
+!H  INFO    :
 !H
 !H Comment:
 !H
@@ -39,7 +39,7 @@ MODULE Response
   !
   USE Parse
   USE InOut
-  USE LinAlg 
+  USE LinAlg
   USE GlobalObjects
   USE SCFKeys
   USE Overlay
@@ -51,20 +51,20 @@ MODULE Response
   USE ControlStructures
   USE NEB
   USE SCFs
-  USE SetXYZ 
+  USE SetXYZ
   !USE MLP !ONLY: MLPDriver
   !
-  IMPLICIT NONE 
+  IMPLICIT NONE
   PRIVATE
   !
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
 ! PUBLIC DECLARATIONS
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
   PUBLIC  :: CPSCF
   !
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
 ! PRIVATE DECLARATIONS
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
   PRIVATE :: Save_LastCPSCFCycleNbr
   !
 CONTAINS
@@ -228,7 +228,7 @@ CONTAINS
     CALL Delete(C%Stat%Action)
     !
     !-------------------------------------------------------------------
-    ! CUBIC RESPONSE CUBIC RESPONSE CUBIC RESPONSE CUBIC RESPONSE CUBIC 
+    ! CUBIC RESPONSE CUBIC RESPONSE CUBIC RESPONSE CUBIC RESPONSE CUBIC
     !-------------------------------------------------------------------
     !
     ! Check if we need to compute the Quadratic Response.

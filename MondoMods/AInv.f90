@@ -48,7 +48,7 @@ CONTAINS
     INTEGER             :: I,J,Q,R,IDex,JDex,ZDex,ZBlk,NIJ, &
                            n,ni,msiz,strtai,stopai,strtaj,stopaj, &
                            strtzi,stopzi,nj,strtzj,stopzj,jcol,k,kdex, &
-                           aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt, & 
+                           aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt, &
                            zblkpt,NewBloks,EndBloks,IRow,JRow,ZBlksPreFilter,ZBlksPostFilter
     TYPE(DBL_VECT)      :: Blk1,Blk2
     TYPE(DBL_RNK2)      :: P,DA
@@ -64,7 +64,7 @@ CONTAINS
     INTEGER :: II
 !------------------------------------------------------------------------------------------------
 #ifdef FIND_CONDA
-    ! Useful if AInv is behaving badly.  If A is singular, you 
+    ! Useful if AInv is behaving badly.  If A is singular, you
     ! will have problems.
     CALL New(B,(/NBasF,NBasF/))
     CALL New(C,(/NBasF,NBasF/))
@@ -82,7 +82,7 @@ CONTAINS
 #endif
     ! Set global workspace for FunkOnSqMat
     CALL SetDSYEVWork(MaxBlkSize)
-    ! Allocate intermediate blocks 
+    ! Allocate intermediate blocks
     IF(.NOT.AllocQ(Blk1%Alloc)) CALL New(Blk1,MaxBlkSize*MaxBlkSize)
     IF(.NOT.AllocQ(Blk2%Alloc)) CALL New(Blk2,MaxBlkSize*MaxBlkSize)
     ! Allocate diagonal "pivot" blocks
@@ -97,7 +97,7 @@ CONTAINS
     CALL SetToI(Z)
     ! Index for new Z bloks
     ZBlk=Z%NNon0+1
-    ! Main outer loop down rows 
+    ! Main outer loop down rows
     DO IRow=1,Natoms !!!!! DANGER !!!!! mixing Natoms and GM%Natms
       IF(IRow>GM%Natms) THEN
           II=Z%RowPt%I(GM%Natms+1)
@@ -135,7 +135,7 @@ CONTAINS
              NJ=BSiz%I(JRow)
              StrtAJ=A%RowPt%I(JRow);StopAJ=A%RowPt%I(JRow+1)-1
              StrtZJ=Z%RowPt%I(JRow);StopZJ=Z%RowPt%I(JRow+1)-1
-             ! Blk1=P^(j-1)_i=[A^t_j].[Z^(j-1)_i]; 
+             ! Blk1=P^(j-1)_i=[A^t_j].[Z^(j-1)_i];
              ! Going down rows over N: (NxNJ)^T.(NxNI)
              NIJ=NI*NJ
              Blk1%D(1:NIJ)=Zero
@@ -147,8 +147,8 @@ CONTAINS
                      (IRowZ-GM%Carts%D(3,JDex))**2)<DstncThresh)THEN
 #endif
                    IDex=ZiFlg%I(JDex)
-                   IF(IDex/=0)THEN                 
-                      ZiBlk=BlkPt%I(IDex) 
+                   IF(IDex/=0)THEN
+                      ZiBlk=BlkPt%I(IDex)
                       AjBlk=A%BlkPt%I(J)
                       M=BSiz%I(JDex)
                       CALL DGEMM_NN(NJ,M,NI,One,A%MTrix%D(AjBlk),Z%MTrix%D(ZiBlk),Blk1%D)
@@ -161,25 +161,25 @@ CONTAINS
              ! Blk2=[P^(j-1)_j]^(-1).[P^(j-1)_i]
              CALL DGEMM_NNc(NJ,NJ,NI,One,Zero,P%D(:,JRow),Blk1%D,Blk2%D)
              Perf%FLOP=Perf%FLOP+DBLE(NIJ*NJ)
-             !  Check the magintude of Blk2.  Update Z_I only if Blk2 is "large" enough.       
+             !  Check the magintude of Blk2.  Update Z_I only if Blk2 is "large" enough.
              B2Norm=SQRT(DDOT(NI*NJ,Blk2%D,1,Blk2%D,1))
              Perf%FLOP=Perf%FLOP+DBLE(NIJ)
              IF(B2Norm>TrixThresh*1.D-1)THEN
                 ! Z^j_i=Z^(j-1)_i-[Z^(j-1)_j].{[P^(j-1)_j]^(-1).[P^(j-1)_i]}
                 ! Update going down rows:(NxNI)=(NxNI)+(NxNJ).(NJxNI)
                 DO JDex=StrtZJ,StopZJ
-                   JCol=ColPt%I(JDex) 
+                   JCol=ColPt%I(JDex)
 #ifdef SPATIAL_THRESHOLDING
                    IF(((IRowX-GM%Carts%D(1,JCol))**2+ &
                        (IRowY-GM%Carts%D(2,JCol))**2+ &
                        (IRowZ-GM%Carts%D(3,JCol))**2)<DstncThresh)THEN
 #endif
-                      ZjBlk=BlkPt%I(JDex) 
+                      ZjBlk=BlkPt%I(JDex)
                       IDex =ZiFlg%I(JCol)
                       M=BSiz%I(JCol)
                       Perf%FLOP=Perf%FLOP+DBLE(NIJ*M)
-                      IF(IDex/=0)THEN                  
-                         ZiBlk=BlkPt%I(IDex) 
+                      IF(IDex/=0)THEN
+                         ZiBlk=BlkPt%I(IDex)
                          CALL DGEMM_NNc(M,NJ,NI,-One,One,Z%MTrix%D(ZjBlk),Blk2%D,Z%MTrix%D(ZiBlk))
                       ELSE
                          ZiBlk=ZBlk
@@ -187,7 +187,7 @@ CONTAINS
                          ZiFlg%I(JCol)=ZDex
                          ColPt%I(ZDex)=JCol
                          BlkPt%I(ZDex)=ZiBlk
-                         ZDex=ZDex+1 
+                         ZDex=ZDex+1
                          ZBlk=ZBlk+M*NI
                       ENDIF
 #ifdef SPATIAL_THRESHOLDING
@@ -213,12 +213,12 @@ CONTAINS
           Z%BlkPt%I(StrtZI:Z%NBlks)=BlkPt%I(StrtZI:Z%NBlks)
        ENDIF
        !  Blk1=P^(i-1)_i=[A^t_i].[Z^(i-1)_i]; Going down rows:(NxNI)^T.(NxNI)
-       Blk1%D=Zero 
+       Blk1%D=Zero
        StrtZI=Z%RowPt%I(IRow);StopZI=Z%RowPt%I(IRow+1)-1
        DO IDex=StrtZI,StopZI
           ICol=Z%ColPt%I(IDex)
           KDex=AiFlg%I(ICol)
-          IF(KDex/=0)THEN                  
+          IF(KDex/=0)THEN
              ZiBlk=Z%BlkPt%I(IDex)
              AiBlk=A%BlkPt%I(KDex)
              M=BSiz%I(ICol)
@@ -230,16 +230,16 @@ CONTAINS
        CALL FunkOnSqMat(NI,Inverse,Blk1%D,P%D(:,IRow))
        ! Estimated performance; 2 DGEMMS+1 DSYEV
        Perf%FLOP=Perf%FLOP+DBLE((2+6)*NI**3)
-       ! Reset flags for column flags   
+       ! Reset flags for column flags
        DO I=StrtZI,ZDex-1
-          ZiFlg%I(ColPt%I(I))=0 
+          ZiFlg%I(ColPt%I(I))=0
        ENDDO
-       DO J=StrtAI,StopAI 
-          AiFlg%I(A%ColPt%I(J))=0 
+       DO J=StrtAI,StopAI
+          AiFlg%I(A%ColPt%I(J))=0
        ENDDO
     ENDDO ! end main loop over IRow
-    !------------------------------------------------------------------------------------------ 
-    ! Finishing touches on Z 
+    !------------------------------------------------------------------------------------------
+    ! Finishing touches on Z
     Z%NAtms=NAtoms
     Z%NBlks=ZDex-1
     Z%NNon0=ZBlk-1
@@ -259,7 +259,7 @@ CONTAINS
        CALL FunkOnSqMat(N,SqRoot,P%D(:,I),Blk1%D)
        !    Estimated performance; 2 DGEMMS+1 DSYEV
        Perf%FLOP=Perf%FLOP+DBLE((2+6)*NI**3)
-       P%D(1:N*N,I)=Blk1%D(1:N*N)     
+       P%D(1:N*N,I)=Blk1%D(1:N*N)
     ENDDO
     CALL SetToI(DiagD,P)
     ! Free some more memory
@@ -270,7 +270,7 @@ CONTAINS
     ! This is workspace for Z^t
     IF(.NOT.AllocQ(Zt%Alloc)) &
     CALL New(Zt)
-    ! Symbolic transpose only, bloks in place 
+    ! Symbolic transpose only, bloks in place
     CALL XPose(Z)
     ZBlksPreFilter=Z%NBlks
     ! Final Z=P^(-1/2).Z

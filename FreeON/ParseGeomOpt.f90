@@ -38,14 +38,14 @@ MODULE ParseGeomOpt
 
    SUBROUTINE LoadGeomOpt(N,GOpt,PBCDim)
      TYPE(FileNames)                :: N
-     TYPE(GeomOpt)                  :: GOpt  
+     TYPE(GeomOpt)                  :: GOpt
      CHARACTER(LEN=DCL)             :: Max_Steps = 'Max_Steps'
      INTEGER                        :: PBCDim
      !
      CALL OpenASCII(N%IFile,Inp)
      ! maximum number of optimization steps
      IF(.NOT.OptIntQ(Inp,Max_Steps,GOpt%GConvCrit%MaxGeOpSteps))THEN
-        GOpt%GConvCrit%MaxGeOpSteps=500  
+        GOpt%GConvCrit%MaxGeOpSteps=500
      ENDIF
      !
      ! Optimizer type
@@ -60,7 +60,7 @@ MODULE ParseGeomOpt
        GOpt%Optimizer=GRAD_DiagHess_OPT !default
      ENDIF
      !
-     ! Parse for GDIIS 
+     ! Parse for GDIIS
      !
      GOpt%GDIIS%NoGDIIS=.FALSE.
      IF(OptKeyQ(Inp,GRADIENTS,OPT_NoGDIIS)) THEN
@@ -126,7 +126,7 @@ MODULE ParseGeomOpt
      CALL FindLattRattio(OPT_RatioABC,GOpt%Constr%RatioABC)
      CALL FindLattRattio(OPT_RatioAlpBetGam,GOpt%Constr%RatioAlpBetGam)
      !
-     ! Parse for alternating lattice and atomic positions relaxation 
+     ! Parse for alternating lattice and atomic positions relaxation
      !
      GOpt%GConvCrit%Alternate=.FALSE.
      GOpt%GConvCrit%LatticeStart=.FALSE.
@@ -266,7 +266,7 @@ MODULE ParseGeomOpt
    !
    SUBROUTINE FindLattRattio(QChar,Ratio)
      CHARACTER(LEN=DCL)             :: Line,Aux
-     CHARACTER(LEN=*)               :: QChar 
+     CHARACTER(LEN=*)               :: QChar
      INTEGER                        :: J,ChLen
      REAL(DOUBLE),DIMENSION(3)      :: Ratio
      !
@@ -277,7 +277,7 @@ MODULE ParseGeomOpt
        Line=OPTIONS_BEGIN
        CALL LowCase(Line)
        CALL AlignLowCase(TRIM(Line),Inp)
-       DO 
+       DO
          READ(Inp,DEFAULT_CHR_FMT,END=1) Line
          CALL RemoveComments(Line)
          IF(INDEX(Line,QChar)/=0) THEN
@@ -289,5 +289,5 @@ MODULE ParseGeomOpt
        1 CONTINUE
      ENDIF
    END SUBROUTINE FindLattRattio
-   ! 
+   !
 END MODULE ParseGeomOpt

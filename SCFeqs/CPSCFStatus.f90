@@ -69,7 +69,7 @@ PROGRAM CPSCFSts
   INTEGER                          :: RespOrder
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: CPSCFMessage
   CHARACTER(LEN=  DEFAULT_CHR_LEN) :: PropName
-  CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCF'  
+  CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCF'
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
   !
   !For nulear dipole moment.
@@ -137,7 +137,7 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   !
   !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  ! 2n+1 rule 2n+1 rule 2n+1 rule 2n+1 rule 
+  ! 2n+1 rule 2n+1 rule 2n+1 rule 2n+1 rule
   !IF(RespOrder==1) THEN
   !   CALL New(Tmp3)
   !   CALL Multiply(PPrm,S,Tmp1)
@@ -178,7 +178,7 @@ PROGRAM CPSCFSts
   !   CALL Multiply(Tmp1,S,Tmp2)
   !   CALL Multiply(Tmp2,PPrm1,Tmp3)
   !   CALL Multiply(Tmp3,FPrm1,Tmp4)
-  !   
+  !
   !   CALL Multiply(PPrm1,S,Tmp1)
   !   CALL Multiply(Tmp1,P,Tmp2)
   !   CALL Multiply(P,S,Tmp1)
@@ -186,15 +186,15 @@ PROGRAM CPSCFSts
   !   CALL Multiply(Tmp3,-One)
   !   CALL Add(Tmp2,Tmp3,Tmp1)
   !   CALL Multiply(Tmp1,S,Tmp5) !<<<
-  !   
+  !
   !   CALL Multiply(PPrm,FPrm1,Tmp1)
   !   CALL Multiply(PPrm1,FPrm,Tmp2)
   !   CALL Add(Tmp1,Tmp2,Tmp3)
-  !   
+  !
   !   CALL Multiply(Tmp5,Tmp3,Tmp1)
-  !   
+  !
   !   CALL Add(Tmp4,Tmp1,Tmp2)
-  !   
+  !
   !   write(*,*) '2n+1=',-24d0*Trace(Tmp2)
   !   !
   !   CALL Delete(Tmp3)
@@ -338,9 +338,9 @@ PROGRAM CPSCFSts
                       //'   MaxDelDPrim = '//TRIM(DblToShrtChar(DPrimMax)) //RTRN  &
                 //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'X    = '          &
                       //TRIM(DblToMedmChar(Tensor(1)))//RTRN                       &
-                //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Y    = '          & 
+                //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Y    = '          &
                       //TRIM(DblToMedmChar(Tensor(2)))//RTRN                       &
-                //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Z    = '          & 
+                //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Z    = '          &
                       //TRIM(DblToMedmChar(Tensor(3)))//RTRN
      !
   ELSEIF(PrintFlags%Key>=DEBUG_NONE) THEN
@@ -348,7 +348,7 @@ PROGRAM CPSCFSts
      ! Fancy output.
      CPSCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','                         &
                       //TRIM(CurBase)//','                                         &
-                      //TRIM(CurGeom)//']') 
+                      //TRIM(CurGeom)//']')
      !
      CPSCFMessage=TRIM(CPSCFMessage)//' '//TRIM(PropName)//' '                     &
                                          //TRIM(Args%C%C(3))//' '                  &

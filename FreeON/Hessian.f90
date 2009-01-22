@@ -49,8 +49,8 @@ CONTAINS
    SUBROUTINE DiagHess(CoordC,Hess,Grad,Displ,IntCs,AtNum,iGEO,XYZ)
      TYPE(CoordCtrl)   :: CoordC
      TYPE(Hessian)     :: Hess
-     TYPE(DBL_VECT)    :: Grad,Displ 
-     TYPE(INTC)        :: IntCs       
+     TYPE(DBL_VECT)    :: Grad,Displ
+     TYPE(INTC)        :: IntCs
      INTEGER           :: I,J,NIntC,NCart,NConstr,NatmsLoc,iGEO
      REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -79,8 +79,8 @@ CONTAINS
        ENDDO
      ELSE
        CALL Halt('Only Primitiv Internals are available yet.')
-     ENDIF 
-     ! 
+     ENDIF
+     !
      IntCs%PredGrad%D=Zero
      IntCs%PredVal%D=IntCs%Value%D+Displ%D
      IntCs%InvHess%D=InvHess%D
@@ -92,15 +92,15 @@ CONTAINS
    SUBROUTINE SetHessian(Hess)
      TYPE(Hessian) :: Hess
     !Hess%Stre = 0.80D0
-    !Hess%Bend = 0.30D0 
+    !Hess%Bend = 0.30D0
     !Hess%LinB = 0.30D0
-    !Hess%OutP = 0.20D0 
-    !Hess%Tors = 0.20D0 
+    !Hess%OutP = 0.20D0
+    !Hess%Tors = 0.20D0
      Hess%Stre = 0.50D0
-     Hess%Bend = 0.20D0 
+     Hess%Bend = 0.20D0
      Hess%LinB = 0.20D0
-     Hess%OutP = 0.10D0 
-     Hess%Tors = 0.10D0 
+     Hess%OutP = 0.10D0
+     Hess%Tors = 0.10D0
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
@@ -110,15 +110,15 @@ CONTAINS
      TYPE(Hessian)                 :: Hess
      TYPE(CoordCtrl)               :: CoordC
      REAL(DOUBLE),DIMENSION(:)     :: DHess,AtNum
-     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ  
-     TYPE(INTC)                    :: IntCs 
+     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ
+     TYPE(INTC)                    :: IntCs
      INTEGER                       :: I,J,NIntC,NatmsLoc,NStre,iGEO
      CHARACTER(LEN=*)              :: Char
      TYPE(INT_VECT)                :: ITop,JTop
      TYPE(DBL_VECT)                :: ATop
      LOGICAL                       :: DoVDW
      !
-     NIntC=IntCs%N     
+     NIntC=IntCs%N
      NatmsLoc=SIZE(XYZ,2)
      IF(NIntC/=SIZE(DHess)) &
        CALL Halt('Dimesion error in DiagHess_Vals.')
@@ -128,13 +128,13 @@ CONTAINS
      DO I=1,NIntC
        IF(.NOT.IntCs%Active%L(I)) THEN
          DHess(I)=Zero
-       ELSE 
+       ELSE
          CALL CalcHess(DHess(I),Char,IntCs%Def%C(I)(1:5),Hess,AtNum, &
                        iGEO,XYZ,IntCs%Atoms%I(I,1:4),ITop,JTop,ATop)
        ENDIF
      ENDDO
      !
-     IF(Char=='Lindh') THEN 
+     IF(Char=='Lindh') THEN
        CALL Delete(ITop)
        CALL Delete(JTop)
        CALL Delete(ATop)
@@ -160,7 +160,7 @@ CONTAINS
        PeriodicRow=5
      ELSE IF(54<I.AND.I<=86) THEN
        PeriodicRow=5
-     ELSE 
+     ELSE
        PeriodicRow=7
      ENDIF
    END FUNCTION PeriodicRow
@@ -174,7 +174,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
      TYPE(Hessian)               :: Hess
      CHARACTER(LEN=*)            :: Char,Type
-     INTEGER,DIMENSION(1:4)      :: Atoms 
+     INTEGER,DIMENSION(1:4)      :: Atoms
      TYPE(INT_VECT)              :: ITop,JTop
      TYPE(DBL_VECT)              :: ATop
      INTEGER                     :: I1Row,I2Row,I3Row,I4Row,iGEO
@@ -204,19 +204,19 @@ CONTAINS
          I3Row=PeriodicRow(INT(AtNum(Atoms(3))))
          I4Row=PeriodicRow(INT(AtNum(Atoms(4))))
          IF(Atoms(2)/=0) THEN
-           R12=GetR(XYZ,Atoms(1),Atoms(2),ITop,JTop,ATop) 
+           R12=GetR(XYZ,Atoms(1),Atoms(2),ITop,JTop,ATop)
            Rho12=EXP(Lindh_Alpha(I1Row,I2Row)*(Lindh_R(I1Row,I2Row)**2-R12**2))
          ENDIF
          IF(Atoms(3)/=0) THEN
-           R23=GetR(XYZ,Atoms(2),Atoms(3),ITop,JTop,ATop) 
+           R23=GetR(XYZ,Atoms(2),Atoms(3),ITop,JTop,ATop)
            Rho23=EXP(Lindh_Alpha(I2Row,I3Row)*(Lindh_R(I2Row,I3Row)**2-R23**2))
          ENDIF
          IF(Atoms(4)/=0) THEN
            IF(Type=='OUTP') THEN
-             R34=GetR(XYZ,Atoms(2),Atoms(4),ITop,JTop,ATop) 
+             R34=GetR(XYZ,Atoms(2),Atoms(4),ITop,JTop,ATop)
              Rho34=EXP(Lindh_Alpha(I2Row,I4Row)*(Lindh_R(I2Row,I4Row)**2-R34**2))
            ELSE
-             R34=GetR(XYZ,Atoms(3),Atoms(4),ITop,JTop,ATop) 
+             R34=GetR(XYZ,Atoms(3),Atoms(4),ITop,JTop,ATop)
              Rho34=EXP(Lindh_Alpha(I3Row,I4Row)*(Lindh_R(I3Row,I4Row)**2-R34**2))
            ENDIF
          ENDIF
@@ -243,7 +243,7 @@ CONTAINS
 !
    FUNCTION GetR(XYZ,I1Row,I2Row,ITop,JTop,ATop)
      REAL(DOUBLE)                  :: GetR
-     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ 
+     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ
      INTEGER                       :: I1Row,I2Row,I,J,III,NDim
      TYPE(INT_VECT)                :: ITop,JTop
      TYPE(DBL_VECT)                :: ATop
@@ -260,7 +260,7 @@ CONTAINS
        GetR=SQRT((XYZ(1,I1Row)-XYZ(1,I2Row))**2+&
                  (XYZ(2,I1Row)-XYZ(2,I2Row))**2+&
                  (XYZ(3,I1Row)-XYZ(3,I2Row))**2)
-     ENDIF 
+     ENDIF
    END FUNCTION GetR
 !
 !-------------------------------------------------------------------

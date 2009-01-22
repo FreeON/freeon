@@ -46,7 +46,7 @@ PROGRAM IRInv
   TYPE(BSET)                     :: BS
   TYPE(CRDS)                     :: GM
   TYPE(ARGMT)                    :: Args
-  TYPE(AtomPair)                 :: Pair 
+  TYPE(AtomPair)                 :: Pair
   INTEGER                        :: I,J,K,L,IC
   REAL(DOUBLE)                   :: Error,Smax,Smin,Factor
   LOGICAL                        :: ErrorTrue
@@ -61,10 +61,10 @@ PROGRAM IRInv
 ! Get the Overlap Matrix
   CALL Get(S,TrixFile('S',Args))
 !----------------------------------------------------------------------------
-! Allocate 
+! Allocate
   CALL New(Tmp1)
   CALL New(Tmp2)
-  CALL New(Tmp3) 
+  CALL New(Tmp3)
   CALL New(SInvL)
   CALL New(SInvR)
 !-------------------------------------------------
@@ -76,9 +76,9 @@ PROGRAM IRInv
 ! Iterate Using Anders Algorithm
 ! Rescale I as the Initial Guess
   Factor = SQRT(1.9D0)/SQRT(ABS(Smax))
-  CALL SetToI(SInvL)  
+  CALL SetToI(SInvL)
   CALL SetToI(SInvR)
-  CALL Multiply(SInvL,Factor)  
+  CALL Multiply(SInvL,Factor)
   CALL Multiply(SInvR,Factor)
 ! Calculate the Inverse of S
   IC        = 0
@@ -120,8 +120,8 @@ PROGRAM IRInv
   IF(.TRUE.) STOP
 !---------------------------------------------------
 !!$    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-!!$       CALL PPrint(PerfMon,Prog)  
-!!$       CALL PPrint(PerfMon,Prog,Unit_O=6)  
+!!$       CALL PPrint(PerfMon,Prog)
+!!$       CALL PPrint(PerfMon,Prog,Unit_O=6)
 !!$    ENDIF
 !!$    ! Consistency check
 !!$    IF(TEST_AINV)THEN
@@ -135,7 +135,7 @@ PROGRAM IRInv
 !!$       CALL Add(T1,T2,A)
 !!$       Mx0=Max(A)
 !!$       !
-!!$       IF(AInvDistanceThresh/=Zero)THEN     
+!!$       IF(AInvDistanceThresh/=Zero)THEN
 !!$          Mssg='Max(Z^t.A.Z-I)='//TRIM(DblToShrtChar(Mx0))                 &
 !!$               //', DistThrsh='//TRIM(DblToShrtChar(AInvDistanceThresh))  &
 !!$               //', TrixThrsh='//TRIM(DblToShrtChar(Thresholds%Trix))
@@ -166,7 +166,7 @@ PROGRAM IRInv
 !!$    !  Tidy up
 !!$    CALL Delete(Z)
 !!$    CALL Delete(ZT)
-    CALL ShutDown(Prog) 
+    CALL ShutDown(Prog)
 !
 END PROGRAM IRInv
 

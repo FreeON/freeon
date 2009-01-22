@@ -29,7 +29,7 @@ MODULE ZippyQuote
   IMPLICIT NONE
 CONTAINS
   !===========================================================================================================================
-  ! LETS NOT TAKE OURSELVES TOO SERIOUSLY ... 
+  ! LETS NOT TAKE OURSELVES TOO SERIOUSLY ...
   !===========================================================================================================================
   SUBROUTINE ZippySez(C)
     TYPE(Controls)  :: C

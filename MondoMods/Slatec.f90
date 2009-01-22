@@ -950,7 +950,7 @@ CONTAINS
 !C     CALL FDUMP
 !C
        STOP
-       END FUNCTION   
+       END FUNCTION
 !*DECK J4SAVE
        FUNCTION J4SAVE (IWHICH, IVALUE, ISET)
 !C***BEGIN PROLOGUE  J4SAVE
@@ -1015,7 +1015,7 @@ CONTAINS
        J4SAVE = IPARAM(IWHICH)
        IF (ISET) IPARAM(IWHICH) = IVALUE
        RETURN
-       END FUNCTION   
+       END FUNCTION
 !*DECK POLFIT
        SUBROUTINE POLFIT (N, X, Y, W, MAXDEG, NDEG, EPS, R, IERR, A)
 !C***BEGIN PROLOGUE  POLFIT
@@ -1372,7 +1372,7 @@ CONTAINS
        END SUBROUTINE
 !
 !---------------------------------------------------------------------
-! 
+!
 !*DECK PVALUE
        SUBROUTINE PVALUE (L, NDER, X, YFIT, YP, A)
 !C***BEGIN PROLOGUE  PVALUE
@@ -2487,7 +2487,7 @@ CONTAINS
       LLP1 = LL + 1
       CALL PVALUE (LL,LL,C,TC(1),TC(2),A)
       IF (LL .LT. 2) GO TO 2
-      FAC = One    
+      FAC = One
       DO 1 I = 3,LLP1
         FAC = FAC*(I-1)
  1      TC(I) = TC(I)/FAC

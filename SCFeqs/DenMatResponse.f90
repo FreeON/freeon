@@ -31,12 +31,12 @@ MODULE DenMatResponse
   USE LinAlg
   USE DenMatMethods, ONLY: SpectralBounds,SetVarThresh
   !
-  IMPLICIT NONE 
+  IMPLICIT NONE
   PRIVATE
   !
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
 ! PUBLIC DECLARATIONS
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
   PUBLIC  :: DoTC2R
   PUBLIC  :: SetPPrmOld
   PUBLIC  :: SavePPrm
@@ -45,9 +45,9 @@ MODULE DenMatResponse
   PUBLIC  :: DeAllocArray
   PUBLIC  :: FockPrimGuess
   !
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
 ! PRIVATE DECLARATIONS
-!--------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------------
   PRIVATE :: PutXFormPrim
   PRIVATE :: TC2R_DMP
   PRIVATE :: CnvrgChckPrim
@@ -1053,17 +1053,17 @@ CONTAINS
     SELECT CASE(RespOrder)
     CASE(1)
        Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE1='//TRIM(DblToShrtChar(RelErrProp))              &   
+            //'dE1='//TRIM(DblToShrtChar(RelErrProp))              &
             //', dP1='//TRIM(DblToShrtChar(AbsErrPPrim))           &
-            //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))              
+            //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE(2)
        Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE2='//TRIM(DblToShrtChar(RelErrProp))              &   
+            //'dE2='//TRIM(DblToShrtChar(RelErrProp))              &
             //', dP2='//TRIM(DblToShrtChar(AbsErrPPrim))           &
-            //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))              
+            //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE(3)
        Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE3='//TRIM(DblToShrtChar(RelErrProp))              &   
+            //'dE3='//TRIM(DblToShrtChar(RelErrProp))              &
             //', dP3='//TRIM(DblToShrtChar(AbsErrPPrim))           &
             //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
@@ -1129,14 +1129,14 @@ CONTAINS
        ENDIF
        WRITE(Out,*)TRIM(Mssg)
        Mssg=ProcessName(Prog)//'ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))         &
-                             //', %Non0s = '//TRIM(DblToShrtChar(PPrmNon0))              
+                             //', %Non0s = '//TRIM(DblToShrtChar(PPrmNon0))
        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
           WRITE(*,*)TRIM(Mssg)
        ENDIF
        WRITE(Out,*)TRIM(Mssg)
        !
        SELECT CASE(RespOrder)
-       CASE(1) 
+       CASE(1)
           Mssg=ProcessName(Prog,'Max abs errors') &
                                 //'dE1='//TRIM(DblToShrtChar(RelErrProp))//', '        &
                                 //'dP1='//TRIM(DblToShrtChar(AbsErrPPrim))
@@ -1179,7 +1179,7 @@ CONTAINS
     ENDIF
     !
   END FUNCTION CnvrgChckPrim
-  !  
+  !
   !
   SUBROUTINE Order0(P0,Tmp1,Tmp2,Tmp3,N,Ne)
     IMPLICIT NONE

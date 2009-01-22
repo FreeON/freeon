@@ -24,7 +24,7 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 MODULE MPIInclude
-   IMPLICIT NONE   
+   IMPLICIT NONE
 #ifdef PARALLEL
    INCLUDE "mpif.h"
 #endif

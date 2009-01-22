@@ -427,7 +427,7 @@ PROGRAM DIIS
   ENDDO
 
   Mssg=""
-  DO I=1,N-2        
+  DO I=1,N-2
      IF(MOD(I,6)==0)THEN
         IF(I.NE.1) &
              CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
@@ -438,7 +438,7 @@ PROGRAM DIIS
   ENDDO
   Mssg=TRIM(Mssg)//'  '//TRIM(FltToMedmChar(DIISCo%D(Idx%I(N-1))))
   CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
-  
+
 #ifdef SUM_AO
    F^ortho = Z^t F Z.
   IF(Present) THEN
