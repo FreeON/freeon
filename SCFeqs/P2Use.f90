@@ -64,10 +64,10 @@ PROGRAM P2Use
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale
-  INTEGER                       :: MDDampStep, m_step, mm_step
+  INTEGER                       :: MDDampStep, m_step, mm_step, Imin
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-       Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax
+       Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax,Occ3,Occ2,Occ1,Occ0
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, &
        OldFileID,ICart,N,NStep,iGEO,iBAS,iSCF,DMPOrder,NSMat,MM,ICycle,Cycle
   CHARACTER(LEN=2)              :: Cycl
@@ -378,9 +378,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_DMLinear',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=8)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -518,9 +526,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -655,9 +671,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt3',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -805,9 +829,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt5',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
@@ -958,13 +990,20 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-    MM = 0
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt7',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -1124,9 +1163,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt9',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL Delete(P0)
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
@@ -1293,9 +1340,17 @@ PROGRAM P2Use
     CALL New(P0)
     CALL SetEq(P0,P)
     ! Do SP2 iterations
+    Occ0 = 0.D0
+    Occ1 = 0.D0
+    Occ2 = 0.D0
+    Occ3 = 0.D0
+    Imin = 4
     DO I=1,100
-      CALL SP2(P,Tmp1,Tmp2,Half*DBLE(NEl),MM)
-      IF(CnvrgChck(Prog//'_dt11',I,Half*DBLE(NEl),MM,P0,P,P0,Tmp1,Tmp2,StartingFromP_O=.TRUE.,NPurMin_O=2)) EXIT
+      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+      Occ3 = Occ2
+      Occ2 = Occ1
+      Occ1 = Occ0
     ENDDO
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
     CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))

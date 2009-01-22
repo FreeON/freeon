@@ -54,8 +54,8 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   ! Trace Setting SP2
   !-------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
-  REAL(DOUBLE)                   :: Ne,Lambda, idempotency_error
-  INTEGER                        :: I, I2, MM
+  REAL(DOUBLE)                   :: Ne,Lambda, idempotency_error,Occ0,Occ1,Occ2,Occ3
+  INTEGER                        :: I, I2, MM, Imin
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
@@ -97,9 +97,17 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL SetEq(Pold,P)
 
   ! Do SP2 iterations
+  Occ0 = 0.D0
+  Occ1 = 0.D0
+  Occ2 = 0.D0
+  Occ3 = 0.D0
+  Imin = 20
   DO I=1,100
-    CALL SP2(P,Tmp1,Tmp2,Ne,MM)
-    IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2)) EXIT
+    CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+    IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+    Occ3 = Occ2
+    Occ2 = Occ1
+    Occ1 = Occ0
   ENDDO
 
   ! If we are called without the DIIS Fockian, consider a levelshift
