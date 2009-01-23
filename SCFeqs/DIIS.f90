@@ -97,7 +97,7 @@ PROGRAM DIIS
 
   ! Set the first SCF cylce that will be considered for the B matrix.
   IF(.NOT.OptIntQ(Inp, "DIISFirstSCF", DIISFirstSCF)) THEN
-    DIISFirstSCF = DIISDelay-1
+    DIISFirstSCF = DIISDelay
   ENDIF
 
   IF(DIISDelay < 1) THEN
@@ -107,7 +107,7 @@ PROGRAM DIIS
 
   IF(DIISDelay < DIISFirstSCF) THEN
     CALL Warn("[DIIS] DIISDelay has to be greater than DIISFirstSCF!")
-    DIISFirstSCF = DIISDelay-1
+    DIISFirstSCF = DIISDelay
   ENDIF
 
   IF(BMax.GT.DIIS_MAX_MATRIX_SIZE)THEN
