@@ -105,7 +105,7 @@ PROGRAM DIIS
     DIISDelay = 1
   ENDIF
 
-  IF(DIISDelay <= DIISFirstSCF) THEN
+  IF(DIISDelay < DIISFirstSCF) THEN
     CALL Warn("[DIIS] DIISDelay has to be greater than DIISFirstSCF!")
     DIISFirstSCF = DIISDelay-1
   ENDIF
@@ -147,6 +147,7 @@ PROGRAM DIIS
   CALL New(MP(1))
   CALL New(MP(2))
 
+#ifdef USE_AO
   ! The current DIIS error in atomic orbital basis. The DIIS error is given by
   !
   ! FPS - SPF
@@ -170,6 +171,7 @@ PROGRAM DIIS
     CALL Get(ZT, TrixFile("ZT", Args))
   ENDIF
 
+  ! Calculate commutator.
   CALL Multiply(S,P,Tmp1)
   CALL Multiply(Tmp1,F,EI)
   CALL Multiply(F,P,Tmp1)
@@ -197,8 +199,21 @@ PROGRAM DIIS
     CALL Multiply(Tmp1, Z, EI)
   ENDIF
 
+#else
+
+  ! The DIIS error using the Fockian and the density in orthogonal basis
+  ! representation.
+  CALL Get(F, TrixFile("OrthoF", Args, 0))
+  CALL Get(P, TrixFile("OrthoD", Args, 0))
+
+  ! Calculate commutator.
+  CALL Multiply(F, P, EI)
+  CALL Multiply(P, F, EI, -One)
+
+#endif
+
   CALL Put(EI, TrixFile("OrthoE_DIIS", Args, 0))
-  CALL PPrint(EI, "DIIS Error Matrix in orthogonal basis")
+  !CALL PPrint(EI, "DIIS Error Matrix in orthogonal basis")
 
   DIISErr=SQRT(Dot(EI,EI))/DBLE(NBasF)
 
@@ -250,6 +265,7 @@ PROGRAM DIIS
 #endif
       IF(IPresent /= 0) THEN
 
+#ifdef USE_AO
         ! Construct missing E_DIIS.
         CALL Get(F,TrixFile('F',Args,I-iSCF))
         CALL Get(P,TrixFile('D',Args,I-iSCF))
@@ -275,6 +291,14 @@ PROGRAM DIIS
           CALL Multiply(ZT, EI, Tmp1)
           CALL Multiply(Tmp1, Z, EI)
         ENDIF
+#else
+        ! Construct missing E_DIIS.
+        CALL Get(F, TrixFile("OrthoF", Args, 0))
+        CALL Get(P, TrixFile("OrthoD", Args, 0))
+
+        CALL Multiply(F, P, EI)
+        CALL Multiply(P, F, EI, -One)
+#endif
 
         CALL Put(EI, TrixFile("OrthoE_DIIS", Args, I-iSCF))
 
@@ -300,7 +324,6 @@ PROGRAM DIIS
           CALL Halt("he?")
         ENDIF
 
-        ! B_ij = Trace(e_i e_j^{dagger})
         IF(iSCF-DIISFirstSCF > 0) THEN
           I0 = I-DIISFirstSCF+1
         ELSE
@@ -308,13 +331,9 @@ PROGRAM DIIS
         ENDIF
         J0 = J-(iSCF-N+2)+1
 
+        ! B_ij = Trace(e_i e_j^{dagger})
         B%D(I0, J0)=Dot(EI,EJ)
         B%D(J0, I0)=B%D(I0, J0)
-
-        !CALL XPose(EJ, Tmp1)
-        !CALL Multiply(EI, Tmp1, Tmp2)
-        !B%D(I,J) = Trace(Tmp2)
-        !B%D(J,I) = B%D(I,J)
 
       ENDDO
     ENDDO
@@ -333,7 +352,7 @@ PROGRAM DIIS
     CALL Put(BTmp,'diismtrix')
     CALL Delete(BTmp)
 
-    ! CALL PPrint(B, "DIIS B matrix")
+    CALL PPrint(B, "DIIS B matrix")
 
     ! Solve the least squares problem to obtain new DIIS coeficients.
     CALL New(DIISCo,N)
@@ -413,7 +432,7 @@ PROGRAM DIIS
 
   ! And do the summation
   DO I=1,N-1
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "Adding "//TRIM(FltToChar(DIISCo%D(Idx%I(I))))//" * F["//TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "Adding "//TRIM(DblToChar(DIISCo%D(Idx%I(I))))//" * F["//TRIM(IntToChar(iSCF+SCFOff%I(Idx%I(I))))//"]")
     IF(DIISCo%D(Idx%I(I)) /= Zero) THEN
 #ifdef SUM_AO
       CALL Get(Tmp1,TrixFile('F',Args,SCFOff%I(Idx%I(I))))
@@ -429,18 +448,17 @@ PROGRAM DIIS
   Mssg=""
   DO I=1,N-2
      IF(MOD(I,6)==0)THEN
-        IF(I.NE.1) &
-             CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
-        Mssg=TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
+        IF(I.NE.1) CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
+        Mssg=TRIM(DblToMedmChar(DIISCo%D(Idx%I(I))))//','
      ELSE
-        Mssg=TRIM(Mssg)//'  '//TRIM(FltToMedmChar(DIISCo%D(Idx%I(I))))//','
+        Mssg=TRIM(Mssg)//'  '//TRIM(DblToMedmChar(DIISCo%D(Idx%I(I))))//','
      ENDIF
   ENDDO
-  Mssg=TRIM(Mssg)//'  '//TRIM(FltToMedmChar(DIISCo%D(Idx%I(N-1))))
+  Mssg=TRIM(Mssg)//'  '//TRIM(DblToMedmChar(DIISCo%D(Idx%I(N-1))))
   CALL MondoLog(DEBUG_MEDIUM, Prog, Mssg, 'C-1 coefficients')
 
 #ifdef SUM_AO
-   F^ortho = Z^t F Z.
+  ! F^ortho = Z^t F Z.
   IF(Present) THEN
     CALL Multiply(X, F, Tmp1)
     CALL Multiply(Tmp1, X, F)

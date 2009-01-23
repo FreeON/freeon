@@ -106,6 +106,7 @@ PROGRAM DIIS
     B%D(N,1:N)=One
     B%D(1:N,N)=One
     B%D(N,N)=Zero
+    CALL PPrint(B, "DIIS B matrix")
     ! Solve the least squares problem to obtain new DIIS coeficients.
     CALL New(DIISCo,N)
 #ifdef PARALLEL
