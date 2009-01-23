@@ -788,21 +788,21 @@ MODULE PrettyPrint
 !    Print a BCSR matrix
 !
      SUBROUTINE Print_BCSR(A,Name,FileName_O,Unit_O)
-        TYPE(BCSR)                           :: A
-        TYPE(DBL_RNK2)                       :: B
-        CHARACTER(LEN=*),INTENT(IN)          :: Name
-        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+       TYPE(BCSR)                           :: A
+       TYPE(DBL_RNK2)                       :: B
+       CHARACTER(LEN=*),INTENT(IN)          :: Name
+       INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
 
-        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
        IF(PrintFlags%Mat/=DEBUG_MATRICES.AND.(.NOT.PRESENT(Unit_O)))RETURN
 #ifdef PARALLEL
-        IF(MyId==ROOT)THEN
+       IF(MyId==ROOT)THEN
 #endif
-           CALL SetEq(B,A)
-           CALL Print_DBL_RNK2(B,Name,FileName_O,Unit_O)
-           CALL Delete(B)
+         CALL SetEq(B,A)
+         CALL Print_DBL_RNK2(B,Name,FileName_O,Unit_O)
+         CALL Delete(B)
 #ifdef PARALLEL
-        ENDIF
+       ENDIF
 #endif
      END SUBROUTINE Print_BCSR
 #ifdef PARALLEL
