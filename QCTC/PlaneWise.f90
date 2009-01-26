@@ -1,11 +1,11 @@
 !------------------------------------------------------------------------------
 !
-!   Written by Matt Challacombe (2007) 
+!   Written by Matt Challacombe (2007)
 !   A major pain in the ass, this was
 !
 MODULE PlaneWise
   USE Derivedtypes
-  USE GlobalScalars   
+  USE GlobalScalars
   USE GlobalObjects
   USE ProcessControl
   USE Indexing
@@ -13,15 +13,15 @@ MODULE PlaneWise
   USE Macros
   USE SpecFun
   USE MemMan
-  USE MondoPoles  
+  USE MondoPoles
   IMPLICIT NONE
   ! Globals
-CONTAINS  
+CONTAINS
 !========================================================================================
-! 
+!
 !========================================================================================
   SUBROUTINE InnPlane(Ell,A1,A2,B1,B2,Ylm,WellSepCells_O)
-    INTEGER                                :: Ell,L,M,LDex,LMDex     
+    INTEGER                                :: Ell,L,M,LDex,LMDex
     INTEGER                                :: Mu1,Mu2,Lm1,Lm2,MuMu,LmLm,NC,NCell
     REAL(DOUBLE)                           :: Beta,Oa
     REAL(DOUBLE),DIMENSION(3)              :: A1,A2,B1,B2
@@ -35,10 +35,12 @@ CONTAINS
     COMPLEX(DOUBLE)                        :: Eye=(0D0,1D0)
 !    REAL(DOUBLE),EXTERNAL                  :: DGamma
     REAL(DOUBLE),DIMENSION(3)              :: A1xA2
-    REAL(DOUBLE)                           :: KMax,SMax,R,RMin
+    REAL(DOUBLE)                           :: KMax,SMax,RMax,R,RMin,RToThEllPlsOne
     TYPE(DBL_RNK2)                         :: HPlane
     TYPE(DBL_VECT)                         :: HSort
     TYPE(INT_VECT)                         :: ISort
+    INTEGER, PARAMETER                     :: EllSwitch=11
+    REAL(DOUBLE),PARAMETER                 :: Accuracy=1D-30
     !-----------------------------------------------------------------------------------
     IF(PRESENT(WellSepCells_O))THEN
        WellSepQ=.TRUE.
@@ -52,8 +54,13 @@ CONTAINS
     R=SQRT(DOT_PRODUCT(A2,A2))
     RMin=MIN(RMin,R)
     Beta=SQRT(Pi)/RMin
-    SMax=(One/Beta)*SQRT(ABS(LOG(1D-20)))
-    KMax=    Beta *SQRT(ABS(LOG(1D-20)))/Pi
+    SMax=(One/Beta)*SQRT(ABS(LOG(Accuracy)))
+    KMax=    Beta *SQRT(ABS(LOG(Accuracy)))/Pi
+    RMax=(One/Accuracy)**(One/DBLE(EllSwitch))
+
+    Ylm=(0D0,0D0)
+    YRecp=(0D0,0D0)
+    YReal=(0D0,0D0)
     !-----------------------------------------------------------------------------------
     A1xA2=CROSS_PRODUCT(A1,A2)
     Oa=SQRT(DOT_PRODUCT(A1xA2,A1xA2))
@@ -66,7 +73,7 @@ CONTAINS
     DO M=0,Ell-1
        ALP(M+1,M)=0
     ENDDO
-    DO L=2,Ell         
+    DO L=2,Ell
        LDex=LTD(L)
        DO M=0,L-2
           ALP(L,M)=-ALP(L-2,M)*FactMlm2(LDex+M)
@@ -120,27 +127,26 @@ CONTAINS
     !
     CALL Sort(HSort,ISort,NCell,2)
     !
-    YRecp=0D0
     DO MuMu=1,NCell
        H=HPlane%D(:,ISort%I(MuMu))
        Ph=ATAN2(H(2),H(1))
        Rh=HSort%D(MuMu)
        Kh=(Rh*Pi/Beta)**2
        CALL InPlaneNegativeGammas(Ell,Kh,Gamma(-2*Ell:1))
-       DO L=0,Ell
+       DO L=0,MIN(EllSwitch,Ell)
           DO M=0,L
              YRecp(L,M)=YRecp(L,M)+Eye**M*EXP(-Eye*DBLE(M)*Ph)*Rh**(L-1)*Gamma(M-L+1)*(Pi**L)
           ENDDO
        ENDDO
     ENDDO
     !
-    DO L=2,Ell                 
+    DO L=2,MIN(EllSwitch,Ell)
        LDex=LTD(L)
        YRecp(L,0)=YRecp(L,0)+Two*Pi*Beta**(L-1)/DBLE(L-1) & ! This is the Mu1,Mu2==0 term
             -Two*Oa*Beta**(L+1)/DBLE(L+1)   ! This is subtracting out the Lam1,Lam2==0 term
     ENDDO
     !
-    DO L=0,Ell
+    DO L=0,MIN(EllSwitch,Ell)
        DO M=0,L
           YRecp(L,M)=YRecp(L,M)/Oa
        ENDDO
@@ -148,7 +154,7 @@ CONTAINS
     !
     CALL Delete(ISort)
     CALL Delete(HSort)
-    CALL Delete(HPlane)    
+    CALL Delete(HPlane)
     !---------------------------------------------------------------------------------
     ! SUBTRACT THE RECIPROCAL SPACE PART OF THE NEAR FIELD FROM THE PLANEWISE CELLS
     !---------------------------------------------------------------------------------
@@ -158,28 +164,19 @@ CONTAINS
           Ps=ATAN2(S(2),S(1))
           Rs=SQRT(S(1)**2+S(2)**2)
           Ks=(Rs*Beta)**2
-          DO L=0,Ell
+          DO L=0,MIN(EllSwitch,Ell)
              DO M=0,L
                 YRecp(L,M)=YRecp(L,M)-EXP(-Eye*DBLE(M)*Ps)*DGamma(DBLE(L+M+1)*5D-1)     &
-                                     *RegularizedGammaP(5D-1*DBLE(L+M+1),Ks)/Rs**(L+1)    
+                                     *RegularizedGammaP(5D-1*DBLE(L+M+1),Ks)/Rs**(L+1)
              ENDDO
           ENDDO
        ENDDO
     ENDIF
-    !---------------------------------------------------------------------------------
-    ! NORMALIZE THE RECIPROCAL HARMONICS
-    !---------------------------------------------------------------------------------
-    DO L=0,Ell
-       DO M=0,L
-          YRecp(L,M)=ALP(L,M)*YRecp(L,M)
-       ENDDO
-    ENDDO
     !-----------------------------------------------------------------------------------
-    ! REAL SPACE PART
+    ! REAL SPACE PART EWALD-LIKE PART (FOR LOWER ELL<=ELLSWITCH)
     !-----------------------------------------------------------------------------------
     !
     NCell=0
-    YReal=0D0
     DO Lm1=-30,30
        DO Lm2=-30,30
           IF(.NOT.(Lm1==0.AND.Lm2==0))THEN
@@ -226,42 +223,90 @@ CONTAINS
           Ps=ATAN2(S(2),S(1))
           Ks=(Rs*Beta)**2
           CALL InPlanePositiveGammas(Ell,Ks,Gamma(0:2*Ell+1))
-          DO L=0,Ell
+          DO L=0,MIN(EllSwitch,Ell)
              DO M=0,L
-                YReal(L,M)=YReal(L,M)+EXP(-Eye*DBLE(M)*Ps)*Gamma(L+M+1)/Rs**(L+1)       
+                YReal(L,M)=YReal(L,M)+EXP(-Eye*DBLE(M)*Ps)*Gamma(L+M+1)/Rs**(L+1)
              ENDDO
           ENDDO
        ENDIF
     ENDDO
     !
-    DO L=0,Ell
-       DO M=0,L
-          YReal(L,M)=ALP(L,M)*YReal(L,M)
-       ENDDO
-    ENDDO
-    !      
-    DO L=0,Ell
-       DO M=0,L
-          Ylm(L,M)=Ylm(L,M)+(YRecp(L,M)+YReal(L,M))*(0D0,1D0)**(M)
-       ENDDO
-    ENDDO
-!!$
-!!$    DO L=64,64 !34,34
-!!$       DO M=0,0
-!!$          WRITE(*,*)'RECP = ',YRecp(L,M)
-!!$          WRITE(*,*)'REAL = ',YReal(L,M)
-!!$          WRITE(*,*)'TOT  = ',Ylm(L,M)
-!!$       ENDDO
-!!$    ENDDO
-    !
     CALL Delete(ISort)
     CALL Delete(HSort)
     CALL Delete(HPlane)
+    !-----------------------------------------------------------------------------------
+    ! REAL SPACE PART (FOR HIGH ELL)
+    !-----------------------------------------------------------------------------------
+    !
+    NCell=0
+    DO Lm1=-100,100
+       DO Lm2=-100,100
+          IF(.NOT.(Lm1==0.AND.Lm2==0))THEN
+             S=Lm1*A1(1:2)+Lm2*A2(1:2)
+             Rs=SQRT(S(1)*S(1)+S(2)*S(2))
+             IF(Rs<RMax)THEN
+                NCell=NCell+1
+             ENDIF
+          ENDIF
+       ENDDO
+    ENDDO
+    !
+    CALL New(ISort,NCell)
+    CALL New(HSort,NCell)
+    CALL New(HPlane,(/2,NCell/))
+    !
+    NCell=0
+    DO Lm1=-100,100
+       DO Lm2=-100,100
+          IF(.NOT.(Lm1==0.AND.Lm2==0))THEN
+             S=Lm1*A1(1:2)+Lm2*A2(1:2)
+             Rs=SQRT(S(1)*S(1)+S(2)*S(2))
+             IF(Rs<RMax)THEN
+                NCell=NCell+1
+                HPlane%D(:,NCell)=S
+                HSort%D(NCell)=Rs
+                ISort%I(NCell)=NCell
+             ENDIF
+          ENDIF
+       ENDDO
+    ENDDO
+    !
+    CALL Sort(HSort,ISort,NCell,2)
+    !
+    DO LmLm=1,NCell
+       S=HPlane%D(:,ISort%I(LmLm))
+       IF(WellSepQ)THEN
+          DoCell=.NOT.InCell_CellSet(WellSepCells_O,S(1),S(2),0D0)
+       ELSE
+          DoCell=.TRUE.
+       ENDIF
+       IF(DoCell)THEN
+          Rs=HSort%D(LmLm)
+          Ps=ATAN2(S(2),S(1))
+          DO L=EllSwitch+1,Ell
+             DO M=0,L
+                YReal(L,M)=YReal(L,M)+EXP(-Eye*DBLE(M)*Ps)/Rs**(L+1)
+             ENDDO
+          ENDDO
+       ENDIF
+    ENDDO
+!
+    CALL Delete(ISort)
+    CALL Delete(HSort)
+    CALL Delete(HPlane)
+    !---------------------------------------------------------------------------------
+    ! COMBINE THE EWALD AND REAL SPACE COMPONENTS AND NORMALIZE THE HARMONICS
+    !---------------------------------------------------------------------------------
+    DO L=0,Ell
+       DO M=0,L
+          Ylm(L,M)=Ylm(L,M)+ALP(L,M)*(YRecp(L,M)+YReal(L,M))*(0D0,1D0)**(M)
+       ENDDO
+    ENDDO
     !
   END SUBROUTINE InnPlane
 
    SUBROUTINE OffPlane(Ell,A1,A2,A3,B1,B2,Ylm)
-     INTEGER                                :: Ell,L,M,LDex,LMDex     
+     INTEGER                                :: Ell,L,M,LDex,LMDex
      INTEGER                                :: Mu1,Mu2,Lm1,Lm2,NCell,MuMu
      REAL(DOUBLE)                           :: Beta,Oa,HMax
      REAL(DOUBLE)                           :: XiOne,XiTwo,Zeta,ZPhz,SgnP,SgnM
@@ -332,14 +377,14 @@ CONTAINS
         Rh=HSort%D(MuMu)
         !
         ZPhz=EXP(Two*Pi*Rh*Zeta)
-        XYPhz=EXP(Two*Pi*Eye*Rh*(XiOne*COS(Ph)+XiTwo*SIN(Ph)))              
+        XYPhz=EXP(Two*Pi*Eye*Rh*(XiOne*COS(Ph)+XiTwo*SIN(Ph)))
         !
         DO L=0,Ell
            DO M=0,L
               YOff(L,M)=YOff(L,M)+EXP(-Eye*DBLE(M)*Ph)*Rh**(L-1) &
                    *(One/(ZPhz*XYPhz-One)*SgnP**(L+M)      &
                     +One/(ZPhz/XYPhz-One)*SgnM**(L+M))
-              
+
            ENDDO
         ENDDO
      ENDDO
@@ -452,7 +497,7 @@ CONTAINS
 !        WRITE(*,*)(TwoM+1),G(TwoM+1)
         XM=XM*SQX
      ENDDO
-!     STOP 
+!     STOP
      !
    END SUBROUTINE InPlanePositiveGCompliment
 
