@@ -5,7 +5,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@
 
 SUBDIRS = MondoMods FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
 
-EXTRA_DIST = localversion
+EXTRA_DIST = localversion FreeON.bibtex
 
 CLEANFILES = *~
 
