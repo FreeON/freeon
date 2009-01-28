@@ -550,7 +550,9 @@ END PROGRAM test_compiler
   ],
   [AC_MSG_RESULT([good, none found])],
   [AC_MSG_RESULT([failed test])
-  AC_MSG_FAILURE([the compiler does not understand the ALLOCATABLE attribute inside a type definition])])
+  AC_MSG_FAILURE([The compiler does not understand the ALLOCATABLE attribute
+                  inside a type definition. If you are using gcc, we suggest
+                  you use a version >= 4.2.])])
 
 # Check for internal LAPACK/BLAS.
 AC_MSG_CHECKING([for internal lapack/blas])
