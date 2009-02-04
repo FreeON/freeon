@@ -13,9 +13,14 @@ if len(arguments) == 0:
   sys.exit(1)
 
 for file in arguments:
-  fd = open(file)
-  lines = fd.readlines()
-  fd.close()
+  try:
+    fd = open(file)
+    lines = fd.readlines()
+    fd.close()
+
+  except:
+    print("error opening file " + file)
+    sys.exit(1)
 
   lineNumber = 0
   fileNeedsFixing = False
