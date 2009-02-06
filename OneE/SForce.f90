@@ -128,11 +128,20 @@ PROGRAM SForce
   CALL BcastBCSR(P)
   CALL Delete(P_DBCSR)
 #else
-  CALL Multiply(P,F,T1)       ! T1:=P.F
-  CALL Multiply(T1,P,F)       ! F:=P.F.P
-  CALL Filter(P,F)            ! P=Filter[P.F.P]
+
+!!  old
+!!  CALL Multiply(P,F,T1)       ! T1:=P.F
+!!  CALL Multiply(T1,P,F)       ! F:=P.F.P
+!!  CALL Filter(P,F)            ! P=Filter[P.F.P]
+!!  CALL Multiply(Z,P,T1)       ! P:= Z.P.ZT
+!!  CALL Multiply(T1,ZT,P)      ! Back AO basis.
+!! Begin Change
+  CALL Multiply(F,P,T1)       ! T1:=F.P
+  CALL Filter(P,T1)            ! P=Filter[P.F]
   CALL Multiply(Z,P,T1)       ! P:= Z.P.ZT
   CALL Multiply(T1,ZT,P)      ! Back AO basis.
+!! End Change
+
 #endif
 
   CALL Delete(F)

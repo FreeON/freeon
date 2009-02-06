@@ -60,7 +60,7 @@ CONTAINS
     TYPE(Controls)  :: C
     INTEGER         :: I,iSCF,iBAS,iGEO,iCLONE,iATS,iREMOVE
     INTEGER         :: iGEOBegin,iMDStep
-    REAL(DOUBLE)    :: Temp
+    REAL(DOUBLE)    :: Temp,Entropy
     LOGICAL         :: NewECMD,OrthogDM
     INTEGER         :: oldState
 
