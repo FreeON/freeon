@@ -10,18 +10,18 @@ Grad=(MolecularDynamics)
 DebugAll=(MaxDebug,CheckSums)
 
 Guess=SuperPos
-SCFMethod=(TC2)
+SCFMethod=(RH)
 BasisSets=(3-21G-SPLIT)
 
-ModelChem=(HF)
+ModelChem=(PBE0)
 
-Accuracy=(good)
+Accuracy=(loose)
 SCFConvergence=(DIIS)
 
 MinSCF=12
 MaxSCF=12
 
-MDNumSCF=2
+MDNumSCF=0
 
 MaxMDStep=20000
 MDMethod=Verlet

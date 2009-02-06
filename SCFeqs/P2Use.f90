@@ -374,26 +374,26 @@ PROGRAM P2Use
     CALL SetEq(P,Tmp2)
 
     ! Purify P
-    MM = 0
-    CALL New(P0)
-    CALL SetEq(P0,P)
-    ! Do SP2 iterations
-    Occ0 = 0.D0
-    Occ1 = 0.D0
-    Occ2 = 0.D0
-    Occ3 = 0.D0
-    Imin = 4
-    DO I=1,100
-      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
-      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
-      Occ3 = Occ2
-      Occ2 = Occ1
-      Occ1 = Occ0
-    ENDDO
-    CALL Delete(P0)
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+!    MM = 0
+!    CALL New(P0)
+!    CALL SetEq(P0,P)
+!    ! Do SP2 iterations
+!    Occ0 = 0.D0
+!    Occ1 = 0.D0
+!    Occ2 = 0.D0
+!    Occ3 = 0.D0
+!    Imin = 4
+!    DO I=1,100
+!      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+!      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+!      Occ3 = Occ2
+!      Occ2 = Occ1
+!      Occ1 = Occ0
+!    ENDDO
+!    CALL Delete(P0)
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P)  = "//TRIM(DblToChar(TrP)))
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -990,25 +990,25 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-    CALL New(P0)
-    CALL SetEq(P0,P)
-    ! Do SP2 iterations
-    Occ0 = 0.D0
-    Occ1 = 0.D0
-    Occ2 = 0.D0
-    Occ3 = 0.D0
-    Imin = 4
-    DO I=1,100
-      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
-      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
-      Occ3 = Occ2
-      Occ2 = Occ1
-      Occ1 = Occ0
-    ENDDO
-    CALL Delete(P0)
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+!!    CALL New(P0)
+!!    CALL SetEq(P0,P)
+!!    ! Do SP2 iterations
+!!    Occ0 = 0.D0
+!!    Occ1 = 0.D0
+!!    Occ2 = 0.D0
+!!    Occ3 = 0.D0
+!!    Imin = 4
+!!    DO I=1,100
+!!      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+!!      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+!!      Occ3 = Occ2
+!!      Occ2 = Occ1
+!!      Occ1 = Occ0
+!!    ENDDO
+!!    CALL Delete(P0)
+!!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+!!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+!!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -1159,26 +1159,26 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
-    MM = 0
-    CALL New(P0)
-    CALL SetEq(P0,P)
-    ! Do SP2 iterations
-    Occ0 = 0.D0
-    Occ1 = 0.D0
-    Occ2 = 0.D0
-    Occ3 = 0.D0
-    Imin = 4
-    DO I=1,100
-      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
-      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
-      Occ3 = Occ2
-      Occ2 = Occ1
-      Occ1 = Occ0
-    ENDDO
-    CALL Delete(P0)
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
-    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
+!    MM = 0
+!    CALL New(P0)
+!    CALL SetEq(P0,P)
+!    ! Do SP2 iterations
+!    Occ0 = 0.D0
+!    Occ1 = 0.D0
+!    Occ2 = 0.D0
+!    Occ3 = 0.D0
+!    Imin = 4
+!    DO I=1,100
+!      CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
+!      IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+!      Occ3 = Occ2
+!      Occ2 = Occ1
+!      Occ1 = Occ0
+!    ENDDO
+!    CALL Delete(P0)
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "purified after "//TRIM(IntToChar(I))//" iterations")
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P) = "//TRIM(DblToChar(TrP)))
+!    CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace(P2) = "//TRIM(DblToChar(TrP2)))
 
     ! Convert to AO Rep
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)

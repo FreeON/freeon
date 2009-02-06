@@ -45,11 +45,12 @@ PROGRAM RHEqs
 
   TYPE(BCSR)                     :: sP,sF,FT,sX,sTmp1,sTmp2
   TYPE(DBL_RNK2)                 :: X,F,MO,P
-  TYPE(DBL_VECT)                 :: EigenV
+  TYPE(DBL_VECT)                 :: EigenV,Entr
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
-  REAL(DOUBLE)                   :: Mu,Entrop,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
-  INTEGER                        :: I,J,K,LgN,NRow,NCol,NSMat
+  REAL(DOUBLE)                   :: Mu,Entropy,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
+  REAL(DOUBLE)                   :: kB,Temp,Occ,OccErr,EPS,dOccdMu,Ne,Beta,Xk
+  INTEGER                        :: I,J,K,LgN,NRow,NCol,NSMat,m
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
@@ -63,6 +64,7 @@ PROGRAM RHEqs
   !
   CALL OpenASCII(InpFile,Inp)
   Smearing='NoSmearing'
+  Smearing='Fermi-Dirac'
   Sigma=0.002D0
   IF(OptKeyQ(Inp,'Smearing','MP')) Smearing='Methfessel-Paxton'
   IF(OptDblQ(Inp,'SmearingValue',Dum)) Sigma=Dum
@@ -151,6 +153,7 @@ PROGRAM RHEqs
   END SELECT
   !
   Mu=(HOMO+LUMO)*0.5D0
+  WRITE(*,*) ' Chemical potential Mu = ', Mu
 
   !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
     !Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
@@ -173,7 +176,7 @@ PROGRAM RHEqs
   !
   SELECT CASE(Smearing)
   CASE('Methfessel-Paxton')
-    Entrop=0D0
+    Entropy=0.D0
     DO K=1,NBasF
       ! PRB 40, 3616, 1989.
       ! Second order smearing N=2.
@@ -187,8 +190,8 @@ PROGRAM RHEqs
       ! Fractional occupation.
       Fk=0.5D0*(1D0-ERF(Z))+EXP(-Z**2)*(A1*H1+A2*H3)
       ! Entropic correction to the energy (Comp. Mat. Sci. 6, 15, 1996).
-      Entrop=Entrop+Sigma*0.5D0*A2*H4*EXP(-Z**2)
-      !write(*,*) Fk,Entrop
+      Entropy=Entropy+Sigma*0.5D0*A2*H4*EXP(-Z**2)
+      !write(*,*) Fk,Entropy
       DO J=1,NBasF
         CJK=F%D(J,K)*Fk
         DO I=1,NBasF
@@ -199,16 +202,78 @@ PROGRAM RHEqs
     !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
     !  Mssg=ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
     !                       //', Entropic correction per atom = ' &
-    !                       //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms)))
+    !                       //TRIM(DblToShrtChar(Entropy/DBLE(NAtoms)))
     !  CALL OpenASCII(OutFile,Out)
     !  CALL PrintProtectL(Out)
     !  WRITE(Out,*)TRIM(Mssg)
     !  CALL PrintProtectR(Out)
     !  CLOSE(Out)
     !ENDIF
-    CALL MondoLog(DEBUG_MEDIUM, "RHeqs", ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
-      //', Entropic correction per atom = ' &
-      //TRIM(DblToShrtChar(Entrop/DBLE(NAtoms))))
+  CASE('Fermi-Dirac')
+    CALL New(Entr,1)
+    CALL SetEq(Entr,Zero)
+!    kB = 6.33366256E-06 ! Ry/K
+    kB = 2.D0*6.33366256E-06 ! au/K
+!    kB = 8.61739E-05  ! eV/K
+    write(*,*) 'kB = ',kB
+    Temp = 5000.D0
+    m = 6
+    Beta = 1.D0/(kB*Temp)
+    Ne=Half*DBLE(NEl)
+    EPS = 1E-10
+    OccErr = 1.0D0
+    DO WHILE (OccErr.GT.EPS)
+      Entropy=0.D0
+      Occ = 0.D0
+      dOccdMu = 0.D0
+      DO K=1,NBasF
+        Ek=EigenV%D(K)
+
+
+        Fk = 1.D0/(EXP(Beta*(Ek-Mu))+1.D0)
+
+!        Xk = 0.5D0 - Beta*(Ek - Mu)/(2**(2+m))
+!        DO I = 1,m
+!          Xk = Xk*Xk/(2*Xk*(Xk-1.D0)+1.D0)
+!        ENDDO
+!        Fk = Xk
+
+        Occ = Occ + Fk
+        IF(Fk.GT.0.D0) THEN
+          IF(Fk.LT.1.D0) THEN
+            Entropy = Entropy - 2*Temp*kB*(Fk*LOG(Fk)+(1.D0-Fk)*LOG(1.D0-Fk))
+          ENDIF
+        ENDIF
+        dOccdMu = dOccdMu + Beta*Fk*(1.D0-Fk)
+      ENDDO
+      WRITE(*,*) 'Mu_fore = ', Mu
+      Mu = Mu + (Ne - Occ)/dOccdMu
+      OccErr = ABS(Occ-Ne)
+      WRITE(*,*) 'Mu = ', Mu
+      WRITE(*,*) 'Occ = ', Occ
+      WRITE(*,*) 'Ne = ', Ne
+      WRITE(*,*) 'Entropy = ', Entropy
+    ENDDO
+    DO K=1,NBasF
+      Ek=EigenV%D(K)
+      Fk = 1.D0/(EXP(Beta*(Ek-Mu))+1.D0)
+      DO J=1,NBasF
+        CJK=F%D(J,K)*Fk
+        DO I=1,NBasF
+          P%D(I,J)=P%D(I,J)+F%D(I,K)*CJK
+        ENDDO
+      ENDDO
+    ENDDO
+    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+      Mssg=ProcessName(Prog)//' ENTROPY correction (eV) = ' &
+                           //TRIM(DblToChar(Entropy*27.20672674616D0))
+      CALL OpenASCII(OutFile,Out)
+      CALL PrintProtectL(Out)
+      WRITE(Out,*)TRIM(Mssg)
+      CALL PrintProtectR(Out)
+      CLOSE(Out)
+    ENDIF
+    Entr%D(1) = Entropy
   CASE('NoSmearing')
     !
     SELECT CASE(NSMat)
@@ -275,9 +340,12 @@ PROGRAM RHEqs
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
   CALL Plot(sTmp1,'P['//TRIM(NxtCycl)//']')
+!  CALL Put(Entr,TrixFile('Entropy',Args,1))
+  CALL Put(Entropy,'Entropy')
 
   CALL Delete(sX)
   CALL Delete(sP)
   CALL Delete(sTmp1)
+  CALL Delete(Entr)
   CALL ShutDown(Prog)
 END PROGRAM  RHEqs
