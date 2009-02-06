@@ -150,10 +150,55 @@ AC_MSG_NOTICE([f90 compiler version: ${fc_compiler_version_string}])
 AC_PROG_CC_STDC
 AC_GNU_SOURCE
 
-# Switch to fortran 90 for tests.
+# Put the F90-compiler into free form.
 AC_LANG(Fortran)
 AC_FC_SRCEXT(f90)
 AC_FC_FREEFORM
+
+# Testing whether the C compiler works.
+AC_MSG_CHECKING([whether the C-compiler produces executable code])
+AC_LANG(C)
+AC_RUN_IFELSE([
+int
+main ()
+{
+  int i = 1;
+  return 0;
+}
+],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])
+   AC_MSG_FAILURE([Please verify your choice of C-compiler])])
+
+# Test whether the F77-compiler works.
+AC_MSG_CHECKING([whether the F77-compiler produces executable code])
+AC_LANG(Fortran 77)
+AC_RUN_IFELSE([
+      INTEGER I
+
+      I = 1
+      STOP
+      END
+],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])
+   AC_MSG_FAILURE([Please verify your choice of F77-compiler])])
+
+# Test whether the F90-compiler works.
+AC_MSG_CHECKING([whether the F90-compiler produces executable code])
+AC_LANG(Fortran)
+AC_RUN_IFELSE([
+program runtest
+
+  integer :: i
+
+  i = 1
+
+end program runtest
+],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])
+   AC_MSG_FAILURE([Please verify your choice of F90-compiler])])
 
 # Store additional optimization flags.
 optimization_flags=""
