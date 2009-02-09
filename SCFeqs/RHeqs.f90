@@ -45,7 +45,7 @@ PROGRAM RHEqs
 
   TYPE(BCSR)                     :: sP,sF,FT,sX,sTmp1,sTmp2
   TYPE(DBL_RNK2)                 :: X,F,MO,P
-  TYPE(DBL_VECT)                 :: EigenV,Entr
+  TYPE(DBL_VECT)                 :: EigenV
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
   REAL(DOUBLE)                   :: Mu,Entropy,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
@@ -82,13 +82,20 @@ PROGRAM RHEqs
   ENDIF
 
   NSMat=sF%NSMat
-  IF(NSMat.GT.1.AND.Smearing.NE.'NoSmearing')CALL Halt('Smearing with unrestricted are not supported!')
-  !
+  IF(NSMat.GT.1.AND.Smearing.NE.'NoSmearing') CALL Halt('Smearing with unrestricted are not supported!')
+
   SELECT CASE(NSMat)
-  CASE(1);NRow=  NBasF;NCol=  NBasF
-  CASE(2);NRow=  NBasF;NCol=2*NBasF
-  CASE(4);NRow=2*NBasF;NCol=2*NBasF
-  CASE DEFAULT;CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
+  CASE(1)
+    NRow=  NBasF
+    NCol=  NBasF
+  CASE(2)
+    NRow=  NBasF
+    NCol=2*NBasF
+  CASE(4)
+    NRow=2*NBasF
+    NCol=2*NBasF
+  CASE DEFAULT
+    CALL Halt(' RHeqs: sF%NSMat doesn''t have an expected value! ')
   END SELECT
 
 !!$  ! Some symmetry checks.
@@ -149,11 +156,12 @@ PROGRAM RHEqs
     !
     HOMO=EigenV%D(NEl)
     LUMO=EigenV%D(MIN(NBasF,Nel+1))
-  CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
+  CASE DEFAULT
+    CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
   END SELECT
   !
   Mu=(HOMO+LUMO)*0.5D0
-  WRITE(*,*) ' Chemical potential Mu = ', Mu
+  CALL MondoLog(DEBUG_MEDIUM, Prog, "Chemical potential Mu = "//TRIM(DblToChar(Mu)))
 
   !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
     !Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
@@ -164,8 +172,7 @@ PROGRAM RHEqs
     !CALL PrintProtectR(Out)
     !CLOSE(Out)
   !ENDIF
-  CALL MondoLog(DEBUG_MINIMUM, "RHeqs", ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
-    //', LUMO = '//TRIM(DblToMedmChar(LUMO)))
+  CALL MondoLog(DEBUG_MINIMUM, Prog, 'HOMO = '//TRIM(DblToMedmChar(HOMO))//', LUMO = '//TRIM(DblToMedmChar(LUMO)))
   CALL Put(HOMO-LUMO,'HomoLumoGap')
   !
   !--------------------------------------------------------------
@@ -210,15 +217,14 @@ PROGRAM RHEqs
     !  CLOSE(Out)
     !ENDIF
   CASE('Fermi-Dirac')
-    CALL New(Entr,1)
-    CALL SetEq(Entr,Zero)
-!    kB = 6.33366256E-06 ! Ry/K
+    ! kB = 6.33366256E-06 ! Ry/K
     kB = 2.D0*6.33366256E-06 ! au/K
-!    kB = 8.61739E-05  ! eV/K
-    write(*,*) 'kB = ',kB
+    ! kB = 8.61739E-05  ! eV/K
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "kB = "//TRIM(DblToChar(kB)))
 
     ! Make this in input parameter.
     Temp = 5000.D0
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "smearing temperature = "//TRIM(FltToChar(Temp))//" K")
 
     ! Leave for now as hack.
     m = 6
@@ -233,7 +239,6 @@ PROGRAM RHEqs
       dOccdMu = 0.D0
       DO K=1,NBasF
         Ek=EigenV%D(K)
-
 
         Fk = 1.D0/(EXP(Beta*(Ek-Mu))+1.D0)
 
@@ -251,13 +256,13 @@ PROGRAM RHEqs
         ENDIF
         dOccdMu = dOccdMu + Beta*Fk*(1.D0-Fk)
       ENDDO
-      WRITE(*,*) 'Mu_fore = ', Mu
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Mu_fore = '//TRIM(DblToChar(Mu)))
       Mu = Mu + (Ne - Occ)/dOccdMu
       OccErr = ABS(Occ-Ne)
-      WRITE(*,*) 'Mu = ', Mu
-      WRITE(*,*) 'Occ = ', Occ
-      WRITE(*,*) 'Ne = ', Ne
-      WRITE(*,*) 'Entropy = ', Entropy
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Mu = '//TRIM(DblToChar(Mu)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Occ = '//TRIM(DblToChar(Occ)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Ne = '//TRIM(DblToChar(Ne)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Entropy = '//TRIM(DblToChar(Entropy)))
     ENDDO
     DO K=1,NBasF
       Ek=EigenV%D(K)
@@ -270,15 +275,13 @@ PROGRAM RHEqs
       ENDDO
     ENDDO
     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-      Mssg=ProcessName(Prog)//' ENTROPY correction (eV) = ' &
-                           //TRIM(DblToChar(Entropy*27.20672674616D0))
+      Mssg=ProcessName(Prog)//' ENTROPY correction (eV) = '//TRIM(DblToChar(Entropy*27.20672674616D0))
       CALL OpenASCII(OutFile,Out)
       CALL PrintProtectL(Out)
       WRITE(Out,*)TRIM(Mssg)
       CALL PrintProtectR(Out)
       CLOSE(Out)
     ENDIF
-    Entr%D(1) = Entropy
   CASE('NoSmearing')
     !
     SELECT CASE(NSMat)
@@ -300,13 +303,18 @@ PROGRAM RHEqs
       CALL DGEMM_NT(2*NBasF,Nel,2*NBasF,0D0,F%D(1,1),F%D(1,1),P%D(1,1))
       !CALL DGEMM('N','T',2*NBasF,2*NBasF,Nel,1D0,F%D(1,1), &
       !           2*NBasF,F%D(1,1),2*NBasF,0D0,P%D(1,1),2*NBasF)
-    CASE DEFAULT;CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
+    CASE DEFAULT
+      CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
     END SELECT
     !
-  CASE DEFAULT;CALL Halt('RHEqs: Doesn''t regonize this Smearing <'//TRIM(Smearing)//'>')
+  CASE DEFAULT
+    CALL Halt('RHEqs: Doesn''t regonize this Smearing <'//TRIM(Smearing)//'>')
   END SELECT
   !
   CALL Delete(EigenV)
+
+  ! Put entropy to hdf.
+  CALL Put(Entropy, "Entropy")
 
   CALL SetEq(sX,P,nsmat_o=nsmat)          !  sX=P
   CALL New(sP,nsmat_o=nsmat)
@@ -346,13 +354,8 @@ PROGRAM RHEqs
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
   CALL Plot(sTmp1,'P['//TRIM(NxtCycl)//']')
 
-  ! Fix this.
-!  CALL Put(Entr,TrixFile('Entropy',Args,1))
-  CALL Put(Entropy,'Entropy')
-
   CALL Delete(sX)
   CALL Delete(sP)
   CALL Delete(sTmp1)
-  CALL Delete(Entr)
   CALL ShutDown(Prog)
 END PROGRAM  RHEqs
