@@ -990,6 +990,8 @@ PROGRAM P2Use
     CALL Put(P, TrixFile("DOPsave", Args))
 
     ! Purify P
+
+    ! For Fermi-Dirac or temperature smearing, do _not_ purify! Else (T=0) do.
 !!    CALL New(P0)
 !!    CALL SetEq(P0,P)
 !!    ! Do SP2 iterations

@@ -64,9 +64,9 @@ PROGRAM RHEqs
   !
   CALL OpenASCII(InpFile,Inp)
   Smearing='NoSmearing'
-  Smearing='Fermi-Dirac'
   Sigma=0.002D0
   IF(OptKeyQ(Inp,'Smearing','MP')) Smearing='Methfessel-Paxton'
+  IF(OptKeyQ(Inp,'Smearing','Fermi-Dirac')) Smearing='Fermi-Dirac'
   IF(OptDblQ(Inp,'SmearingValue',Dum)) Sigma=Dum
   CLOSE(Inp)
   !--------------------------------------------------------------------
@@ -216,8 +216,13 @@ PROGRAM RHEqs
     kB = 2.D0*6.33366256E-06 ! au/K
 !    kB = 8.61739E-05  ! eV/K
     write(*,*) 'kB = ',kB
+
+    ! Make this in input parameter.
     Temp = 5000.D0
+
+    ! Leave for now as hack.
     m = 6
+
     Beta = 1.D0/(kB*Temp)
     Ne=Half*DBLE(NEl)
     EPS = 1E-10
@@ -340,6 +345,8 @@ PROGRAM RHEqs
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
   CALL Plot(sTmp1,'P['//TRIM(NxtCycl)//']')
+
+  ! Fix this.
 !  CALL Put(Entr,TrixFile('Entropy',Args,1))
   CALL Put(Entropy,'Entropy')
 
