@@ -109,7 +109,7 @@ CONTAINS
       ENDIF
       ! MD Time Step
       IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,D%DTime)) THEN
-        CALL MondoHalt(PRSE_ERROR,MD_TIME_STEP//' not found in input.')
+        CALL MondoHalt(PRSE_ERROR, "option "//MD_TIME_STEP//' not found in input.')
       ELSE
         ! Convert that to internal time units.
         D%DTime = D%DTime*FemtosecondsToInternalTime
@@ -187,7 +187,7 @@ CONTAINS
         D%BerendsenTau = D%BerendsenTau*FemtosecondsToInternalTime
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using tau = "//TRIM(DblToChar(D%BerendsenTau*InternalTimeToFemtoseconds))//" fs")
       ELSE
-        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "BerendsenTau not specified in input: Setting tau to DeltaTime")
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "BerendsenTau not specified in input: Setting tau to "//MD_TIME_STEP)
         D%BerendsenTau = D%DTime
       ENDIF
 
