@@ -80,7 +80,7 @@ PROGRAM DIIS
   ! i.e. no propagation and the SCF cylce stalls. A Damp factor of 0 means
   ! that we only use the new Fock matrix, i.e. full propagation.
   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp)) THEN
-    Damp = 0.5D0
+    Damp = 0.2D0
   ENDIF
 
   ! Max number of equations to keep in DIIS

@@ -49,7 +49,7 @@ PROGRAM SCFStatus
 #else
   TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
-  REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc,Gap,Etot,DMax,Virial,DIISErr,S2,SFac
+  REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc,Gap,Etot,DMax,Virial,DIISErr,S2,SFac,Entropy
 #ifdef MMech
   REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
@@ -182,6 +182,7 @@ PROGRAM SCFStatus
     DIISErr=Zero
   ENDIF
   CALL Get(Gap,'HomoLumoGap')
+  CALL Get(Entropy, "Entropy")
   !-----------------------------------------------------------
   !  PRINT STATISTICS
 
@@ -193,6 +194,7 @@ PROGRAM SCFStatus
   !
   SCFMessage=""
   IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap = '//TRIM(DblToShrtChar(-Gap))
+  IF(Entropy > Zero) SCFMessage = TRIM(SCFMessage)//", Entropy = "//TRIM(DblToShrtChar(Entropy))
   IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2> = '//TRIM(FltToShrtChar(S2))
   IF(TRIM(SCFMessage) /= "") &
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)

@@ -147,6 +147,7 @@ CONTAINS
       CALL Put(BIG_DBL,'e_nucleartotal')
       CALL Put(BIG_DBL,'exc')
       CALL Put(BIG_DBL,'homolumogap')
+      CALL Put(-1.0D0, "Entropy")
       CALL Put(BIG_DBL,'e_electronictotal')
       CALL Put(BIG_DBL,'etot')
       CALL Put(BIG_DBL,'dmax')
@@ -251,6 +252,7 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
     !   CALL PPrint(G%Clone(1),Unit_O=6)
+    CALL MondoLog(DEBUG_MAXIMUM, "GeomArchive", "done archiving")
   END SUBROUTINE GeomArchive
   !==============================================================================
   !

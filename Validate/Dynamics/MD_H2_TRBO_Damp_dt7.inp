@@ -8,7 +8,7 @@ Guess=SuperPos
 SCFMethod=(TC2)
 BasisSets=(6-31G**)
 ModelChem=(HF)
-Accuracy=(good)
+Accuracy=(tight)
 SCFConvergence=(DIIS)
 Geometry=(InAU)
 
@@ -16,14 +16,12 @@ MinSCF=12
 MaxSCF=12
 
 Grad=(MolecularDynamics)
-MDProjection=DMTRBO
+MDProjection=DMTRBO_Damp_dt7
 MDMethod=Verlet
 DeltaTime=0.5
-MaxMDStep=1000
-MDDamping = 0.1
-MDDampStep = 20
+MaxMDStep=100
 
-MDNumSCF=4
+MDNumSCF=1
 
 <EndOptions>
 
