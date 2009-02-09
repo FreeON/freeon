@@ -49,7 +49,7 @@ PROGRAM RHEqs
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
   REAL(DOUBLE)                   :: Mu,Entropy,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
-  REAL(DOUBLE)                   :: kB,Temp,Occ,OccErr,EPS,dOccdMu,Ne,Beta,Xk
+  REAL(DOUBLE)                   :: kB,Temperature,Occ,OccErr,EPS,dOccdMu,Ne,Beta,Xk
   INTEGER                        :: I,J,K,LgN,NRow,NCol,NSMat,m
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
@@ -64,10 +64,15 @@ PROGRAM RHEqs
   !
   CALL OpenASCII(InpFile,Inp)
   Smearing='NoSmearing'
-  Sigma=0.002D0
   IF(OptKeyQ(Inp,'Smearing','MP')) Smearing='Methfessel-Paxton'
   IF(OptKeyQ(Inp,'Smearing','Fermi-Dirac')) Smearing='Fermi-Dirac'
-  IF(OptDblQ(Inp,'SmearingValue',Dum)) Sigma=Dum
+
+  IF(Smearing == "Fermi-Dirac") THEN
+    IF(.NOT.OptDblQ(Inp,'SmearingValue',Sigma)) Sigma=0.002D0
+    IF(.NOT.OptDblQ(Inp, "SmearingTemperature", Temperature)) THEN
+      CALL Halt("Set SmearingTemperature > 0")
+    ENDIF
+  ENDIF
   CLOSE(Inp)
   !--------------------------------------------------------------------
   !
@@ -223,13 +228,12 @@ PROGRAM RHEqs
     CALL MondoLog(DEBUG_MAXIMUM, Prog, "kB = "//TRIM(DblToChar(kB)))
 
     ! Make this in input parameter.
-    Temp = 5000.D0
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "smearing temperature = "//TRIM(FltToChar(Temp))//" K")
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "smearing temperature = "//TRIM(FltToChar(Temperature))//" K")
 
     ! Leave for now as hack.
     m = 6
 
-    Beta = 1.D0/(kB*Temp)
+    Beta = 1.D0/(kB*Temperature)
     Ne=Half*DBLE(NEl)
     EPS = 1E-10
     OccErr = 1.0D0
@@ -251,7 +255,7 @@ PROGRAM RHEqs
         Occ = Occ + Fk
         IF(Fk.GT.0.D0) THEN
           IF(Fk.LT.1.D0) THEN
-            Entropy = Entropy - 2*Temp*kB*(Fk*LOG(Fk)+(1.D0-Fk)*LOG(1.D0-Fk))
+            Entropy = Entropy - 2*Temperature*kB*(Fk*LOG(Fk)+(1.D0-Fk)*LOG(1.D0-Fk))
           ENDIF
         ENDIF
         dOccdMu = dOccdMu + Beta*Fk*(1.D0-Fk)
@@ -262,7 +266,7 @@ PROGRAM RHEqs
       CALL MondoLog(DEBUG_MEDIUM, Prog, 'Mu = '//TRIM(DblToChar(Mu)))
       CALL MondoLog(DEBUG_MEDIUM, Prog, 'Occ = '//TRIM(DblToChar(Occ)))
       CALL MondoLog(DEBUG_MEDIUM, Prog, 'Ne = '//TRIM(DblToChar(Ne)))
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Entropy = '//TRIM(DblToChar(Entropy)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Entropy = '//TRIM(DblToChar(Entropy))//" hartree")
     ENDDO
     DO K=1,NBasF
       Ek=EigenV%D(K)
@@ -274,14 +278,6 @@ PROGRAM RHEqs
         ENDDO
       ENDDO
     ENDDO
-    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-      Mssg=ProcessName(Prog)//' ENTROPY correction (eV) = '//TRIM(DblToChar(Entropy*27.20672674616D0))
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
-      WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(Out)
-    ENDIF
   CASE('NoSmearing')
     !
     SELECT CASE(NSMat)

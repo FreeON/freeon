@@ -15,6 +15,7 @@ ModelChem=(HF)
 Accuracy=(Good)
 SCFConvergence=(DIIS)
 Smearing=(Fermi-Dirac)
+SmearingTemperature=10000.0D0
 
 Geometry=InAngstrom
 

@@ -512,7 +512,6 @@ MODULE PrettyPrint
        REAL(DOUBLE), DIMENSION(3)           :: VTmp
        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
 
-
        ! Are we printing out gradients or forces?
        IF(PRESENT(Gradients_O))THEN
           Gradients=TRIM(Gradients_O)

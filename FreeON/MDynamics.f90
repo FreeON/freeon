@@ -895,7 +895,7 @@ CONTAINS
   SUBROUTINE OutputMD(C,iGEO)
     TYPE(Controls)                 :: C
     INTEGER                        :: iGEO,iCLONE,iATS,I,J,K
-    REAL(DOUBLE)                   :: Pressure,DMax
+    REAL(DOUBLE)                   :: Pressure,DMax,Entropy,Ftot
     REAL(DOUBLE),DIMENSION(3,3)    :: Latt,InvLatt,LattFrc
     REAL(DOUBLE),DIMENSION(3)      :: Pos,Vel
     LOGICAL, SAVE                  :: FirstTime = .TRUE.
@@ -907,6 +907,16 @@ CONTAINS
                "Epot = "//TRIM(DblToChar(MDEpot%D(iCLONE)*au2eV))//" eV, "// &
                "Etot = "//TRIM(DblToChar(MDEtot%D(iCLONE)*au2eV))//" eV, "// &
                "T = "//TRIM(DblToMedmChar(MDTemp%D(iCLONE)))//" K"
+      HDFFileID=OpenHDF(C%Nams%HFile)
+      HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+      CALL Get(Entropy, "Entropy")
+      CALL CloseHDFGroup(HDF_CurrentID)
+      CALL CloseHDF(HDFFileID)
+      IF(Entropy > Zero) THEN
+        Ftot = MDEtot%D(iCLONE)-Entropy
+        Remark = TRIM(Remark)//", Entropy = "//TRIM(DblToChar(Entropy*au2eV))// " eV, Ftot = " &
+                 //TRIM(DblToChar(Ftot*au2eV))//" eV"
+      ENDIF
       CALL PPrint(C%Geos%Clone(iCLONE), FileName_O=C%Nams%GFile, Unit_O=Geo, &
                   PrintGeom_O=C%Opts%GeomPrint, Clone_O=iCLONE, Remark_O=Remark, Gradients_O='Velocities')
     ENDDO

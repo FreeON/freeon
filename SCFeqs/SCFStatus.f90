@@ -194,7 +194,7 @@ PROGRAM SCFStatus
   !
   SCFMessage=""
   IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap = '//TRIM(DblToShrtChar(-Gap))
-  IF(Entropy > Zero) SCFMessage = TRIM(SCFMessage)//", Entropy = "//TRIM(DblToShrtChar(Entropy))
+  IF(Entropy > Zero) SCFMessage = TRIM(SCFMessage)//", Entropy = "//TRIM(DblToShrtChar(Entropy))//" hartree"
   IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2> = '//TRIM(FltToShrtChar(S2))
   IF(TRIM(SCFMessage) /= "") &
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)

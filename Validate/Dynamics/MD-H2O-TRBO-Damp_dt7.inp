@@ -10,8 +10,10 @@ Grad=(MolecularDynamics)
 DebugAll=(MaxDebug,CheckSums)
 
 Guess=SuperPos
-SCFMethod=(TC2)
+SCFMethod=(RH)
 BasisSets=(3-21G-SPLIT)
+Smearing=Fermi-Dirac
+SmearingTemperature=10000.0
 
 ModelChem=(HF)
 
