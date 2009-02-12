@@ -41,6 +41,9 @@ CONTAINS
   !==============================================================================
   SUBROUTINE InitArchive(N)
     TYPE(FileNames)  :: N
+
+    CALL MondoLog(DEBUG_MAXIMUM, "InitArchive", "initializing hdf file")
+
     !---------------------------------------------------------------------------!
     HDF_CurrentID=InitHDF(N%HFile)
     HDF_CurrentID=OpenHDF(N%HFile)
@@ -93,6 +96,9 @@ CONTAINS
     TYPE(DBL_VECT)     :: ETRootArr
     TYPE(DBL_RNK2)     :: DblMat
     TYPE(CMPoles)      :: MP
+
+    CALL MondoLog(DEBUG_MAXIMUM, "InitClones", "initializing hdf file")
+
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
@@ -406,7 +412,9 @@ CONTAINS
   !
   SUBROUTINE InitGlobal(C)
     TYPE(Controls) :: C
-    !
+
+    CALL MondoLog(DEBUG_MAXIMUM, "InitGlobal", "initializing...")
+
     ! Initialize the HDF archival file
     CALL InitArchive(C%Nams)
     ! Initialize HDF files for clones
