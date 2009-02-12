@@ -486,7 +486,6 @@ CONTAINS
                   //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
                   //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                   //', Step= '//TRIM(DblToShrtChar(StepLength))
-             !    WRITE(*,*)TRIM(Mssg)
              CALL MondoLog(DEBUG_MEDIUM, "Optimizer", Mssg)
           ENDIF
        ENDDO
@@ -1031,8 +1030,8 @@ CONTAINS
      IF(CtrlStat%GeOpConvgd) THEN
        CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
          " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
-       WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
-       WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
+       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max Unconstrained Cart Grad = "// &
+         TRIM(DblToShrtChar(MaxCGrad))//" on atom "//TRIM(IntToChar((IMaxCGrad-1)/3+1)))
        IF(PBCDim>0) THEN
          IF(ILMaxCGrad==NatmsLoc-2) THEN
            ALatt='   A'
@@ -1041,8 +1040,8 @@ CONTAINS
          ELSE
            ALatt='   C'
          ENDIF
-         WRITE(*,145) LMaxCGrad,ALAtt
-         WRITE(Out,145) LMaxCGrad,ALAtt
+         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max Unconstrained Latt Grad = "// &
+           TRIM(DblToShrtChar(LMaxCGrad))//" on vect "//TRIM(ALAtt))
          CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
        ENDIF
        RETURN
@@ -1123,10 +1122,14 @@ CONTAINS
      MaxOutPDispl=MaxOutPDispl*180.D0/PI
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
-     WRITE(*,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
+     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max intl Grad = "// &
+       TRIM(DblToShrtChar(MaxGrad))//" between atoms "// &
+       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" "// &
+       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,2)))//" "// &
+       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,3)))//" "// &
+       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))))
      WRITE(*,140) MaxCGrad,IMaxCGrad
      WRITE(*,420) RMSGrad
-     WRITE(Out,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
      WRITE(Out,140) MaxCGrad,IMaxCGrad
      IF(ILMaxCGrad==NatmsLoc-2) THEN
        ALatt='   A'
