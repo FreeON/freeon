@@ -907,8 +907,17 @@ AC_ARG_WITH([MONDO_SCRATCH],
   [MONDO_SCRATCH="/tmp"])
 AC_MSG_RESULT([using ${MONDO_SCRATCH}])
 
-# Some mondo variables.
-AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
+# Define FreeON variables.
+
+# In case prefix was not set on command line.
+if test "${prefix}" = "NONE"; then
+  MONDO_HOME="${ac_default_prefix}"
+  AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${ac_default_prefix}"], [Define the main installation directory.])
+else
+  MONDO_HOME="${prefix}"
+  AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
+fi
+
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,    ["`hostname`"], [Define hostname.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,    ["${build_cpu}"], [Define build cpu.])
@@ -999,6 +1008,7 @@ AC_MSG_NOTICE([CPPFLAGS                 = ${CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
+AC_MSG_NOTICE([MONDO_HOME               = ${MONDO_HOME}])
 AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
 AC_MSG_NOTICE([])
 if test "${use_internal_lapack}" = "yes"; then
