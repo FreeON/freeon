@@ -6,6 +6,9 @@
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
+# Fix for bug in autoconf-2.59
+builddir = .
+
 if INTERNAL_LAPACK
 LDADD_INTERNAL_LAPACK = \
   $(top_builddir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
