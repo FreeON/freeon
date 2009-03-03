@@ -804,30 +804,40 @@ else
   AC_LANG(C)
 
   # Check for math library (ceil).
-  AC_CHECK_LIB([m], [ceil],
-    [],
-    [AC_MSG_NOTICE([The external hdf5 library might require ceil()])])
-
-  # Check for zlib compression.
-  AC_CHECK_LIB([z], [zlibVersion],
-    [],
-    [AC_MSG_NOTICE([The external hdf5 library might require the zlib library.])])
+  AC_CHECK_LIB([m],
+               [ceil],
+               [],
+               [AC_MSG_NOTICE([The external hdf5 library might require ceil()])])
 
   # Check for the pthread library.
   AC_CHECK_HEADERS(pthread.h)
-  AC_CHECK_LIB([pthread], [pthread_create],
-    [],
-    [AC_MSG_NOTICE([The external hdf5 library might require the pthread library.])])
+  AC_CHECK_LIB([pthread],
+               [pthread_create],
+               [],
+               [AC_MSG_NOTICE([The external hdf5 library might require the pthread library.])])
 
   # Check for HDF5 libraries.
   AC_CHECK_HEADER([hdf5.h],
-    [],
-    [AC_MSG_FAILURE([I need the hdf5.h header file])])
-  AC_CHECK_LIB([hdf5], [H5get_libversion],
-    [],
-    [AC_MSG_FAILURE([I need the hdf5 library])])
+                  [],
+                  [AC_MSG_FAILURE([I need the hdf5.h header file])])
+  AC_CHECK_LIB([hdf5],
+               [H5get_libversion],
+               [],
+               [AC_MSG_FAILURE([I need the hdf5 library])])
 
 fi
+
+# Set language to C.
+AC_LANG(C)
+
+# Check for zlib compression.
+AC_CHECK_HEADERS([zlib.h])
+AC_CHECK_LIB([z], [compress2])
+AC_CHECK_FUNC([compres2])
+AC_LINK_IFELSE(AC_LANG_PROGRAM([char compres2 ();],
+  [return compres2 ();]),
+  [],
+  [AC_MSG_NOTICE([I do not have a working zlib installed.])])
 
 # Find flags for static linking.
 AC_MSG_CHECKING([whether to link binaries statically])
