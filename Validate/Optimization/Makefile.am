@@ -11,4 +11,5 @@ EXTRA_DIST = \
   08-Na2Cl2.inp \
   09-TEMPO.inp \
   10-Malonaldahyde.inp \
-  11-CO2.inp
+  11-CO2.inp \
+  12-BPA.inp
