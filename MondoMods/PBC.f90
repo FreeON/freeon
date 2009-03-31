@@ -822,12 +822,14 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)   :: AB
     INTEGER,DIMENSION(3)        :: AutoW
     INTEGER                     :: I,J,D
-    !
+
     D=0
     DO I=1,3
        D = D + AutoW(I)
     ENDDO
-    !
+
+    CellVolume = -1.0D0
+
     IF(D==1) THEN
        IF(AutoW(1)==1) CellVolume=BoxShape(1,1)
        IF(AutoW(2)==1) CellVolume=BoxShape(2,2)
