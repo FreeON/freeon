@@ -174,11 +174,12 @@ MODULE BoundingBox
 !     Generate an expanded BBox
 !============================================================================
       FUNCTION ExpandPoint(Point,Extent,Box_O) RESULT(Expando)
-         Type(BBox)     :: Expando
-         Type(BBox),OPTIONAL  :: Box_O
-         REAL(DOUBLE),DIMENSION(3) :: Point
-         Real(Double)   :: Extent
-         Integer        :: I
+         Type(BBox)                 :: Expando
+         Type(BBox),OPTIONAL        :: Box_O
+         REAL(DOUBLE),DIMENSION(3)  :: Point
+         Real(Double)               :: Extent
+         Integer                    :: I
+
          IF(PRESENT(Box_O))THEN
             Expando%Tier=Box_O%Tier
             Expando%Number=Box_O%Number

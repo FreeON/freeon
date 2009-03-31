@@ -87,7 +87,6 @@ MODULE BlokTrWdS
           IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
              Prim%PFA=PFA
              Prim%PFB=PFB
-             K=K+1
              Amp=SetBraBlok(Prim,BS,Gradients_O=SameAtom)
 !-------------------------------------------------------------------
              PiE32=(Pi/Prim%Zeta)**(1.5D0) 

@@ -1844,10 +1844,6 @@ PROGRAM P2Use
         iGEO     = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
         CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
-      ELSE
-        IF(DMPOrder > 0) THEN
-          CALL Warn(TRIM(logtag)//' POrder is only implimented for MD')
-        ENDIF
       ENDIF
     ENDIF
     ! Initial Trace Error
