@@ -353,9 +353,9 @@ CONTAINS
     TYPE(Controls)            :: C
     INTEGER                   :: iGEO
     INTEGER                   :: iCLONE,iATS,AOut
-    INTEGER                   :: numberUnconstrainedAtoms
-    REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
-    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,PosSave,VelSave
+    INTEGER                   :: numberConstrainedAtoms
+    REAL(DOUBLE)              :: Mass,totalMass,dT,dT2,dTSq2,Time,Dist,averageTorqueNorm
+    REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc,torque,PosSave,VelSave,centerOfMass
     REAL(DOUBLE)              :: v_scale
 
     ! Initialize
@@ -363,35 +363,109 @@ CONTAINS
     dT2   = Half*dT
     dTSq2 = Half*dT*dT
 
-    ! Set the Sum of the Forces equal to zero in case of no constraint atoms.
-    numberUnconstrainedAtoms = 0
+    ! Count the number of constrained atoms.
+    numberConstrainedAtoms = 0
+    centerOfMass = Zero
     DO iCLONE = 1,C%Geos%Clones
-      Acc(1:3) = Zero
       DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
-        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
-          Acc(1:3) = Acc(1:3)+C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)
-          numberUnconstrainedAtoms = numberUnconstrainedAtoms + 1
+        IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) /= 0) THEN
+          numberConstrainedAtoms = numberConstrainedAtoms + 1
+          centerOfMass = C%Geos%Clone(iCLONE)%Carts%D(1:3, iATS)
         ENDIF
       ENDDO
+    ENDDO
 
-      ! Calculate total acceleration.
-      Acc(1:3) = Acc(1:3)/DBLE(numberUnconstrainedAtoms)
+    ! Set the total torque to zero. In the case of no constrained atom, we take
+    ! the center of mass as the center of rotation. In the case of 1 constrained
+    ! atom, we take that atom position as the center of rotation. In the case of
+    ! more than 1 constrained atom, we don't worry about the spinning ice-cube
+    ! correction.
+    IF(numberConstrainedAtoms == 0) THEN
+      totalMass = Zero
+      DO iATS = 1, C%Geos%Clone(1)%NAtms
+        centerOfMass(1:3) = centerOfMass(1:3) + C%Geos%Clone(1)%AtMss%D(iATS)*C%Geos%Clone(1)%Carts%D(1:3, iAts)
+        totalMass = totalMass + C%Geos%Clone(1)%AtMss%D(iATS)
+      ENDDO
+      centerOfMass(1:3) = centerOfMass(1:3)/totalMass
+    ENDIF
 
-      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "flying ice-cube correction: [ " &
-        //TRIM(DblToChar(Acc(1)))//" " &
-        //TRIM(DblToChar(Acc(2)))//" " &
-        //TRIM(DblToChar(Acc(3)))//" ]")
+    CALL MondoLog(DEBUG_NONE, "MD:Verlet", "CM = [ "// &
+      TRIM(DblToChar(centerOfMass(1)))//" "// &
+      TRIM(DblToChar(centerOfMass(2)))//" "// &
+      TRIM(DblToChar(centerOfMass(3)))//" ]")
 
-      IF(numberUnconstrainedAtoms == C%Geos%Clone(iCLONE)%NAtms) THEN
+    IF(numberConstrainedAtoms < 2) THEN
+      torque = Zero
+      DO iATS = 1, C%Geos%Clone(1)%NAtms
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "F("//TRIM(IntToChar(iATS))//") = [ " &
+          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(1, iATS)))//" " &
+          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(2, iATS)))//" " &
+          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(3, iATS)))//" ]")
+        torque(1:3) = torque(1:3) - CROSS_PRODUCT(C%Geos%Clone(1)%Gradients%D(1:3, iATS), C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+      ENDDO
+
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "spinning ice-cube correction: [ " &
+        //TRIM(DblToChar(torque(1)))//" " &
+        //TRIM(DblToChar(torque(2)))//" " &
+        //TRIM(DblToChar(torque(3)))//" ]")
+
+      averageTorqueNorm = VABS(torque/DBLE(C%Geos%Clone(1)%NAtms-numberConstrainedAtoms))
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "norm(average torque) = "//TRIM(DblToChar(averageTorqueNorm)))
+
+      DO iATS = 1, C%Geos%Clone(1)%NAtms
+        Acc(1:3) = CROSS_PRODUCT(torque, C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+        Acc(1:3) = Acc(1:3)/VABS(Acc)
+        Acc(1:3) = Acc(1:3)*averageTorqueNorm/VABS(C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+        C%Geos%Clone(1)%Gradients%D(1:3, iATS) = C%Geos%Clone(1)%Gradients%D(1:3, iATS)-Acc(1:3)
+      ENDDO
+
+      ! Check torque.
+      torque = Zero
+      DO iATS = 1, C%Geos%Clone(1)%NAtms
+        torque(1:3) = torque(1:3) - CROSS_PRODUCT(C%Geos%Clone(1)%Gradients%D(1:3, iATS), C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+      ENDDO
+
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet", "total torque after spinning ice-cube correction: [ " &
+        //TRIM(DblToChar(torque(1)))//" " &
+        //TRIM(DblToChar(torque(2)))//" " &
+        //TRIM(DblToChar(torque(3)))//" ]")
+    ENDIF
+
+    ! Set the Sum of the Forces equal to zero in case of no constraint atoms.
+    IF(numberConstrainedAtoms == 0) THEN
+      DO iCLONE = 1,C%Geos%Clones
+        Acc(1:3) = Zero
+        DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+            Acc(1:3) = Acc(1:3)+C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)
+          ENDIF
+        ENDDO
+
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "flying ice-cube correction: [ " &
+          //TRIM(DblToChar(Acc(1)))//" " &
+          //TRIM(DblToChar(Acc(2)))//" " &
+          //TRIM(DblToChar(Acc(3)))//" ]")
+
         ! Make sure the total force on the system is zero.
         CALL MondoLog(DEBUG_NONE, "MD:Verlet", "setting total force to zero")
         DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
-            C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)
+            C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS) = C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)-Acc(1:3)*C%Geos%Clone(iCLONE)%AtMss%D(iATS)/totalMass
           ENDIF
         ENDDO
-      ENDIF
-    ENDDO
+
+        ! Check torque.
+        torque = Zero
+        DO iATS = 1, C%Geos%Clone(1)%NAtms
+          torque(1:3) = torque(1:3) - CROSS_PRODUCT(C%Geos%Clone(1)%Gradients%D(1:3, iATS), C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+        ENDDO
+
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "total torque after flying ice-cube correction: [ " &
+          //TRIM(DblToChar(torque(1)))//" " &
+          //TRIM(DblToChar(torque(2)))//" " &
+          //TRIM(DblToChar(torque(3)))//" ]")
+      ENDDO
+    ENDIF
 
     ! Update the Velocity if not the first step
     IF(iGEO .NE. 1) THEN
