@@ -414,9 +414,11 @@ CONTAINS
 
       DO iATS = 1, C%Geos%Clone(1)%NAtms
         Acc(1:3) = CROSS_PRODUCT(torque, C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
-        Acc(1:3) = Acc(1:3)/VABS(Acc)
-        Acc(1:3) = Acc(1:3)*averageTorqueNorm/VABS(C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
-        C%Geos%Clone(1)%Gradients%D(1:3, iATS) = C%Geos%Clone(1)%Gradients%D(1:3, iATS)-Acc(1:3)
+        IF(VABS(Acc) > 1D-12) THEN
+          Acc(1:3) = Acc(1:3)/VABS(Acc)
+          Acc(1:3) = Acc(1:3)*averageTorqueNorm/VABS(C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
+          C%Geos%Clone(1)%Gradients%D(1:3, iATS) = C%Geos%Clone(1)%Gradients%D(1:3, iATS)-Acc(1:3)
+        ENDIF
       ENDDO
 
       ! Check torque.
@@ -532,7 +534,9 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "MD temperature     = "//TRIM(DblToChar(MDTemp%D(1)))//" K")
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp))//" K")
       DO iCLONE = 1, C%Geos%Clones
-        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        !CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        CALL BerendsenThermostatTotalEnergy(C%Geos%Clone(iCLONE), MDEpot%D(iCLONE), MDEkin%D(iCLONE), C%Dyns%TargetEtotal, &
+          C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
         C%Dyns%BerendsenVScale = v_scale
 
         ! Store v_scale in hdf.
@@ -875,10 +879,11 @@ CONTAINS
     !
     ! tau = Delta_t.
 
-    TYPE(CRDS)   :: GM
-    REAL(DOUBLE) :: T, T0, delta_t, tau, v_scale
+    TYPE(CRDS), INTENT(INOUT)           :: GM
+    REAL(DOUBLE), INTENT(IN)            :: T, T0, delta_t, tau
     REAL(DOUBLE), OPTIONAL, INTENT(OUT) :: v_scale_O
-    INTEGER      :: i
+    REAL(DOUBLE)                        :: v_scale
+    INTEGER                             :: i
 
     IF(T > 1.0D-4) THEN
       v_scale = SQRT(1 + delta_t/tau * (T0/T - 1))
@@ -905,6 +910,53 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE BerendsenThermostat
+
+  SUBROUTINE BerendsenThermostatTotalEnergy(GM, Epot, Ekin, E0, delta_t, tau, v_scale_O)
+
+    ! Fix v_scale. We use Berendsen's weak coupling to an external heat bath, J.
+    ! Chem. Phys. 81, 3684 (1984). tau is the time constant of thermal coupling,
+    !
+    ! dT/dt = 1/tau * (T_0 - T)
+    !
+    ! where T_0 is the temperature of the heat bath. Perfect coupling means that
+    !
+    ! tau = Delta_t.
+
+    TYPE(CRDS), INTENT(INOUT)           :: GM
+    REAL(DOUBLE), INTENT(IN)            :: Epot, Ekin, E0, delta_t, tau
+    REAL(DOUBLE), OPTIONAL, INTENT(OUT) :: v_scale_O
+    REAL(DOUBLE)                        :: v_scale, E, Ekin_target
+    INTEGER                             :: i
+
+    ! Calculate v_scale.
+    E = Epot + Ekin
+    Ekin_target = E0-Epot
+
+    IF(Ekin_target > 0 .AND. Ekin > 1.0D-4) THEN
+      v_scale = SQRT(1 + delta_t/tau * (Ekin_target/Ekin - 1))
+    ELSE
+      v_scale = 1.0D0
+    ENDIF
+
+    IF(PRESENT(v_scale_O)) THEN
+      v_scale_O = v_scale
+    ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "E       = "//TRIM(DblToChar(E))//" eV")
+    CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "E0      = "//TRIM(DblToChar(E0))//" eV")
+    CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "delta_t = "//TRIM(DblToChar(delta_t*InternalTimeToFemtoseconds))//" fs")
+    CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "tau     = "//TRIM(DblToChar(tau*InternalTimeToFemtoseconds))//" fs")
+    CALL MondoLog(DEBUG_NONE, "Berendsen Thermostat", "v_scale = "//TRIM(FltToChar(v_scale)))
+
+    DO i = 1, GM%NAtms
+      IF(GM%CConstrain%I(i) == 0) THEN
+        GM%Velocity%D(1,i) = v_scale*GM%Velocity%D(1,i)
+        GM%Velocity%D(2,i) = v_scale*GM%Velocity%D(2,i)
+        GM%Velocity%D(3,i) = v_scale*GM%Velocity%D(3,i)
+      ENDIF
+    ENDDO
+
+  END SUBROUTINE BerendsenThermostatTotalEnergy
 
   !--------------------------------------------------------------
   ! Calculate the Temperature

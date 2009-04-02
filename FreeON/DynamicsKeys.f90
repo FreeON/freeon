@@ -79,6 +79,7 @@ MODULE DynamicsKeys
 
   ! Temperature Rescaling
   CHARACTER(LEN=*), PARAMETER :: MD_TEMP_SCALE          = 'TempScaling'
+  CHARACTER(LEN=*), PARAMETER :: MD_ETOTAL_SCALE        = 'EtotalScaling'
   CHARACTER(LEN=*), PARAMETER :: MD_TSCALE_INT          = 'TempIntScaling'
 
   ! Thermostats.

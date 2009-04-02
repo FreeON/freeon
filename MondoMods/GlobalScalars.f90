@@ -121,6 +121,7 @@ MODULE GlobalScalars
 #endif
   ! These constants not yet verified:
   REAL(DOUBLE), PARAMETER :: au2eV=27.21139613182D0           ! au to eV
+  REAL(DOUBLE), PARAMETER :: eV2au=1/au2eV                    ! eV to au
   REAL(DOUBLE), PARAMETER :: eVK=11676.33D0                   ! eV to K
   REAL(DOUBLE), PARAMETER :: eVcm=8065.73D0                   ! eV to cm-1
   REAL(DOUBLE), PARAMETER :: eVkkal=23.06035D0                ! eV to kkal
