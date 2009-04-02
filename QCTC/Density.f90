@@ -123,8 +123,9 @@ CONTAINS
     CALL Delete(Psv)
     ! Now eliminate redundancies in the density    !
     NNaive=NLink
+
     CALL RhoEcon(RhoHead,NLink)
-!
+
     CALL MondoLog(DEBUG_MAXIMUM,Prog,'RhoEcon = '//TRIM(FltToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
                                    //', Gaussians = '//TRIM(IntToChar(NLink)))
 
@@ -173,7 +174,7 @@ CONTAINS
 !          IF(.FALSE.)THEN
              NZ(I)=NZ(I)+1
              NL(I)=NL(I)+1
-	     El(I)=MAX(El(I),HGLink%Ell)
+             El(I)=MAX(El(I),HGLink%Ell)
              GOTO 101
           ENDIF
        ENDDO
@@ -380,7 +381,12 @@ CONTAINS
     REAL(DOUBLE)                      :: MinX,MaxX,MinY,MaxY,MinZ,MaxZ
     REAL(DOUBLE)                      :: ZK,ZJ,ZZJK,RJK2,DX,Bhatt
     REAL(DOUBLE),DIMENSION(3)         :: RJ,RK
-    !
+
+    IF(NLink < 1) THEN
+      CALL MondoLog(DEBUG_NONE, "RhoEcon", "called with NLink = "//TRIM(IntToChar(NLink)))
+      CALL Halt("illegal value")
+    ENDIF
+
     ILink=0
     HGLink=>RhoHead%Next
     !
@@ -390,7 +396,7 @@ CONTAINS
     MinY=1D20
     MaxZ=-1D20
     MinZ=1D20
-    !
+
     DO WHILE(ASSOCIATED(HGLink))
        ILink=ILink+1
        ListArray1(ILink)=ILink
@@ -437,7 +443,7 @@ CONTAINS
        L=0
        DO K=J+1,NLink
           IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(K))%L))CYCLE
-          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))	
+          DX=ABS(RJ(ISort)-LinkArray1(ListArray1(K))%L%Cent(ISort))
           IF(DX.GT.1D-6)EXIT
           ZK=LinkArray1(ListArray1(K))%L%Zeta
           RK=LinkArray1(ListArray1(K))%L%Cent
@@ -450,7 +456,7 @@ CONTAINS
        ENDDO
 
        IF(L>0)THEN
-          CALL DblIntSort77(L,RealArray1,ListArray2,2)	
+          CALL DblIntSort77(L,RealArray1,ListArray2,2)
 
           DO I=1,L
              IF(RealArray1(I).GT.1D-12)EXIT
