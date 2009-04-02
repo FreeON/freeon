@@ -95,6 +95,7 @@ MODULE ControlStructures
     LOGICAL           :: Temp_Scaling
     INTEGER           :: RescaleInt
     REAL(DOUBLE)      :: TargetTemp
+    REAL(DOUBLE)      :: TargetEtotal
 
     LOGICAL           :: Const_Temp
 

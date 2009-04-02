@@ -144,6 +144,21 @@ CONTAINS
         D%RescaleInt   = 1
       ENDIF
 
+      ! Parse for Energy Scaling
+      IF(OptDblQ(Inp,MD_ETOTAL_SCALE,D%TargetEtotal)) THEN
+        D%Temp_Scaling = .TRUE.
+        ! Change units of the energy to internal units, i.e. Hartree.
+        D%TargetEtotal = eV2au*D%TargetEtotal
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "thermostating Etotal to "//TRIM(DblToChar(D%TargetEtotal*au2eV))//" eV")
+        IF(.NOT. OptIntQ(Inp,MD_TSCALE_INT,D%RescaleInt)) THEN
+          D%RescaleInt = 100
+        ENDIF
+      ELSE
+        D%Temp_Scaling = .FALSE.
+        D%TargetTemp   = Zero
+        D%RescaleInt   = 1
+      ENDIF
+
       ! Parse for thermostat.
       IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) THEN
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Berendsen thermostat")
