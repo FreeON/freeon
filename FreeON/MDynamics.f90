@@ -397,10 +397,10 @@ CONTAINS
     IF(numberConstrainedAtoms < 2) THEN
       torque = Zero
       DO iATS = 1, C%Geos%Clone(1)%NAtms
-        CALL MondoLog(DEBUG_NONE, "MD:Verlet", "F("//TRIM(IntToChar(iATS))//") = [ " &
-          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(1, iATS)))//" " &
-          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(2, iATS)))//" " &
-          //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(3, iATS)))//" ]")
+        !CALL MondoLog(DEBUG_NONE, "MD:Verlet", "F("//TRIM(IntToChar(iATS))//") = [ " &
+        !  //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(1, iATS)))//" " &
+        !  //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(2, iATS)))//" " &
+        !  //TRIM(DblToChar(-C%Geos%Clone(1)%Gradients%D(3, iATS)))//" ]")
         torque(1:3) = torque(1:3) - CROSS_PRODUCT(C%Geos%Clone(1)%Gradients%D(1:3, iATS), C%Geos%Clone(1)%Carts%D(1:3, iATS)-centerOfMass(1:3))
       ENDDO
 
@@ -494,7 +494,8 @@ CONTAINS
 
       ! Store Potential and Total Energy
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotal = "//TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" Hartree")
-      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, (/ 0, C%Stat%Current%I(1) /)))//" Hartree")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "ETotalPerSCF = "//TRIM(DblVectToChar(C%Geos%Clone(iCLONE)%ETotalPerSCF, &
+        (/ 0, C%Stat%Current%I(1) /)))//" Hartree")
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "EKin = "//TRIM(DblToChar(MDEkin%D(iCLONE)))//" Hartree")
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "T = "//TRIM(DblToChar(MDTemp%D(iCLONE)))//" K")
 #if defined MD_DEBUG
@@ -534,7 +535,30 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "MD temperature     = "//TRIM(DblToChar(MDTemp%D(1)))//" K")
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Target temperature = "//TRIM(DblToChar(C%Dyns%TargetTemp))//" K")
       DO iCLONE = 1, C%Geos%Clones
-        !CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        CALL BerendsenThermostat(C%Geos%Clone(iCLONE), MDTemp%D(iCLONE), C%Dyns%TargetTemp, C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
+        C%Dyns%BerendsenVScale = v_scale
+
+        ! Store v_scale in hdf.
+        HDFFileID=OpenHDF(C%Nams%HFile)
+        HDF_CurrentID = OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(v_scale, "v_scale", Tag_O=TRIM(IntToChar(iGEO)))
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "putting v_scale("//TRIM(IntToChar(iGEO))//") to hdf = "//TRIM(DblToChar(v_scale)))
+      ENDDO
+
+    ! Berendsen thermostat for Etotal.
+    ELSEIF(C%Dyns%Thermostat == MD_THERM_BERENDSEN_ETOT) THEN
+
+      IF(iGEO == 1 .AND. (.NOT.C%Dyns%Energy_Scaling_Set)) THEN
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Using total energy of first MD step as target energy")
+        C%Dyns%TargetEtotal = MDEtot%D(1)
+      ENDIF
+
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Applying Berendsen thermostat for E_total")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "MD E_total     = "//TRIM(DblToChar(MDEtot%D(1)*au2eV))//" eV")
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Target E_total = "//TRIM(DblToChar(C%Dyns%TargetEtotal*au2eV))//" eV")
+      DO iCLONE = 1, C%Geos%Clones
         CALL BerendsenThermostatTotalEnergy(C%Geos%Clone(iCLONE), MDEpot%D(iCLONE), MDEkin%D(iCLONE), C%Dyns%TargetEtotal, &
           C%Dyns%DTime, C%Dyns%BerendsenTau, v_scale)
         C%Dyns%BerendsenVScale = v_scale

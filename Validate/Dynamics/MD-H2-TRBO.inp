@@ -24,11 +24,10 @@ MaxMDStep=100
 MDNumSCF=0
 #MDDamping=0.2
 #MDDampStep=25
-Thermostat=(Berendsen)
+#Thermostat=(Berendsen)
 #TempScaling=100
-EtotalScaling=-30.5
 #TempIntScaling=100000
-BerendsenTau=10
+#BerendsenTau=10
 
 <EndOptions>
 
