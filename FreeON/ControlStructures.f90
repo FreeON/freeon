@@ -93,9 +93,13 @@ MODULE ControlStructures
     REAL(DOUBLE)      :: TempInit
 
     LOGICAL           :: Temp_Scaling
-    INTEGER           :: RescaleInt
     REAL(DOUBLE)      :: TargetTemp
+
+    LOGICAL           :: Energy_Scaling
+    LOGICAL           :: Energy_Scaling_Set
     REAL(DOUBLE)      :: TargetEtotal
+
+    INTEGER           :: RescaleInt
 
     LOGICAL           :: Const_Temp
 

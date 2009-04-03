@@ -8,6 +8,7 @@ VALIDATE_INPUTS = \
   MD_C2F4_TRBO_ACT_2.inp \
   MD_C2F4_TRBO_ACT.inp \
   MD_C2F4_TRBO.inp \
+  MD_C2F4_TRBO-thermostat.inp \
   MD-F2-Symplectic.inp \
   MD-F2-TRBO.inp \
   MD-H2-BO.inp \

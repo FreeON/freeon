@@ -27,6 +27,14 @@ MDNumSCF=0
 MDDamping=0.1
 MDDampStep=100000
 
+#Thermostat=(Berendsen)
+#TempScaling=500
+#TempIntScaling=10000000
+#BerendsenTau=100
+
+Thermostat=(BerendsenEtotal)
+BerendsenTau=1
+
 <EndOptions>
 
 <BeginGeometry>
