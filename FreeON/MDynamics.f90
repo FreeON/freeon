@@ -551,8 +551,9 @@ CONTAINS
     ELSEIF(C%Dyns%Thermostat == MD_THERM_BERENDSEN_ETOT) THEN
 
       IF(iGEO == 1 .AND. (.NOT.C%Dyns%Energy_Scaling_Set)) THEN
-        CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Using total energy of first MD step as target energy")
         C%Dyns%TargetEtotal = MDEtot%D(1)
+        CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Using total energy of first MD step as target energy = "// &
+          TRIM(DblToChar(C%Dyns%TargetEtotal*au2eV))//" eV")
       ENDIF
 
       CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "Applying Berendsen thermostat for E_total")
