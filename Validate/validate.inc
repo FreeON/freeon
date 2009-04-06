@@ -15,5 +15,9 @@ EXTRA_DIST = \
 validate : $(VALIDATE_TESTS)
 	@echo "running test $@"
 	@for i in $^; do \
-	  $(top_srcdir)/Validate/runTests.py $$i; \
+	  $(MAKE) $$i; \
 	done
+
+%.test :
+	@echo "running suffix rule on $@"
+	$(top_srcdir)/Validate/runTests.py $@

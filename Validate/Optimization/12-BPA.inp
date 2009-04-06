@@ -7,10 +7,17 @@ Multiplicity=1
 Guess=SuperPos
 Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
 DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+#BasisSets=(STO-3G-SPLIT,6-31G**-SPLIT)
+#SCFMethod=(RH,RH)
+#SCFConvergence=(ODA,ODA)
+#ModelChem=(HF,HF)
+#Accuracy=(good,tight)
 BasisSets=(STO-3G-SPLIT)
 SCFMethod=(RH)
+#SCFConvergence=(ODA)
+SCFConvergence=(DIIS)
 ModelChem=(HF)
-Accuracy=(Tight)
+Accuracy=(tight)
 Geometry=(InAngstroms)
 
 <EndOptions>
