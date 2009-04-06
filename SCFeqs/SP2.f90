@@ -104,7 +104,12 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   Imin = 20
   DO I=1,100
     CALL TC2(P,Tmp1,Tmp2,Half*DBLE(NEl),Occ0,I)
-    IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) EXIT
+    IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) THEN
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, "converged in "//TRIM(IntToChar(I))//" iterations")
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, "Idempotency error = "//TRIM(DblToChar(ABS(Occ0-Occ1))))
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, "Previous idempotency error = "//TRIM(DblToChar(ABS(Occ2-Occ3))))
+      EXIT
+    ENDIF
     Occ3 = Occ2
     Occ2 = Occ1
     Occ1 = Occ0
