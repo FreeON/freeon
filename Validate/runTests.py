@@ -49,41 +49,41 @@ Mondo_inputbase = ""
 inputfield = {}
 
 # Start of the main program.
-parse = optparse.OptionParser(usage = "%prog [options] input.test", \
+parser = optparse.OptionParser(usage = "%prog [options] input.test", \
     description = """This scripts reads input from the file given on the command
 line and executes the tests in there.""")
 
-parse.add_option("--tar", \
+parser.add_option("--tar", \
     help = "Build Mondo from tarfile.", \
     metavar = "tarfile", \
     dest = "tar", \
     type = "string")
 
-parse.add_option("--verbose", "-v", \
+parser.add_option("--verbose", "-v", \
     help = "print lots of stuff.", \
     dest = "verbose", \
     action = "store_true")
 
-parse.add_option("--clean-run", \
+parser.add_option("--clean-run", \
     help = "clean the run directory", \
     dest = "clean_run", \
     action = "store_true")
 
-parse.add_option("--clean-build", \
+parser.add_option("--clean-build", \
     help = "clean the build directory", \
     dest = "clean_build", \
     action = "store_true")
 
-parse.add_option("--pretend", \
-    help = "do not run the test, simply anaylize the output file", \
+parser.add_option("--pretend", \
+    help = "do not run the test, simply analyze the output file", \
     dest = "pretend", \
     action = "store_true")
 
-parse.add_option("--FreeON",
+parser.add_option("--FreeON",
     help = "specify explicitly where the FreeON executable is",
     dest = "executable")
 
-option, argument = parse.parse_args()
+option, argument = parser.parse_args()
 
 # Set up logging.
 logging.basicConfig(level = logging.INFO, \
@@ -105,10 +105,9 @@ logging.getLogger().addHandler(console_handler)
 log = logging.getLogger("main")
 
 # Start...
-log.info("starting new regression test")
-
 if len(argument) != 1:
   log.error("I need exactly 1 input file")
+  parser.print_help()
   sys.exit(1)
 
 # Parse the input file.
@@ -322,6 +321,9 @@ if "Mondo_tar" in inputfield:
     log.info("sources build and install correctly")
 
 if "Mondo_executable" in inputfield:
+  if not os.path.isfile(inputfield["Mondo_executable"]):
+    log.error("executable " + inputfield["Mondo_executable"] + " does not exist")
+    sys.exit(1)
   log.debug("running " + inputfield["Mondo_executable"])
 elif "Mondo_tar" in inputfield:
   inputfield["Mondo_executable"] = os.path.join(installdir, "bin", "MondoSCF")
@@ -368,11 +370,16 @@ if not option.pretend:
   Mondo_arguments = [ inputfield["Mondo_executable"], Mondo_inputbase ]
 
   log.info("running " + str(Mondo_arguments))
-  Mondo = subprocess.Popen(Mondo_arguments, \
-      stdin = subprocess.PIPE, \
-      stdout = subprocess.PIPE, \
-      stderr = subprocess.PIPE, \
-      cwd = rundir)
+  try:
+    Mondo = subprocess.Popen(Mondo_arguments, \
+        stdin = subprocess.PIPE, \
+        stdout = subprocess.PIPE, \
+        stderr = subprocess.PIPE, \
+        cwd = rundir)
+
+  except OSError, e:
+    log.error("encountered error: " + e.strerror)
+    sys.exit(1)
 
   Mondo_stdout = []
   while not Mondo.stdout.closed:

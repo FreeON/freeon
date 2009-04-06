@@ -1,6 +1,8 @@
 include $(srcdir)/../validate.inc
 
-EXTRA_DIST = \
+TESTS = 12-BPA.sh
+
+VALIDATE_INPUTS = \
   01-Benzene.inp \
   02-BNSheet.inp \
   03-Caffine.inp \
