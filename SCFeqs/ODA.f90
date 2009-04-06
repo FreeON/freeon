@@ -93,7 +93,6 @@ PROGRAM ODA
     IF(HasHF(ModelChem)) THEN
       CALL Get(K0,TrixFile('K',Args,-1))
       CALL Get(K1,TrixFile('K',Args,0))
-      CALL OpenASCII(OutFile,Out)
 #ifdef PARALLEL
       CALL Multiply(PTilde,K1,T1)
       TrP0K1 =  Trace(T1)
@@ -114,9 +113,7 @@ PROGRAM ODA
       IKPS_denom = SQRT(ABS(Trace(T2,T2)))
       IKPS_Error =  ABS(TrP0K1-TrP1K0)/IKPS_denom
 #endif
-      WRITE(Out,'(a14,D11.5)') "IKPS_Error = ",IKPS_Error
-      WRITE(*  ,'(a14,D11.5)') "IKPS_Error = ",IKPS_Error
-      CLOSE(Out)
+      CALL MondoLog(DEBUG_NONE, "ODA", "IKPS_Error = "//TRIM(DblToChar(IKPS_Error)))
     ENDIF
   ENDIF
   ! Get Energies: E_nuc and E_xc and K_xc matrices
