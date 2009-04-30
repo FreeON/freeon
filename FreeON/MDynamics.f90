@@ -471,6 +471,7 @@ CONTAINS
 
     ! Update the Velocity if not the first step
     IF(iGEO .NE. 1) THEN
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "updating velocity")
       DO iCLONE = 1,C%Geos%Clones
         DO iATS = 1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
@@ -484,6 +485,8 @@ CONTAINS
           ENDIF
         ENDDO
       ENDDO
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "first step, not updating velocity")
     ENDIF
 
     ! Reset the linear momentum, compute the kinetic energy and average kinectic energy.
@@ -517,7 +520,7 @@ CONTAINS
       MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDEkin%D(iCLONE)
     ENDDO
 
-    ! Thermostats
+    ! Rescaling thermostat.
     IF(C%Dyns%Temp_Scaling) THEN
       IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
         CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", 'Rescaling Temperature')

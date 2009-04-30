@@ -6,7 +6,7 @@ DebugAll=(MaxDebug,CheckSums)
 Guess=SuperPos
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
-ModelChem=(HF,PBE0) 
+ModelChem=(HF,PBE0)
 Accuracy=(tight,tight)
 SCFConvergence=(DIIS,DIIS)
 Geometry=(InAU)
@@ -23,7 +23,6 @@ MDNumSCF=1
 <EndOptions>
 
 <BeginGeometry>
-H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000  
+H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
 H     1.20000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
 <EndGeometry>
- 

@@ -127,7 +127,7 @@ CONTAINS
     CALL RhoEcon(RhoHead,NLink)
 
     CALL MondoLog(DEBUG_MAXIMUM,Prog,'RhoEcon = '//TRIM(FltToShrtChar(DBLE(NNaive)/DBLE(NLink))) &
-                                   //', Gaussians = '//TRIM(IntToChar(NLink)))
+                                     //', Gaussians = '//TRIM(IntToChar(NLink)))
 
     ! Next, calculate the Schwartz inequality and prune small links ???
 
@@ -385,6 +385,7 @@ CONTAINS
     IF(NLink < 1) THEN
       CALL MondoLog(DEBUG_NONE, "RhoEcon", "called with NLink = "//TRIM(IntToChar(NLink)))
       CALL Halt("illegal value")
+      !RETURN
     ENDIF
 
     ILink=0
