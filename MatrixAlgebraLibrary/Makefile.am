@@ -1,3 +1,3 @@
 CLEANFILES = *~
 
-SUBDIRS = src interface
+SUBDIRS = src interface tests
