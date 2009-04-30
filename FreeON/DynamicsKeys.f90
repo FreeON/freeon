@@ -75,16 +75,17 @@ MODULE DynamicsKeys
   CHARACTER(LEN=*), PARAMETER :: MD_DAMPING             = 'MDDamping'
 
   ! Initial Temp
-  CHARACTER(LEN=*), PARAMETER :: MD_INIT_TEMP           = 'InitTemp'
+  CHARACTER(LEN=*), PARAMETER :: MD_INITIAL_TEMP        = 'InitialTemp'
 
   ! Temperature Rescaling
-  CHARACTER(LEN=*), PARAMETER :: MD_TEMP_SCALE          = 'TempScaling'
-  CHARACTER(LEN=*), PARAMETER :: MD_ETOTAL_SCALE        = 'EtotalScaling'
-  CHARACTER(LEN=*), PARAMETER :: MD_TSCALE_INT          = 'TempIntScaling'
+  CHARACTER(LEN=*), PARAMETER :: MD_TARGET_TEMP         = 'TargetTemp'
+  CHARACTER(LEN=*), PARAMETER :: MD_TARGET_ETOTAL       = 'TargetEtotal'
+  CHARACTER(LEN=*), PARAMETER :: MD_TSCALE_STEPS        = 'TempScalingSteps'
 
   ! Thermostats.
   CHARACTER(LEN=*), PARAMETER :: MD_THERMOSTAT           = 'Thermostat'
   CHARACTER(LEN=*), PARAMETER :: MD_THERM_UNSET          = 'ThermUnset'
+  CHARACTER(LEN=*), PARAMETER :: MD_THERM_SCALING        = 'Scaling'
   CHARACTER(LEN=*), PARAMETER :: MD_THERM_BERENDSEN      = 'Berendsen'
   CHARACTER(LEN=*), PARAMETER :: MD_THERM_BERENDSEN_ETOT = 'BerendsenEtotal'
   CHARACTER(LEN=*), PARAMETER :: MD_BERENDSEN_TAU        = 'BerendsenTau'
