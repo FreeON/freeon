@@ -125,7 +125,7 @@ CONTAINS
       ENDIF
 
       ! Parse for Initial Temp, if any
-      IF(OptDblQ(Inp,MD_INIT_TEMP,D%TempInit))THEN
+      IF(OptDblQ(Inp,MD_INITIAL_TEMP,D%TempInit))THEN
         D%Initial_Temp = .TRUE.
       ELSE
         D%Initial_Temp = .FALSE.
@@ -133,42 +133,37 @@ CONTAINS
       ENDIF
 
       ! Parse for Temperature Scaling
-      IF(OptDblQ(Inp,MD_TEMP_SCALE,D%TargetTemp)) THEN
-        D%Temp_Scaling = .TRUE.
-        IF(.NOT. OptIntQ(Inp,MD_TSCALE_INT,D%RescaleInt)) THEN
-          D%RescaleInt = 100
-        ENDIF
-      ELSE
-        D%Temp_Scaling = .FALSE.
-        D%TargetTemp   = Zero
-        D%RescaleInt   = 1
+      IF(.NOT.OptDblQ(Inp,MD_TARGET_TEMP,D%TargetTemp)) THEN
+        D%TargetTemp = Zero
+        D%RescaleInt = 1
+      ENDIF
+
+      IF(.NOT.OptIntQ(Inp,MD_TSCALE_STEPS,D%RescaleInt)) THEN
+        D%RescaleInt = D%MDMaxSteps
       ENDIF
 
       ! Parse for Energy Scaling
-      IF(OptDblQ(Inp,MD_ETOTAL_SCALE,D%TargetEtotal)) THEN
-        D%Energy_Scaling = .TRUE.
+      IF(OptDblQ(Inp,MD_TARGET_ETOTAL,D%TargetEtotal)) THEN
         D%Energy_Scaling_Set = .TRUE.
         ! Change units of the energy to internal units, i.e. Hartree.
         D%TargetEtotal = eV2au*D%TargetEtotal
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "thermostating Etotal to "//TRIM(DblToChar(D%TargetEtotal*au2eV))//" eV")
-        IF(.NOT. OptIntQ(Inp,MD_TSCALE_INT,D%RescaleInt)) THEN
-          D%RescaleInt = 100
-        ENDIF
       ELSE
-        D%Energy_Scaling     = .FALSE.
         D%Energy_Scaling_Set = .FALSE.
         D%TargetEtotal       = Zero
         D%RescaleInt         = 1
       ENDIF
 
       ! Parse for thermostat.
-      IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) THEN
+      IF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_SCALING)) THEN
+        CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Scaling thermostat")
+        D%Thermostat = MD_THERM_SCALING
+      ELSEIF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN)) THEN
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Berendsen thermostat")
         D%Thermostat = MD_THERM_BERENDSEN
       ELSEIF(OptKeyQ(Inp, MD_THERMOSTAT, MD_THERM_BERENDSEN_ETOT)) THEN
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Berendsen thermostat for Etotal")
         D%Thermostat = MD_THERM_BERENDSEN_ETOT
-        D%Energy_Scaling = .TRUE.
       ELSEIF(OptKeyQ(Inp, MD_THERMOSTAT, MD_ACT)) THEN
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "Using Action Control Theory thermostat")
         D%Thermostat = MD_ACT
