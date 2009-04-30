@@ -222,23 +222,23 @@ if test "${use_optimizations}" = "yes"; then
     case ${build_cpu} in
       *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) CFLAGS="-O3" ;;
-          *)     CFLAGS="-O3" ;;
+          GCC)   CFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) CFLAGS="-g -O3" ;;
+          *)     CFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) CFLAGS="-O3" ;;
-          *)     CFLAGS="-O3" ;;
+          GCC)   CFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) CFLAGS="-g -O3" ;;
+          *)     CFLAGS="-g -O3" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) CFLAGS="-O3 -mcpu=G5" ;;
-          *)   CFLAGS="-O3" ;;
+          GCC) CFLAGS="-g -O3 -mcpu=G5" ;;
+          *)   CFLAGS="-g -O3" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
-         CFLAGS="-O" ;;
+         CFLAGS="-g -O" ;;
     esac
 
     # Test whether these flags actually produce runnable code.
@@ -265,23 +265,23 @@ main ()
     case ${build_cpu} in
       *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) FFLAGS="-O3" ;;
-          *)     FFLAGS="-O3" ;;
+          GCC)   FFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FFLAGS="-g -O3" ;;
+          *)     FFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) FFLAGS="-O3" ;;
-          *)     FFLAGS="-O3" ;;
+          GCC)   FFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FFLAGS="-g -O3" ;;
+          *)     FFLAGS="-g -O3" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) FFLAGS="-O3 -mcpu=G5" ;;
-          *)   FFLAGS="-O3" ;;
+          GCC) FFLAGS="-g -O3 -mcpu=G5" ;;
+          *)   FFLAGS="-g -O3" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
-         FFLAGS="-O" ;;
+         FFLAGS="-g -O" ;;
     esac
 
     # Test whether these flags actually produce runnable code.
@@ -307,23 +307,23 @@ main ()
     case ${build_cpu} in
       *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) FCFLAGS="-O3" ;;
-          *)     FCFLAGS="-O3" ;;
+          GCC)   FCFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FCFLAGS="-g -O3" ;;
+          *)     FCFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
-          Intel) FCFLAGS="-O3" ;;
-          *)     FCFLAGS="-O3" ;;
+          GCC)   FCFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" ;;
+          Intel) FCFLAGS="-g -O3" ;;
+          *)     FCFLAGS="-g -O3" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) FCFLAGS="-O3 -mcpu=G5" ;;
-          *)   FCFLAGS="-O3" ;;
+          GCC) FCFLAGS="-g -O3 -mcpu=G5" ;;
+          *)   FCFLAGS="-g -O3" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
-         FCFLAGS="-O" ;;
+         FCFLAGS="-g -O" ;;
     esac
 
     # Test whether these flags actually produce runnable code.
