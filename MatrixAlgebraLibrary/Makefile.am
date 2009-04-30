@@ -1,1 +1,3 @@
 CLEANFILES = *~
+
+SUBDIRS = src interface

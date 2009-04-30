@@ -599,6 +599,9 @@ END PROGRAM test_compiler
                   inside a type definition. If you are using gcc, we suggest
                   you use a version >= 4.2.])])
 
+# Compile MatrixAlgebraLibrary.
+AC_CONFIG_SUBDIRS([MatrixAlgebraLibrary])
+
 # Check for internal LAPACK/BLAS.
 AC_MSG_CHECKING([for internal lapack/blas])
 AC_ARG_ENABLE([internal-lapack],
