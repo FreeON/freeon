@@ -1,12 +1,12 @@
 include $(srcdir)/../validate.inc
 
 VALIDATE_INPUTS = \
+  01-MD-H2.inp \
+  02-MD-H2-TRBO.inp \
   MD-F2-Symplectic.inp \
   MD-F2-TRBO.inp \
   MD-H2-BO.inp \
   MD-H2-Symplectic.inp \
-  MD-H2-TRBO.inp \
-  MD-H2.inp \
   MD-H2O-TRBO-BasisSwitch.inp \
   MD-H2O-TRBO-Damp_dt11.inp \
   MD-H2O-TRBO-Damp_dt7.inp \
