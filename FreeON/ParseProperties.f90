@@ -42,6 +42,7 @@ MODULE ParseProperties
 !H---------------------------------------------------------------------------------
   USE InOut
   USE ControlStructures
+  USE MondoLogger
 #ifdef NAG
   USE F90_UNIX
 #endif
@@ -137,11 +138,15 @@ CONTAINS
        !
        IF(IsThere) THEN
           R%AlphaAxis = ArrTmpA
+          CALL MondoLog(DEBUG_MAXIMUM, "Response", "calculating polarizability along the following axes: [ "// &
+            TRIM(LogicalToChar(R%AlphaAxis(1)))//" "// &
+            TRIM(LogicalToChar(R%AlphaAxis(2)))//" "// &
+            TRIM(LogicalToChar(R%AlphaAxis(3)))//" ]")
        ENDIF
     ENDIF
     !
     ! Look for First Static HyperPolarizability.
-    IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_BETA )) THEN
+    IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_BETA)) THEN
        R%StcAlpha = .TRUE.
        R%StcBeta  = .TRUE.
        !
