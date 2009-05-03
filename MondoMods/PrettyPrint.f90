@@ -291,7 +291,7 @@ MODULE PrettyPrint
          ENDDO
 #else
          WRITE(outputString, *) TRIM(Name), ' := ', (TRIM(CA%C(J)), ', ', J=1, N)
-         CALL MondoLog(DEBUG_NONE, "", TRIM(outputString))
+         CALL MondoLog(DEBUG_NONE, "", TRIM(ADJUSTL(outputString)))
 #endif
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN

@@ -51,6 +51,7 @@ PROGRAM CPSCFSts
   USE Parse
   USE Macros
   USE LinAlg
+  USE MondoLogger
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -68,6 +69,7 @@ PROGRAM CPSCFSts
   INTEGER                          :: I,iXYZ,CPSCFCycl,LastSCFCycle
   INTEGER                          :: RespOrder
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: CPSCFMessage
+  CHARACTER(LEN=  DEFAULT_CHR_LEN) :: CPSCFTag
   CHARACTER(LEN=  DEFAULT_CHR_LEN) :: PropName
   CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCF'
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
@@ -320,22 +322,24 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   !
   CPSCFMessage=''
+  CPSCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
+
   IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
      !
      ! Fancy output.
-     CPSCFMessage=RTRN//'= = = = = CPSCFCycle #'//TRIM(SCFCycl)                    &
-                      //', Basis #'//TRIM(CurBase)                                 &
-                      //', Geometry #'//TRIM(CurGeom)                              &
-                      //' = = = = ='//RTRN//RTRN
+     CPSCFMessage='= = = = = CPSCFCycle #'//TRIM(SCFCycl)                    &
+                //', Basis #'//TRIM(CurBase)                                 &
+                //', Geometry #'//TRIM(CurGeom)                              &
+                //' = = = = ='//RTRN//RTRN
      !
      ! Add in DDIIS error.
-     IF(DIISErr/=Zero)                                                             &
-                  CPSCFMessage=TRIM(CPSCFMessage)                                  &
-                      //'   DDIISErr    = '//TRIM(DblToShrtChar(DIISErr))//RTRN
+     IF(DIISErr/=Zero) THEN
+       CPSCFMessage=TRIM(CPSCFMessage)//'  DDIISErr    = '//TRIM(DblToShrtChar(DIISErr))//RTRN
+     ENDIF
      !
      ! Add in Tensor elements.
      CPSCFMessage=TRIM(CPSCFMessage)                                               &
-                      //'   MaxDelDPrim = '//TRIM(DblToShrtChar(DPrimMax)) //RTRN  &
+                      //'  MaxDelDPrim = '//TRIM(DblToShrtChar(DPrimMax)) //RTRN  &
                 //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'X    = '          &
                       //TRIM(DblToMedmChar(Tensor(1)))//RTRN                       &
                 //'  '//TRIM(PropName)//' '//TRIM(Args%C%C(3))//'Y    = '          &
@@ -346,17 +350,13 @@ PROGRAM CPSCFSts
   ELSEIF(PrintFlags%Key>=DEBUG_NONE) THEN
      !
      ! Fancy output.
-     CPSCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','                         &
-                      //TRIM(CurBase)//','                                         &
-                      //TRIM(CurGeom)//']')
-     !
-     CPSCFMessage=TRIM(CPSCFMessage)//' '//TRIM(PropName)//' '                     &
-                                         //TRIM(Args%C%C(3))//' '                  &
-                                         //'X,Y,Z = '                              &
-                                         //TRIM(FltToShrtChar(Tensor(1)))          &
-                                   //', '//TRIM(FltToShrtChar(Tensor(2)))          &
-                                   //', '//TRIM(FltToShrtChar(Tensor(3)))
-     !
+     CPSCFMessage=TRIM(PropName)//' '                     &
+                //TRIM(Args%C%C(3))//' '                  &
+                //'X,Y,Z = '                              &
+                //TRIM(FltToShrtChar(Tensor(1)))          &
+                //', '//TRIM(FltToShrtChar(Tensor(2)))    &
+                //', '//TRIM(FltToShrtChar(Tensor(3)))
+
      IF(CPSCFCycl.GT.0) THEN
         SELECT CASE(RespOrder)
         CASE(1); CPSCFMessage=TRIM(CPSCFMessage)//', dD1 = '//TRIM(DblToShrtChar(DPrimMax))
@@ -378,10 +378,7 @@ PROGRAM CPSCFSts
 #endif
   !
   ! Printing.
-  CALL OpenASCII(OutFile,Out)
-  WRITE(*,* )TRIM(CPSCFMessage)
-  WRITE(Out,* )TRIM(CPSCFMessage)
-  CLOSE(Out)
+  CALL MondoLog(DEBUG_NONE, Prog, CPSCFMessage, CPSCFTag)
 #ifdef PARALLEL
   ENDIF
 #endif
