@@ -30,10 +30,11 @@ MODULE DenMatResponse
   USE GlobalObjects
   USE LinAlg
   USE DenMatMethods, ONLY: SpectralBounds,SetVarThresh
-  !
+  USE MondoLogger
+
   IMPLICIT NONE
   PRIVATE
-  !
+
 !---------------------------------------------------------------------------------
 ! PUBLIC DECLARATIONS
 !---------------------------------------------------------------------------------
@@ -925,7 +926,7 @@ CONTAINS
     REAL(DOUBLE)                    :: AveErrProp,PNon0,PPrmNon0
     REAL(DOUBLE)                    :: AbsErrPPrim,FNormErrPPrim,TRacePPrim
     REAL(DOUBLE)    ,SAVE           :: OldProp,OldAEP
-    CHARACTER(LEN=2*DEFAULT_CHR_LEN):: Mssg,CnvrgCmmnt
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN):: Mssg,MssgTag,CnvrgCmmnt
     INTEGER, PARAMETER              :: CyclMin=10
     !-------------------------------------------------------------------
     !
@@ -1050,20 +1051,18 @@ CONTAINS
     OldAEP=AbsErrPPrim
     !
     ! Print convergence stats
+    MssgTag = 'Pure '//TRIM(IntToChar(NPur))
     SELECT CASE(RespOrder)
     CASE(1)
-       Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE1='//TRIM(DblToShrtChar(RelErrProp))              &
+      Mssg= 'dE1='//TRIM(DblToShrtChar(RelErrProp))                &
             //', dP1='//TRIM(DblToShrtChar(AbsErrPPrim))           &
             //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE(2)
-       Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE2='//TRIM(DblToShrtChar(RelErrProp))              &
+       Mssg='dE2='//TRIM(DblToShrtChar(RelErrProp))                &
             //', dP2='//TRIM(DblToShrtChar(AbsErrPPrim))           &
             //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE(3)
-       Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))       &
-            //'dE3='//TRIM(DblToShrtChar(RelErrProp))              &
+       Mssg='dE3='//TRIM(DblToShrtChar(RelErrProp))                &
             //', dP3='//TRIM(DblToShrtChar(AbsErrPPrim))           &
             //', %Non0='//TRIM(DblToShrtChar(PPrmNon0))
     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
@@ -1073,12 +1072,7 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-       CALL OpenASCII(OutFile,Out)
-       CALL PrintProtectL(Out)
-       WRITE(*,*)TRIM(Mssg)
-       WRITE(Out,*)TRIM(Mssg)
-       CALL PrintProtectR(Out)
-       CLOSE(UNIT=Out,STATUS='KEEP')
+       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg, MssgTag)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1113,66 +1107,42 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-       CALL OpenASCII(OutFile,Out)
-       CALL PrintProtectL(Out)
-       Mssg=ProcessName(Prog,CnvrgCmmnt)                                             &
-                             //'Tr{PT}='//TRIM(DblToChar(Prop))
-       IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-          WRITE(*,*)TRIM(Mssg)
-       ENDIF
-       WRITE(Out,*)TRIM(Mssg)
-       !
-       Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps, '        &
-                             //TRIM(IntToChar(MM))//' matrix multiplies'
-       IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-          WRITE(*,*)TRIM(Mssg)
-       ENDIF
-       WRITE(Out,*)TRIM(Mssg)
-       Mssg=ProcessName(Prog)//'ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))         &
-                             //', %Non0s = '//TRIM(DblToShrtChar(PPrmNon0))
-       IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-          WRITE(*,*)TRIM(Mssg)
-       ENDIF
-       WRITE(Out,*)TRIM(Mssg)
-       !
+       CALL MondoLog(DEBUG_NONE, Prog, CnvrgCmmnt//'Tr{PT}='//TRIM(DblToChar(Prop)))
+
+       Mssg=TRIM(IntToChar(NPur))//' purification steps, '//TRIM(IntToChar(MM))//' matrix multiplies'
+       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg)
+
+       Mssg='ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))//', %Non0s = '//TRIM(DblToShrtChar(PPrmNon0))
+       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg)
+
        SELECT CASE(RespOrder)
        CASE(1)
-          Mssg=ProcessName(Prog,'Max abs errors') &
-                                //'dE1='//TRIM(DblToShrtChar(RelErrProp))//', '        &
-                                //'dP1='//TRIM(DblToShrtChar(AbsErrPPrim))
+          Mssg='Max abs errors'//'dE1='//TRIM(DblToShrtChar(RelErrProp))//', '        &
+                               //'dP1='//TRIM(DblToShrtChar(AbsErrPPrim))
        CASE(2)
-          Mssg=ProcessName(Prog,'Max abs errors') &
-                                //'dE2='//TRIM(DblToShrtChar(RelErrProp))//', '        &
-                                //'dP2='//TRIM(DblToShrtChar(AbsErrPPrim))
+          Mssg='Max abs errors'//'dE2='//TRIM(DblToShrtChar(RelErrProp))//', '        &
+                               //'dP2='//TRIM(DblToShrtChar(AbsErrPPrim))
        CASE(3)
-          Mssg=ProcessName(Prog,'Max abs errors') &
-                                //'dE3='//TRIM(DblToShrtChar(RelErrProp))//', '        &
-                                //'dP3='//TRIM(DblToShrtChar(AbsErrPPrim))
+          Mssg='Max abs errors'//'dE3='//TRIM(DblToShrtChar(RelErrProp))//', '        &
+                               //'dP3='//TRIM(DblToShrtChar(AbsErrPPrim))
        CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
        END SELECT
-       IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-          WRITE(*,*)TRIM(Mssg)
-       ENDIF
-       WRITE(Out,*)TRIM(Mssg)
-       !
+       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg)
+
        SELECT CASE(RespOrder)
        CASE(1)
-          Mssg=ProcessName(Prog)//'Rel dE1='//TRIM(DblToShrtChar(RelErrProp))//', '    &
-                                //'||dP1||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
+          Mssg='Rel dE1='//TRIM(DblToShrtChar(RelErrProp))//', '    &
+             //'||dP1||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
        CASE(2)
-          Mssg=ProcessName(Prog)//'Rel dE2='//TRIM(DblToShrtChar(RelErrProp))//', '    &
-                                //'||dP2||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
+          Mssg='Rel dE2='//TRIM(DblToShrtChar(RelErrProp))//', '    &
+             //'||dP2||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
        CASE(3)
-          Mssg=ProcessName(Prog)//'Rel dE3='//TRIM(DblToShrtChar(RelErrProp))//', '    &
-                                //'||dP3||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
+          Mssg='Rel dE3='//TRIM(DblToShrtChar(RelErrProp))//', '    &
+             //'||dP3||_F='//TRIM(DblToShrtChar(FNormErrPPrim))
        CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
        END SELECT
-       IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-          WRITE(*,*)TRIM(Mssg)
-       ENDIF
-       WRITE(Out,*)TRIM(Mssg)
-       CALL PrintProtectR(Out)
-       CLOSE(UNIT=Out,STATUS='KEEP')
+       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg)
+
 #ifdef PARALLEL
     ENDIF
 #endif
