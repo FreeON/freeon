@@ -6,6 +6,7 @@ endif
 
 if INTERNAL_HDF5
 INTERNAL_HDF5_DIRS = hdf5
+HDF5_INCLUDES = -I$(srcdir)/hdf5/src -I$(builddir)/hdf5/src
 endif
 
 SUBDIRS = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
@@ -164,6 +165,7 @@ EXTRA_DIST = \
   MMA/PAC/PFunk.Inc
 
 EXTRA_INCLUDES = \
+  $(HDF5_INCLUDES) \
   -I$(srcdir)/MMA/LookUpTables \
   -I$(srcdir)/MMA/Functionals  \
   -I$(srcdir)/MMA/PAC
