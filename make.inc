@@ -62,14 +62,14 @@ depcheck-lib :
 
 CPP_COMMAND = $(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(FORTRAN_CPPFLAGS) $(CPPFLAGS) $(CPPMISC)
 
+AM_FCFLAGS = $(FORTRAN_DEFAULT_INCLUDES) $(DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
+AM_FFLAGS  = $(FORTRAN_DEFAULT_INCLUDES) $(DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
+AM_CFLAGS  = $(EXTRA_INCLUDES)
+
 if USE_COMPILER_OPTIMIZATIONS
-FC_COMMAND  = $(FC) $(AM_FCFLAGS) $(FCFLAGS) $(OPTIMIZATION_FLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
-F77_COMMAND = $(F77) $(AM_FFLAGS) $(FFLAGS) $(OPTIMIZATION_FLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
-CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMISC) $(AM_CFLAGS) $(CFLAGS) $(OPTIMIZATION_FLAGS) $(EXTRA_INCLUDES)
-else
-FC_COMMAND  = $(FC) $(AM_FCFLAGS) $(FCFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
-F77_COMMAND = $(F77) $(AM_FFLAGS) $(FFLAGS) $(FORTRAN_DEFAULT_INCLUDES) $(EXTRA_INCLUDES)
-CC_COMMAND  = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(CPPMISC) $(AM_CFLAGS) $(CFLAGS) $(EXTRA_INCLUDES)
+AM_FCFLAGS += $(OPTIMIZATION_FLAGS)
+AM_FFLAGS += $(OPTIMIZATION_FLAGS)
+AM_CFLAGS += $(OPTIMIZATION_FLAGS)
 endif
 
 # Whether we should keep or remove preprocessed files.
@@ -79,61 +79,16 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 AM_LIBTOOLFLAGS = --silent
 
 # Suffix rules.
-
-#.f90.o :
-#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
-#	$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
-#	fi
-
-#.f90.lo :
-#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
-#	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
-#	fi
-
-#.f.o :
-#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
-#	$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
-#	fi
-#
-#.f.lo :
-#	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
-#	$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
-#	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
-#	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
-#	fi
-
-#.c.o:
-#	@echo "compiling $<"
-#	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< > /dev/null 2>&1 && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	  echo '$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<' 1>&2; \
-#	  $(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-#	@mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#
-#.c.lo:
-#	@echo "compiling $<"
-#	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< > /dev/null 2>&1 && exit 0; \
-#	  echo "The following compiler command failed:" 1>&2; \
-#	  echo '$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<' 1>&2; \
-#	  $(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-#	@mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-
 .f90.o :
 	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
 	  echo "The following preprocessor command failed:" 1>&2; \
 	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
 	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
 	@echo "compiling $<"
-	@$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1 && exit 0; \
+	@$(FCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1 && exit 0; \
 	  echo "The following compiler command failed:" 1>&2; \
-	  echo '$(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-	  $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	  echo '$(FCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(FCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
 	fi
@@ -144,10 +99,10 @@ AM_LIBTOOLFLAGS = --silent
 	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
 	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
 	@echo "compiling $<"
-	@$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1 && exit 0; \
+	@$(LTFCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90 > /dev/null 2>&1 && exit 0; \
 	  echo "The following compiler command failed:" 1>&2; \
-	  echo '$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(FC_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	  echo '$(LTFCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90' 1>&2; \
+	  $(LTFCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
 	fi
@@ -158,10 +113,10 @@ AM_LIBTOOLFLAGS = --silent
 	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
 	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
 	@echo "compiling $<"
-	@$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1 && exit 0; \
+	@$(F77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1 && exit 0; \
 	  echo "The following compiler command failed:" 1>&2; \
-	  echo '$(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-	  $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	  echo '$(F77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(F77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
@@ -172,10 +127,10 @@ AM_LIBTOOLFLAGS = --silent
 	  echo '$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
 	  $(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
 	@echo "compiling $<"
-	@$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1 && exit 0; \
+	@$(LTF77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f > /dev/null 2>&1 && exit 0; \
 	  echo "The following compiler command failed:" 1>&2; \
-	  echo '$(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
-	  $(LIBTOOL) --tag=F77 $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(F77_COMMAND) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	  echo '$(LTF77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f' 1>&2; \
+	  $(LTF77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
