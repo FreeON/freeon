@@ -1,4 +1,4 @@
-AC_INIT([MatrixAlgebraLibrary], [0.1], [nbock@lanl.gov])
+AC_INIT([LinearAlgebraLibrary], [0.1], [nbock@lanl.gov])
 AM_INIT_AUTOMAKE
 
 # Identify compilers.
