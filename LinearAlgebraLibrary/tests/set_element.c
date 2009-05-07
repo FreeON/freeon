@@ -12,6 +12,8 @@ main ()
 
   lal_zero(A);
 
-  if (lal_get(0, 0, A) == 0.0) { return 0; }
+  lal_set(1, 2, 5, A);
+
+  if (lal_get(1, 2, A) == 5.0) { return 0; }
   else { return 1; }
 }

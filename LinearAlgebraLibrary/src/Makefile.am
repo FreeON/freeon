@@ -1,12 +1,11 @@
 CLEANFILES = *~
 
-lib_LTLIBRARIES = libmal.la
+lib_LTLIBRARIES = liblal.la
 
-libmal_la_SOURCES = \
+liblal_la_SOURCES = \
   allocate.c \
   dgemm.c \
   get.c \
-  mal.h \
-  matrix.h \
+  lal.h \
   set.c \
   zero.c

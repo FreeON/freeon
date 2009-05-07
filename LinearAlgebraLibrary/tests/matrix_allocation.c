@@ -1,4 +1,4 @@
-#include <mal.h>
+#include <lal.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,5 +13,5 @@ main ()
   M = (int) (100+rand()/((double) (RAND_MAX))*100);
   N = (int) (100+rand()/((double) (RAND_MAX))*100);
 
-  return mal_allocate(M, N, &A);
+  return lal_allocate(M, N, &A);
 }
