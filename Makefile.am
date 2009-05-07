@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-SUBDIRS = MondoMods MatrixAlgebraLibrary FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
+SUBDIRS = MondoMods LinearAlgebraLibrary FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
 
 EXTRA_DIST = localversion FreeON.bibtex
 
