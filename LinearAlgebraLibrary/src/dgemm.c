@@ -100,10 +100,28 @@
 #include "config.h"
 #include "lal.h"
 
+#include <assert.h>
+
 void
 lal_dgemm (const char *transA, const char *transB, const int M, const int N,
-    const int K, const double alpha, const matrix_t A, const int lda,
-    const matrix_t B, const int ldb, const double beta, matrix_t C,
+    const int K, const double alpha, const matrix_t *A, const int lda,
+    const matrix_t *B, const int ldb, const double beta, matrix_t *C,
     const int ldc)
 {
+  int i, j, k;
+
+  assert(transA[0] == 'N' || transA[0] == 'n');
+  assert(transB[0] == 'N' || transB[0] == 'n');
+  assert(M > 0 && N > 0 && K > 0);
+
+  /* Braindead implementation. */
+  lal_zero(C);
+  for (i = 0; i < M; ++i) {
+    for (j = 0; j < N; ++j) {
+      for (k = 0; k < M; ++k)
+      {
+        lal_set(i, j, lal_get(i, j, C)+lal_get(i, k, A)*lal_get(k, j, B), C);
+      }
+    }
+  }
 }
