@@ -1,11 +1,11 @@
-#include "matrix.h"
+#include "lal.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 int
-mal_allocate (const int M, const int N, matrix_t **A)
+lal_allocate (const int M, const int N, matrix_t **A)
 {
   assert(M > 0);
   assert(N > 0);
@@ -22,7 +22,7 @@ mal_allocate (const int M, const int N, matrix_t **A)
 
   if ((*A)->data == NULL)
   {
-    fprintf(stderr, "[mal_allocate]", "error allocating matrix\n");
+    fprintf(stderr, "[lal_allocate]", "error allocating matrix\n");
     return -1;
   }
 

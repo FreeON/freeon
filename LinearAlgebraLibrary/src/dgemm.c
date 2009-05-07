@@ -98,10 +98,10 @@
  */
 
 #include "config.h"
-#include "matrix.h"
+#include "lal.h"
 
 void
-mal_dgemm (const char *transA, const char *transB, const int M, const int N,
+lal_dgemm (const char *transA, const char *transB, const int M, const int N,
     const int K, const double alpha, const matrix_t A, const int lda,
     const matrix_t B, const int ldb, const double beta, matrix_t C,
     const int ldc)
