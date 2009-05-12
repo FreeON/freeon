@@ -9,7 +9,7 @@ HDFFile=/tmp/MD_H2_TRBO-restart-1_23498.hdf
 
 SCFMethod=(TC2)
 BasisSets=(6-31G**)
-ModelChem=(HF) 
+ModelChem=(HF)
 Accuracy=(tight)
 SCFConvergence=(DIIS)
 MinSCF=12
@@ -27,6 +27,6 @@ Geometry=(InAngstrom)
 <EndOptions>
 
 <BeginGeometry>
-H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000  
+H     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
 H     1.20000000     0.00000000     0.00000000     0.00000000     0.00000000     0.00000000
 <EndGeometry>
