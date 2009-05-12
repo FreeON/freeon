@@ -190,11 +190,11 @@ CONTAINS
             ! Reset the atomic number in the case that we had/have atomic
             ! numbers cooresponding to an effective core potential basis set
             CALL ReSetAtNum(G%Clone(iCLONE))
-            IF(iGEO/=O%RestartState%I(3))THEN
-              CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
-                   PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
+            !IF(iGEO/=O%RestartState%I(3))THEN
+              !CALL PPrint(G%Clone(iCLONE),FileName_O=N%GFile,Unit_O=Geo, &
+                   !PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
               ! CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O=O%GeomPrint,Clone_O=iCLONE)
-            ENDIF
+            !ENDIF
             CALL CloseHDFGroup(HDF_CurrentID)
 
             ! Check for coordinate unit conversions.
