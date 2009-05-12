@@ -68,7 +68,7 @@ CONTAINS
     ! Do Molecular Dynamics:Loop over Time Steps
 
     ! Intitialize
-    CALL MondoLog(DEBUG_NONE, "MD", "initializing")
+    CALL MondoLog(DEBUG_NONE, "MD", "initializing MD simulation")
     C%Stat%Previous%I = (/0,1,1/)
     iGEO    = 1
     iMDStep = 1
@@ -591,7 +591,7 @@ CONTAINS
     ENDIF
 
     ! Generate Output
-    CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "writing output")
+    CALL MondoLog(DEBUG_NONE, "MD:Verlet_NVE", "writing coordinates to file")
     CALL OutputMD(C,iGEO)
 
     ! Update the Positions
@@ -777,7 +777,7 @@ CONTAINS
 
     IF(m_step == 1) THEN
       ! Generate Output.
-      CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "writing output")
+      CALL MondoLog(DEBUG_NONE, "MD:Symplectic", "writing coordinates to file")
       CALL OutputMD(C,iGEO)
     ENDIF
 
@@ -1056,6 +1056,8 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Remark
 
     DO iCLONE=1,C%Geos%Clones
+      CALL MondoLog(DEBUG_MAXIMUM, "MD:OutputMD", "writing coordinates, t = " &
+        //TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs")
       Remark = 't = '//TRIM(DblToMedmChar(MDTime%D(iCLONE)*InternalTimeToFemtoseconds))//" fs, "// &
                "Ekin = "//TRIM(DblToChar(MDEkin%D(iCLONE)*au2eV))//" eV, "// &
                "Epot = "//TRIM(DblToChar(MDEpot%D(iCLONE)*au2eV))//" eV, "// &
