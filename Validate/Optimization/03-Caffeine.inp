@@ -16,7 +16,7 @@ Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
 
 #Guess=SuperPos
 Guess=Restart
-HDFFile=/tmp/03-Caffine_27842.hdf
+HDFFile=/tmp/03-Caffeine_3826.hdf
 
 SCFMethod=(RH,RH)
 BasisSets=(STO-2G,6-31G**)
