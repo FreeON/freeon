@@ -1265,7 +1265,7 @@ MODULE MemMan
             CALL Halt(' On node '//TRIM(ChMyId)  &
                    //', Attempt to allocate memory already allocated.')
 #else
-            CALL Halt(' Attempt to allocate memory already allocated.')
+            CALL Halt('Attempt to allocate memory already allocated.')
 #endif
          ENDIF
       END SUBROUTINE AllocChk
