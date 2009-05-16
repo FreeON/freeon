@@ -46,7 +46,10 @@ MODULE NEB
   USE ls_rmsd
   USE PrettyPrint
   USE ControlStructures
+  USE MondoLogger
+
   IMPLICIT NONE
+
   SAVE
 CONTAINS
   !===============================================================================
@@ -210,17 +213,12 @@ CONTAINS
           ENDDO
           R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
        ENDDO
-       Mssg=ProcessName('FreeON','NEBPurify')//'RMSDs = '
+       Mssg='RMSDs = '
        DO I=1,G%Clones
-          IF(MOD(I,4)==0)THEN
-             Mssg=TRIM(Mssg)//RTRN//ProcessName() &
-                  //'          '//TRIM(DblToShrtChar(R2(I)))//','
-          ELSE
-             Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
-          ENDIF
+          Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
        ENDDO
        Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
-       WRITE(*,*)TRIM(Mssg)
+       CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
 !    ENDIF
   END SUBROUTINE NEBPurify
   !===============================================================================

@@ -133,8 +133,8 @@ CONTAINS
 #ifdef MPI2
     NArg=8+SNC
     CALL New(ArgT,NArg)
-    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
-    ArgT%C(2) =N%SCF_NAME
+    ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(2)=N%SCF_NAME
     DO K=1,SNC
       ArgT%C(2+K)=S%Action%C(K)
     ENDDO
@@ -148,13 +148,13 @@ CONTAINS
 #elif PARALLEL
     NArg=13+SNC
     CALL New(ArgT,NArg)
-    ArgT%C(1) =M%Invoking
-    ArgT%C(2) =M%ProcFlag
-    ArgT%C(3) =IntToChar(M%Clump%I(3,cCLUMP))
-    ArgT%C(4) =M%MachFlag
-    ArgT%C(5) =M%MachFile
-    ArgT%C(6) =TRIM(N%M_EXEC)//'/'//Ex
-    ArgT%C(7) =N%SCF_NAME
+    ArgT%C(1)=M%Invoking
+    ArgT%C(2)=M%ProcFlag
+    ArgT%C(3)=IntToChar(M%Clump%I(3,cCLUMP))
+    ArgT%C(4)=M%MachFlag
+    ArgT%C(5)=M%MachFile
+    ArgT%C(6)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(7)=N%SCF_NAME
     DO K=1,SNC
       ArgT%C(7+K)=S%Action%C(K)
     ENDDO
@@ -168,8 +168,8 @@ CONTAINS
 #else
     NArg=8+SNC
     CALL New(ArgT,NArg)
-    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
-    ArgT%C(2) =N%SCF_NAME
+    ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(2)=N%SCF_NAME
     DO K=1,SNC
       ArgT%C(2+K)=S%Action%C(K)
     ENDDO
