@@ -551,7 +551,7 @@ CONTAINS
     ENDIF
 
     IF(C%NSMat.NE.NSMat) THEN
-      write(*,*) 'MultiplyM_BCSR: C%NSMat.NE.NSMat! Deallocate and reallocate.'
+      CALL MondoLog(DEBUG_MAXIMUM, "MultiplyM_BCSR", "C%NSMat.NE.NSMat! Deallocate and reallocate.")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
@@ -1696,7 +1696,7 @@ CONTAINS
     IF(.NOT.AllocQ(C%Alloc)   ) CALL New(C,NSMat_O=NSMat)
     !
     IF(NSMat.NE.C%NSMat) THEN
-      write(*,*) 'Add_BCSR: NSMat.NE.C%NSMat! Deallocate-reallocate'
+      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "NSMat.NE.C%NSMat! Deallocate-reallocate")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
