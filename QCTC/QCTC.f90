@@ -46,6 +46,7 @@ PROGRAM QCTC
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   NukesOn=.TRUE.
+
   ! ---------------------------------------------------------------------------------
   ! Begin building a density 
   !
@@ -84,9 +85,18 @@ PROGRAM QCTC
      CALL CloseHDF(OldFileID)
      ! Reopen current group and HDF
      HDFFileID=OpenHDF(H5File)
+     HDF_CurrentID=HDFFileID
+     !
+     CALL Get(Stat,'current_state')
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     !
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
+     !
      CALL Get(Dmat,TrixFile('D',Args,0))
+
   ELSE
      ! Get the current information
      CALL Get(BS,CurBase)
@@ -159,6 +169,7 @@ PROGRAM QCTC
   ENDIF
   ! Now that we are done with the density, lets make sure we have the 
   ! current basis set, matrix block sizes etc:  
+
   CALL Get(BS,CurBase)
   CALL Get(BSiz,'atsiz',CurBase)
   CALL Get(OffS,'atoff',CurBase)
