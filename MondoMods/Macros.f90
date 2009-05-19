@@ -109,6 +109,7 @@ CONTAINS
     ! CALL AlignNodes(' After CartCommSplit ')
 #else
     CALL Get(MyClone,'spacetime')
+    CurClone = IntToChar(MyClone)
     CALL CloseHDF(HDFFileID)
 #endif
     ! Each ROOT in each MONDO_COMM opens the HDF file --->FOR READ ONLY<---

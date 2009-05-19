@@ -1444,7 +1444,7 @@ CONTAINS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name))
+    !CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name))
 
     IF(PRESENT(BCast_O)) THEN
       Bcast = BCast_O

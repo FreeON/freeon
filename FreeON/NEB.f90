@@ -253,9 +253,9 @@ CONTAINS
     !GH    write(*,*)'Prod Crds'
     !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
 
-    Mssg=ProcessName('NEBForce','Reactant')//' D = '//TRIM(FltToShrtChar(Dist)) &
-         //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal))
-    WRITE(*,*)TRIM(Mssg)
+    CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+      //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal)), "Reactant")
+
     DO I=1,G%Clones
        ! Are the neighboring images higher in energy?
        IF(I==1)THEN
@@ -327,18 +327,14 @@ CONTAINS
        ! Write distance, energies and forces
        Dist=Dist+Rm
 
-       Mssg=ProcessName('NEBForce','Image '//TRIM(IntToChar(I))) &
-            //' D = '//TRIM(FltToShrtChar(Dist))                 &
-            //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal))   &
-            //', F = '//TRIM(DblToMedmChar(FProj))
-       WRITE(*,*)TRIM(Mssg)
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+            //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal)) &
+            //', F = '//TRIM(DblToMedmChar(FProj)), "Image"//TRIM(IntToChar(I)))
     ENDDO
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))
     Dist=Dist+Rm
-    Mssg=ProcessName('NEBForce','Product')   &
-         //' D = '//TRIM(FltToShrtChar(Dist)) &
-         //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal))
-    WRITE(*,*)TRIM(Mssg)
+    CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+         //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal)), "Product")
   END SUBROUTINE NEBForce
 
   !===============================================================================

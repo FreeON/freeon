@@ -55,12 +55,13 @@ PROGRAM SCFStatus
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
   LOGICAL                         :: HasECPs
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFMessage
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: SCFTag
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFMessage
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFTag
   CHARACTER(LEN=9),PARAMETER      :: Prog='SCF'
   !---------------------------------------------------------------------------------------
   !  Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+
   !  Allocate some matrices
   CALL New(P)
   CALL New(Tmp1)
