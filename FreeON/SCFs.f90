@@ -1826,15 +1826,15 @@ CONTAINS
     DoingMD=.FALSE.
     IF(PRESENT(DoingMD_O)) DoingMD=DoingMD_O
 
-    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
-      //", iGEO = "//TRIM(IntToChar(iGEO)))
+    !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
+    !  //", iGEO = "//TRIM(IntToChar(iGEO)))
 
     chGEO = IntToChar(iGEO)
-    RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"
-    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
+    RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_*Geom#'//TRIM(chGEO)//"_*"
+    CALL MondoLog(DEBUG_NONE, "CleanScratch", "removing "//TRIM(RemoveFile))
     CALL FileRemove(RemoveFile)
     IF(DoingMD) THEN
-      RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*"
+      RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_*G#'//TRIM(chGEO)//"_*"
       !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
       CALL FileRemove(RemoveFile)
     ENDIF
