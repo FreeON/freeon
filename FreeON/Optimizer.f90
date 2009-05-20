@@ -589,6 +589,11 @@ CONTAINS
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
        ! Continue optimization?
        IF(ConvgdAll==1) EXIT
+
+       ! Clean out scratch.
+       IF(C%Stat%Current%I(3) > 2) THEN
+         CALL CleanScratch(C, iGEO-2)
+       ENDIF
      ENDDO
      CALL Delete(Convgd)
 
