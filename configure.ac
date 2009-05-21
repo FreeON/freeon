@@ -222,13 +222,13 @@ if test "${use_optimizations}" = "yes"; then
     case ${build_cpu} in
       *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
@@ -265,13 +265,13 @@ main ()
     case ${build_cpu} in
       *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
@@ -307,13 +307,13 @@ main ()
     case ${build_cpu} in
       *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=i686 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
