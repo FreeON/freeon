@@ -610,6 +610,9 @@ CONTAINS
           ELSEIF(GLogic)THEN
             Converged(iCLONE)=DIIS_NOPATH
           ENDIF
+        ELSE
+          DIISA = 0.0D0
+          DIISB = 0.0D0
         ENDIF
 
         IF(DoDIIS.AND.DIISB<DIISA)THEN
