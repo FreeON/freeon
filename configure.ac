@@ -971,6 +971,7 @@ TwoE/VRR/Makefile
 ONX/Makefile
 Validate/Makefile
 Validate/Dynamics/Makefile
+Validate/NEB/Makefile
 Validate/Optimization/Makefile
 Validate/Response/Frequencies/Makefile
 Validate/Response/Makefile
