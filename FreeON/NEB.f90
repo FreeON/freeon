@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#define NEB_DEBUG
+
 MODULE NEB
   !===============================================================================
   ! Module for calculating reaction (minimum energy) paths between known
@@ -51,6 +54,7 @@ MODULE NEB
   IMPLICIT NONE
 
   SAVE
+
 CONTAINS
   !===============================================================================
   ! Initialize the NEB by generating an linear interpolation between intial
@@ -61,9 +65,13 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: ReactionVector
     REAL(DOUBLE)     :: ImageFraction
     INTEGER          :: iCLONE,j
+
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
-    !write(*,*)'NEB: Into NEBInit'
+#ifdef NEB_DEBUG
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "starting...")
+#endif
+
     ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
     iClone=0
     !write(*,'(1A7,I3)')'Image',iClone
@@ -80,6 +88,7 @@ CONTAINS
     !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
     !write(*,*)'NEB: Done NEBInit'
   END SUBROUTINE NEBInit
+
   !===============================================================================
   ! Make a deep copy of the CRDS structure
   ! (This should move.  Also figure out PBC issue.)
@@ -106,21 +115,27 @@ CONTAINS
   END SUBROUTINE SetEq_CRDS
 
   SUBROUTINE NEBPurify(G,Init_O,Print_O)
-    TYPE(Geometries) :: G
-    LOGICAL,OPTIONAL :: Init_O,Print_O
-    LOGICAL          :: Init
-    INTEGER          :: I,iCLONE,bCLONE,eCLONE,J
-    REAL(DOUBLE),DIMENSION(G%Clones+1) :: R2
-    REAL(DOUBLE),DIMENSION(3,3) :: U
-    REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
-    REAL(DOUBLE) :: Error
-    CHARACTER(LEN=4*DCL) :: Mssg
-    IF(PRESENT(INIT_O))THEN
-       INIT=.TRUE.
+    TYPE(Geometries)                    :: G
+    LOGICAL,OPTIONAL                    :: Init_O,Print_O
+    LOGICAL                             :: Init
+    INTEGER                             :: I,iCLONE,bCLONE,eCLONE,J
+    REAL(DOUBLE),DIMENSION(G%Clones+1)  :: R2
+    REAL(DOUBLE),DIMENSION(3,3)         :: U
+    REAL(DOUBLE),DIMENSION(3)           :: Center1,Center2
+    REAL(DOUBLE)                        :: Error
+    CHARACTER(LEN=4*DCL)                :: Mssg
+
+    IF(PRESENT(Init_O))THEN
+       Init=.TRUE.
     ELSE
-       INIT=.FALSE.
+       Init=.FALSE.
     ENDIF
-    IF(INIT)THEN
+
+#ifdef NEB_DEBUG
+    CALL MondoLog(DEBUG_NONE, "NEB", "Init = "//TRIM(LogicalToChar(Init)))
+#endif
+
+    IF(Init)THEN
        bCLONE=G%Clones+1
        eCLONE=G%Clones+1
        ! Check for stupid input
@@ -133,45 +148,43 @@ CONTAINS
        bCLONE=1
        eCLONE=G%Clones+1
     ENDIF
-    !
+
 !!$    ! Scale the coordinates by Z
 !!$    DO I=1,G%Clone(0)%NAtms
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
 !!$    ENDDO
 
-
 #ifdef NEB_DEBUG
-    WRITE(*,*)' bCLONE = ',bCLONE
-    WRITE(*,*)' eCLONE = ',eCLONE
-    WRITE(*,*)' CLONE ZERO AFTER SCALING = '
+    CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
+    CALL MondoLog(DEBUG_NONE, "NEB", "eCLONE = "//TRIM(IntToChar(eCLONE)))
+    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE ZERO AFTER SCALING = ")
     CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
 #endif
-    !
+
     DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG
-       WRITE(*,*)'==========',iclone,'============='
+      WRITE(*,*)'==========',iclone,'============='
 #endif
-
-
 
 !!$       ! Scale the coordinates by Z
 !!$       DO I=1,G%Clone(0)%NAtms
 !!$          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)*G%Clone(iCLONE)%AtNum%D(I)
 !!$       ENDDO
+
        ! Find the transformation that minimizes the RMS deviation between the
        ! reactants (clone 0), the clones (1-N) and the products (N+1)
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
-            1, U, center2, center1, error )! , calc_g, grad)
+            1, U, Center2, Center1, error )! , calc_g, grad)
 #ifdef NEB_DEBUG
-       WRITE(*,333)1,center1
-       WRITE(*,333)2,center2
-       WRITE(*,333)-1,-(center2-center1)
-333    FORMAT('CENTER',I2,' = ',3(F10.5,', '))
+       WRITE(*,333)1,Center1
+       WRITE(*,333)2,Center2
+       WRITE(*,333)-1,-(Center2-Center1)
+333    FORMAT('Center',I2,' = ',3(F10.5,', '))
 #endif
-       IF(INIT)THEN
+       IF(Init)THEN
           ! Translate the reactants JUST ONCE to C1
           DO I=1,G%Clone(0)%NAtms
-             G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)-center1
+             G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)-Center1
           ENDDO
        ENDIF
 #ifdef NEB_DEBUG
@@ -182,7 +195,7 @@ CONTAINS
 #endif
        ! Translation to C2 ...
        DO I=1,G%Clone(0)%NAtms
-          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)-center2
+          G%Clone(iCLONE)%Carts%D(:,I)=G%Clone(iCLONE)%Carts%D(:,I)-Center2
        ENDDO
        ! ... and rotation
        DO I=1,G%Clone(0)%NAtms
