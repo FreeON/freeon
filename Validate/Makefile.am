@@ -1,6 +1,6 @@
 include $(srcdir)/validate-recursive.inc
 
-SUBDIRS = Dynamics Optimization Response Restart SinglePoint
+SUBDIRS = Dynamics Optimization Response Restart SinglePoint NEB
 
 # Install the validation suite scripts.
 #bin_SCRIPTS = runTests.py
