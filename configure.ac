@@ -355,7 +355,7 @@ else
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
       GCC)   CFLAGS="-O0 -g -Wall" ;;
-      Intel) CFLAGS="-O0 -fp-port -g" ;;
+      Intel) CFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
@@ -367,7 +367,7 @@ else
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
       GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      Intel) FFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
+      Intel) FFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
@@ -379,7 +379,7 @@ else
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
       GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
-      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -g -check all" ;;
+      Intel) FCFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
     AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
@@ -1053,6 +1053,6 @@ fi
 AC_MSG_NOTICE([*** End Summary ***])
 
 # Pass the optimization flags to the hdf configure script.
-#ac_configure_args="${ac_configure_args} ${optimization_flags}"
+ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT
