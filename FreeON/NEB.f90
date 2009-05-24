@@ -74,19 +74,25 @@ CONTAINS
 
     ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
     iClone=0
-    !write(*,'(1A7,I3)')'Image',iClone
-    !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+#ifdef NEB_DEBUG
+    write(*,'(1A7,I3)')'Image',iClone
+    write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+#endif
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
        G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
-       !write(*,'(1A7,I3)')'Image',iClone
-       !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+#ifdef NEB_DEBUG
+       write(*,'(1A7,I3)')'Image',iClone
+       write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+#endif
     ENDDO
     iClone=G%Clones+1
-    !write(*,'(1A7,I3)')'Image',iClone
-    !write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-    !write(*,*)'NEB: Done NEBInit'
+#ifdef NEB_DEBUG
+    write(*,'(1A7,I3)')'Image',iClone
+    write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+    write(*,*)'NEB: Done NEBInit'
+#endif
   END SUBROUTINE NEBInit
 
   !===============================================================================
@@ -163,7 +169,7 @@ CONTAINS
 
     DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG
-      WRITE(*,*)'==========',iclone,'============='
+      CALL MondoLog(DEBUG_NONE, "NEB", "=========="//TRIM(IntToChar(iclone))//"=============")
 #endif
 
 !!$       ! Scale the coordinates by Z
@@ -233,6 +239,7 @@ CONTAINS
        Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
        CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
 !    ENDIF
+
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
