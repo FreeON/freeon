@@ -3,6 +3,7 @@ MODULE SetXYZ
    USE GlobalScalars
    USE GlobalObjects
    USE MemMan
+
 #ifdef PARALLEL
    USE MondoMPI
 #endif
@@ -874,7 +875,7 @@ MODULE SetXYZ
       SUBROUTINE Set_Bond_EQ_Bond(A,IA,B,IB)
         TYPE(BONDDATA) :: A,B
         INTEGER        :: IA,IB
-        !
+
         A%IJ%I(1:2,IA)=B%IJ%I(1:2,IB)
         A%Length%D(IA)=B%Length%D(IB)
         A%Type%C(IA)=B%Type%C(IB)

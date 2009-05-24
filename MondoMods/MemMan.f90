@@ -550,10 +550,14 @@ MODULE MemMan
          CALL New(A%BoxCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl,(/3,3/))
-         !
          CALL New(A%ETotalPerSCF, 256, 0)
+
+         ! [FIXME] Check whether this is actually correct. In other words, is a
+         ! NCELLS == 0 really correct?
+         !CALL New(A%InCells, 0)
+         !CALL New(A%OvCells, 0)
+
          A%ETotalPerSCF%D = 0.0D0
-         !
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
