@@ -1127,75 +1127,79 @@ CONTAINS
      MaxOutPDispl=MaxOutPDispl*180.D0/PI
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
-     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max intl Grad = "// &
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Max intl Grad = "// &
        TRIM(DblToShrtChar(MaxGrad))//" between atoms "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,2)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,3)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))))
-     WRITE(*,140) MaxCGrad,IMaxCGrad
-     WRITE(*,420) RMSGrad
-     WRITE(Out,140) MaxCGrad,IMaxCGrad
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Cart Grad = "// &
+       TRIM(DblToChar(MaxCGrad))//" on atom "// &
+       TRIM(IntToChar(IMaxCGrad)))
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS intl Grad = "//TRIM(DblToChar(RMSGrad)))
      IF(ILMaxCGrad==NatmsLoc-2) THEN
-       ALatt='   A'
+       ALatt='A'
      ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
-       ALatt='   B'
+       ALatt='B'
      ELSE
-       ALatt='   C'
+       ALatt='C'
      ENDIF
      IF(PBCDim>0) THEN
-       WRITE(*,145) LMaxCGrad,ALAtt
-       WRITE(Out,145) LMaxCGrad,ALAtt
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Latt Grad = "// &
+         TRIM(DblToChar(LMaxCGrad))//" on vect "//TRIM(ALatt))
      ENDIF
-     WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
-       WRITE(*,510) MaxGradNoConstr, &
-                    IntCs%Atoms%I(IMaxGradNoConstr,1:4)
-       WRITE(*,520) RMSGradNoConstr
-       WRITE(Out,510) MaxGradNoConstr, &
-                      IntCs%Atoms%I(IMaxGradNoConstr,1:4)
-       WRITE(Out,520) RMSGradNoConstr
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Grad on Unconstrained Coords = "// &
+         TRIM(DblToChar(MaxGradNoConstr))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,4))))
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Grad on Unconstrained Coords = "// &
+         TRIM(DblToChar(RMSGradNoConstr)))
      ENDIF
-     !
+
      IF(MaxStre/=0) THEN
-       WRITE(*,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
-       WRITE(Out,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max STRE Displ = "// &
+         TRIM(DblToChar(MaxStreDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,2))))
      ENDIF
      IF(MaxBend/=0) THEN
-       WRITE(*,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
-       WRITE(Out,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max BEND Displ = "// &
+         TRIM(DblToChar(MaxBendDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,3))))
      ENDIF
      IF(MaxLinB/=0) THEN
-       WRITE(*,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
-       WRITE(Out,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max LINB Displ = "// &
+         TRIM(DblToChar(MaxLinBDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,3))))
      ENDIF
      IF(MaxOutP/=0) THEN
-       WRITE(*,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
-       WRITE(Out,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max OUTP Displ = "// &
+         TRIM(DblToChar(MaxOutPDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,4))))
      ENDIF
      IF(MaxTors/=0) THEN
-       WRITE(*,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
-       WRITE(Out,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max TORS Displ = "// &
+         TRIM(DblToChar(MaxTorsDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,4))))
      ENDIF
-     !
-     WRITE(*,440) RMSIntDispl
-     WRITE(Out,440) RMSIntDispl
-     !
+
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Displ = "//TRIM(DblToChar(RMSIntDispl)))
+
      IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
-     !
-410 FORMAT('                   Max intl Grad = ',F12.6,' between atoms ',4I4)
-140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
-145 FORMAT('     Max Unconstrained Latt Grad = ',F12.6,'      on vect  ',A4)
-420 FORMAT('                   RMS intl Grad = ',F12.6)
-510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
-520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
-430 FORMAT('                  Max STRE Displ = ',F12.6,' between atoms ',4I4)
-435 FORMAT('                  Max BEND Displ = ',F12.6,' between atoms ',4I4)
-436 FORMAT('                  Max LINB Displ = ',F12.6,' between atoms ',4I4)
-437 FORMAT('                  Max OUTP Displ = ',F12.6,' between atoms ',4I4)
-438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
-440 FORMAT('                       RMS Displ = ',F12.6)
-        !
+
    END SUBROUTINE GeOpReview
 !
 !---------------------------------------------------------------------
