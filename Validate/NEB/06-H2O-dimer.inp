@@ -3,9 +3,9 @@
 Charge=0
 Multiplicity=1
 
-Clones=15
+Clones=10
 Grad=(TSSearch,PrimInt,NoGDIIS,NoBackTr,BiSect)
-NEBSpring=0.001
+NEBSpring=0.01
 MaxSTRE=0.01
 MaxANGLE=0.1
 
@@ -20,6 +20,17 @@ Accuracy=(verytight)
 SCFConvergence=(DIIS)
 
 <EndOptions>
+
+<Begin_Add_Internals>
+
+STRE 1 2 0.97
+STRE 1 3 0.97
+BEND 2 1 3 107.9
+STRE 4 5 0.97
+STRE 4 6 0.97
+BEND 5 4 6 108.8
+
+<End_Add_Internals>
 
 <BeginReactants>
  O     0.1300106161119544    -0.1321341769683156     1.4115897456262343
