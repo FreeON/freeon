@@ -49,6 +49,7 @@ MODULE NEB
   USE ls_rmsd
   USE PrettyPrint
   USE ControlStructures
+  USE Order
   USE MondoLogger
 
   IMPLICIT NONE
@@ -121,15 +122,17 @@ CONTAINS
   END SUBROUTINE SetEq_CRDS
 
   SUBROUTINE NEBPurify(G,Init_O,Print_O)
-    TYPE(Geometries)                    :: G
-    LOGICAL,OPTIONAL                    :: Init_O,Print_O
-    LOGICAL                             :: Init
-    INTEGER                             :: I,iCLONE,bCLONE,eCLONE,J
-    REAL(DOUBLE),DIMENSION(G%Clones+1)  :: R2
-    REAL(DOUBLE),DIMENSION(3,3)         :: U
-    REAL(DOUBLE),DIMENSION(3)           :: Center1,Center2
-    REAL(DOUBLE)                        :: Error
-    CHARACTER(LEN=4*DCL)                :: Mssg
+    TYPE(Geometries)                      :: G
+    LOGICAL,OPTIONAL                      :: Init_O,Print_O
+    LOGICAL                               :: Init
+    INTEGER                               :: I,iCLONE,bCLONE,eCLONE,nCLONE,J
+    TYPE(DBL_RNK2), DIMENSION(G%Clones+1) :: GTmp
+    INTEGER, DIMENSION(G%Clones+1)        :: I2
+    REAL(DOUBLE),DIMENSION(G%Clones+1)    :: R2
+    REAL(DOUBLE),DIMENSION(3,3)           :: U
+    REAL(DOUBLE),DIMENSION(3)             :: Center1,Center2
+    REAL(DOUBLE)                          :: Error
+    CHARACTER(LEN=4*DCL)                  :: Mssg
 
     IF(PRESENT(Init_O))THEN
        Init=.TRUE.
@@ -167,6 +170,15 @@ CONTAINS
     CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
 #endif
 
+    ! Constraints over-ride purification
+    DO I=1,G%Clone(0)%NAtms
+       IF(G%Clone(0)%CConstrain%I(I)/=0)THEN
+          ! No RMSD alignment with constraints
+          GOTO 101 ! can still re-order based on RMSD
+       ENDIF
+    ENDDO
+
+    ! Translate and rotate each clone to minimize the rmsd relative to clone zero
     DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG
       CALL MondoLog(DEBUG_NONE, "NEB", "=========="//TRIM(IntToChar(iclone))//"=============")
@@ -212,6 +224,7 @@ CONTAINS
        CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O='XYZ')
 #endif
     ENDDO
+
 !!$    ! Un-scale the coordinates by Z
 !!$    DO I=1,G%Clone(0)%NAtms
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)/G%Clone(0)%AtNum%D(I)
@@ -222,24 +235,48 @@ CONTAINS
 !!$       ENDDO
 !!$    ENDDO
 !    IF(PRESENT(Print_O))THEN
-       R2(:)=Zero
-       DO iCLONE=bCLONE,eCLONE
-          R2(iCLONE)=Zero
-          DO I=1,G%Clone(0)%NAtms
-             DO J=1,3
-                R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
-             ENDDO
-          ENDDO
-          R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
-       ENDDO
-       Mssg='RMSDs = '
-       DO I=1,G%Clones
-          Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
-       ENDDO
-       Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
-       CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
-!    ENDIF
 
+101 IF(Init) RETURN
+
+    ! Compute RMSD from first clone
+    R2(:)=Zero
+    DO iCLONE=bCLONE,eCLONE
+       R2(iCLONE)=Zero
+       DO I=1,G%Clone(0)%NAtms
+          DO J=1,3
+             R2(iCLONE)=R2(iCLONE)+(G%Clone(iCLONE)%Carts%D(J,I)-G%Clone(0)%Carts%D(J,I))**2
+          ENDDO
+       ENDDO
+       R2(iCLONE)=SQRT(R2(iCLONE))/G%Clone(0)%NAtms
+    ENDDO
+
+    ! Order based on RMSD
+    nCLONE=eCLONE-bCLONE+1
+    DO I=1,nCLONE
+       I2(I)=I
+       CALL New(GTmp(I),(/3,G%Clone(0)%NAtms/))
+       GTmp(I)%D=G%Clone(I)%Carts%D
+    ENDDO
+    CALL DblIntSort77(nCLONE,R2,I2,2)
+    WRITE(*,*)R2
+    WRITE(*,*)I2
+
+    DO I=1,nCLONE
+       G%Clone(I)%Carts%D=GTmp(I2(I))%D
+    ENDDO
+    DO I=1,nCLONE
+       CALL Delete(GTmp(I))
+    ENDDO
+
+    Mssg='RMSDs = '
+    DO I=1,G%Clones
+       Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
+    ENDDO
+    Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
+    CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
+!   ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "FreeON",Mssg,"NEBPurify("//TRIM(IntToChar(G%Clone(1)%Confg))//')')
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
