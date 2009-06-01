@@ -24,7 +24,7 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-!#define NEB_DEBUG
+#define NEB_DEBUG
 
 MODULE NEB
   !===============================================================================
@@ -273,10 +273,10 @@ CONTAINS
        Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
     ENDDO
     Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
-    CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
+    !CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
 !   ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "FreeON",Mssg,"NEBPurify("//TRIM(IntToChar(G%Clone(1)%Confg))//')')
+    CALL MondoLog(DEBUG_NONE, "FreeON", Mssg, "NEBPurify("//TRIM(IntToChar(G%Clone(1)%Confg))//')')
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
@@ -310,7 +310,8 @@ CONTAINS
     !GH    write(*,*)'Prod Crds'
     !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
 
-    CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+    CALL MondoLog(DEBUG_NONE, "NEBForce", &
+          "Dist = "//TRIM(FltToShrtChar(Dist)) &
       //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal)), "Reactant")
 
     DO I=1,G%Clones
@@ -384,13 +385,18 @@ CONTAINS
        ! Write distance, energies and forces
        Dist=Dist+Rm
 
-       CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+       CALL MondoLog(DEBUG_NONE, "NEBForce", &
+                "Rm = "//TRIM(FltToShrtChar(Rm)) &
+            //", Rp = "//TRIM(FltToShrtChar(Rp)) &
+            //", Dist = "//TRIM(FltToShrtChar(Dist)) &
             //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal)) &
             //', F = '//TRIM(DblToMedmChar(FProj)), "Image "//TRIM(IntToChar(I)))
     ENDDO
+
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))
     Dist=Dist+Rm
-    CALL MondoLog(DEBUG_NONE, "NEBForce", "D = "//TRIM(FltToShrtChar(Dist)) &
+    CALL MondoLog(DEBUG_NONE, "NEBForce", &
+             "Dist = "//TRIM(FltToShrtChar(Dist)) &
          //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal)), "Product")
   END SUBROUTINE NEBForce
 
