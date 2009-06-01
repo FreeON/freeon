@@ -34,47 +34,44 @@ MODULE Utilities
 
   INTERFACE
 
-    SUBROUTINE GetMemoryUsage_Wrapper(virtualMemorySize)
+    SUBROUTINE GetMemoryUsage_Wrapper (virtualMemorySize)
       INTEGER :: virtualMemorySize
     END SUBROUTINE GetMemoryUsage_Wrapper
 
-    SUBROUTINE GetHostnameWrapper(hostname, maximumLength)
+    SUBROUTINE GetHostnameWrapper (hostname, maximumLength)
       CHARACTER(LEN=*) :: hostname
       INTEGER          :: maximumLength
     END SUBROUTINE GetHostnameWrapper
 
-    SUBROUTINE GetStacksizeLimit(currentLimit, maximumLimit)
+    SUBROUTINE GetStacksizeLimit (currentLimit, maximumLimit)
       INTEGER :: currentLimit, maximumLimit
     END SUBROUTINE GetStacksizeLimit
 
-  END INTERFACE
-
-  INTERFACE FileCopyWrapper
-
     SUBROUTINE FileCopyWrapper (lenA, fileA, lenB, fileB)
-      INTEGER :: lenA, lenB
+      INTEGER          :: lenA, lenB
       CHARACTER(LEN=*) :: fileA, fileB
     END SUBROUTINE FileCopyWrapper
 
-  END INTERFACE FileCopyWrapper
-
-  INTERFACE GetPWDWrapper
-
     SUBROUTINE GetPWDWrapper (pwd, max_length)
-      INTEGER :: max_length
+      INTEGER          :: max_length
       CHARACTER(LEN=*) :: pwd
     END SUBROUTINE GetPWDWrapper
 
-  END INTERFACE GetPWDWrapper
+    SUBROUTINE TemporaryDirectory (path, max_length)
+      CHARACTER(LEN=*) :: path
+      INTEGER          :: max_length
+    END SUBROUTINE TemporaryDirectory
+
+  END INTERFACE
 
 CONTAINS
 
-  SUBROUTINE NOP()
+  SUBROUTINE NOP ()
     INTEGER :: i
     i = 0
   END SUBROUTINE NOP
 
-  FUNCTION GetMemoryUsage()
+  FUNCTION GetMemoryUsage ()
     INTEGER :: GetMemoryUsage
     INTEGER :: virtualMemorySize
 
@@ -85,19 +82,19 @@ CONTAINS
 
   END FUNCTION GetMemoryUsage
 
-  SUBROUTINE FileCopy(fileA, fileB)
+  SUBROUTINE FileCopy (fileA, fileB)
     CHARACTER(LEN=*) :: fileA, fileB
     CALL MondoLog(DEBUG_MAXIMUM, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
     CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
   END SUBROUTINE FileCopy
 
-  SUBROUTINE FileRemove(filename)
+  SUBROUTINE FileRemove (filename)
     CHARACTER(LEN=*), INTENT(IN) :: filename
     CALL MondoLog(DEBUG_MAXIMUM, "FileRemove", "removing "//TRIM(filename)//" -> "//TRIM(EscapeFilename(filename)))
     CALL SYSTEM("rm -f "//TRIM(EscapeFilename(filename)))
   END SUBROUTINE
 
-  SUBROUTINE GetPWD(pwd)
+  SUBROUTINE GetPWD (pwd)
     CHARACTER(LEN=*) :: pwd
     CALL GetPWDWrapper(pwd, LEN(pwd))
   END SUBROUTINE GetPWD

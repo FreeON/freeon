@@ -836,11 +836,19 @@ AC_LANG(C)
 # Check for zlib compression.
 AC_CHECK_HEADERS([zlib.h])
 AC_CHECK_LIB([z], [compress2])
-AC_CHECK_FUNC([compres2])
-AC_LINK_IFELSE(AC_LANG_PROGRAM([char compres2 ();],
-  [return compres2 ();]),
+AC_CHECK_FUNC([compress2])
+AC_LINK_IFELSE(AC_LANG_PROGRAM([char compress2 ();],
+  [return compress2 ();]),
   [],
   [AC_MSG_NOTICE([I do not have a working zlib installed.])])
+
+# Check for mkstemp or mkostemp.
+AC_CHECK_FUNC([mkstemp],
+              [AC_DEFINE([HAVE_MKSTEMP], [1], [whether we have mkstemp()])],
+              [])
+AC_CHECK_FUNC([mkostemp],
+              [AC_DEFINE([HAVE_MKOSTEMP], [1], [whether we have mkostemp()])],
+              [])
 
 # Find flags for static linking.
 AC_MSG_CHECKING([whether to link binaries statically])
@@ -1053,6 +1061,6 @@ fi
 AC_MSG_NOTICE([*** End Summary ***])
 
 # Pass the optimization flags to the hdf configure script.
-ac_configure_args="${ac_configure_args} ${optimization_flags}"
+#ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
 AC_OUTPUT

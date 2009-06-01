@@ -9,4 +9,5 @@ EXTRA_DIST = \
   03-Malonaldahyde.inp \
   04-silane.inp \
   05-HCN.inp \
-  06-H2O-dimer.inp
+  06-H2O-dimer.inp \
+  06-H2O-dimer-cartesian.inp
