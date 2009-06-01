@@ -65,10 +65,8 @@ PROGRAM FreeON
     CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
     CASE(GRAD_TS_SEARCH_NEB)
-      ! Place holder for whatever
       CALL Descender(C)
     CASE(GRAD_DO_DYNAMICS)
-      ! Do some molecular dynamics
       CALL MD(C)
     CASE(GRAD_DO_HYBRIDMC)
       CALL HybridMC(C)

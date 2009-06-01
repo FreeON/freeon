@@ -996,10 +996,10 @@ CONTAINS
 
     ! A call to get() will allocate. We therefore need to delete these
     ! variables.
-    call delete(GM)
-    call delete(GM_rs)
-    call delete(BS)
-    call delete(BS_rs)
+    CALL DELETE(GM)
+    CALL DELETE(GM_rs)
+    CALL DELETE(BS)
+    CALL DELETE(BS_rs)
 
   END SUBROUTINE SameBasisSameGeom
   !===============================================================================
@@ -1167,6 +1167,23 @@ CONTAINS
     IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
        CALL NEBForce(G,O)
     ENDIF
+
+    ! Zero forces on constrained atoms again.
+    DO iCLONE=1,G%Clones
+      DO iATS=1,G%Clone(iCLONE)%NAtms
+        IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
+          IF((G%Clone(iCLONE)%Gradients%D(1,iATS) /= Zero) .OR. &
+             (G%Clone(iCLONE)%Gradients%D(2,iATS) /= Zero) .OR. &
+             (G%Clone(iCLONE)%Gradients%D(3,iATS) /= Zero)) THEN
+            CALL MondoLog(DEBUG_NONE, "Force", "force on atom " &
+              //TRIM(IntToChar(iATS))//" in clone " &
+              //TRIM(IntToChar(iCLONE))//" is not zero!")
+            G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+          ENDIF
+        ENDIF
+      ENDDO
+    ENDDO
+
     ! Finally, archive the whole mother
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     ! Done with this sucka
