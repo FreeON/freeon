@@ -1301,7 +1301,12 @@ CONTAINS
   SUBROUTINE Get_CRDS(GM,Tag_O)
     TYPE(CRDS)                           :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    IF(AllocQ(GM%Alloc))CALL Delete(GM)
+
+    !CALL MondoLog(DEBUG_NONE, "Get_CRDS", "getting CRDS...")
+
+    ! If already allocated, delete old object.
+    IF(AllocQ(GM%Alloc)) CALL Delete(GM)
+
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
     CALL Get(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
@@ -1312,7 +1317,10 @@ CONTAINS
     CALL Get(GM%TotCh,'charge'       ,Tag_O=Tag_O)
     CALL Get(GM%NKind,'nkind'        ,Tag_O=Tag_O)
     CALL Get(GM%InAU, 'inau'         ,Tag_O=Tag_O)
+
+    ! Allocate new object (with the information we just read from file...).
     CALL New(GM)
+
     !-------------------------------------------------------------------------------
     !        Items that can change with geometry ...
 
@@ -1341,7 +1349,6 @@ CONTAINS
     CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
     CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
 
-
     ! THIS PBC DISPL MAY BE UNCESSESARY.  LETS SEE IF WE CAN MAKEIT DIE!
     !                IF(PRESENT(Tag_O))THEN
     !                   CALL Get(GM%PBCDispl,Tag_O='KAROLYS_PBCDispl'//TRIM(Tag_O))
@@ -1352,6 +1359,9 @@ CONTAINS
     !--------- to here ----------------------
     CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
     CALL Get(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
+
+    !CALL MondoLog(DEBUG_NONE, "Get_CRDS", "done getting CRDS.")
+
   END SUBROUTINE Get_CRDS
   !-------------------------------------------------------------------------------
   !     Put a coordinate set
@@ -1369,6 +1379,9 @@ CONTAINS
 !!$                   WRITE(*,*)'==================================================================='
 !!$                   WRITE(*,*)'==================================================================='
 !!$                ENDIF
+
+    !CALL MondoLog(DEBUG_NONE, "Put_CRDS", "putting...")
+
     CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
     CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
     CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
@@ -1401,7 +1414,16 @@ CONTAINS
     CALL Put(GM%Fext      ,'Fext'         ,Tag_O=Tag_O)
     ! PBC INFO ONE -- THE ONE WE SHOULD KEEP
     CALL Put(GM%PBC                       ,Tag_O=Tag_O)
+
+    ! In case we don't have InCells allocated yet, we allocate something
+    ! (admittedly a hack, but for now the best I have...).
+    IF(.NOT. AllocQ(GM%InCells%Alloc)) THEN
+      CALL New(GM%InCells, 0)
+    ENDIF
     CALL Put(GM%InCells   ,'incells'      ,Tag_O=Tag_O)
+    IF(.NOT. AllocQ(GM%OvCells%Alloc)) THEN
+      CALL New(GM%OvCells, 0)
+    ENDIF
     CALL Put(GM%OvCells   ,'ovcells'      ,Tag_O=Tag_O)
     !---------Variables we REALLY want to get rid of-------
     CALL Put(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
@@ -1427,6 +1449,8 @@ CONTAINS
     !                WRITE(*,*)' DONE DONE DONE PUTTING COORDINATES '
     !                WRITE(*,*)'==================================================================='
     !                WRITE(*,*)'==================================================================='
+
+    !CALL MondoLog(DEBUG_NONE, "Put_CRDS", "done putting.")
 
   END SUBROUTINE Put_CRDS
   !-------------------------------------------------------------------------------
@@ -2852,15 +2876,17 @@ CONTAINS
     CHARACTER(Len=*),OPTIONAL      :: Name_O
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     INTEGER                        :: NC
-    !
+
     IF(PRESENT(Name_O))THEN
       CALL Get(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
       CALL Get(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
+      ! Allocate a new CellSet with the information just read.
       CALL New_CellSet(CS,CS%NCells)
       CALL Get(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O)
     ELSE
       CALL Get(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
       CALL Get(CS%NCells   ,'cell_number',Tag_O=Tag_O)
+      ! Allocate a new CellSet with the information just read.
       CALL New_CellSet(CS,CS%NCells)
       CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
     ENDIF
