@@ -58,7 +58,6 @@ CONTAINS
     END INTERFACE
 #endif
 
-    !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
       !       WRITE(*,*)'========================================================='
       !       WRITE(*,*)' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP,' CLUMP = ',iCLUMP

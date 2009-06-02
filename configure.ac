@@ -155,6 +155,18 @@ AC_LANG(Fortran)
 AC_FC_SRCEXT(f90)
 AC_FC_FREEFORM
 
+# Switch back to C.
+AC_LANG(C)
+
+# Check for libtool.
+AC_PROG_LIBTOOL
+
+# Set the preprocessor.
+CPP=cpp
+
+# Set $(MAKE).
+AC_PROG_MAKE_SET
+
 # Testing whether the C compiler works.
 AC_MSG_CHECKING([whether the C-compiler produces executable code])
 AC_LANG(C)
@@ -448,12 +460,6 @@ esac
 
 # Change to C.
 AC_LANG(C)
-
-# Check for libtool.
-AC_PROG_LIBTOOL
-
-# Set $(MAKE).
-AC_PROG_MAKE_SET
 
 # Check for some standard headers.
 AC_HEADER_STDC
@@ -878,9 +884,6 @@ else
   esac
 
 fi
-
-# Set the preprocessor.
-CPP=cpp
 
 # Set some preprocessor command line options.
 FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/MondoMods"

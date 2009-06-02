@@ -87,6 +87,8 @@ CONTAINS
     INTEGER,PARAMETER    :: MaxSCFs = HAVE_MAX_SCF
     INTEGER              :: cBAS,cGEO,iSCF
 
+    CALL MondoLog(DEBUG_NONE, "SCF", "doing SCF")
+
     ! Allocate space for action.
     CALL New(C%Stat%Action,1)
 
@@ -1163,6 +1165,7 @@ CONTAINS
     ENDDO
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
+
     ! Now add in any NEB force projections
     IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
        CALL NEBForce(G,O)
@@ -1206,6 +1209,17 @@ CONTAINS
        ENDDO
     ENDIF
 
+    ! Print out the forces.
+    DO iCLONE=0, G%Clones+1
+      CALL MondoLog(DEBUG_NONE, "Force", "clone "//TRIM(IntToChar(iCLONE)))
+      DO iATS=1, G%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "Force", "F["//TRIM(IntToChar(iATS))//"] = [ " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2, iATS)))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3, iATS))), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
+    ENDDO
   END SUBROUTINE Force
   !===============================================================================
   ! Numerically compute Lattice Forces for J

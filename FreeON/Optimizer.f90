@@ -63,12 +63,12 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     ! Print the starting coordinates and energy
-    IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    DO iCLONE=GBeg,GEnd
-       CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-    ENDDO
+    !IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
+    !DO iCLONE=GBeg,GEnd
+       !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+    !ENDDO
 
-    !CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+    CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
 
     iBAS=C%Sets%NBSets
     IStart=iGEO
@@ -84,17 +84,20 @@ CONTAINS
           ! Overwrite the most recent GFile (doing transition state)
           !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
           !          CLOSE(Geo)
-          IF(C%Opts%GeomPrint=='XSF') &
-             CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
+          !IF(C%Opts%GeomPrint=='XSF') &
+             !CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
           DO iCLONE=GBeg,GEnd
              ! If transition states, geometry is the image number
              ! otherwise, it is the step number
              gtmp=C%Geos%Clone(iCLONE)%Confg
              C%Geos%Clone%Confg=iCLONE+1
-            !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
-             CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+             !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
              C%Geos%Clone%Confg=gtmp
           ENDDO
+
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ELSE
           ! No transitions states, just good old downhill
           IF(C%Opts%GeomPrint=='XSF') &
@@ -122,15 +125,16 @@ CONTAINS
   !
   !=====================================================================================
   !
-  SUBROUTINE MergePrintClones(Geos,Nams,Opts)
-    TYPE(Geometries) :: Geos
-    TYPE(FileNames)  :: Nams
-    TYPE(Options)    :: Opts
-    INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M,I
-    TYPE(CRDS)       :: GMMerge
-    REAL(DOUBLE)              :: Length,Length0
-    REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG,TRM
-    !
+  SUBROUTINE MergePrintClones(Geos,Nams,Opts,Gradients_O)
+    TYPE(Geometries)                     :: Geos
+    TYPE(FileNames)                      :: Nams
+    TYPE(Options)                        :: Opts
+    INTEGER                              :: iCLONE,NatmsMerge,GBeg,GEnd,J,M,I
+    TYPE(CRDS)                           :: GMMerge
+    REAL(DOUBLE)                         :: Length,Length0
+    REAL(DOUBLE),DIMENSION(3)            :: CME1,CME2,TR,DIAG,TRM
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Gradients_O
+
     GBeg=0
     GEnd=Geos%Clones+1
     NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
@@ -170,12 +174,13 @@ CONTAINS
       DO J=1,Geos%Clone(iCLONE)%Natms
         M=M+1
         GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TRM*iCLONE
+        GMMerge%Gradients%D(1:3,M) = Geos%Clone(iCLONE)%Gradients%D(1:3,J)
         GMMerge%AtNum%D(M)=Geos%Clone(iCLONE)%AtNum%D(J)
         GMMerge%AtNam%C(M)=Geos%Clone(iCLONE)%AtNam%C(J)
       ENDDO
     ENDDO
     GMMerge%Confg=Geos%Clone(1)%Confg
-    CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint)
+    CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint,Gradients_O=Gradients_O)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
   !=====================================================================================
@@ -557,8 +562,7 @@ CONTAINS
        CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
        ! Backtracking can modify geometries too, so this is the right place
        ! to print geometries cooresponding to the energies that have just been computed
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
-                  C%Geos,C%Sets,C%MPIs)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        !
        DO iCLONE=1,C%Geos%Clones
          CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
@@ -573,7 +577,7 @@ CONTAINS
        !
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
           CALL NEBPurify(C%Geos,Print_O=.TRUE.)
-          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ENDIF
        !
        ! Fill in new geometries

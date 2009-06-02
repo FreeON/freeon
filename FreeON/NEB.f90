@@ -150,7 +150,7 @@ CONTAINS
        ! Check for stupid input
        DO I=1,G%Clone(0)%NAtms
           IF(G%Clone(0)%AtNum%D(I).NE.G%Clone(G%Clones+1)%AtNum%D(I))THEN
-             CALL MondoHalt(NEBS_ERROR,'Ordering of Reactant and Product is different! ')
+             CALL MondoHalt(NEBS_ERROR,'Ordering of Reactant and Product is different!')
           ENDIF
        ENDDO
     ELSE
@@ -158,14 +158,19 @@ CONTAINS
        eCLONE=G%Clones+1
     ENDIF
 
+#ifdef NEB_DEBUG
+    CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
+    CALL MondoLog(DEBUG_NONE, "NEB", "eCLONE = "//TRIM(IntToChar(eCLONE)))
+    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE zero before anything = ")
+    CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
+#endif
+
 !!$    ! Scale the coordinates by Z
 !!$    DO I=1,G%Clone(0)%NAtms
 !!$       G%Clone(0)%Carts%D(:,I)=G%Clone(0)%Carts%D(:,I)*G%Clone(0)%AtNum%D(I)
 !!$    ENDDO
 
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
-    CALL MondoLog(DEBUG_NONE, "NEB", "eCLONE = "//TRIM(IntToChar(eCLONE)))
     CALL MondoLog(DEBUG_NONE, "NEB", "CLONE ZERO AFTER SCALING = ")
     CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
 #endif
@@ -181,7 +186,7 @@ CONTAINS
     ! Translate and rotate each clone to minimize the rmsd relative to clone zero
     DO iCLONE=bCLONE,eCLONE
 #ifdef NEB_DEBUG
-      CALL MondoLog(DEBUG_NONE, "NEB", "=========="//TRIM(IntToChar(iclone))//"=============")
+      CALL MondoLog(DEBUG_NONE, "NEB", "purifying clone "//TRIM(IntToChar(iclone)))
 #endif
 
 !!$       ! Scale the coordinates by Z

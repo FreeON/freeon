@@ -4787,7 +4787,7 @@ CONTAINS
      CHARACTER(LEN=*),OPTIONAL :: Messg_O
      CHARACTER(LEN=DCL)        :: Messg
 
-     CALL MondoLog(DEBUG_NONE, "RedundancyOff", "RedundancyOff hardwired to return")
+     CALL MondoLog(DEBUG_MAXIMUM, "RedundancyOff", "hardwired to return")
      RETURN
 
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
