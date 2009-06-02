@@ -151,7 +151,7 @@ CONTAINS
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
           READ(LineLowCase,*) CHAR,Value
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU
           NConstr=NConstr+1
           CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_A = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre_b')/=0) THEN
@@ -163,7 +163,7 @@ CONTAINS
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
           READ(LineLowCase,*) CHAR,Value
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU
           NConstr=NConstr+1
           CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_B = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre_c')/=0) THEN
@@ -175,7 +175,7 @@ CONTAINS
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
           READ(LineLowCase,*) CHAR,Value
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU
           NConstr=NConstr+1
           CALL MondoLog(DEBUG_MAXIMUM, "LoadExtraCoords", "STRE_C = "//TRIM(FltToChar(Value))//" A")
         ELSE IF(INDEX(LineLowCase,'stre')/=0) THEN
@@ -197,13 +197,13 @@ CONTAINS
               READ(LineLowCase,*) &
                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2),Value
               GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-              GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+              GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU
             ELSE
               READ(LineLowCase,*) &
                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:2), &
                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:6),Value
               GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-              GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+              GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU
             ENDIF
             NConstr=NConstr+1
           ENDIF
@@ -257,7 +257,7 @@ CONTAINS
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
           READ(LineLowCase,*) CHAR,Value
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-          GOpt%ExtIntCs%ConstrValue%D(NIntCs)= Value*AngstromsToAu**2
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)= Value*AngstromsToAU**2
           NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'volm_l')/=0) THEN
@@ -270,7 +270,7 @@ CONTAINS
           GOpt%ExtIntCs%Active%L(NIntCs)=.TRUE.
           READ(LineLowCase,*) CHAR,Value
           GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
-          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu**3
+          GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAU**3
           NConstr=NConstr+1
           !--------------------
         ELSE IF(INDEX(LineLowCase,'beta')/=0) THEN
