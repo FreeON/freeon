@@ -630,7 +630,7 @@ CONTAINS
     CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
 
     IF(.NOT. OptDblQ(Inp, RSL, StepLength)) THEN
-      StepLength = 0.1D0
+      StepLength = 0.1D0*AngstromsToAU
     ENDIF
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN

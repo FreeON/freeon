@@ -108,7 +108,7 @@ CONTAINS
                    BB_O=Aux12)
          B%B%D(IInt,1:12)=Aux12
        ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
-       !  B%B%D(IInt,1:12)*AngstromsToAu
+       !  B%B%D(IInt,1:12)*AngstromsToAU
        ELSE IF(Char(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
@@ -952,8 +952,8 @@ CONTAINS
      CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
                     Cells,CellEq,IEq)
 !do i=1,size(XYZRepl%D,2)
-!write(*,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
-!write(out,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
+!write(*,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/AngstromsToAU
+!write(out,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/AngstromsToAU
 !enddo
 !100 format(I4,3F20.8)
 !stop
@@ -2263,11 +2263,11 @@ CONTAINS
      INTEGER                   :: PBCDim
      IF(PBCDim==0) RETURN
      IF(PBCDim<3) THEN
-       Vec(3)=AngstromsToAu
+       Vec(3)=AngstromsToAU
        Vec(6)=Half*PI
      ENDIF
      IF(PBCDim<2) THEN
-       Vec(2)=AngstromsToAu
+       Vec(2)=AngstromsToAU
        Vec(4)=Half*PI
        Vec(5)=Half*PI
      ENDIF
@@ -2383,11 +2383,11 @@ CONTAINS
        Crit=Fact*MaxAngle
      ENDIF
      IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
-       MaxConv=One/AngstromsToAu
+       MaxConv=One/AngstromsToAU
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='VOLM_L') THEN
-       MaxConv=One/AngstromsToAu**3
+       MaxConv=One/AngstromsToAU**3
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='AREA_L') THEN
-       MaxConv=One/AngstromsToAu**2
+       MaxConv=One/AngstromsToAU**2
      ELSE
        MaxConv=180.D0/PI
      ENDIF
@@ -2489,7 +2489,7 @@ CONTAINS
      LOGICAL          :: DoPrtCells,DoPrtExternal
      !
      Conv=180.D0/PI
-     ConvC=One/AngstromsToAu
+     ConvC=One/AngstromsToAU
      NIntC=SIZE(IntCs%Def%C)
      DoPrtCells=.FALSE.
      DoPrtExternal=.FALSE.
@@ -2506,7 +2506,7 @@ CONTAINS
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          SumU=Value(I)*ConvC
-         SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAu
+         SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAU
        ELSE IF(HasAngle(IntCs%Def%C(I))) THEN
          SumU=Value(I)*Conv
          SUMConstr=IntCs%ConstrValue%D(I)*Conv
@@ -2575,16 +2575,16 @@ CONTAINS
      ENDDO
      CALL CalcBoxPars(Vec,BoxShape)
      !
-     WRITE(*,111) 'STRE_A  ',Vec(1)/AngstromsToAu
-     WRITE(*,111) 'STRE_B  ',Vec(2)/AngstromsToAu
-     WRITE(*,111) 'STRE_C  ',Vec(3)/AngstromsToAu
+     WRITE(*,111) 'STRE_A  ',Vec(1)/AngstromsToAU
+     WRITE(*,111) 'STRE_B  ',Vec(2)/AngstromsToAU
+     WRITE(*,111) 'STRE_C  ',Vec(3)/AngstromsToAU
      WRITE(*,111) 'ALPHA   ',Vec(4)*180.D0/PI
      WRITE(*,111) 'BETA    ',Vec(5)*180.D0/PI
      WRITE(*,111) 'GAMMA   ',Vec(6)*180.D0/PI
      !
-     WRITE(Out,111) 'STRE_A  ',Vec(1)/AngstromsToAu
-     WRITE(Out,111) 'STRE_B  ',Vec(2)/AngstromsToAu
-     WRITE(Out,111) 'STRE_C  ',Vec(3)/AngstromsToAu
+     WRITE(Out,111) 'STRE_A  ',Vec(1)/AngstromsToAU
+     WRITE(Out,111) 'STRE_B  ',Vec(2)/AngstromsToAU
+     WRITE(Out,111) 'STRE_C  ',Vec(3)/AngstromsToAU
      WRITE(Out,111) 'ALPHA   ',Vec(4)*180.D0/PI
      WRITE(Out,111) 'BETA    ',Vec(5)*180.D0/PI
      WRITE(Out,111) 'GAMMA   ',Vec(6)*180.D0/PI
@@ -4426,11 +4426,11 @@ CONTAINS
      WRITE(99,*) TRIM(Title)
      IF(PRESENT(Vects_O)) THEN
        DO I=1,NatmsLoc
-         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAu,100.D0*Vects_O(1:3,I)
+         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAU,100.D0*Vects_O(1:3,I)
        ENDDO
      ELSE
        DO I=1,NatmsLoc
-         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAu
+         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAU
        ENDDO
      ENDIF
      !
@@ -4438,7 +4438,7 @@ CONTAINS
        NatmsLoc=SIZE(XYZL_O,2)-3
          WRITE(99,200) Zero,Zero,Zero
        DO I=1,3
-         WRITE(99,200) XYZL_O(1:3,NatmsLoc+I)/AngstromsToAu
+         WRITE(99,200) XYZL_O(1:3,NatmsLoc+I)/AngstromsToAU
        ENDDO
      ENDIF
      200  FORMAT('  I ',2X,3F20.10,2X,3F20.10)
@@ -5023,7 +5023,7 @@ CONTAINS
      !
      ! For H-bonds: A-H...B = JJE-JJ1...JJ2
      !
-     BridgeCrit=3.5D0*AngstromsToAu
+     BridgeCrit=3.5D0*AngstromsToAU
      HasAttached=.FALSE.
      Conv=180.D0/PI
      JJE=0

@@ -1125,7 +1125,7 @@ CONTAINS
      CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
        " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
 
-     MaxStreDispl=MaxStreDispl/AngstromsToAu
+     MaxStreDispl=MaxStreDispl/AngstromsToAU
      MaxBendDispl=MaxBendDispl*180.D0/PI
      MaxLinBDispl=MaxLinBDispl*180.D0/PI
      MaxOutPDispl=MaxOutPDispl*180.D0/PI
@@ -1229,7 +1229,7 @@ CONTAINS
          NStre=3
          NBend=3
        ENDIF
-       Fact=One/AngstromsToAu
+       Fact=One/AngstromsToAU
        DO I=1,NStre
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
@@ -1249,7 +1249,7 @@ CONTAINS
        ENDDO
        !
        IF(PBCDim==3.AND.IntCL%Def%C(7)(1:8)=='VOLM_L  ') THEN
-         Fact=One/(AngstromsToAu**3)
+         Fact=One/(AngstromsToAU**3)
          I=7
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
@@ -1260,7 +1260,7 @@ CONTAINS
        ENDIF
        !
        IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
-         Fact=One/(AngstromsToAu**2)
+         Fact=One/(AngstromsToAU**2)
          I=4
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &

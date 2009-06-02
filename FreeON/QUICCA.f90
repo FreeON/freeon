@@ -1233,7 +1233,7 @@ CONTAINS
        IF(HasAngle(IntCs%Def%C(I))) THEN
          Conv=180.D0/PI
        ELSE
-         Conv=One/AngstromsToAu
+         Conv=One/AngstromsToAU
        ENDIF
        WRITE(91,12) I,IntCs%Def%C(I)(1:5),Conv*IntCValues(I,NDim), &
                     IntCGrads(I,NDim),Conv*FitVal(I),PredGrad(I)
@@ -1254,8 +1254,8 @@ CONTAINS
      !
      NDim=SIZE(VectX)
      IF(Def(1:4)=='STRE') THEN
-       Conv=One/AngstromsToAu
-       ConvI=AngstromsToAu
+       Conv=One/AngstromsToAU
+       ConvI=AngstromsToAU
      ELSE IF(HasAngle(Def)) THEN
        Conv=180.D0/PI
        ConvI=PI/180.D0
