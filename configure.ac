@@ -234,13 +234,13 @@ if test "${use_optimizations}" = "yes"; then
     case ${build_cpu} in
       *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
@@ -277,13 +277,13 @@ main ()
     case ${build_cpu} in
       *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
@@ -319,13 +319,13 @@ main ()
     case ${build_cpu} in
       *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
@@ -366,7 +366,7 @@ else
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
-      GCC)   CFLAGS="-O0 -g -Wall" ;;
+      GCC)   CFLAGS="-O0 -g -Wall -pipe" ;;
       Intel) CFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
@@ -378,7 +378,7 @@ else
 
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
-      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
@@ -390,7 +390,7 @@ else
 
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
-      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
