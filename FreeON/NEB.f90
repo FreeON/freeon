@@ -78,8 +78,12 @@ CONTAINS
     iClone=0
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
-    WRITE(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-    CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
+    DO j=1, G%Clone(iCLONE)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+    ENDDO
 #endif
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
@@ -87,15 +91,23 @@ CONTAINS
        G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
 #ifdef NEB_DEBUG
        CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
-       WRITE(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-       CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
+       DO j=1, G%Clone(iCLONE)%NAtms
+         CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+       ENDDO
 #endif
     ENDDO
     iClone=G%Clones+1
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
-    write(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-    CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
+    DO j=1, G%Clone(iCLONE)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+    ENDDO
     CALL MondoLog(DEBUG_NONE, "NEBInit", "Done NEBInit")
 #endif
   END SUBROUTINE NEBInit
@@ -203,10 +215,18 @@ CONTAINS
        CALL RMSD(G%Clone(0)%NAtms,G%Clone(iCLONE)%Carts%D,G%Clone(0)%Carts%D,  &
             1, U, Center2, Center1, error )! , calc_g, grad)
 #ifdef NEB_DEBUG
-       WRITE(*,333)1,Center1
-       WRITE(*,333)2,Center2
-       WRITE(*,333)-1,-(Center2-Center1)
-333    FORMAT('Center',I2,' = ',3(F10.5,', '))
+       CALL MondoLog(DEBUG_NONE, "NEB", "Center   1: "// &
+         TRIM(DblToChar(Center1(1)))//" "// &
+         TRIM(DblToChar(Center1(2)))//" "// &
+         TRIM(DblToChar(Center1(3))))
+       CALL MondoLog(DEBUG_NONE, "NEB", "Center   2: "// &
+         TRIM(DblToChar(Center2(1)))//" "// &
+         TRIM(DblToChar(Center2(2)))//" "// &
+         TRIM(DblToChar(Center2(3))))
+       CALL MondoLog(DEBUG_NONE, "NEB", "Center 1-2: "// &
+         TRIM(DblToChar(Center1(1)-Center2(1)))//" "// &
+         TRIM(DblToChar(Center1(2)-Center2(2)))//" "// &
+         TRIM(DblToChar(Center1(3)-Center2(3))))
 #endif
        IF(Init)THEN
           ! Translate the reactants JUST ONCE to C1
