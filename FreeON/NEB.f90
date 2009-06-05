@@ -62,10 +62,11 @@ CONTAINS
   ! and final states.
   !===============================================================================
   SUBROUTINE NEBInit(G)
-    TYPE(Geometries) :: G
-    REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: ReactionVector
-    REAL(DOUBLE)     :: ImageFraction
-    INTEGER          :: iCLONE,j
+    TYPE(Geometries)                            :: G
+    REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms)  :: ReactionVector
+    REAL(DOUBLE)                                :: ImageFraction
+    INTEGER                                     :: iCLONE,j
+    CHARACTER(LEN=DEFAULT_CHR_LEN)              :: Message
 
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
@@ -76,23 +77,26 @@ CONTAINS
     ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
     iClone=0
 #ifdef NEB_DEBUG
-    write(*,'(1A7,I3)')'Image',iClone
-    write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
+    WRITE(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+    CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
 #endif
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
        G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
 #ifdef NEB_DEBUG
-       write(*,'(1A7,I3)')'Image',iClone
-       write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+       CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
+       WRITE(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+       CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
 #endif
     ENDDO
     iClone=G%Clones+1
 #ifdef NEB_DEBUG
-    write(*,'(1A7,I3)')'Image',iClone
-    write(*,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-    write(*,*)'NEB: Done NEBInit'
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
+    write(Message,'(3F13.5)') (G%Clone(iCLONE)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
+    CALL MondoLog(DEBUG_NONE, "NEBInit", Message)
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Done NEBInit")
 #endif
   END SUBROUTINE NEBInit
 
