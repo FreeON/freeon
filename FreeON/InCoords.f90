@@ -1780,8 +1780,8 @@ CONTAINS
      !
      ! Project out hard constraints
      !
-  !  CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
-!CALL PrtIntCoords(IntCs,VectInt,'aft hard constr filt',PBCDim_O=PBCDim)
+     !CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
+     CALL PrtIntCoords(IntCs,VectInt,'aft hard constr filt',PBCDim_O=PBCDim)
    END SUBROUTINE CartToInternal
 !
 !------------------------------------------------------------------
