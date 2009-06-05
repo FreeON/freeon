@@ -515,14 +515,14 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE IntOpt(C)
-     TYPE(Controls)            :: C
-     INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
-     INTEGER                   :: AccL
-     INTEGER                   :: FirstGeom,NatmsLoc,GuessO
-     INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
-     TYPE(INT_VECT)            :: Convgd
-     TYPE(INTC)                :: IntCES
-     TYPE(State)               :: StateO
+     TYPE(Controls) :: C
+     INTEGER        :: I,iBAS,iGEO,iGEOst,iCLONE
+     INTEGER        :: AccL
+     INTEGER        :: FirstGeom,NatmsLoc,GuessO
+     INTEGER        :: ConvgdAll,MaxSteps,IStart,Dimen
+     TYPE(INT_VECT) :: Convgd
+     TYPE(INTC)     :: IntCES
+     TYPE(State)    :: StateO
      !
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
@@ -629,8 +629,8 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,RefXYZ,AtNum,GradIn, &
-                  Convgd,ETot,PBCDim,iGEO,iCLONE, &
-                  SCRPath,PWDPath,DoNEB,Print,HFileIn)
+                         Convgd,ETot,PBCDim,iGEO,iCLONE, &
+                         SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
@@ -984,8 +984,8 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE GeOpReview(CtrlConstr,CtrlStat,CtrlCoord,GConvCr, &
-                       XYZ,Etot,IntCs,IntCL,IntOld,LatOld,iCLONE,iGEO,DoNEB, &
-                       LattIntC,PBCDim)
+                         XYZ,Etot,IntCs,IntCL,IntOld,LatOld,iCLONE,iGEO,DoNEB, &
+                         LattIntC,PBCDim)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(CoordCtrl)            :: CtrlCoord

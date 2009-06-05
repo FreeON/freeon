@@ -1641,24 +1641,24 @@ CONTAINS
 !
    SUBROUTINE CartToInternal(IntCs,VectCart,VectInt,XYZ,PBCDim, &
                              TrfGrd,CtrlCoord,CtrlTrf,Print,SCRPath)
-     REAL(DOUBLE),DIMENSION(:) :: VectCart,VectInt
-     TYPE(DBL_VECT)  :: VectCartAux,VectIntAux
-     TYPE(DBL_VECT)  :: VectCartAux2,VectCartAux3
-     REAL(DOUBLE)    :: DiffMax,RMSD
-     REAL(DOUBLE)    :: SumU
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)    :: BoxShapeT(3,3),Vect(3),Vect1(3)
-     INTEGER         :: NCart,NatmsLoc,I,II,J,K,L,NIntC,PBCDim
-     INTEGER         :: Print
-     TYPE(INTC)      :: IntCs
-     TYPE(Cholesky)  :: CholData
-     TYPE(INT_VECT)  :: ISpB,JSpB,IPerm1,IPerm2
-     TYPE(DBL_VECT)  :: ASpB
-     TYPE(GrdTrf)    :: TrfGrd
-     TYPE(CoordCtrl) :: CtrlCoord
-     TYPE(TrfCtrl)   :: CtrlTrf
-     CHARACTER(LEN=*):: SCRPath
-     LOGICAL         :: Print2
+     REAL(DOUBLE),DIMENSION(:)    :: VectCart,VectInt
+     TYPE(DBL_VECT)               :: VectCartAux,VectIntAux
+     TYPE(DBL_VECT)               :: VectCartAux2,VectCartAux3
+     REAL(DOUBLE)                 :: DiffMax,RMSD
+     REAL(DOUBLE)                 :: SumU
+     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
+     REAL(DOUBLE)                 :: BoxShapeT(3,3),Vect(3),Vect1(3)
+     INTEGER                      :: NCart,NatmsLoc,I,II,J,K,L,NIntC,PBCDim
+     INTEGER                      :: Print
+     TYPE(INTC)                   :: IntCs
+     TYPE(Cholesky)               :: CholData
+     TYPE(INT_VECT)               :: ISpB,JSpB,IPerm1,IPerm2
+     TYPE(DBL_VECT)               :: ASpB
+     TYPE(GrdTrf)                 :: TrfGrd
+     TYPE(CoordCtrl)              :: CtrlCoord
+     TYPE(TrfCtrl)                :: CtrlTrf
+     CHARACTER(LEN=*)             :: SCRPath
+     LOGICAL                      :: Print2
      !
      NCart=SIZE(VectCart)
      NatmsLoc=NCart/3-3
@@ -1691,13 +1691,13 @@ CONTAINS
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      IF(Print2) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Gradient transformation, No. Int. Coords = "//TRIM(IntToChar(NIntC)))
+       CALL MondoLog(DEBUG_NONE, "CartToInternal", "Gradient transformation, No. Int. Coords = "//TRIM(IntToChar(NIntC)))
        IF(.NOT.CtrlTrf%DoClssTrf) THEN
-         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Three-atoms reference system used, atoms are "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(1)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(2)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(3))))
-         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Three-atoms reference system used, atoms are "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(1)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(2)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(3))))
@@ -1736,7 +1736,7 @@ CONTAINS
        !
        IF(DiffMax>TrfGrd%MaxGradDiff) THEN
          IF(Print2) THEN
-           CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Rescale Step from "//TRIM(FltToChar(DiffMax))//" to "//TRIM(FltToChar(TrfGrd%MaxGradDiff)))
+           CALL MondoLog(DEBUG_NONE, "CartToInternal", "Rescale Step from "//TRIM(FltToChar(DiffMax))//" to "//TRIM(FltToChar(TrfGrd%MaxGradDiff)))
          ENDIF
          SumU=TrfGrd%MaxGradDiff/DiffMax
          VectIntAux%D(:)=SumU*VectIntAux%D(:)
@@ -1750,9 +1750,9 @@ CONTAINS
        ! Review iteration
        !
        IF(Print2) THEN
-         CALL MondoLog(DEBUG_NONE, "CartToInternals", "II = "//TRIM(IntToChar(II))// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "II = "//TRIM(IntToChar(II))// &
            ", MaxChange = "//TRIM(DblToChar(DiffMax))// &
-           ", ChageNorm = "//TRIM(DblToChar(RMSD)))
+           ", ChangeNorm = "//TRIM(DblToChar(RMSD)))
        ENDIF
        !
        IF(DiffMax<TrfGrd%GrdTrfCrit) EXIT
@@ -1760,12 +1760,12 @@ CONTAINS
      !
      IF(II>=TrfGrd%MaxIt_GrdTrf) THEN
        IF(Print2) THEN
-         CALL MondoLog(DEBUG_NONE, "CartToInternals", "Stop Gradient Trf, max. number "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Stop Gradient Trf, max. number "// &
            "of Iterations exceeded! Use current gradient vector!")
        ENDIF
      ELSE
        IF(Print2) THEN
-         CALL MondoLog(DEBUG_NONE, "CartToInternals", "Gradient "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Gradient "// &
            "transformation converged in "//TRIM(IntToChar(II))//" steps")
        ENDIF
      ENDIF
@@ -2146,7 +2146,7 @@ CONTAINS
      CALL POffHardGc(VectInt,ISpB,JSpB,ASpB,CholData, &
                      NCart,IntCs%N,Fact)
      IF(Print2) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "ProjectBCol", "Percentage of Hard Constraints Projected Out = " &
+       CALL MondoLog(DEBUG_NONE, "ProjectBCol", "Percentage of Hard Constraints Projected Out = " &
          //TRIM(FltToChar(Fact)))
      ENDIF
 
@@ -4805,7 +4805,7 @@ CONTAINS
          //TRIM(IntToChar(INT(Perc)))
      ENDIF
      IF(Print>=DEBUG_GEOP_MAX) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "RedundancyOff", Messg)
+       CALL MondoLog(DEBUG_NONE, "RedundancyOff", Messg)
      ENDIF
 
      CALL Delete(Displ2)
@@ -7882,7 +7882,7 @@ CONTAINS
 
      Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
      Fact=Fact*100.D0
-     CALL MondoLog(DEBUG_MEDIUM, "CleanConstrCart", &
+     CALL MondoLog(DEBUG_NONE, "CleanConstrCart", &
        "Percentage of Constraint Force That is Projected Out = "//TRIM(FltToChar(Fact)))
      CartGrad=CartGrad-CartA1%D
      IF(PBCDim>0) THEN
