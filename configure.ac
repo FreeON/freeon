@@ -54,20 +54,6 @@ AC_OUTPUT_COMMANDS([
     echo "MondoConfig.h updated"
     cat MondoConfig.diff
   fi
-
-  echo "checking MondoLocalVersion.h"
-  grep LOCAL_VERSION config_localversion.h > tempconf
-  if test ! -f MondoLocalVersion.h; then
-    mv -f tempconf MondoLocalVersion.h
-    echo "MondoLocalVersion.h did not exist"
-  elif (diff -u tempconf MondoLocalVersion.h > MondoLocalVersion.diff); then
-    rm -f tempconf
-    echo "MondoLocalVersion.h unchanged"
-  else
-    mv -f tempconf MondoLocalVersion.h
-    echo "MondoLocalVersion.h updated"
-    cat MondoLocalVersion.diff
-  fi
 ])
 
 # Store user supplied compiler flags.
