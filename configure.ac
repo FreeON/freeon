@@ -227,11 +227,17 @@ AC_ARG_ENABLE([optimizations],
 AM_CONDITIONAL(USE_COMPILER_OPTIMIZATIONS, [test "${use_optimizations}" = "yes"])
 
 if test "${use_optimizations}" = "yes"; then
-  AC_MSG_RESULT([adding compiler optimizations])
+  AC_MSG_RESULT([adding compiler optimizations for build_cpu ${build_cpu}])
 
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${CC_COMPILERNAME} in
+          GCC)   CFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) CFLAGS="-g -O3" ;;
+          *)     CFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${CC_COMPILERNAME} in
           GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
@@ -275,6 +281,12 @@ main ()
 
   if test -z "${user_FFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${F77_COMPILERNAME} in
+          GCC)   FFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FFLAGS="-g -O3" ;;
+          *)     FFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${F77_COMPILERNAME} in
           GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
@@ -317,6 +329,12 @@ main ()
 
   if test -z "${user_FCFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${FC_COMPILERNAME} in
+          GCC)   FCFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FCFLAGS="-g -O3" ;;
+          *)     FCFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${FC_COMPILERNAME} in
           GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;

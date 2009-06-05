@@ -852,12 +852,12 @@ MODULE SetXYZ
         TYPE(BONDDATA)          :: A,B
         INTEGER,OPTIONAL        :: NewDim_O,OldDim_O
         INTEGER                 :: I,NewDim,OldDim
-        !
-       !OldDim=SIZE(B%Length%D)
+
         OldDim=B%N
         NewDim=OldDim
         IF(PRESENT(NewDim_O)) NewDim=NewDim_O
         IF(PRESENT(OldDim_O)) OldDim=OldDim_O
+
         IF(.NOT.AllocQ(A%Alloc)) THEN
           CALL New(A,NewDim)
         ELSE
