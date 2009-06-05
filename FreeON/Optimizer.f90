@@ -564,9 +564,15 @@ CONTAINS
        ! to print geometries cooresponding to the energies that have just been computed
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        !
-       DO iCLONE=1,C%Geos%Clones
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-       ENDDO
+       IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+         DO iCLONE=0,C%Geos%Clones+1
+           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+         ENDDO
+       ELSE
+         DO iCLONE=1,C%Geos%Clones
+           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+         ENDDO
+       ENDIF
        ! Loop over all clones and modify geometries.
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
@@ -664,10 +670,12 @@ CONTAINS
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
      CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
-     IF(GOpt%TrfCtrl%DoTranslOff) &
+     IF(GOpt%TrfCtrl%DoTranslOff) THEN
        CALL TranslsOff(CartGrad%D(1:NCart-9),Print2)
-     IF(GOpt%TrfCtrl%DoRotOff) &
+     ENDIF
+     IF(GOpt%TrfCtrl%DoRotOff) THEN
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
+     ENDIF
      CALL Delete(Carts)
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
@@ -699,8 +707,8 @@ CONTAINS
      ! Get B matrices for redundancy projector, etc.
      !
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
-                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
-                    PBCDim,Print,SCRPath)
+                          GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+                          PBCDim,Print,SCRPath)
      !
      ! Print current set of internals for debugging
      !
@@ -713,8 +721,8 @@ CONTAINS
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad%D,iCLONE,ETot, &
-               IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
-               Refresh)
+                      IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
+                      Refresh)
      ELSE
        CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Geometry optimization of Clone "// &
          TRIM(IntToChar(iCLONE))//" converged in "//TRIM(IntToChar(iGEO))//" steps.")
@@ -1321,9 +1329,8 @@ CONTAINS
      TYPE(INTC)           :: EIntcSave
      TYPE(Constr)         :: ConstrSave
      !
-     SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
-             '.'//TRIM(IntToChar(iCLONE))
-     PWDPath  =TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
+     SCRPath=TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))
+     PWDPath=TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
      GMLoc%Displ%D=GMLoc%Carts%D
      DoNEB=(Opts%Grad==GRAD_TS_SEARCH_NEB)
      !
@@ -1370,21 +1377,21 @@ CONTAINS
      ENDIF
      !
      CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
-                       GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
-                       EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
+                        GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
+                        EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
      !
      !--------------------------------------------
      !
-       CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
-                       GradNew%D,Convgd,GMLoc%Etotal, &
-                       GMLoc%PBC%Dimen,iGEO,iCLONE, &
-                       SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
-                       Nams%HFile)
+     CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
+                     GradNew%D,Convgd,GMLoc%Etotal, &
+                     GMLoc%PBC%Dimen,iGEO,iCLONE, &
+                     SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
+                     Nams%HFile)
      !
      !--------------------------------------------
      !
      CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
-                        GOpt%Constr,EIntcSave,ConstrSave)
+                         GOpt%Constr,EIntcSave,ConstrSave)
      ! Put back modified geometry into GMLoc array
      !
      NatmsNew=0
