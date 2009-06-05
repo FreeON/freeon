@@ -2418,25 +2418,13 @@ CONTAINS
      IF(Print2) THEN
        CALL MondoLog(DEBUG_NONE, "CheckBigStep", "Rigidity = "//TRIM(DblToChar(Rigid)))
        IF(DoRepeat) THEN
-         !CALL MondoLog(DEBUG_NONE, "CheckBigStep", TRIM(IntToChar(IRep))//": Repeat "// &
-         !  "from CheckBigStep MaxDispl = "//TRIM(DblToChar(MaxConv*MaxDispl))// &
-         !  " on "//TRIM(IntToChar(IMax))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 1)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 2)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 3)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 4)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 5)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 6)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 7)))//" "// &
-         !  TRIM(IntToChar(IntCs%Def%C(IMax, 8))))
-
-         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ', &
-                    MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         CALL MondoLog(DEBUG_NONE, "CheckBigStep", TRIM(IntToChar(IRep))//": Repeat "// &
+           "from CheckBigStep MaxDispl = "//TRIM(DblToChar(MaxConv*MaxDispl))// &
+           " on "//TRIM(IntToChar(IMax))//" "//TRIM(IntCs%Def%C(IMax)))
        ELSE
-         WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ', &
-                    MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
-         WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ', &
-                    MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         CALL MondoLog(DEBUG_NONE, "CheckBigStep", TRIM(IntToChar(IRep))//": "// &
+           "Maximum Displacement from Backtransform = "//TRIM(DblToChar(MaxDispl*MaxConv))// &
+           " on "//TRIM(IntToChar(IMax))//" "//TRIM(IntCs%Def%C(IMax)))
        ENDIF
      ENDIF
    END SUBROUTINE CheckBigStep
@@ -2491,13 +2479,14 @@ CONTAINS
 !
    SUBROUTINE PrtIntCoords(IntCs,Value,CharU,PBCDim_O)
      !
-     TYPE(INTC)       :: IntCs
-     INTEGER          :: I,NIntC,J
-     REAL(DOUBLE),DIMENSION(:) :: Value
-     REAL(DOUBLE)     :: SumU,SumConstr,Conv,ConvC
-     CHARACTER(LEN=*) :: CharU
-     INTEGER,OPTIONAL :: PBCDim_O
-     LOGICAL          :: DoPrtCells,DoPrtExternal
+     TYPE(INTC)                       :: IntCs
+     INTEGER                          :: I,NIntC,J
+     REAL(DOUBLE),DIMENSION(:)        :: Value
+     REAL(DOUBLE)                     :: SumU,SumConstr,Conv,ConvC
+     CHARACTER(LEN=*)                 :: CharU
+     INTEGER,OPTIONAL                 :: PBCDim_O
+     LOGICAL                          :: DoPrtCells,DoPrtExternal
+     CHARACTER(LEN = DEFAULT_CHR_LEN) :: Message
      !
      Conv=180.D0/PI
      ConvC=One/AngstromsToAU
@@ -2505,15 +2494,11 @@ CONTAINS
      DoPrtCells=.FALSE.
      DoPrtExternal=.FALSE.
      IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
-     !
-     WRITE(*,*) TRIM(CharU)
-     WRITE(Out,*) TRIM(CharU)
-     WRITE(*,123)
-     WRITE(*,124)
-     WRITE(Out,123)
-     WRITE(Out,124)
-     123  FORMAT('INTERNAL COORDINATES')
-     124  FORMAT('       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE')
+
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", TRIM(CharU))
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", "")
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", "       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE")
+
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          SumU=Value(I)*ConvC
@@ -2540,27 +2525,25 @@ CONTAINS
          IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
             IntCs%Def%C(I)(1:4)=='LINB'.OR. &
             IntCs%Def%C(I)(1:4)=='OUTP') THEN
-            WRITE(Out,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4), &
-                           ' CELL ',IntCs%Cells%I(I,1:12),SumU
+            WRITE(Message,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),' CELL ',IntCs%Cells%I(I,1:12),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
-            WRITE(Out,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3), &
-                           ' CELL ',IntCs%Cells%I(I,1:9),SumU
+            WRITE(Message,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3),' CELL ',IntCs%Cells%I(I,1:9),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ELSE IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-            WRITE(Out,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2), &
-                           ' CELL ',IntCs%Cells%I(I,1:6),SumU
+            WRITE(Message,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2),' CELL ',IntCs%Cells%I(I,1:6),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ENDIF
      322 FORMAT(A8,4I4,A6,12I3,F12.5)
      422 FORMAT(A8,3I4,4X,A6,9I3,3X,F12.5)
      522 FORMAT(A8,2I4,2X,A6,6I3,6X,F12.5)
        ELSE
-         WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-         WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         WRITE(Message,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU,IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          IF(DoPrtCells) THEN
            IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
-             WRITE(*,112) IntCs%Cells%I(I,1:12)
-             WRITE(Out,112) IntCs%Cells%I(I,1:12)
+             WRITE(Message,112) IntCs%Cells%I(I,1:12)
+             CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
            ENDIF
          ENDIF
        ENDIF
@@ -2574,31 +2557,31 @@ CONTAINS
 !----------------------------------------------------------
 !
    SUBROUTINE PrtPBCs(XYZ)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE),DIMENSION(6)   :: Vec
-     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
-     INTEGER                     :: I,J,NatmsLoc
-     !
+     REAL(DOUBLE),DIMENSION(:,:)      :: XYZ
+     REAL(DOUBLE),DIMENSION(6)        :: Vec
+     REAL(DOUBLE),DIMENSION(3,3)      :: BoxShape
+     INTEGER                          :: I,J,NatmsLoc
+     CHARACTER(LEN = DEFAULT_CHR_LEN) :: Message
+
      NatmsLoc=SIZE(XYZ,2)-3
      DO I=1,3
        BoxShape(1:3,I)=XYZ(1:3,NatmsLoc+I)
      ENDDO
      CALL CalcBoxPars(Vec,BoxShape)
-     !
-     WRITE(*,111) 'STRE_A  ',Vec(1)/AngstromsToAU
-     WRITE(*,111) 'STRE_B  ',Vec(2)/AngstromsToAU
-     WRITE(*,111) 'STRE_C  ',Vec(3)/AngstromsToAU
-     WRITE(*,111) 'ALPHA   ',Vec(4)*180.D0/PI
-     WRITE(*,111) 'BETA    ',Vec(5)*180.D0/PI
-     WRITE(*,111) 'GAMMA   ',Vec(6)*180.D0/PI
-     !
-     WRITE(Out,111) 'STRE_A  ',Vec(1)/AngstromsToAU
-     WRITE(Out,111) 'STRE_B  ',Vec(2)/AngstromsToAU
-     WRITE(Out,111) 'STRE_C  ',Vec(3)/AngstromsToAU
-     WRITE(Out,111) 'ALPHA   ',Vec(4)*180.D0/PI
-     WRITE(Out,111) 'BETA    ',Vec(5)*180.D0/PI
-     WRITE(Out,111) 'GAMMA   ',Vec(6)*180.D0/PI
-     !
+
+     WRITE(Message,111) 'STRE_A  ',Vec(1)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'STRE_B  ',Vec(2)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'STRE_C  ',Vec(3)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'ALPHA   ',Vec(4)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'BETA    ',Vec(5)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'GAMMA   ',Vec(6)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+
      111 FORMAT('LATTICE  ',A8,2X,20X,2X,F12.6,L5,F12.6,L5)
    END SUBROUTINE PrtPBCs
 !
@@ -2657,12 +2640,10 @@ CONTAINS
        Fact=Zero
      ENDIF
      IF(Print) THEN
-       WRITE(*,100) Fact
-       WRITE(Out,100) Fact
+       CALL MondoLog(DEBUG_NONE, "PBCRotOff", "PRot = "//TRIM(DblToChar(Fact))//"%")
      ENDIF
      !
      DCarts=DCarts2
-100  FORMAT('PRot= ',F7.3,'%')
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
