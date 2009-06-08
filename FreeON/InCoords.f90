@@ -742,7 +742,6 @@ CONTAINS
 
      ! BondTot will contain the bonds. We need to properly allocate this
      ! variable.
-     !CALL MondoLog(DEBUG_NONE, "DefineIntCoos", "initializing BondTot to 0")
      CALL New(BondTot, 0)
      CALL BondingScheme(XYZ,AtNum,AtmBTot,BondTot,TOPM,Cells,IEq,&
                         AtomDim%I,GConvCr%HBondOnly)
@@ -801,17 +800,12 @@ CONTAINS
 
      ! This function will change the size of Bond to the new dimension.
 
-     !CALL MondoLog(DEBUG_NONE, "MoreBondArray", "Incr = "//TRIM(IntToChar(Incr))//", DimOld = "//TRIM(IntToChar(DimOld)))
-     !CALL MondoLog(DEBUG_NONE, "MoreBondArray", "on entry, Bond allocated = "//TRIM(LogicalToChar(AllocQ(Bond%Alloc))))
-
      DimNew=DimOld+Incr
      CALL SetEq(Bond2,Bond,NewDim_O=DimNew,OldDim_O=DimOld)
      CALL Delete(Bond)
      CALL New(Bond,DimNew)
      CALL SetEq(Bond,Bond2)
      CALL Delete(Bond2)
-
-     !CALL MondoLog(DEBUG_NONE, "MoreBondArray", "on exit, Bond allocated = "//TRIM(LogicalToChar(AllocQ(Bond%Alloc))))
 
    END SUBROUTINE MoreBondArray
 !
@@ -5920,8 +5914,6 @@ CONTAINS
      !
      !now define bonding scheme, based on Slater or Van der Waals radii
 
-     !CALL MondoLog(DEBUG_NONE, "BondingScheme", "BondCov allocated = "//TRIM(LogicalToChar(AllocQ(BondCov%Alloc))))
-
      NatmsLoc=SIZE(XYZ,2)
 
      CALL New(CritRad,NatmsLoc)
@@ -5962,8 +5954,7 @@ CONTAINS
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            CritRad%D=Fact*StRad%D
            !
-        !  CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)
-           !CALL MondoLog(DEBUG_NONE, "BondingScheme", "calling BondList with BondCov")
+           !CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)
            CALL BondList(XYZ,AtNum,IntSet,Box,BondCov,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
            CALL SortBonds(NatmsLoc,AtmB,BondCov)
@@ -6000,14 +5991,11 @@ CONTAINS
            CritRad%D=Fact*StRad%D
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
 
-           !CALL MondoLog(DEBUG_NONE, "BondingScheme", "initializing BondVDW to 0")
            CALL New(BondVDW, 0)
-           !CALL MondoLog(DEBUG_NONE, "BondingScheme", "calling BondList with BondVDW")
            CALL BondList(XYZ,AtNum,IntSet,Box,BondVDW,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
 
            IF(BondVDW%N/=0) THEN
-             !CALL MondoLog(DEBUG_NONE, "BondingScheme", "calling MergeBonds")
              CALL MergeBonds(BondCov,BondVDW,Bond)
              CALL Delete(BondCov)
              CALL Delete(BondVDW)
@@ -6085,9 +6073,6 @@ CONTAINS
      LOGICAL                     :: FoundHBond,FoundMetLig
      LOGICAL                     :: LonelyAtom,DoExclude
      LOGICAL                     :: NearestOnly,AtomRepeat,HBondonly
-
-     !CALL MondoLog(DEBUG_NONE, "BondList", "Bond allocated = "//TRIM(LogicalToChar(AllocQ(Bond%Alloc))))
-     !CALL MondoLog(DEBUG_NONE, "BondList", "Bond%N = "//TRIM(IntToChar(Bond%N)))
 
      NatmsLoc=SIZE(XYZ,2)
      HAtm=0
@@ -6179,10 +6164,8 @@ CONTAINS
 
                              IF(NBond+1>NBondEst) THEN
                                DDimU=NatmsLoc*10
-                               !CALL MondoLog(DEBUG_NONE, "BondList", "NBondEst = "//TRIM(IntToChar(NBondEst)))
                                CALL MoreBondArray(Bond,DDimU,NBondEst)
                                NBondEst=NBondEst+DDimU
-                               !CALL MondoLog(DEBUG_NONE, "BondList", "NBondEst = "//TRIM(IntToChar(NBondEst)))
                              ENDIF
 
                              NBond=NBond+1
@@ -6262,8 +6245,6 @@ CONTAINS
      TYPE(DBL_VECT)              :: VectB,VectBO,QVals
      TYPE(DBL_RNK2)              :: Vects,Vects2
      TYPE(ATOMBONDS)             :: AtmB,AtmB2
-
-     !CALL MondoLog(DEBUG_NONE, "BondList2", "entering")
 
      NatmsLoc=SIZE(XYZ,2)
      NBondEst=Bond%N
@@ -6526,8 +6507,6 @@ CONTAINS
      TYPE(DBL_VECT)              :: VectB,VectBO,QVals,QVals2
      TYPE(DBL_RNK2)              :: Vects,Vects2
      TYPE(ATOMBONDS)             :: AtmB,AtmB2
-
-     !CALL MondoLog(DEBUG_NONE, "BondList3", "entering")
 
      NatmsLoc=SIZE(XYZ,2)
      NBondEst=Bond%N
@@ -7352,10 +7331,6 @@ CONTAINS
      INTEGER         :: NTot,NCov
      INTEGER         :: I,J,K,L
 
-     !CALL MondoLog(DEBUG_NONE, "MergeBonds", "merging bonds")
-     !CALL MondoLog(DEBUG_NONE, "MergeBonds", "BondCov allocated = "//TRIM(LogicalToChar(AllocQ(BondCov%Alloc))))
-     !CALL MondoLog(DEBUG_NONE, "MergeBonds", "BondVDW allocated = "//TRIM(LogicalToChar(AllocQ(BondVDW%Alloc))))
-
      NTot=BondCov%N+BondVDW%N
      CALL New(BondTot,NTot)
      BondTot%N=NTot
@@ -7438,7 +7413,6 @@ CONTAINS
      ENDDO
      BondNew%N=NNew
      IF(NNew/=0) THEN
-       !CALL MondoLog(DEBUG_NONE, "MergeBondSets", "calling MergeBonds")
        CALL MergeBonds(Bond,BondNew,BondM)
        CALL Delete(Bond)
        CALL SetEq(Bond,BondM)
