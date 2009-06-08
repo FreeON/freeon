@@ -1787,9 +1787,9 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE InternalToCart(XYZ,AtNum,IntCs,PredVals,RefPoints,Print, &
-                           GBackTrf,GTrfCtrl,GCoordCtrl,GConvCr, &
-                           GConstr,PBCDim,&
-                           SCRPath,PWDPath,IntCsE,MixMat_O,iGEO_O)
+                             GBackTrf,GTrfCtrl,GCoordCtrl,GConvCr, &
+                             GConstr,PBCDim,&
+                             SCRPath,PWDPath,IntCsE,MixMat_O,iGEO_O)
      REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: MixMat_O
      REAL(DOUBLE),DIMENSION(:)            :: PredVals,RefPoints,AtNum
