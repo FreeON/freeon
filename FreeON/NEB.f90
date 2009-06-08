@@ -287,8 +287,7 @@ CONTAINS
        GTmp(I)%D=G%Clone(I)%Carts%D
     ENDDO
     CALL DblIntSort77(nCLONE,R2,I2,2)
-    WRITE(*,*)R2
-    WRITE(*,*)I2
+    CALL MondoLog(DEBUG_NONE, "NEBPurify", "Clone "//TRIM(IntToChar(I))//": I2 = "//TRIM(IntToChar(I2(I)))//" R2 = "//TRIM(DblToChar(R2(I))))
 
     DO I=1,nCLONE
        G%Clone(I)%Carts%D=GTmp(I2(I))%D
@@ -302,7 +301,6 @@ CONTAINS
        Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(I)))//','
     ENDDO
     Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(R2(G%Clones+1)))
-    !CALL MondoLog(DEBUG_NONE, "NEBPurify", TRIM(Mssg))
 !   ENDIF
 
     CALL MondoLog(DEBUG_NONE, "FreeON", Mssg, "NEBPurify("//TRIM(IntToChar(G%Clone(1)%Confg))//')')

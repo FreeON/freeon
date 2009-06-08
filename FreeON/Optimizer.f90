@@ -927,10 +927,11 @@ CONTAINS
      !
      CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
-   ! IF(PBCDim>0.AND.Print2) THEN
-   !   CALL PrtIntCoords(IntCs,Grad%D,&
-   !     'Internal Coordinate forces',PBCDim_O=PBCDim)
-   ! ENDIF
+
+     IF(PBCDim>0.AND.Print2) THEN
+       CALL PrtIntCoords(IntCs,Grad%D,'Internal Coordinate forces',PBCDim_O=PBCDim)
+     ENDIF
+
      CALL RedundancyOff(Grad%D,SCRPath,Print,Messg_O='IntC Grads')
      !
      CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
@@ -947,11 +948,11 @@ CONTAINS
      CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
    ! CALL RedundancyOff(Displ%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
-     !
+
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit, &
    !                      PBCDim,Print)
-!CALL ProjectBCol(SCRPath,IntCs,XYZ,Displ%D,PBCDim,.TRUE.)
+     !CALL ProjectBCol(SCRPath,IntCs,XYZ,Displ%D,PBCDim,.TRUE.)
      IntCs%PredVal%D=IntCs%Value%D+Displ%D
      CALL InternalToCart(XYZ,AtNum,IntCs,IntCs%PredVal%D, &
                          RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
