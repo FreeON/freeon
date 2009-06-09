@@ -1210,8 +1210,8 @@ CONTAINS
     ENDIF
 
     ! Print out the forces.
-    DO iCLONE=0, G%Clones+1
-      CALL MondoLog(DEBUG_NONE, "Force", "clone "//TRIM(IntToChar(iCLONE)))
+    DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
+      CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
       DO iATS=1, G%Clone(iCLONE)%NAtms
         CALL MondoLog(DEBUG_NONE, "Force", "F["//TRIM(IntToChar(iATS))//"] = [ " &
           //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" " &
