@@ -86,7 +86,7 @@ CONTAINS
   END SUBROUTINE MondoHalt
 
   SUBROUTINE Halt(Strng)
-    CHARACTER (LEN=*) :: Strng
+    CHARACTER(LEN=*)           :: Strng
     CHARACTER(LEN=*),PARAMETER :: Motto='Frango ut patefaciam -- I break in order to reveal'
     CALL MondoLogPlain(Strng)
 #ifdef PARALLEL

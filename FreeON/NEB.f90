@@ -287,7 +287,10 @@ CONTAINS
        GTmp(I)%D=G%Clone(I)%Carts%D
     ENDDO
     CALL DblIntSort77(nCLONE,R2,I2,2)
-    CALL MondoLog(DEBUG_NONE, "NEBPurify", "Clone "//TRIM(IntToChar(I))//": I2 = "//TRIM(IntToChar(I2(I)))//" R2 = "//TRIM(DblToChar(R2(I))))
+
+    DO I=bCLONE, eCLONE
+      CALL MondoLog(DEBUG_NONE, "NEBPurify", "Clone "//TRIM(IntToChar(I))//": I2 = "//TRIM(IntToChar(I2(I)))//" R2 = "//TRIM(DblToChar(R2(I))))
+    ENDDO
 
     DO I=1,nCLONE
        G%Clone(I)%Carts%D=GTmp(I2(I))%D

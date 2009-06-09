@@ -160,16 +160,15 @@ CONTAINS
   ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
   !============================================================================
   FUNCTION ParseBasisSets(G,B,BasU,BlkSiz,OffSet)
-    TYPE(BSET)                 :: BS,B
-    TYPE(CRDS)                 :: G
-    TYPE(INT_VECT)             :: BlkSiz,OffSet
-    TYPE(CHR_VECT)             :: C
-    REAL(DOUBLE),    &
-         DIMENSION(1:MaxASymt+2) :: Dbls
-    INTEGER, DIMENSION(2)      :: Ints
-    LOGICAL                    :: ParseBasisSets
-    CHARACTER(LEN=DCL)         :: Line
-    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell,BasU
+    TYPE(BSET)                            :: BS,B
+    TYPE(CRDS)                            :: G
+    TYPE(INT_VECT)                        :: BlkSiz,OffSet
+    TYPE(CHR_VECT)                        :: C
+    REAL(DOUBLE), DIMENSION(1:MaxASymt+2) :: Dbls
+    INTEGER, DIMENSION(2)                 :: Ints
+    LOGICAL                               :: ParseBasisSets
+    CHARACTER(LEN=DCL)                    :: Line
+    INTEGER                               :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell,BasU
     !-------------------------------------------------------------------------!
     ParseBasisSets=.FALSE.
     ! Allocate temporary set
@@ -231,9 +230,6 @@ CONTAINS
           !vwIF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN
           NC=0
           KFound=KFound+1
-
-          !!          CALL MondoLog(DEBUG_MAXIMUM, "ParseBasis", "found basis for "//TRIM(BS%AtNam%C(NK)))
-
           DO
             READ(BasU,DEFAULT_CHR_FMT,END=99)Line
             IF(INDEX(Line,'<End')/=0)RETURN
