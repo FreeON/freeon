@@ -562,8 +562,8 @@ fi
 declare -i md_debug_SCFs
 AC_ARG_WITH([md-debug],
   [AS_HELP_STRING([--with-md-debug],
-  [ Using the --with-enable-debug=N command line argument, the number of SCFs
-   used can be hardwired to something else than 2.])],
+  [Using the --with-md-debug=N command line argument, the number of SCFs used
+   can be hardwired to something else than 2.])],
   [md_debug_SCFs=${withval}-1],
   [md_debug_SCFs=1])
 
@@ -925,6 +925,15 @@ AC_ARG_ENABLE([really-old-DIIS],
   [use_really_old_DIIS="no"])
 AC_MSG_RESULT([${use_really_old_DIIS}])
 AM_CONDITIONAL(REALLY_OLD_DIIS, [test "${use_really_old_DIIS}" = "yes"])
+
+AC_MSG_CHECKING([whether to print out some extra NEB debugging information])
+AC_ARG_ENABLE([NEB-debug],
+  [AS_HELP_STRING([--enable-NEB-debug],
+  [Print out some extra (quite a lot) debugging information in the NEB.])],
+  [use_NEB_debug="${enableval}"],
+  [use_NEB_debug="no"])
+AC_MSG_RESULT([${use_NEB_debug}])
+AM_CONDITIONAL(NEB_DEBUG, [test "${use_NEB_debug}" = "yes"])
 
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
