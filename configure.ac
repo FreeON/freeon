@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [1.0-alpha-June-1-2009], [mchalla@lanl.gov])
+AC_INIT([freeon], [1.0-alpha-June-10-2009], [mchalla@lanl.gov])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
@@ -53,20 +53,6 @@ AC_OUTPUT_COMMANDS([
     mv -f tempconf MondoConfig.h
     echo "MondoConfig.h updated"
     cat MondoConfig.diff
-  fi
-
-  echo "checking MondoLocalVersion.h"
-  grep LOCAL_VERSION config_localversion.h > tempconf
-  if test ! -f MondoLocalVersion.h; then
-    mv -f tempconf MondoLocalVersion.h
-    echo "MondoLocalVersion.h did not exist"
-  elif (diff -u tempconf MondoLocalVersion.h > MondoLocalVersion.diff); then
-    rm -f tempconf
-    echo "MondoLocalVersion.h unchanged"
-  else
-    mv -f tempconf MondoLocalVersion.h
-    echo "MondoLocalVersion.h updated"
-    cat MondoLocalVersion.diff
   fi
 ])
 
@@ -155,6 +141,18 @@ AC_LANG(Fortran)
 AC_FC_SRCEXT(f90)
 AC_FC_FREEFORM
 
+# Switch back to C.
+AC_LANG(C)
+
+# Check for libtool.
+AC_PROG_LIBTOOL
+
+# Set the preprocessor.
+CPP=cpp
+
+# Set $(MAKE).
+AC_PROG_MAKE_SET
+
 # Testing whether the C compiler works.
 AC_MSG_CHECKING([whether the C-compiler produces executable code])
 AC_LANG(C)
@@ -215,20 +213,26 @@ AC_ARG_ENABLE([optimizations],
 AM_CONDITIONAL(USE_COMPILER_OPTIMIZATIONS, [test "${use_optimizations}" = "yes"])
 
 if test "${use_optimizations}" = "yes"; then
-  AC_MSG_RESULT([adding compiler optimizations])
+  AC_MSG_RESULT([adding compiler optimizations for build_cpu ${build_cpu}])
 
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${CC_COMPILERNAME} in
+          GCC)   CFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) CFLAGS="-g -O3" ;;
+          *)     CFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) CFLAGS="-g -O3" ;;
           *)     CFLAGS="-g -O3" ;;
         esac ;;
@@ -263,15 +267,21 @@ main ()
 
   if test -z "${user_FFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${F77_COMPILERNAME} in
+          GCC)   FFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FFLAGS="-g -O3" ;;
+          *)     FFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FFLAGS="-g -O3" ;;
           *)     FFLAGS="-g -O3" ;;
         esac ;;
@@ -305,15 +315,21 @@ main ()
 
   if test -z "${user_FCFLAGS}"; then
     case ${build_cpu} in
+      *386)
+        case ${FC_COMPILERNAME} in
+          GCC)   FCFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FCFLAGS="-g -O3" ;;
+          *)     FCFLAGS="-g -O3" ;;
+        esac ;;
       *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize" ;;
+          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
           Intel) FCFLAGS="-g -O3" ;;
           *)     FCFLAGS="-g -O3" ;;
         esac ;;
@@ -354,7 +370,7 @@ else
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
-      GCC)   CFLAGS="-O0 -g -Wall" ;;
+      GCC)   CFLAGS="-O0 -g -Wall -pipe" ;;
       Intel) CFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
@@ -366,7 +382,7 @@ else
 
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
-      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
@@ -378,7 +394,7 @@ else
 
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
-      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall" ;;
+      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
@@ -448,12 +464,6 @@ esac
 
 # Change to C.
 AC_LANG(C)
-
-# Check for libtool.
-AC_PROG_LIBTOOL
-
-# Set $(MAKE).
-AC_PROG_MAKE_SET
 
 # Check for some standard headers.
 AC_HEADER_STDC
@@ -552,8 +562,8 @@ fi
 declare -i md_debug_SCFs
 AC_ARG_WITH([md-debug],
   [AS_HELP_STRING([--with-md-debug],
-  [ Using the --with-enable-debug=N command line argument, the number of SCFs
-   used can be hardwired to something else than 2.])],
+  [Using the --with-md-debug=N command line argument, the number of SCFs used
+   can be hardwired to something else than 2.])],
   [md_debug_SCFs=${withval}-1],
   [md_debug_SCFs=1])
 
@@ -842,6 +852,14 @@ AC_LINK_IFELSE(AC_LANG_PROGRAM([char compress2 ();],
   [],
   [AC_MSG_NOTICE([I do not have a working zlib installed.])])
 
+# Check for mkstemp or mkostemp.
+AC_CHECK_FUNC([mkstemp],
+              [AC_DEFINE([HAVE_MKSTEMP], [1], [whether we have mkstemp()])],
+              [])
+AC_CHECK_FUNC([mkostemp],
+              [AC_DEFINE([HAVE_MKOSTEMP], [1], [whether we have mkostemp()])],
+              [])
+
 # Find flags for static linking.
 AC_MSG_CHECKING([whether to link binaries statically])
 AC_ARG_ENABLE([static-binaries],
@@ -870,9 +888,6 @@ else
   esac
 
 fi
-
-# Set the preprocessor.
-CPP=cpp
 
 # Set some preprocessor command line options.
 FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/MondoMods"
@@ -910,6 +925,15 @@ AC_ARG_ENABLE([really-old-DIIS],
   [use_really_old_DIIS="no"])
 AC_MSG_RESULT([${use_really_old_DIIS}])
 AM_CONDITIONAL(REALLY_OLD_DIIS, [test "${use_really_old_DIIS}" = "yes"])
+
+AC_MSG_CHECKING([whether to print out some extra NEB debugging information])
+AC_ARG_ENABLE([NEB-debug],
+  [AS_HELP_STRING([--enable-NEB-debug],
+  [Print out some extra (quite a lot) debugging information in the NEB.])],
+  [use_NEB_debug="${enableval}"],
+  [use_NEB_debug="no"])
+AC_MSG_RESULT([${use_NEB_debug}])
+AM_CONDITIONAL(NEB_DEBUG, [test "${use_NEB_debug}" = "yes"])
 
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
@@ -971,6 +995,7 @@ TwoE/VRR/Makefile
 ONX/Makefile
 Validate/Makefile
 Validate/Dynamics/Makefile
+Validate/NEB/Makefile
 Validate/Optimization/Makefile
 Validate/Response/Frequencies/Makefile
 Validate/Response/Makefile

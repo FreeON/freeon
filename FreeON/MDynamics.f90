@@ -954,6 +954,7 @@ CONTAINS
     REAL(DOUBLE), INTENT(IN)            :: Epot, Ekin, E0, delta_t, tau
     REAL(DOUBLE), OPTIONAL, INTENT(OUT) :: v_scale_O
     REAL(DOUBLE)                        :: v_scale, E, Ekin_target
+    REAL(DOUBLE), SAVE                  :: EIntegrated = 0.D0
     INTEGER                             :: i
 
     ! Calculate v_scale.
@@ -961,7 +962,8 @@ CONTAINS
     Ekin_target = E0-Epot
 
     IF(Ekin_target > 0 .AND. Ekin > 1.0D-4) THEN
-      v_scale = SQRT(1 + delta_t/tau * (Ekin_target/Ekin - 1))
+      EIntegrated = EIntegrated + (Ekin_target/Ekin - 1)
+      v_scale = SQRT(1 + delta_t/tau * ((Ekin_target/Ekin - 1) + 1/10.D0*EIntegrated))
     ELSE
       v_scale = 1.0D0
     ENDIF

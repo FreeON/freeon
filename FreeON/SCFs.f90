@@ -87,6 +87,8 @@ CONTAINS
     INTEGER,PARAMETER    :: MaxSCFs = HAVE_MAX_SCF
     INTEGER              :: cBAS,cGEO,iSCF
 
+    CALL MondoLog(DEBUG_NONE, "SCF", "doing SCF")
+
     ! Allocate space for action.
     CALL New(C%Stat%Action,1)
 
@@ -610,6 +612,9 @@ CONTAINS
           ELSEIF(GLogic)THEN
             Converged(iCLONE)=DIIS_NOPATH
           ENDIF
+        ELSE
+          DIISA = 0.0D0
+          DIISB = 0.0D0
         ENDIF
 
         IF(DoDIIS.AND.DIISB<DIISA)THEN
@@ -993,10 +998,10 @@ CONTAINS
 
     ! A call to get() will allocate. We therefore need to delete these
     ! variables.
-    call delete(GM)
-    call delete(GM_rs)
-    call delete(BS)
-    call delete(BS_rs)
+    CALL DELETE(GM)
+    CALL DELETE(GM_rs)
+    CALL DELETE(BS)
+    CALL DELETE(BS_rs)
 
   END SUBROUTINE SameBasisSameGeom
   !===============================================================================
@@ -1160,10 +1165,28 @@ CONTAINS
     ENDDO
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
+
     ! Now add in any NEB force projections
     IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
        CALL NEBForce(G,O)
     ENDIF
+
+    ! Zero forces on constrained atoms again.
+    DO iCLONE=1,G%Clones
+      DO iATS=1,G%Clone(iCLONE)%NAtms
+        IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
+          IF((G%Clone(iCLONE)%Gradients%D(1,iATS) /= Zero) .OR. &
+             (G%Clone(iCLONE)%Gradients%D(2,iATS) /= Zero) .OR. &
+             (G%Clone(iCLONE)%Gradients%D(3,iATS) /= Zero)) THEN
+            CALL MondoLog(DEBUG_NONE, "Force", "force on atom " &
+              //TRIM(IntToChar(iATS))//" in clone " &
+              //TRIM(IntToChar(iCLONE))//" is not zero!")
+            G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+          ENDIF
+        ENDIF
+      ENDDO
+    ENDDO
+
     ! Finally, archive the whole mother
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
     ! Done with this sucka
@@ -1186,6 +1209,17 @@ CONTAINS
        ENDDO
     ENDIF
 
+    ! Print out the forces.
+    DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
+      CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
+      DO iATS=1, G%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "Force", "F["//TRIM(IntToChar(iATS))//"] = [ " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2, iATS)))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3, iATS))), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
+    ENDDO
   END SUBROUTINE Force
   !===============================================================================
   ! Numerically compute Lattice Forces for J
@@ -1826,15 +1860,15 @@ CONTAINS
     DoingMD=.FALSE.
     IF(PRESENT(DoingMD_O)) DoingMD=DoingMD_O
 
-    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
-      //", iGEO = "//TRIM(IntToChar(iGEO)))
+    !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "doing MD = "//TRIM(LogicalToChar(DoingMD)) &
+    !  //", iGEO = "//TRIM(IntToChar(iGEO)))
 
     chGEO = IntToChar(iGEO)
-    RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"
-    CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
+    RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_*Geom#'//TRIM(chGEO)//"_*"
+    CALL MondoLog(DEBUG_NONE, "CleanScratch", "removing "//TRIM(RemoveFile))
     CALL FileRemove(RemoveFile)
     IF(DoingMD) THEN
-      RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_G#'//TRIM(chGEO)//"_*.*"
+      RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_*G#'//TRIM(chGEO)//"_*"
       !CALL MondoLog(DEBUG_MAXIMUM, "CleanScratch", "removing "//TRIM(RemoveFile))
       CALL FileRemove(RemoveFile)
     ENDIF

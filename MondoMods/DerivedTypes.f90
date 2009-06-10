@@ -298,18 +298,18 @@ MODULE DerivedTypes
    END TYPE ATOMBONDS
 !
    TYPE INTC
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N
+     INTEGER          :: Alloc     !-- Allocation key
+     INTEGER          :: N
      TYPE(CHR10_VECT) :: Def
-     TYPE(INT_RNK2) :: Atoms
-     TYPE(INT_RNK2) :: Cells
-     TYPE(DBL_VECT) :: Value
-     TYPE(LOG_VECT) :: Constraint
-     TYPE(DBL_VECT) :: ConstrValue
-     TYPE(LOG_VECT) :: Active
-     TYPE(DBL_VECT) :: PredVal
-     TYPE(DBL_VECT) :: PredGrad
-     TYPE(DBL_VECT) :: InvHess
+     TYPE(INT_RNK2)   :: Atoms
+     TYPE(INT_RNK2)   :: Cells
+     TYPE(DBL_VECT)   :: Value
+     TYPE(LOG_VECT)   :: Constraint
+     TYPE(DBL_VECT)   :: ConstrValue
+     TYPE(LOG_VECT)   :: Active
+     TYPE(DBL_VECT)   :: PredVal
+     TYPE(DBL_VECT)   :: PredGrad
+     TYPE(DBL_VECT)   :: InvHess
    END TYPE INTC
 !
 !----------------------------------------------------------------------

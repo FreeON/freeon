@@ -132,8 +132,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), INTENT(IN)            :: tag
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
-    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: output
-    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: line_string
+    CHARACTER(LEN=2048)                     :: output
+    CHARACTER(LEN=2048)                     :: line_string
     INTEGER, OPTIONAL, INTENT(IN)           :: line_O
     LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
     INTEGER :: logLevel

@@ -1,0 +1,39 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Clones=10
+Grad=(TSSearch,Cartesian,NoGDIIS,NoBackTr,BiSect)
+NEBSpring=0.001
+
+OutPut=xyz
+DebugAll=(MinDebug,MaxGeOp)
+
+Guess=SuperPos
+
+SCFMethod=(RH)
+BasisSets=(STO-2G-SPLIT)
+ModelChem=(HF)
+Accuracy=(verytight)
+SCFConvergence=(DIIS)
+
+<EndOptions>
+
+<BeginReactants>
+O          0.00000        0.00000        0.00000
+H          0.99816        0.00033       -0.00329
+H         -0.15739       -0.00009       -0.98311
+O          2.70568       -0.00000        0.00000
+H          3.01655       -0.75832        0.56450
+H          3.01664        0.75829        0.56450
+<EndReactants>
+
+<BeginProducts>
+O          0.00000        0.00000        0.00000
+H         -0.15739        0.00009        0.98311
+H          0.99816       -0.00033        0.00329
+O          2.70568       -0.00000        0.00000
+H          3.01664       -0.75829       -0.56450
+H          3.01655        0.75832       -0.56450
+<EndProducts>

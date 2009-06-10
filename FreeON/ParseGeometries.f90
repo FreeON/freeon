@@ -208,7 +208,7 @@ CONTAINS
               ! them later on.
               G%Clone(iCLONE)%Carts%D    = AUToAngstroms*G%Clone(iCLONE)%Carts%D
               G%Clone(iCLONE)%Velocity%D = AUToAngstroms*G%Clone(iCLONE)%Velocity%D
-              !
+
               CALL MondoHalt(PRSE_ERROR, ' ERROR ON RESTART, MISSING IS CONVERSION TO PBCS!! ')
               ! THIS PART IS REDUNDANT, AND SHOULD BE SORTED ON ARCHIVAL IF PBS ARE RESET PROPERLY:
 
@@ -246,7 +246,9 @@ CONTAINS
     INTEGER                   :: J,N,Coordinates,L
     CHARACTER(LEN=3)          :: At,AtTmp
     CHARACTER(LEN=DCL)        :: Line,LineLowCase
-    !------------------------------------------------------------------------!
+
+    CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing between "//TRIM(BeginDelimiter)//" and "//TRIM(EndDelimiter))
+
     ! Determine the number of atoms in this block
     N=0
     CALL Align(BeginDelimiter,Inp)
@@ -285,7 +287,8 @@ CONTAINS
         G%Carts%D(2,N)=CharToDbl(C%C(3))
         G%Carts%D(3,N)=CharToDbl(C%C(4))
         G%CConstrain%I(N)=0
-        G%Velocity%D(1:3,N)=0.0D0
+        G%Velocity%D(1:3,N) = Zero
+        G%Gradients%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==5)THEN
         ! Atomtype x y z constrain
         At=TRIM(ADJUSTL(C%C(1)))
@@ -307,7 +310,8 @@ CONTAINS
         CASE DEFAULT
           G%CConstrain%I(N)=0
         END SELECT
-        G%Velocity%D(1:3,N)=0.0D0
+        G%Velocity%D(1:3,N) = Zero
+        G%Gradients%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==7)THEN
         ! Atomtype x y z vx vy vz
         At=TRIM(ADJUSTL(C%C(1)))
@@ -318,6 +322,7 @@ CONTAINS
         G%Velocity%D(2,N)=CharToDbl(C%C(6))
         G%Velocity%D(3,N)=CharToDbl(C%C(7))
         G%CConstrain%I(N)=0
+        G%Gradients%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==8)THEN
         ! Atomtype x y z vx vy vz constrain
         At=TRIM(ADJUSTL(C%C(1)))
@@ -339,7 +344,7 @@ CONTAINS
 !
         CASE('fext')
           G%CConstrain%I(N)=3
-          G%Fext%D(1:3,N)    =G%Velocity%D(1:3,N)
+          G%Fext%D(1:3,N)=G%Velocity%D(1:3,N)
           G%Velocity%D(1:3,N)=Zero
         CASE('f')
           ! We found an atom for freq calculation
@@ -349,6 +354,7 @@ CONTAINS
         CASE DEFAULT
           G%CConstrain%I(N)=0
         END SELECT
+        G%Gradients%D(1:3,N) = Zero
 
       ENDIF
       CALL Delete(C)
@@ -386,18 +392,18 @@ CONTAINS
       CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates')
     ENDIF
 
-!!$    ! Print something....
-!!$    DO J=1, G%NAtms
-!!$      CALL MondoLog(DEBUG_NONE, "ParseCoordinates", &
-!!$        TRIM(G%AtNam%C(J))//" "// &
-!!$        TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
-!!$        TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
-!!$        TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
-!!$        TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
-!!$        TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
-!!$        TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
-!!$        TRIM(IntToChar(G%CConstrain%I(J))))
-!!$    ENDDO
+    ! Print something....
+    !DO J=1, G%NAtms
+    !  CALL MondoLog(DEBUG_NONE, "ParseCoordinates", &
+    !    TRIM(G%AtNam%C(J))//" "// &
+    !    TRIM(FltToShrtChar(G%Carts%D(1,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Carts%D(2,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Carts%D(3,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
+    !    TRIM(IntToChar(G%CConstrain%I(J))))
+    !ENDDO
 
     ! ULTIMATELY, THE FOLLOWING ITEMS SHOULD BE ASSOCIATED WITH THE Geometries
     ! TYPE RATHER THAN THE CRDS TYPE

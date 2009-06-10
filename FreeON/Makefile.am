@@ -188,6 +188,7 @@ ZippyQuote.o : \
   ControlStructures.o
 
 NEB.o : \
+  $(top_builddir)/MondoConfig.h \
   ls_rmsd.o \
   ControlStructures.o
 

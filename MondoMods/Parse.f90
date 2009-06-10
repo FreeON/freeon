@@ -51,7 +51,7 @@ CONTAINS
       CALL RemoveComments(Line)
       IF(INDEX(Line,Key)/=0)RETURN
     ENDDO
-99  CALL Halt(' Key not found in input : '//TRIM(Key))
+99  CALL Halt('Key not found in input : '//TRIM(Key))
   END SUBROUTINE Align
   !======================================================================
   !     Align file pointer one a lowercase-line past a character key
@@ -67,7 +67,7 @@ CONTAINS
       CALL LowCase(Line)
       IF(INDEX(Line,Key)/=0)RETURN
     ENDDO
-99  CALL Halt(' Key not found in input : '//TRIM(Key))
+99  CALL Halt('Key not found in input : '//TRIM(Key))
   END SUBROUTINE AlignLowCase
   !======================================================================
   !     Align file pointer one line past a character key
@@ -545,7 +545,7 @@ CONTAINS
     !
     CALL LowCase(TmpLine)
     J=SCAN(TmpLine,Lower)
-    IF(J==0)Call Halt(' No characters found in line in LineToGeom ')
+    IF(J==0)Call Halt('No characters found in line in LineToGeom ')
     At=TmpLine(J:J+1)
     J=J+2
     L=LEN(Line)
@@ -577,7 +577,7 @@ CONTAINS
       ENDIF
       IF(L==N)EXIT
     ENDDO
-    IF(N/=L)CALL Halt(' Parse error in LineToDbls, N/=L')
+    IF(N/=L)CALL Halt('Parse error in LineToDbls, N/=L')
     CALL Delete(Chars)
     RETURN
     !        OLD STYLE ...
