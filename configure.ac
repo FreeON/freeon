@@ -933,7 +933,8 @@ AC_ARG_ENABLE([NEB-debug],
   [use_NEB_debug="${enableval}"],
   [use_NEB_debug="no"])
 AC_MSG_RESULT([${use_NEB_debug}])
-AM_CONDITIONAL(NEB_DEBUG, [test "${use_NEB_debug}" = "yes"])
+AC_DEFINE(NEB_DEBUG, [test "${use_NEB_debug}" = "yes"], [Print out additional
+  debugging information in NEB])
 
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
