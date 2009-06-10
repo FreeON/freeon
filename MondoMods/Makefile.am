@@ -39,8 +39,8 @@ libMondoMods_la_SOURCES = \
   GetAddress.c \
   GetHostname.c \
   GetLimits.c \
-  GetRUsage.c \
   GetPWD.c \
+  GetRUsage.c \
   GlobalCharacters.f90 \
   GlobalObjects.f90 \
   GlobalScalars.f90 \
@@ -73,6 +73,7 @@ libMondoMods_la_SOURCES = \
   SetEq77.f \
   Slatec.f90 \
   SpecFun.f90 \
+  TempDirectory.c \
   Thresholding.f90 \
   TimerWrapper.c \
   Trap.c \

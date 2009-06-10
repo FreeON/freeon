@@ -195,8 +195,7 @@ MODULE ParseGeomOpt
      ! Parse for Maximum angle and maximum bondlength displacements
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN
-      !GOpt%CoordCtrl%MaxAngle=Two*PI !default value
-       GOpt%CoordCtrl%MaxAngle=10.D0*PI/180.D0  !default value
+       GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0  !default value
       !IF(PBCDim==3) THEN
       !  GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0
       !ELSE
@@ -206,10 +205,9 @@ MODULE ParseGeomOpt
        GOpt%CoordCtrl%MaxAngle=GOpt%CoordCtrl%MaxAngle*PI/180.D0
      ENDIF
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
-      !GOpt%CoordCtrl%MaxStre=100.000D0 !default value
-       GOpt%CoordCtrl%MaxStre=0.30D0*AngstromsToAu
+       GOpt%CoordCtrl%MaxStre=0.1D0*AngstromsToAU
      ELSE
-       GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAu
+       GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAU
      ENDIF
      !
      ! Parse for Internal coordinates refresh type

@@ -63,12 +63,12 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     ! Print the starting coordinates and energy
-    IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    DO iCLONE=GBeg,GEnd
-       CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-    ENDDO
+    !IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
+    !DO iCLONE=GBeg,GEnd
+       !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+    !ENDDO
 
-    !CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+    CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
 
     iBAS=C%Sets%NBSets
     IStart=iGEO
@@ -84,17 +84,20 @@ CONTAINS
           ! Overwrite the most recent GFile (doing transition state)
           !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
           !          CLOSE(Geo)
-          IF(C%Opts%GeomPrint=='XSF') &
-             CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
+          !IF(C%Opts%GeomPrint=='XSF') &
+             !CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
           DO iCLONE=GBeg,GEnd
              ! If transition states, geometry is the image number
              ! otherwise, it is the step number
              gtmp=C%Geos%Clone(iCLONE)%Confg
              C%Geos%Clone%Confg=iCLONE+1
-            !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
-             CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+             !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
+             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
              C%Geos%Clone%Confg=gtmp
           ENDDO
+
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ELSE
           ! No transitions states, just good old downhill
           IF(C%Opts%GeomPrint=='XSF') &
@@ -122,15 +125,16 @@ CONTAINS
   !
   !=====================================================================================
   !
-  SUBROUTINE MergePrintClones(Geos,Nams,Opts)
-    TYPE(Geometries) :: Geos
-    TYPE(FileNames)  :: Nams
-    TYPE(Options)    :: Opts
-    INTEGER          :: iCLONE,NatmsMerge,GBeg,GEnd,J,M,I
-    TYPE(CRDS)       :: GMMerge
-    REAL(DOUBLE)              :: Length,Length0
-    REAL(DOUBLE),DIMENSION(3) :: CME1,CME2,TR,DIAG,TRM
-    !
+  SUBROUTINE MergePrintClones(Geos,Nams,Opts,Gradients_O)
+    TYPE(Geometries)                     :: Geos
+    TYPE(FileNames)                      :: Nams
+    TYPE(Options)                        :: Opts
+    INTEGER                              :: iCLONE,NatmsMerge,GBeg,GEnd,J,M,I
+    TYPE(CRDS)                           :: GMMerge
+    REAL(DOUBLE)                         :: Length,Length0
+    REAL(DOUBLE),DIMENSION(3)            :: CME1,CME2,TR,DIAG,TRM
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Gradients_O
+
     GBeg=0
     GEnd=Geos%Clones+1
     NatmsMerge=Geos%Clone(GBeg)%Natms*(GEnd-GBeg+1)
@@ -170,12 +174,13 @@ CONTAINS
       DO J=1,Geos%Clone(iCLONE)%Natms
         M=M+1
         GMMerge%Carts%D(1:3,M)=Geos%Clone(iCLONE)%Carts%D(1:3,J)+TRM*iCLONE
+        GMMerge%Gradients%D(1:3,M) = Geos%Clone(iCLONE)%Gradients%D(1:3,J)
         GMMerge%AtNum%D(M)=Geos%Clone(iCLONE)%AtNum%D(J)
         GMMerge%AtNam%C(M)=Geos%Clone(iCLONE)%AtNam%C(J)
       ENDDO
     ENDDO
     GMMerge%Confg=Geos%Clone(1)%Confg
-    CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint)
+    CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint,Gradients_O=Gradients_O)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
   !=====================================================================================
@@ -510,14 +515,14 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE IntOpt(C)
-     TYPE(Controls)            :: C
-     INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
-     INTEGER                   :: AccL
-     INTEGER                   :: FirstGeom,NatmsLoc,GuessO
-     INTEGER                   :: ConvgdAll,MaxSteps,IStart,Dimen
-     TYPE(INT_VECT)            :: Convgd
-     TYPE(INTC)                :: IntCES
-     TYPE(State)               :: StateO
+     TYPE(Controls) :: C
+     INTEGER        :: I,iBAS,iGEO,iGEOst,iCLONE
+     INTEGER        :: AccL
+     INTEGER        :: FirstGeom,NatmsLoc,GuessO
+     INTEGER        :: ConvgdAll,MaxSteps,IStart,Dimen
+     TYPE(INT_VECT) :: Convgd
+     TYPE(INTC)     :: IntCES
+     TYPE(State)    :: StateO
      !
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
@@ -557,12 +562,17 @@ CONTAINS
        CALL BackTrack(iBAS,iGEO,C,StateO,GuessO)
        ! Backtracking can modify geometries too, so this is the right place
        ! to print geometries cooresponding to the energies that have just been computed
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
-                  C%Geos,C%Sets,C%MPIs)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        !
-       DO iCLONE=1,C%Geos%Clones
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-       ENDDO
+       IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+         DO iCLONE=0,C%Geos%Clones+1
+           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+         ENDDO
+       ELSE
+         DO iCLONE=1,C%Geos%Clones
+           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+         ENDDO
+       ENDIF
        ! Loop over all clones and modify geometries.
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
@@ -573,7 +583,7 @@ CONTAINS
        !
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
           CALL NEBPurify(C%Geos,Print_O=.TRUE.)
-          CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+          CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ENDIF
        !
        ! Fill in new geometries
@@ -589,6 +599,11 @@ CONTAINS
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
        ! Continue optimization?
        IF(ConvgdAll==1) EXIT
+
+       ! Clean out scratch.
+       IF(C%Stat%Current%I(3) > 2) THEN
+         CALL CleanScratch(C, iGEO-2)
+       ENDIF
      ENDDO
      CALL Delete(Convgd)
 
@@ -614,8 +629,8 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,RefXYZ,AtNum,GradIn, &
-                  Convgd,ETot,PBCDim,iGEO,iCLONE, &
-                  SCRPath,PWDPath,DoNEB,Print,HFileIn)
+                         Convgd,ETot,PBCDim,iGEO,iCLONE, &
+                         SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
@@ -655,10 +670,12 @@ CONTAINS
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
      CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
-     IF(GOpt%TrfCtrl%DoTranslOff) &
+     IF(GOpt%TrfCtrl%DoTranslOff) THEN
        CALL TranslsOff(CartGrad%D(1:NCart-9),Print2)
-     IF(GOpt%TrfCtrl%DoRotOff) &
+     ENDIF
+     IF(GOpt%TrfCtrl%DoRotOff) THEN
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
+     ENDIF
      CALL Delete(Carts)
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
@@ -690,8 +707,8 @@ CONTAINS
      ! Get B matrices for redundancy projector, etc.
      !
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
-                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
-                    PBCDim,Print,SCRPath)
+                          GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+                          PBCDim,Print,SCRPath)
      !
      ! Print current set of internals for debugging
      !
@@ -704,8 +721,8 @@ CONTAINS
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad%D,iCLONE,ETot, &
-               IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
-               Refresh)
+                      IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
+                      Refresh)
      ELSE
        CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Geometry optimization of Clone "// &
          TRIM(IntToChar(iCLONE))//" converged in "//TRIM(IntToChar(iGEO))//" steps.")
@@ -910,10 +927,11 @@ CONTAINS
      !
      CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
-   ! IF(PBCDim>0.AND.Print2) THEN
-   !   CALL PrtIntCoords(IntCs,Grad%D,&
-   !     'Internal Coordinate forces',PBCDim_O=PBCDim)
-   ! ENDIF
+
+     IF(PBCDim>0.AND.Print2) THEN
+       CALL PrtIntCoords(IntCs,Grad%D,'Internal Coordinate forces',PBCDim_O=PBCDim)
+     ENDIF
+
      CALL RedundancyOff(Grad%D,SCRPath,Print,Messg_O='IntC Grads')
      !
      CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
@@ -930,11 +948,11 @@ CONTAINS
      CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
    ! CALL RedundancyOff(Displ%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
-     !
+
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit, &
    !                      PBCDim,Print)
-!CALL ProjectBCol(SCRPath,IntCs,XYZ,Displ%D,PBCDim,.TRUE.)
+     !CALL ProjectBCol(SCRPath,IntCs,XYZ,Displ%D,PBCDim,.TRUE.)
      IntCs%PredVal%D=IntCs%Value%D+Displ%D
      CALL InternalToCart(XYZ,AtNum,IntCs,IntCs%PredVal%D, &
                          RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
@@ -967,8 +985,8 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE GeOpReview(CtrlConstr,CtrlStat,CtrlCoord,GConvCr, &
-                       XYZ,Etot,IntCs,IntCL,IntOld,LatOld,iCLONE,iGEO,DoNEB, &
-                       LattIntC,PBCDim)
+                         XYZ,Etot,IntCs,IntCL,IntOld,LatOld,iCLONE,iGEO,DoNEB, &
+                         LattIntC,PBCDim)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(CoordCtrl)            :: CtrlCoord
@@ -1116,81 +1134,85 @@ CONTAINS
      CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
        " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
 
-     MaxStreDispl=MaxStreDispl/AngstromsToAu
+     MaxStreDispl=MaxStreDispl/AngstromsToAU
      MaxBendDispl=MaxBendDispl*180.D0/PI
      MaxLinBDispl=MaxLinBDispl*180.D0/PI
      MaxOutPDispl=MaxOutPDispl*180.D0/PI
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
-     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max intl Grad = "// &
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Max intl Grad = "// &
        TRIM(DblToShrtChar(MaxGrad))//" between atoms "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,2)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,3)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))))
-     WRITE(*,140) MaxCGrad,IMaxCGrad
-     WRITE(*,420) RMSGrad
-     WRITE(Out,140) MaxCGrad,IMaxCGrad
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Cart Grad = "// &
+       TRIM(DblToChar(MaxCGrad))//" on atom "// &
+       TRIM(IntToChar(IMaxCGrad)))
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS intl Grad = "//TRIM(DblToChar(RMSGrad)))
      IF(ILMaxCGrad==NatmsLoc-2) THEN
-       ALatt='   A'
+       ALatt='A'
      ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
-       ALatt='   B'
+       ALatt='B'
      ELSE
-       ALatt='   C'
+       ALatt='C'
      ENDIF
      IF(PBCDim>0) THEN
-       WRITE(*,145) LMaxCGrad,ALAtt
-       WRITE(Out,145) LMaxCGrad,ALAtt
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Latt Grad = "// &
+         TRIM(DblToChar(LMaxCGrad))//" on vect "//TRIM(ALatt))
      ENDIF
-     WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
-       WRITE(*,510) MaxGradNoConstr, &
-                    IntCs%Atoms%I(IMaxGradNoConstr,1:4)
-       WRITE(*,520) RMSGradNoConstr
-       WRITE(Out,510) MaxGradNoConstr, &
-                      IntCs%Atoms%I(IMaxGradNoConstr,1:4)
-       WRITE(Out,520) RMSGradNoConstr
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Grad on Unconstrained Coords = "// &
+         TRIM(DblToChar(MaxGradNoConstr))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,4))))
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Grad on Unconstrained Coords = "// &
+         TRIM(DblToChar(RMSGradNoConstr)))
      ENDIF
-     !
+
      IF(MaxStre/=0) THEN
-       WRITE(*,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
-       WRITE(Out,430) MaxStreDispl,IntCs%Atoms%I(MaxStre,1:2)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max STRE Displ = "// &
+         TRIM(DblToChar(MaxStreDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,2))))
      ENDIF
      IF(MaxBend/=0) THEN
-       WRITE(*,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
-       WRITE(Out,435) MaxBendDispl,IntCs%Atoms%I(MaxBend,1:3)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max BEND Displ = "// &
+         TRIM(DblToChar(MaxBendDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,3))))
      ENDIF
      IF(MaxLinB/=0) THEN
-       WRITE(*,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
-       WRITE(Out,436) MaxLinBDispl,IntCs%Atoms%I(MaxLinB,1:3)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max LINB Displ = "// &
+         TRIM(DblToChar(MaxLinBDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,3))))
      ENDIF
      IF(MaxOutP/=0) THEN
-       WRITE(*,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
-       WRITE(Out,437) MaxOutPDispl,IntCs%Atoms%I(MaxOutP,1:4)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max OUTP Displ = "// &
+         TRIM(DblToChar(MaxOutPDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,4))))
      ENDIF
      IF(MaxTors/=0) THEN
-       WRITE(*,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
-       WRITE(Out,438) MaxTorsDispl,IntCs%Atoms%I(MaxTors,1:4)
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max TORS Displ = "// &
+         TRIM(DblToChar(MaxTorsDispl))//" between atoms "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,1)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,2)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,3)))//" "// &
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,4))))
      ENDIF
-     !
-     WRITE(*,440) RMSIntDispl
-     WRITE(Out,440) RMSIntDispl
-     !
+
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Displ = "//TRIM(DblToChar(RMSIntDispl)))
+
      IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
-     !
-410 FORMAT('                   Max intl Grad = ',F12.6,' between atoms ',4I4)
-140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
-145 FORMAT('     Max Unconstrained Latt Grad = ',F12.6,'      on vect  ',A4)
-420 FORMAT('                   RMS intl Grad = ',F12.6)
-510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
-520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
-430 FORMAT('                  Max STRE Displ = ',F12.6,' between atoms ',4I4)
-435 FORMAT('                  Max BEND Displ = ',F12.6,' between atoms ',4I4)
-436 FORMAT('                  Max LINB Displ = ',F12.6,' between atoms ',4I4)
-437 FORMAT('                  Max OUTP Displ = ',F12.6,' between atoms ',4I4)
-438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
-440 FORMAT('                       RMS Displ = ',F12.6)
-        !
+
    END SUBROUTINE GeOpReview
 !
 !---------------------------------------------------------------------
@@ -1216,7 +1238,7 @@ CONTAINS
          NStre=3
          NBend=3
        ENDIF
-       Fact=One/AngstromsToAu
+       Fact=One/AngstromsToAU
        DO I=1,NStre
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
@@ -1236,7 +1258,7 @@ CONTAINS
        ENDDO
        !
        IF(PBCDim==3.AND.IntCL%Def%C(7)(1:8)=='VOLM_L  ') THEN
-         Fact=One/(AngstromsToAu**3)
+         Fact=One/(AngstromsToAU**3)
          I=7
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
@@ -1247,7 +1269,7 @@ CONTAINS
        ENDIF
        !
        IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
-         Fact=One/(AngstromsToAu**2)
+         Fact=One/(AngstromsToAU**2)
          I=4
          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
@@ -1308,9 +1330,8 @@ CONTAINS
      TYPE(INTC)           :: EIntcSave
      TYPE(Constr)         :: ConstrSave
      !
-     SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
-             '.'//TRIM(IntToChar(iCLONE))
-     PWDPath  =TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
+     SCRPath=TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))
+     PWDPath=TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
      GMLoc%Displ%D=GMLoc%Carts%D
      DoNEB=(Opts%Grad==GRAD_TS_SEARCH_NEB)
      !
@@ -1357,21 +1378,21 @@ CONTAINS
      ENDIF
      !
      CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
-                       GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
-                       EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
+                        GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
+                        EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly)
      !
      !--------------------------------------------
      !
-       CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
-                       GradNew%D,Convgd,GMLoc%Etotal, &
-                       GMLoc%PBC%Dimen,iGEO,iCLONE, &
-                       SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
-                       Nams%HFile)
+     CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
+                     GradNew%D,Convgd,GMLoc%Etotal, &
+                     GMLoc%PBC%Dimen,iGEO,iCLONE, &
+                     SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
+                     Nams%HFile)
      !
      !--------------------------------------------
      !
      CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
-                        GOpt%Constr,EIntcSave,ConstrSave)
+                         GOpt%Constr,EIntcSave,ConstrSave)
      ! Put back modified geometry into GMLoc array
      !
      NatmsNew=0

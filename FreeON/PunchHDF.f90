@@ -502,8 +502,7 @@ CONTAINS
     TYPE(DBL_RNK2)       :: RefXYZ
     !
     HDFFileID=OpenHDF(HFileIn)
-    HDF_CurrentID= &
-         OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+    HDF_CurrentID= OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
     CALL Get(RefXYZ,'cartesians',Tag_O=TRIM(IntToChar(1)))
     CALL CloseHDFGroup(HDF_CurrentID)
     CALL CloseHDF(HDFFileID)
@@ -539,8 +538,7 @@ CONTAINS
     CALL New(PBC)
     !
     HDFFileID=OpenHDF(HFileIn)
-    HDF_CurrentID= &
-         OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+    HDF_CurrentID= OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
     !
     DO IGeom=IStart,iGEO
       ICount=IGeom-IStart+1

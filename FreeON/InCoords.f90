@@ -16,9 +16,10 @@ MODULE InCoords
    USE CholFactor
    USE PBC
    USE AtomPairs
-   !
+   USE MondoLogger
+
    IMPLICIT NONE
-!
+
 CONTAINS
 !
 !----------------------------------------------------------------
@@ -108,7 +109,7 @@ CONTAINS
                    BB_O=Aux12)
          B%B%D(IInt,1:12)=Aux12
        ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
-       !  B%B%D(IInt,1:12)*AngstromsToAu
+       !  B%B%D(IInt,1:12)*AngstromsToAU
        ELSE IF(Char(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
@@ -733,8 +734,15 @@ CONTAINS
      NIntC=0
      NTorsion=0
      NatmsLoc=SIZE(XYZ,2)
-     !
+
+     ! [FIXME] The variable Bond is never used here. This is somewhat
+     ! suspicious, and should get fixed either by removing the Bond argument
+     ! from the DefineIntCoos () argument list or by properly using Bond.
      CALL New(AtomDim,NatmsLoc)
+
+     ! BondTot will contain the bonds. We need to properly allocate this
+     ! variable.
+     CALL New(BondTot, 0)
      CALL BondingScheme(XYZ,AtNum,AtmBTot,BondTot,TOPM,Cells,IEq,&
                         AtomDim%I,GConvCr%HBondOnly)
      !
@@ -787,15 +795,18 @@ CONTAINS
 !----------------------------------------------------------------
 !
    SUBROUTINE MoreBondArray(Bond,Incr,DimOld)
-     TYPE(BondDATA)     :: Bond,Bond2
-     INTEGER            :: DimNew,DimOld,Incr
-     !
+     TYPE(BondDATA) :: Bond,Bond2
+     INTEGER        :: DimNew,DimOld,Incr
+
+     ! This function will change the size of Bond to the new dimension.
+
      DimNew=DimOld+Incr
-     CALL Set_BONDDATA_EQ_BONDDATA(Bond2,Bond,NewDim_O=DimNew,OldDim_O=DimOld)
+     CALL SetEq(Bond2,Bond,NewDim_O=DimNew,OldDim_O=DimOld)
      CALL Delete(Bond)
      CALL New(Bond,DimNew)
-     CALL Set_BONDDATA_EQ_BONDDATA(Bond,Bond2)
+     CALL SetEq(Bond,Bond2)
      CALL Delete(Bond2)
+
    END SUBROUTINE MoreBondArray
 !
 !----------------------------------------------------------------
@@ -952,8 +963,8 @@ CONTAINS
      CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
                     Cells,CellEq,IEq)
 !do i=1,size(XYZRepl%D,2)
-!write(*,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
-!write(out,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
+!write(*,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/AngstromsToAU
+!write(out,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/AngstromsToAU
 !enddo
 !100 format(I4,3F20.8)
 !stop
@@ -1003,17 +1014,17 @@ CONTAINS
      !
        ILast=0
      IF(NIntC_Bas/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_Bas,IntCs,1,NIntC_Bas,ILast+1)
+       CALL SetEq(IntC_Bas,IntCs,1,NIntC_Bas,ILast+1)
        CALL Delete(IntC_Bas)
        ILast=ILast+NIntC_Bas
      ENDIF
      IF(NIntC_VDW/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_VDW,IntCs,1,NIntC_VDW,ILast+1)
+       CALL SetEq(IntC_VDW,IntCs,1,NIntC_VDW,ILast+1)
        CALL Delete(IntC_VDW)
        ILast=ILast+NIntC_VDW
      ENDIF
      IF(IntC_L%N/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_L,IntCs,1,IntC_L%N,ILast+1)
+       CALL SetEq(IntC_L,IntCs,1,IntC_L%N,ILast+1)
        CALL Delete(IntC_L)
        ILast=ILast+IntC_L%N
      ENDIF
@@ -1028,7 +1039,7 @@ CONTAINS
    ! IntCs%Active%L=.TRUE.
      !
      IF(IntC_Extra%N/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
+       CALL SetEq(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
        ILast=ILast+IntC_Extra%N
      ENDIF
      !
@@ -1321,12 +1332,12 @@ CONTAINS
      DO I=1,IntCs%N
        IF(Sort%I(I)==0) CYCLE
        II=II+1
-       CALL Set_INTC_EQ_INTC(IntCs,IntCs2,I,I,II)
+       CALL SetEq(IntCs,IntCs2,I,I,II)
      ENDDO
      !
      CALL Delete(IntCs)
      CALL New(IntCs,II)
-     CALL Set_INTC_EQ_INTC(IntCs2,IntCs,1,II,1)
+     CALL SetEq(IntCs2,IntCs,1,II,1)
      CALL Delete(IntCs2)
      CALL Delete(Sort)
    END SUBROUTINE CleanPBCIntCs
@@ -1497,13 +1508,13 @@ CONTAINS
          DO I=1,NIntc
            IF(IntCs%Def%C(I)(1:5)/='BLANK') THEN
              NNew=NNew+1
-             CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NNew)
+             CALL SetEq(IntCs,IntC_New,I,I,NNew)
            ENDIF
          ENDDO
          CALL Delete(IntCs)
          NIntC=NNew
          CALL New(IntCs,NIntC)
-           CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
+           CALL SetEq(IntC_New,IntCs,1,NIntC,1)
          CALL Delete(IntC_New)
        ENDIF
      ENDIF
@@ -1624,24 +1635,24 @@ CONTAINS
 !
    SUBROUTINE CartToInternal(IntCs,VectCart,VectInt,XYZ,PBCDim, &
                              TrfGrd,CtrlCoord,CtrlTrf,Print,SCRPath)
-     REAL(DOUBLE),DIMENSION(:) :: VectCart,VectInt
-     TYPE(DBL_VECT)  :: VectCartAux,VectIntAux
-     TYPE(DBL_VECT)  :: VectCartAux2,VectCartAux3
-     REAL(DOUBLE)    :: DiffMax,RMSD
-     REAL(DOUBLE)    :: SumU
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)    :: BoxShapeT(3,3),Vect(3),Vect1(3)
-     INTEGER         :: NCart,NatmsLoc,I,II,J,K,L,NIntC,PBCDim
-     INTEGER         :: Print
-     TYPE(INTC)      :: IntCs
-     TYPE(Cholesky)  :: CholData
-     TYPE(INT_VECT)  :: ISpB,JSpB,IPerm1,IPerm2
-     TYPE(DBL_VECT)  :: ASpB
-     TYPE(GrdTrf)    :: TrfGrd
-     TYPE(CoordCtrl) :: CtrlCoord
-     TYPE(TrfCtrl)   :: CtrlTrf
-     CHARACTER(LEN=*):: SCRPath
-     LOGICAL         :: Print2
+     REAL(DOUBLE),DIMENSION(:)    :: VectCart,VectInt
+     TYPE(DBL_VECT)               :: VectCartAux,VectIntAux
+     TYPE(DBL_VECT)               :: VectCartAux2,VectCartAux3
+     REAL(DOUBLE)                 :: DiffMax,RMSD
+     REAL(DOUBLE)                 :: SumU
+     REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
+     REAL(DOUBLE)                 :: BoxShapeT(3,3),Vect(3),Vect1(3)
+     INTEGER                      :: NCart,NatmsLoc,I,II,J,K,L,NIntC,PBCDim
+     INTEGER                      :: Print
+     TYPE(INTC)                   :: IntCs
+     TYPE(Cholesky)               :: CholData
+     TYPE(INT_VECT)               :: ISpB,JSpB,IPerm1,IPerm2
+     TYPE(DBL_VECT)               :: ASpB
+     TYPE(GrdTrf)                 :: TrfGrd
+     TYPE(CoordCtrl)              :: CtrlCoord
+     TYPE(TrfCtrl)                :: CtrlTrf
+     CHARACTER(LEN=*)             :: SCRPath
+     LOGICAL                      :: Print2
      !
      NCart=SIZE(VectCart)
      NatmsLoc=NCart/3-3
@@ -1674,13 +1685,13 @@ CONTAINS
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      IF(Print2) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Gradient transformation, No. Int. Coords = "//TRIM(IntToChar(NIntC)))
+       CALL MondoLog(DEBUG_NONE, "CartToInternal", "Gradient transformation, No. Int. Coords = "//TRIM(IntToChar(NIntC)))
        IF(.NOT.CtrlTrf%DoClssTrf) THEN
-         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Three-atoms reference system used, atoms are "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(1)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(2)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt(3))))
-         CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Three-atoms reference system used, atoms are "// &
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Three-atoms reference system used, atoms are "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(1)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(2)))//" "// &
            TRIM(IntToChar(CtrlTrf%ThreeAt_2(3))))
@@ -1719,7 +1730,7 @@ CONTAINS
        !
        IF(DiffMax>TrfGrd%MaxGradDiff) THEN
          IF(Print2) THEN
-           CALL MondoLog(DEBUG_MEDIUM, "CartToInternal", "Rescale Step from "//TRIM(FltToChar(DiffMax))//" to "//TRIM(FltToChar(TrfGrd%MaxGradDiff)))
+           CALL MondoLog(DEBUG_NONE, "CartToInternal", "Rescale Step from "//TRIM(FltToChar(DiffMax))//" to "//TRIM(FltToChar(TrfGrd%MaxGradDiff)))
          ENDIF
          SumU=TrfGrd%MaxGradDiff/DiffMax
          VectIntAux%D(:)=SumU*VectIntAux%D(:)
@@ -1733,31 +1744,25 @@ CONTAINS
        ! Review iteration
        !
        IF(Print2) THEN
-         WRITE(*,110) II,DiffMax,RMSD
-         WRITE(Out,110) II,DiffMax,RMSD
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "II = "//TRIM(IntToChar(II))// &
+           ", MaxChange = "//TRIM(DblToChar(DiffMax))// &
+           ", ChangeNorm = "//TRIM(DblToChar(RMSD)))
        ENDIF
-       110  FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,&
-                   ' ChangeNorm= ',F12.6)
        !
        IF(DiffMax<TrfGrd%GrdTrfCrit) EXIT
      ENDDO
      !
      IF(II>=TrfGrd%MaxIt_GrdTrf) THEN
        IF(Print2) THEN
-         WRITE(*,777)
-         WRITE(*,778)
-         WRITE(Out,777)
-         WRITE(Out,778)
-         777 FORMAT('Stop Gradient Trf, max. number of Iterations exceeded!')
-         778 FORMAT('Use current gradient vector!')
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Stop Gradient Trf, max. number "// &
+           "of Iterations exceeded! Use current gradient vector!")
        ENDIF
      ELSE
        IF(Print2) THEN
-         WRITE(*,120) II
-         WRITE(Out,120) II
+         CALL MondoLog(DEBUG_NONE, "CartToInternal", "Gradient "// &
+           "transformation converged in "//TRIM(IntToChar(II))//" steps")
        ENDIF
      ENDIF
-     120  FORMAT('Gradient transformation converged in ',I3,' steps')
      !
      ! Tidy up
      !
@@ -1769,16 +1774,16 @@ CONTAINS
      !
      ! Project out hard constraints
      !
-  !  CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
-!CALL PrtIntCoords(IntCs,VectInt,'aft hard constr filt',PBCDim_O=PBCDim)
+     !CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
+     CALL PrtIntCoords(IntCs,VectInt,'aft hard constr filt',PBCDim_O=PBCDim)
    END SUBROUTINE CartToInternal
 !
 !------------------------------------------------------------------
 !
    SUBROUTINE InternalToCart(XYZ,AtNum,IntCs,PredVals,RefPoints,Print, &
-                           GBackTrf,GTrfCtrl,GCoordCtrl,GConvCr, &
-                           GConstr,PBCDim,&
-                           SCRPath,PWDPath,IntCsE,MixMat_O,iGEO_O)
+                             GBackTrf,GTrfCtrl,GCoordCtrl,GConvCr, &
+                             GConstr,PBCDim,&
+                             SCRPath,PWDPath,IntCsE,MixMat_O,iGEO_O)
      REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: MixMat_O
      REAL(DOUBLE),DIMENSION(:)            :: PredVals,RefPoints,AtNum
@@ -1868,10 +1873,9 @@ CONTAINS
        ! Internal --> Cartesian transformation
        !
        IF(Print2) THEN
-         WRITE(*,450) NIntC
-         WRITE(Out,450) NIntC
+         CALL MondoLog(DEBUG_NONE, "InternalToCart", "Iterative back-transformation, "// &
+           "No. Int. Coords = "//TRIM(IntToChar(NIntC)))
        ENDIF
-       450 FORMAT('Iterative back-transformation, No. Int. Coords=',I7)
        !
        ConstrMax=GConstr%ConstrMaxCrit*10.D0
        ConstrRMS=1.D0
@@ -1996,10 +2000,10 @@ CONTAINS
          ! Review iteration
          !
          IF(Print2) THEN
-           WRITE(*,210) IStep,DiffMax,RMSD
-           WRITE(Out,210) IStep,DiffMax,RMSD
+           CALL MondoLog(DEBUG_NONE, "InternalToCart", "Step = "//TRIM(IntToChar(IStep))// &
+             ", Max_DX = "//TRIM(DblToChar(DiffMax))// &
+             ", X_RMSD = "//TRIM(DblToChar(RMSD)))
          ENDIF
-         210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
          !
          CALL BackTrfConvg(GConstr,GBackTrf, &
            DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
@@ -2018,12 +2022,11 @@ CONTAINS
        IF(IStep>=GBackTrf%MaxIt_CooTrf) THEN
          IF(RMSD>0.001D0) THEN
            IF(Print2) THEN
-             WRITE(*,*) IRep,' Rescaling and Repeating back-transformation'
-             WRITE(Out,*) IRep,' Rescaling and Repeating back-transformation'
+             CALL MondoLog(DEBUG_NONE, "InternalToCart", "IRep = "//TRIM(IntToChar(IRep))// &
+               ". Rescaling and Repeating back-transformation")
            ENDIF
            IF(IRep>RepMax) THEN
-             WRITE(*,*)'Warning! Iterative backtransformation has not converged accurately.'
-             WRITE(Out,*)'Warning! Iterative backtransformation has not converged accurately.'
+             CALL MondoLog(DEBUG_NONE, "InternalToCart", "Warning! Iterative backtransformation has not converged accurately.")
              EXIT
            ENDIF
            !
@@ -2034,10 +2037,8 @@ CONTAINS
            CYCLE
          ENDIF
          IF(Print2) THEN
-           WRITE(*,180)
-           WRITE(Out,180)
-           WRITE(*,190)
-           WRITE(Out,190)
+           CALL MondoLog(DEBUG_NONE, "InternalToCart", "Stop Coord Back-Trf, max. number "// &
+             "of Iterations exceeded! Use Current Geometry!")
          ENDIF
          EXIT
        ELSE
@@ -2060,17 +2061,12 @@ CONTAINS
            ENDIF
          ENDIF
          IF(Print2) THEN
-           WRITE(*,220) IStep
-           WRITE(Out,220) IStep
+           CALL MondoLog(DEBUG_NONE, "InternalToCart", "Coordinate "// &
+             "back-transformation converged in "//TRIM(IntToChar(IStep))//" steps")
          ENDIF
          EXIT
        ENDIF
      ENDDO !!! Repeat
-     !
-     180  FORMAT('Stop Coord Back-Trf, max. number of Iterations exceeded!')
-     190  FORMAT('Use Current Geometry!')
-     220  FORMAT('Coordinate back-transformation converged in ',&
-                 I3,' steps')
      !
      ! Fill new Cartesians into XYZ
      !
@@ -2144,7 +2140,7 @@ CONTAINS
      CALL POffHardGc(VectInt,ISpB,JSpB,ASpB,CholData, &
                      NCart,IntCs%N,Fact)
      IF(Print2) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "ProjectBCol", "Percentage of Hard Constraints Projected Out = " &
+       CALL MondoLog(DEBUG_NONE, "ProjectBCol", "Percentage of Hard Constraints Projected Out = " &
          //TRIM(FltToChar(Fact)))
      ENDIF
 
@@ -2248,9 +2244,9 @@ CONTAINS
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntAux%D,CartAux%D)
      Fact=DOT_PRODUCT(IntAux%D,IntCDispl)/ &
           (DOT_PRODUCT(IntCDispl,IntCDispl)+1.D-10)*100.D0
-     WRITE(*,100) Fact
+     CALL MondoLog(DEBUG_NONE, "CleanConstrIntc", "Constraints projected "// &
+       "out: "//TRIM(DblToChar(Fact))//"%")
      IntCDispl=IntAux%D
-     100  FORMAT('Constraints projected out: ',F7.3,'%')
      !
      CALL Delete(IntAux)
      CALL Delete(CartAux)
@@ -2263,11 +2259,11 @@ CONTAINS
      INTEGER                   :: PBCDim
      IF(PBCDim==0) RETURN
      IF(PBCDim<3) THEN
-       Vec(3)=AngstromsToAu
+       Vec(3)=AngstromsToAU
        Vec(6)=Half*PI
      ENDIF
      IF(PBCDim<2) THEN
-       Vec(2)=AngstromsToAu
+       Vec(2)=AngstromsToAU
        Vec(4)=Half*PI
        Vec(5)=Half*PI
      ENDIF
@@ -2383,11 +2379,11 @@ CONTAINS
        Crit=Fact*MaxAngle
      ENDIF
      IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
-       MaxConv=One/AngstromsToAu
+       MaxConv=One/AngstromsToAU
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='VOLM_L') THEN
-       MaxConv=One/AngstromsToAu**3
+       MaxConv=One/AngstromsToAU**3
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='AREA_L') THEN
-       MaxConv=One/AngstromsToAu**2
+       MaxConv=One/AngstromsToAU**2
      ELSE
        MaxConv=180.D0/PI
      ENDIF
@@ -2414,18 +2410,15 @@ CONTAINS
      IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
    ! IF(Rigid>0.20D0) DoRepeat=.TRUE.
      IF(Print2) THEN
-       WRITE(*,*) 'Rigidity= ',Rigid
-       WRITE(Out,*) 'Rigidity= ',Rigid
+       CALL MondoLog(DEBUG_NONE, "CheckBigStep", "Rigidity = "//TRIM(DblToChar(Rigid)))
        IF(DoRepeat) THEN
-         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ', &
-                    MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
-         WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ', &
-                    MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         CALL MondoLog(DEBUG_NONE, "CheckBigStep", TRIM(IntToChar(IRep))//": Repeat "// &
+           "from CheckBigStep MaxDispl = "//TRIM(DblToChar(MaxConv*MaxDispl))// &
+           " on "//TRIM(IntToChar(IMax))//" "//TRIM(IntCs%Def%C(IMax)))
        ELSE
-         WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ', &
-                    MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
-         WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ', &
-                    MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         CALL MondoLog(DEBUG_NONE, "CheckBigStep", TRIM(IntToChar(IRep))//": "// &
+           "Maximum Displacement from Backtransform = "//TRIM(DblToChar(MaxDispl*MaxConv))// &
+           " on "//TRIM(IntToChar(IMax))//" "//TRIM(IntCs%Def%C(IMax)))
        ENDIF
      ENDIF
    END SUBROUTINE CheckBigStep
@@ -2480,33 +2473,30 @@ CONTAINS
 !
    SUBROUTINE PrtIntCoords(IntCs,Value,CharU,PBCDim_O)
      !
-     TYPE(INTC)       :: IntCs
-     INTEGER          :: I,NIntC,J
-     REAL(DOUBLE),DIMENSION(:) :: Value
-     REAL(DOUBLE)     :: SumU,SumConstr,Conv,ConvC
-     CHARACTER(LEN=*) :: CharU
-     INTEGER,OPTIONAL :: PBCDim_O
-     LOGICAL          :: DoPrtCells,DoPrtExternal
+     TYPE(INTC)                       :: IntCs
+     INTEGER                          :: I,NIntC,J
+     REAL(DOUBLE),DIMENSION(:)        :: Value
+     REAL(DOUBLE)                     :: SumU,SumConstr,Conv,ConvC
+     CHARACTER(LEN=*)                 :: CharU
+     INTEGER,OPTIONAL                 :: PBCDim_O
+     LOGICAL                          :: DoPrtCells,DoPrtExternal
+     CHARACTER(LEN = DEFAULT_CHR_LEN) :: Message
      !
      Conv=180.D0/PI
-     ConvC=One/AngstromsToAu
+     ConvC=One/AngstromsToAU
      NIntC=SIZE(IntCs%Def%C)
      DoPrtCells=.FALSE.
      DoPrtExternal=.FALSE.
      IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
-     !
-     WRITE(*,*) TRIM(CharU)
-     WRITE(Out,*) TRIM(CharU)
-     WRITE(*,123)
-     WRITE(*,124)
-     WRITE(Out,123)
-     WRITE(Out,124)
-     123  FORMAT('INTERNAL COORDINATES')
-     124  FORMAT('       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE')
+
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", TRIM(CharU))
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", "")
+     CALL MondoLog(DEBUG_NONE, "Internal Coordinates", "       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE")
+
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          SumU=Value(I)*ConvC
-         SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAu
+         SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAU
        ELSE IF(HasAngle(IntCs%Def%C(I))) THEN
          SumU=Value(I)*Conv
          SUMConstr=IntCs%ConstrValue%D(I)*Conv
@@ -2529,27 +2519,25 @@ CONTAINS
          IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
             IntCs%Def%C(I)(1:4)=='LINB'.OR. &
             IntCs%Def%C(I)(1:4)=='OUTP') THEN
-            WRITE(Out,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4), &
-                           ' CELL ',IntCs%Cells%I(I,1:12),SumU
+            WRITE(Message,322) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),' CELL ',IntCs%Cells%I(I,1:12),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
-            WRITE(Out,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3), &
-                           ' CELL ',IntCs%Cells%I(I,1:9),SumU
+            WRITE(Message,422) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:3),' CELL ',IntCs%Cells%I(I,1:9),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ELSE IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-            WRITE(Out,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2), &
-                           ' CELL ',IntCs%Cells%I(I,1:6),SumU
+            WRITE(Message,522) IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:2),' CELL ',IntCs%Cells%I(I,1:6),SumU
+            CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          ENDIF
      322 FORMAT(A8,4I4,A6,12I3,F12.5)
      422 FORMAT(A8,3I4,4X,A6,9I3,3X,F12.5)
      522 FORMAT(A8,2I4,2X,A6,6I3,6X,F12.5)
        ELSE
-         WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-         WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
-           IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         WRITE(Message,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU,IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
+         CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
          IF(DoPrtCells) THEN
            IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
-             WRITE(*,112) IntCs%Cells%I(I,1:12)
-             WRITE(Out,112) IntCs%Cells%I(I,1:12)
+             WRITE(Message,112) IntCs%Cells%I(I,1:12)
+             CALL MondoLog(DEBUG_NONE, "Internal Coordinates", Message)
            ENDIF
          ENDIF
        ENDIF
@@ -2557,38 +2545,37 @@ CONTAINS
      !
      111 FORMAT(I7,2X,A8,2X,4I5,2X,F12.6,L5,F12.6,L5)
      112 FORMAT(15X,4(3I2,2X))
-     222 FORMAT(I7,2X,A8,2X,4I5,2X,3F12.6,L5,F12.6,L5)
      !
    END SUBROUTINE PrtIntCoords
 !
 !----------------------------------------------------------
 !
    SUBROUTINE PrtPBCs(XYZ)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE),DIMENSION(6)   :: Vec
-     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
-     INTEGER                     :: I,J,NatmsLoc
-     !
+     REAL(DOUBLE),DIMENSION(:,:)      :: XYZ
+     REAL(DOUBLE),DIMENSION(6)        :: Vec
+     REAL(DOUBLE),DIMENSION(3,3)      :: BoxShape
+     INTEGER                          :: I,J,NatmsLoc
+     CHARACTER(LEN = DEFAULT_CHR_LEN) :: Message
+
      NatmsLoc=SIZE(XYZ,2)-3
      DO I=1,3
        BoxShape(1:3,I)=XYZ(1:3,NatmsLoc+I)
      ENDDO
      CALL CalcBoxPars(Vec,BoxShape)
-     !
-     WRITE(*,111) 'STRE_A  ',Vec(1)/AngstromsToAu
-     WRITE(*,111) 'STRE_B  ',Vec(2)/AngstromsToAu
-     WRITE(*,111) 'STRE_C  ',Vec(3)/AngstromsToAu
-     WRITE(*,111) 'ALPHA   ',Vec(4)*180.D0/PI
-     WRITE(*,111) 'BETA    ',Vec(5)*180.D0/PI
-     WRITE(*,111) 'GAMMA   ',Vec(6)*180.D0/PI
-     !
-     WRITE(Out,111) 'STRE_A  ',Vec(1)/AngstromsToAu
-     WRITE(Out,111) 'STRE_B  ',Vec(2)/AngstromsToAu
-     WRITE(Out,111) 'STRE_C  ',Vec(3)/AngstromsToAu
-     WRITE(Out,111) 'ALPHA   ',Vec(4)*180.D0/PI
-     WRITE(Out,111) 'BETA    ',Vec(5)*180.D0/PI
-     WRITE(Out,111) 'GAMMA   ',Vec(6)*180.D0/PI
-     !
+
+     WRITE(Message,111) 'STRE_A  ',Vec(1)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'STRE_B  ',Vec(2)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'STRE_C  ',Vec(3)/AngstromsToAU
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'ALPHA   ',Vec(4)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'BETA    ',Vec(5)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+     WRITE(Message,111) 'GAMMA   ',Vec(6)*180.D0/PI
+     CALL MondoLog(DEBUG_NONE, "PBCs", Message)
+
      111 FORMAT('LATTICE  ',A8,2X,20X,2X,F12.6,L5,F12.6,L5)
    END SUBROUTINE PrtPBCs
 !
@@ -2647,12 +2634,10 @@ CONTAINS
        Fact=Zero
      ENDIF
      IF(Print) THEN
-       WRITE(*,100) Fact
-       WRITE(Out,100) Fact
+       CALL MondoLog(DEBUG_NONE, "PBCRotOff", "PRot = "//TRIM(DblToChar(Fact))//"%")
      ENDIF
      !
      DCarts=DCarts2
-100  FORMAT('PRot= ',F7.3,'%')
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
@@ -2862,10 +2847,9 @@ CONTAINS
        SUM3=SUM3*SUM3/SumU*100.D0
      ENDIF
      IF(Print) THEN
-       WRITE(*,100) SUM1,SUM2,SUM3
+       CALL MondoLog(DEBUG_NONE, "MolRotOff", "Rot1 = "//TRIM(DblToChar(SUM1))// &
+         ", Rot2 = "//TRIM(DblToChar(SUM2))//", Rot3 = "//TRIM(DblToChar(SUM3)))
      ENDIF
-     100  FORMAT('Rot1= ',F7.3,'%    Rot2= ', &
-                  F7.3,'%     Rot3= ',F7.3,'% ')
      CALL Delete(Vect)
      CALL Delete(Rot3)
      CALL Delete(Rot2)
@@ -2922,11 +2906,10 @@ CONTAINS
      ! Percentage of translations
      !
      IF(Print) THEN
-       WRITE(*,100) SUM1,SUM2,SUM3
+       CALL MondoLog(DEBUG_NONE, "TranslsOff", "Tr1 = "//TRIM(DblToChar(SUM1)) &
+         //", Tr2 = "//TRIM(DblToChar(SUM2))//", Tr3 = "//TRIM(DblToChar(SUM3)))
      ENDIF
-     100  FORMAT(' Tr1= ',F7.3,'%     Tr2= ',F7.3,'%      Tr3= ',&
-                  F7.3,'% ')
-     !
+
      CALL Delete(Tr3)
      CALL Delete(Tr2)
      CALL Delete(Tr1)
@@ -3072,14 +3055,14 @@ CONTAINS
        NLinB=0
        DO I=1,NIntC
          IF(MarkLinB%I(I)==0) THEN
-           CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
+           CALL SetEq(IntCs,IntC_New,I,I,NLinB+I)
          ELSE
            CALL FindLinBRef(XYZ,IntCs%Atoms%I(I,1:4), &
                             TOPM%ITot12%I,TOPM%JTot12%I)
-           CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
+           CALL SetEq(IntCs,IntC_New,I,I,NLinB+I)
            IntC_New%Def%C(NLinB+I)='LINB1'
            NLinB=NLinB+1
-           CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
+           CALL SetEq(IntCs,IntC_New,I,I,NLinB+I)
            IntC_New%Def%C(NLinB+I)='LINB2'
          ENDIF
        ENDDO
@@ -3087,7 +3070,7 @@ CONTAINS
        CALL Delete(IntCs)
        NIntC=NIntC_New
        CALL New(IntCs,NIntC)
-         CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
+         CALL SetEq(IntC_New,IntCs,1,NIntC,1)
        CALL Delete(IntC_New)
      ENDIF
      !
@@ -3971,7 +3954,7 @@ CONTAINS
          MaxCorr=MAXVAL(ACorr2%D)
          CALL Delete(ICorr2) ; CALL Delete(JCorr2) ; CALL Delete(ACorr2)
          CALL Delete(IMP2) ; CALL Delete(JMP2) ; CALL Delete(AMP2)
-       WRITE(*,*) I,' CorrMax= ',MaxCorr
+       CALL MondoLog(DEBUG_NONE, "GcInvItMatr", TRIM(IntToChar(I))//" CorrMax = "//TRIM(DblToChar(MaxCorr)))
        IF(MaxCorr<ConvCrit) EXIT
      ENDDO
      !
@@ -4426,11 +4409,11 @@ CONTAINS
      WRITE(99,*) TRIM(Title)
      IF(PRESENT(Vects_O)) THEN
        DO I=1,NatmsLoc
-         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAu,100.D0*Vects_O(1:3,I)
+         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAU,100.D0*Vects_O(1:3,I)
        ENDDO
      ELSE
        DO I=1,NatmsLoc
-         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAu
+         WRITE(99,100) AtNum(I),XYZ(1:3,I)/AngstromsToAU
        ENDDO
      ENDIF
      !
@@ -4438,7 +4421,7 @@ CONTAINS
        NatmsLoc=SIZE(XYZL_O,2)-3
          WRITE(99,200) Zero,Zero,Zero
        DO I=1,3
-         WRITE(99,200) XYZL_O(1:3,NatmsLoc+I)/AngstromsToAu
+         WRITE(99,200) XYZL_O(1:3,NatmsLoc+I)/AngstromsToAU
        ENDDO
      ENDIF
      200  FORMAT('  I ',2X,3F20.10,2X,3F20.10)
@@ -4689,7 +4672,7 @@ CONTAINS
      NIntc_New=IntCs%N+NTorsLinB+NStreLinB+NBendLinB
      CALL New(IntC_New,NIntc_New)
      NIntC=IntCs%N
-     CALL Set_INTC_EQ_INTC(IntCs,IntC_New,1,NIntC,1)
+     CALL SetEq(IntCs,IntC_New,1,NIntC,1)
      !
      ! torsions
      !
@@ -4764,7 +4747,7 @@ CONTAINS
      !
      CALL Delete(Intcs)
      CALL New(Intcs,NIntC)
-       CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
+       CALL SetEq(IntC_New,IntCs,1,NIntC,1)
      CALL Delete(IntC_New)
      !
      CALL Delete(LinCenter)
@@ -4787,7 +4770,7 @@ CONTAINS
      CHARACTER(LEN=*),OPTIONAL :: Messg_O
      CHARACTER(LEN=DCL)        :: Messg
 
-     CALL MondoLog(DEBUG_NONE, "RedundancyOff", "RedundancyOff hardwired to return")
+     CALL MondoLog(DEBUG_MAXIMUM, "RedundancyOff", "hardwired to return")
      RETURN
 
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
@@ -4816,7 +4799,7 @@ CONTAINS
          //TRIM(IntToChar(INT(Perc)))
      ENDIF
      IF(Print>=DEBUG_GEOP_MAX) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "RedundancyOff", Messg)
+       CALL MondoLog(DEBUG_NONE, "RedundancyOff", Messg)
      ENDIF
 
      CALL Delete(Displ2)
@@ -5023,7 +5006,7 @@ CONTAINS
      !
      ! For H-bonds: A-H...B = JJE-JJ1...JJ2
      !
-     BridgeCrit=3.5D0*AngstromsToAu
+     BridgeCrit=3.5D0*AngstromsToAU
      HasAttached=.FALSE.
      Conv=180.D0/PI
      JJE=0
@@ -5674,8 +5657,7 @@ CONTAINS
      call pprint(Aux1,'Unit Matr?',Unit_O=6)
      CALL Delete(Aux1)
      !
-     CALL WriteBMATR(ISpB,JSpB,ASpB, &
-                     TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
+     CALL WriteBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
      !
      CALL Delete(SQFullGc)
      CALL Delete(FullGc)
@@ -5856,9 +5838,9 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE SortBonds(NatmsLoc,AtmB,Bond)
-     TYPE(BondDATA) :: Bond
-     TYPE(ATOMBONDS):: AtmB
-     INTEGER        :: NatmsLoc,I,I1,I2,MaxBonds
+     TYPE(BondDATA)  :: Bond
+     TYPE(ATOMBONDS) :: AtmB
+     INTEGER         :: NatmsLoc,I,I1,I2,MaxBonds
      !
      MaxBonds=20
      IF(AllocQ(AtmB%Alloc)) THEN
@@ -5931,9 +5913,9 @@ CONTAINS
      TYPE(IntCBox)               :: Box
      !
      !now define bonding scheme, based on Slater or Van der Waals radii
-     !
+
      NatmsLoc=SIZE(XYZ,2)
-     !
+
      CALL New(CritRad,NatmsLoc)
      CALL New(StRad,NatmsLoc)
      CALL New(MaxBondL,NatmsLoc)
@@ -5972,7 +5954,7 @@ CONTAINS
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
            CritRad%D=Fact*StRad%D
            !
-        !  CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)
+           !CALL BondList2(XYZ,AtNum,Box,BondCov,IEq,CritRad%D)
            CALL BondList(XYZ,AtNum,IntSet,Box,BondCov,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
            CALL SortBonds(NatmsLoc,AtmB,BondCov)
@@ -6008,9 +5990,11 @@ CONTAINS
            BoxSize=3.D0*Fact
            CritRad%D=Fact*StRad%D
            CALL IntCBoxes(XYZ,Box,BoxSize_O=BoxSize)
-           !
+
+           CALL New(BondVDW, 0)
            CALL BondList(XYZ,AtNum,IntSet,Box,BondVDW,MaxBondL%D, &
                          CritRad,IEq,FragID%I,NFrag,TOPM,HBondOnly)
+
            IF(BondVDW%N/=0) THEN
              CALL MergeBonds(BondCov,BondVDW,Bond)
              CALL Delete(BondCov)
@@ -6089,7 +6073,7 @@ CONTAINS
      LOGICAL                     :: FoundHBond,FoundMetLig
      LOGICAL                     :: LonelyAtom,DoExclude
      LOGICAL                     :: NearestOnly,AtomRepeat,HBondonly
-     !
+
      NatmsLoc=SIZE(XYZ,2)
      HAtm=0
      MBF=1.33D0
@@ -6177,12 +6161,13 @@ CONTAINS
                                ENDIF
                                IF(DoExclude) CYCLE
                              ENDIF
-                             !
+
                              IF(NBond+1>NBondEst) THEN
                                DDimU=NatmsLoc*10
                                CALL MoreBondArray(Bond,DDimU,NBondEst)
                                NBondEst=NBondEst+DDimU
                              ENDIF
+
                              NBond=NBond+1
                              IF(IEq(JJ1)<IEq(JJ2)) THEN
                                Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
@@ -6260,7 +6245,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: VectB,VectBO,QVals
      TYPE(DBL_RNK2)              :: Vects,Vects2
      TYPE(ATOMBONDS)             :: AtmB,AtmB2
-     !
+
      NatmsLoc=SIZE(XYZ,2)
      NBondEst=Bond%N
      NBond=NBondEst
@@ -6522,7 +6507,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: VectB,VectBO,QVals,QVals2
      TYPE(DBL_RNK2)              :: Vects,Vects2
      TYPE(ATOMBONDS)             :: AtmB,AtmB2
-     !
+
      NatmsLoc=SIZE(XYZ,2)
      NBondEst=Bond%N
      NBond=NBondEst
@@ -7345,7 +7330,7 @@ CONTAINS
      TYPE(BONDDATA)  :: BondCov,BondVDW,BondTot
      INTEGER         :: NTot,NCov
      INTEGER         :: I,J,K,L
-     !
+
      NTot=BondCov%N+BondVDW%N
      CALL New(BondTot,NTot)
      BondTot%N=NTot
@@ -7430,7 +7415,7 @@ CONTAINS
      IF(NNew/=0) THEN
        CALL MergeBonds(Bond,BondNew,BondM)
        CALL Delete(Bond)
-       CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondM)
+       CALL SetEq(Bond,BondM)
        CALL Delete(BondM)
      ENDIF
      CALL Delete(BondMark)
@@ -7530,7 +7515,7 @@ CONTAINS
      DO I=1,IntCs%N
        IF(IntCs%Constraint%L(I)) THEN
          NC=NC+1
-         CALL Set_INTC_EQ_INTC(Intcs,IntcsX,I,I,NC)
+         CALL SetEq(Intcs,IntcsX,I,I,NC)
        ENDIF
      ENDDO
    END SUBROUTINE IntCsConstr
@@ -7722,11 +7707,8 @@ CONTAINS
        IF(Fact<Tol) EXIT
      ENDDO
      IF(Fact>Tol) THEN
-       Messg='WARNING! '// &
-             'Gc V = V0 has not been solved exactly , Fact= '// &
-              TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol))
-       WRITE(*,*) Messg
-       WRITE(Out,*) Messg
+       CALL MondoLog(DEBUG_NONE, "GcInvIter", "WARNING! Gc V = V0 has not been solved exactly, Fact= "// &
+         TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol)))
      ENDIF
      CartVect=CartVect2%D
      !
@@ -7764,15 +7746,14 @@ CONTAINS
        IntA2=IntA2+IntA4%D
        Fact=DOT_PRODUCT(IntA4%D,IntA4%D)
        Fact=SQRT(Fact/DBLE(NIntC))
-write(*,*) ii,fact,tol
+       CALL MondoLog(DEBUG_NONE, "GiInvIter", "ii = "//TRIM(IntToChar(ii))// &
+         "fact = "//TRIM(DblToChar(fact))//", tol = "//TRIM(DblToChar(tol)))
        IF(Fact<Tol) EXIT
      ENDDO
      IF(Fact>Tol) THEN
-       Messg='WARNING! '// &
-             'Unsuccesful projection of constraint forces, Fact= '// &
-              TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol))
-       WRITE(*,*) Messg
-       WRITE(Out,*) Messg
+       CALL MondoLog(DEBUG_NONE, "GiInvIter", "WARNING! "// &
+         "Unsuccesful projection of constraint forces, Fact = "// &
+         TRIM(DblToChar(Fact))//" Tol = "//TRIM(DblToChar(Tol)))
      ENDIF
      !
      CALL Delete(IntA4)
@@ -7875,7 +7856,7 @@ write(*,*) ii,fact,tol
 
      Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
      Fact=Fact*100.D0
-     CALL MondoLog(DEBUG_MEDIUM, "CleanConstrCart", &
+     CALL MondoLog(DEBUG_NONE, "CleanConstrCart", &
        "Percentage of Constraint Force That is Projected Out = "//TRIM(FltToChar(Fact)))
      CartGrad=CartGrad-CartA1%D
      IF(PBCDim>0) THEN

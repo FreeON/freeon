@@ -550,10 +550,12 @@ MODULE MemMan
          CALL New(A%BoxCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl,(/3,3/))
-         !
          CALL New(A%ETotalPerSCF, 256, 0)
+
+         ! We are not allocating OvCells and InCells here since we don't know
+         ! yet what NCells is going to be.
+
          A%ETotalPerSCF%D = 0.0D0
-         !
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -1398,24 +1400,26 @@ MODULE MemMan
   SUBROUTINE New_CellSet(CS,NCELL)
     TYPE(CellSet)                    :: CS
     INTEGER                          :: NCELL
-!
+
+    !CALL MondoLog(DEBUG_NONE, "New_CellSet", "allocating new CellSet")
     CS%NCells = NCELL
     CALL New(CS%CellCarts,(/3,CS%NCells/))
     CS%Alloc=ALLOCATED_TRUE
-!
+
   END SUBROUTINE New_CellSet
 !--------------------------------------------------------------------------
 ! Delete the CellSet
 !--------------------------------------------------------------------------
   SUBROUTINE Delete_CellSet(CS)
     TYPE(CellSet)                  :: CS
-!
+
+    !CALL MondoLog(DEBUG_NONE, "Delete_CellSet", "deleting CellSet")
     IF(AllocQ(CS%Alloc)) THEN
        CS%Alloc  = ALLOCATED_FALSE
        CS%NCells = 0
        CALL Delete(CS%CellCarts)
     ENDIF
-!
+
   END SUBROUTINE Delete_CellSet
 !
 !--------------------------------------------------------------------

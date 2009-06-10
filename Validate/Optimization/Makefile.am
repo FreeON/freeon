@@ -14,4 +14,5 @@ VALIDATE_INPUTS = \
   09-TEMPO.inp \
   10-Malonaldahyde.inp \
   11-CO2.inp \
-  12-BPA.inp
+  12-BPA.inp \
+  13-PhyticAcid.inp

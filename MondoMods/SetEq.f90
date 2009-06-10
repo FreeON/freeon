@@ -3,6 +3,7 @@ MODULE SetXYZ
    USE GlobalScalars
    USE GlobalObjects
    USE MemMan
+
 #ifdef PARALLEL
    USE MondoMPI
 #endif
@@ -96,19 +97,20 @@ MODULE SetXYZ
         TYPE(BCSR) :: B
         TYPE(DBL_VECT) :: A
         INTEGER :: I,J,K,L,II,KK,M
+
         DO II=1,B%NAtms
-	  DO I=B%RowPt%I(II),B%RowPt%I(II+1)-1
-	  IF(B%ColPt%I(I)==1) THEN
-	    J=II
-	    K=OffS%I(J)
-	    L=BSiz%I(J)
-	    KK=B%BlkPt%I(I)
-	    DO M=1,L
-	      A%D(K+M-1)=B%MTrix%D(KK+M-1)
-	    ENDDO
-	  ENDIF
-	  ENDDO
-	ENDDO
+          DO I=B%RowPt%I(II),B%RowPt%I(II+1)-1
+            IF(B%ColPt%I(I)==1) THEN
+              J=II
+              K=OffS%I(J)
+              L=BSiz%I(J)
+              KK=B%BlkPt%I(I)
+              DO M=1,L
+                A%D(K+M-1)=B%MTrix%D(KK+M-1)
+              ENDDO
+            ENDIF
+          ENDDO
+        ENDDO
       END SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect
 !======================================================================
 !     Copy a BCSR matrix
@@ -362,7 +364,7 @@ MODULE SetXYZ
       END SUBROUTINE BlockToBlock2
 !
       SUBROUTINE Set_BCSR_EQ_VECT(B,A)
-	! turn column vector into sparse matrix (BCSR) form
+         ! turn column vector into sparse matrix (BCSR) form
          TYPE(DBL_VECT), INTENT(INOUT) :: A
          TYPE(BCSR),     INTENT(INOUT) :: B
          INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA
@@ -851,12 +853,19 @@ MODULE SetXYZ
         TYPE(BONDDATA)          :: A,B
         INTEGER,OPTIONAL        :: NewDim_O,OldDim_O
         INTEGER                 :: I,NewDim,OldDim
-        !
-       !OldDim=SIZE(B%Length%D)
-        OldDim=B%N
+
+        ! In case we have not allocated B, we don't have to worry about copying
+        ! any bond information from B to A.
+        IF(.NOT.AllocQ(B%Alloc)) THEN
+          WRITE(*,*) "[Set_BONDDATA_EQ_BONDDATA] B is not allocated!"
+          OldDim = 0
+        ELSE
+          OldDim=B%N
+        ENDIF
         NewDim=OldDim
         IF(PRESENT(NewDim_O)) NewDim=NewDim_O
-        IF(PRESENT(OldDim_O)) OldDim=OldDim_O
+        IF(PRESENT(OldDim_O) .AND. AllocQ(B%Alloc)) OldDim=OldDim_O
+
         IF(.NOT.AllocQ(A%Alloc)) THEN
           CALL New(A,NewDim)
         ELSE
@@ -874,7 +883,7 @@ MODULE SetXYZ
       SUBROUTINE Set_Bond_EQ_Bond(A,IA,B,IB)
         TYPE(BONDDATA) :: A,B
         INTEGER        :: IA,IB
-        !
+
         A%IJ%I(1:2,IA)=B%IJ%I(1:2,IB)
         A%Length%D(IA)=B%Length%D(IB)
         A%Type%C(IA)=B%Type%C(IB)
