@@ -451,10 +451,10 @@ CONTAINS
        IF(GCnvrgd)THEN
           ! Cool, we are done
           Converged=.TRUE.
-          Mssg=ProcessName('SteepStep','Converged #'//TRIM(chGEO))
+          Mssg="Converged "//TRIM(chGEO)
        ELSE
           Converged=.FALSE.
-          Mssg=ProcessName('SteepStep','Descent #'//TRIM(chGEO))
+          Mssg="Descent "//TRIM(chGEO)
        ENDIF
     ELSE
        ! Take some steps
@@ -486,12 +486,12 @@ CONTAINS
           IF(ECnvrgd.OR.GCnvrgd)THEN
              ! Cool, we are done
              Converged=.TRUE.
-             Mssg=ProcessName('SteepStep','Converged #'//TRIM(chGEO))
+             Mssg="Converged "//TRIM(chGEO)
              EXIT
           ELSEIF(RelErrE<Zero)THEN
              ! Went down hill but not converged
              Converged=.FALSE.
-             Mssg=ProcessName('SteepStep','Descent #'//TRIM(chGEO))
+             Mssg="Descent "//TRIM(chGEO)
              EXIT
           ELSEIF(iSTEP==MaxSTEP)THEN
              ! Probably need to readjust thresholds/accuracy goals
@@ -499,20 +499,19 @@ CONTAINS
                   //TRIM(DblToShrtChar(RelErrE))//' in SteepStep.')
           ELSE
              ! Need to shorten the step length.  Try again ...
-             Mssg=ProcessName('SteepStep','BkTrack #'//TRIM(chGEO))
-             Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))  &
-                  //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
-                  //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
-                  //', Step= '//TRIM(DblToShrtChar(StepLength))
+             Mssg="BackTrack "//TRIM(ChGEO)//", dE = "//TRIM(DblToShrtChar(RelErrE))  &
+                  //", Grms = "//TRIM(DblToShrtChar(RMSGrad))         &
+                  //", Gmax = "//TRIM(DblToShrtChar(MAXGrad))         &
+                  //", Step = "//TRIM(DblToShrtChar(StepLength))
              CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
           ENDIF
        ENDDO
     ENDIF
-    Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE)) &
-         //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        &
-         //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
-         //', Step= '//TRIM(DblToShrtChar(StepLength))
-    CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
+    Mssg=TRIM(Mssg)//', dE = '//TRIM(DblToShrtChar(RelErrE)) &
+         //', Grms = '//TRIM(DblToShrtChar(RMSGrad))        &
+         //', Gmax = '//TRIM(DblToShrtChar(MAXGrad))        &
+         //', Step = '//TRIM(DblToShrtChar(StepLength))
+    CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg, "SteepStep")
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
        CALL Delete(Carts(iCLONE))

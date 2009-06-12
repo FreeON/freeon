@@ -142,6 +142,7 @@ CONTAINS
         CALL Delete(DMax)
         CALL Delete(DIIS)
         CALL Delete(C%Stat%Action)
+        CALL MondoLog(DEBUG_NONE, "FreeON", "SCF converged to required accuracy")
         RETURN
       ENDIF
     ENDDO
@@ -1140,9 +1141,9 @@ CONTAINS
 !      Zero forces on constrained atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
-             IF(O%Coordinates/=GRAD_INTS_OPT) THEN
-                G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
-             ENDIF
+             !IF(O%Coordinates /= GRAD_INTS_OPT) THEN
+             G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+             !ENDIF
           ENDIF
        ENDDO
 !      Add additional External Forces to Atoms
