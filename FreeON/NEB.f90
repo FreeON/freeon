@@ -170,10 +170,21 @@ CONTAINS
     ENDDO
 #endif
 
+    ! Check some things for internal consistency.
+    DO j = 1, G%Clone(0)%NAtms
+      IF(G%Clone(0)%CConstrain%I(j) /= G%Clone(G%Clones+1)%CConstrain%I(j)) THEN
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "constrain on atom "//TRIM(IntToChar(j))//" is different between reactant and product")
+        CALL Halt("Constrain mismatch on input")
+      ENDIF
+    ENDDO
+
     ! Initialize reaction path.
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq(G%Clone(iCLONE),G%Clone(0))
+
+       ! Fix constrain.
+       G%Clone(iCLONE)%CConstrain%I = G%Clone(0)%CConstrain%I
 
        ! Linear interpolation of path.
        CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
@@ -189,7 +200,6 @@ CONTAINS
        G%Clone(iCLONE)%Velocity%D = Zero
        G%Clone(iCLONE)%Fext%D = Zero
        G%Clone(iCLONE)%Gradients%D = Zero
-       G%Clone(iCLONE)%CConstrain%I = 0
 
 #ifdef NEB_DEBUG
        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE)))
