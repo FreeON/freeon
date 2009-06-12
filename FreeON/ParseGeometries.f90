@@ -278,8 +278,7 @@ CONTAINS
 
       IF(SIZE(C%C)<4) CALL MondoHalt(PRSE_ERROR, 'Bad data on parsing geometry at line = <<'//TRIM(LineLowCase)//'>>')
       ! Set the atom for freq calculation
-      G%DoFreq%I(N)   = 0
-      G%Fext%D(1:3,N) = Zero
+      G%DoFreq%I(N) = 0
       IF(SIZE(C%C)==4) THEN
         ! Atomtype x y z
         At=TRIM(ADJUSTL(C%C(1)))
@@ -289,6 +288,7 @@ CONTAINS
         G%CConstrain%I(N)=0
         G%Velocity%D(1:3,N) = Zero
         G%Gradients%D(1:3,N) = Zero
+        G%Fext%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==5)THEN
         ! Atomtype x y z constrain
         At=TRIM(ADJUSTL(C%C(1)))
@@ -312,6 +312,7 @@ CONTAINS
         END SELECT
         G%Velocity%D(1:3,N) = Zero
         G%Gradients%D(1:3,N) = Zero
+        G%Fext%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==7)THEN
         ! Atomtype x y z vx vy vz
         At=TRIM(ADJUSTL(C%C(1)))
@@ -323,6 +324,7 @@ CONTAINS
         G%Velocity%D(3,N)=CharToDbl(C%C(7))
         G%CConstrain%I(N)=0
         G%Gradients%D(1:3,N) = Zero
+        G%Fext%D(1:3,N) = Zero
       ELSEIF(SIZE(C%C)==8)THEN
         ! Atomtype x y z vx vy vz constrain
         At=TRIM(ADJUSTL(C%C(1)))
@@ -351,8 +353,10 @@ CONTAINS
           G%DoFreq%I(N)=1
           ! We set the constrain for any case
           G%CConstrain%I(N)=0
+          G%Fext%D(1:3,N) = Zero
         CASE DEFAULT
           G%CConstrain%I(N)=0
+          G%Fext%D(1:3,N) = Zero
         END SELECT
         G%Gradients%D(1:3,N) = Zero
 
@@ -402,6 +406,9 @@ CONTAINS
     !    TRIM(FltToShrtChar(G%Velocity%D(1,J)))//" "// &
     !    TRIM(FltToShrtChar(G%Velocity%D(2,J)))//" "// &
     !    TRIM(FltToShrtChar(G%Velocity%D(3,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Fext%D(1,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Fext%D(2,J)))//" "// &
+    !    TRIM(FltToShrtChar(G%Fext%D(3,J)))//" "// &
     !    TRIM(IntToChar(G%CConstrain%I(J))))
     !ENDDO
 
