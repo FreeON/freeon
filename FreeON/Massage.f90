@@ -86,7 +86,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3) :: RVec,IVec
     !
     TYPE(DBL_VECT)            :: AtNum,AtMss
-    TYPE(DBL_RNK2)            :: Velocity,Carts,Displ,Gradients,BoxCarts
+    TYPE(DBL_RNK2)            :: Velocity,Carts,Displ,Gradients,BoxCarts,Fext
     TYPE(INT_VECT)            :: AtTyp,CConstrain
     TYPE(CHR10_VECT)          :: AtNam
     !
@@ -98,6 +98,7 @@ CONTAINS
     CALL New(AtMss,G%NAtms)
     CALL New(CConstrain,G%NAtms)
     CALL New(Velocity,(/3,G%NAtms/))
+    CALL New(Fext,(/3,G%NAtms/))
     CALL New(Carts,(/3,G%NAtms/))
     CALL New(Displ,(/3,G%NAtms/))
     CALL New(Gradients,(/3,G%NAtms/))
@@ -109,6 +110,7 @@ CONTAINS
     AtMss%D=G%AtMss%D
     CConstrain%I=G%CConstrain%I
     Velocity%D=G%Velocity%D
+    Fext%D=G%Fext%D
     Carts%D=G%Carts%D
     Gradients%D=G%Gradients%D
     BoxCarts%D=G%BoxCarts%D
@@ -127,6 +129,7 @@ CONTAINS
     CALL Delete(G%AtMss)
     CALL Delete(G%CConstrain)
     CALL Delete(G%Velocity)
+    CALL Delete(G%Fext)
     CALL Delete(G%Carts)
     CALL Delete(G%Displ)
     CALL Delete(G%Gradients)
@@ -138,6 +141,7 @@ CONTAINS
     CALL New(G%AtMss,NAtoms)
     CALL New(G%CConstrain,NAtoms)
     CALL New(G%Velocity,(/3,NAtoms/))
+    CALL New(G%Fext,(/3,NAtoms/))
     CALL New(G%Carts,(/3,NAtoms/))
     CALL New(G%Displ,(/3,NAtoms/))
     CALL New(G%Gradients,(/3,NAtoms/))
@@ -149,8 +153,8 @@ CONTAINS
         DO K=1,ISCZ
           IVec=(/DBLE(I-1),DBLE(J-1),DBLE(K-1)/)
           RVec=(/G%PBC%BoxShape%D(1,1)*DBLE(I-1)+G%PBC%BoxShape%D(1,2)*DBLE(J-1)+G%PBC%BoxShape%D(1,3)*DBLE(K-1), &
-               G%PBC%BoxShape%D(2,1)*DBLE(I-1)+G%PBC%BoxShape%D(2,2)*DBLE(J-1)+G%PBC%BoxShape%D(2,3)*DBLE(K-1), &
-               G%PBC%BoxShape%D(3,1)*DBLE(I-1)+G%PBC%BoxShape%D(3,2)*DBLE(J-1)+G%PBC%BoxShape%D(3,3)*DBLE(K-1)/)
+                 G%PBC%BoxShape%D(2,1)*DBLE(I-1)+G%PBC%BoxShape%D(2,2)*DBLE(J-1)+G%PBC%BoxShape%D(2,3)*DBLE(K-1), &
+                 G%PBC%BoxShape%D(3,1)*DBLE(I-1)+G%PBC%BoxShape%D(3,2)*DBLE(J-1)+G%PBC%BoxShape%D(3,3)*DBLE(K-1)/)
           DO AT=1,G%NAtms
             NC=NC+1
             G%AtNum%D(NC)=AtNum%D(AT)
@@ -159,6 +163,7 @@ CONTAINS
             G%AtMss%D(NC)=AtMss%D(AT)
             G%CConstrain%I(NC)=CConstrain%I(AT)
             G%Velocity%D(1:3,NC)=Velocity%D(1:3,AT)
+            G%Fext%D(1:3,NC)=Fext%D(1:3,AT)
             G%Carts%D(:,NC)=Carts%D(:,AT)+RVec(:)
             G%Displ%D(:,NC)=Displ%D(:,AT)
             G%Gradients%D(:,NC)=Gradients%D(:,AT)
@@ -174,6 +179,7 @@ CONTAINS
     CALL Delete(AtMss)
     CALL Delete(CConstrain)
     CALL Delete(Velocity)
+    CALL Delete(Fext)
     CALL Delete(Carts)
     CALL Delete(Displ)
     CALL Delete(Gradients)
