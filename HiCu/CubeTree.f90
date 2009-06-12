@@ -161,11 +161,11 @@ CONTAINS !
       !   CLOSE(Out)
       !ENDIF
 #else
-      CALL MondoLog(DEBUG_MAXIMUM, 'HiCu.GridGen', &
+      CALL MondoLog(DEBUG_MAXIMUM, 'HiCu', &
            'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
            //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
            //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
-           //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom)))
+           //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom)), "GridGen")
 #endif
       OldCubes=NewCubes
     ENDDO
@@ -173,10 +173,10 @@ CONTAINS !
     SubVolExc = Exc
 #ifdef PARALLEL
 #else
-    CALL MondoLog(DEBUG_MEDIUM, 'HiCu.GridGen', &
+    CALL MondoLog(DEBUG_MEDIUM, 'HiCu', &
          'TauRel = '//TRIM(DblToShrtChar(TauRel))              &
          //', RhoErr = '//TRIM(DblToShrtChar(RelativeError(1)))  &
-         //', <Exc> = '//TRIM(DblToMedmChar(Exc)))
+         //', <Exc> = '//TRIM(DblToMedmChar(Exc)), "GridGen")
 #endif
     PU=OpenPU(); CALL PrintProtectR(PU); CLOSE(PU)
   END SUBROUTINE GridGen

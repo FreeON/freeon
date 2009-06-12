@@ -18,9 +18,10 @@ MODULE SetXYZ
                        Set_DBL_VECT_EQ_BCSRColVect,&
                        Set_INTC_EQ_INTC,          &
                        Set_AtmB_EQ_AtmB,          &
-                       Set_BMATR_EQ_BMATR,          &
+                       Set_BMATR_EQ_BMATR,        &
                        Set_Chol_EQ_Chol,          &
                        Set_BONDDATA_EQ_BONDDATA,  &
+                       Set_CRDS_EQ_CRDS,          &
                        Set_PBCInfo_EQ_PBCInfo,    &
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
@@ -877,9 +878,34 @@ MODULE SetXYZ
           CALL Set_Bond_EQ_Bond(A,I,B,I)
         ENDDO
       END SUBROUTINE Set_BONDDATA_EQ_BONDDATA
-!
-!---------------------------------------------------------------
-!
+
+      !===============================================================================
+      ! Make a deep copy of the CRDS structure
+      ! Also figure out PBC issue.
+      !
+      ! G1 = G2
+      !===============================================================================
+      SUBROUTINE Set_CRDS_EQ_CRDS(G1,G2)
+        TYPE(CRDS) :: G1,G2
+        G1%InAU=G2%InAU
+        G1%NElec=G2%NElec
+        G1%Ordrd=G2%Ordrd
+        G1%Multp=G2%Multp
+        G1%TotCh=G2%TotCh
+        G1%NAlph=G2%NAlph
+        G1%NBeta=G2%NBeta
+        G1%Carts%D=G2%Carts%D
+        G1%Carts%D=G2%Carts%D
+        G1%NAtms=G2%NAtms
+        G1%Nkind=G2%Nkind
+        G1%AtNum%D=G2%AtNum%D
+        G1%AtMss%D=G2%AtMss%D
+        G1%AtNam%C=G2%AtNam%C
+        G1%AtTyp%I=G2%AtTyp%I
+        G1%CConstrain%I=G2%CConstrain%I
+        ! CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
+      END SUBROUTINE Set_CRDS_EQ_CRDS
+
       SUBROUTINE Set_Bond_EQ_Bond(A,IA,B,IB)
         TYPE(BONDDATA) :: A,B
         INTEGER        :: IA,IB

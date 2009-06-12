@@ -23,7 +23,7 @@ SCFConvergence=(DIIS)
 
 <EndOptions>
 
-<BeginGeometry>  
+<BeginGeometry>
 O 15.166760 -3.618977 1.331220
 H 14.451769 -3.008255 1.582111
 H 14.933572 -4.497920 1.656471

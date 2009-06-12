@@ -192,7 +192,7 @@ CONTAINS
       SC(:)=1
     ENDIF
     IF(SC(1)==0.OR.SC(2)==0.OR.SC(3)==0)THEN
-      CALL MondoHalt(PRSE_ERROR,'SupreCell=('//TRIM(IntToChar(SC(1)))//','// &
+      CALL MondoHalt(PRSE_ERROR,'SuperCell = ('//TRIM(IntToChar(SC(1)))//','// &
            TRIM(IntToChar(SC(2)))//','// &
            TRIM(IntToChar(SC(3)))//') given on input.')
     ENDIF

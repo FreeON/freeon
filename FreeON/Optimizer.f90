@@ -39,12 +39,12 @@ CONTAINS
   !
   !=====================================================================================
   SUBROUTINE SteepD(C)
-    TYPE(Controls) :: C
-    INTEGER        :: iBAS,iGEO,iCLONE
+    TYPE(Controls)                                      :: C
+    INTEGER                                             :: iBAS,iGEO,iCLONE
     REAL(DOUBLE),DIMENSION(C%Geos%Clones,C%Opts%NSteps) :: Energy
-    INTEGER        :: NatmsLoc,IStart,gtmp,GBeg,GEnd
-    TYPE(DBL_RNK2) :: OldXYZ
-    LOGICAL        :: NewFile,ExitQ
+    INTEGER                                             :: NatmsLoc,IStart,gtmp,GBeg,GEnd,j
+    TYPE(DBL_RNK2)                                      :: OldXYZ
+    LOGICAL                                             :: NewFile,ExitQ
     !-------------------------------------------------------------------------!
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
        GBeg=0
@@ -63,10 +63,10 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     ! Print the starting coordinates and energy
-    !IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    !DO iCLONE=GBeg,GEnd
-       !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-    !ENDDO
+    IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
+    DO iCLONE=GBeg,GEnd
+       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+    ENDDO
 
     CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
 
@@ -89,24 +89,37 @@ CONTAINS
           DO iCLONE=GBeg,GEnd
              ! If transition states, geometry is the image number
              ! otherwise, it is the step number
-             gtmp=C%Geos%Clone(iCLONE)%Confg
-             C%Geos%Clone%Confg=iCLONE+1
+             !gtmp=C%Geos%Clone(iCLONE)%Confg
+             !C%Geos%Clone(iCLONE)%Confg=iCLONE+1
              !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
              !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
              CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-             C%Geos%Clone%Confg=gtmp
+             !C%Geos%Clone%Confg=gtmp
           ENDDO
 
           CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ELSE
           ! No transitions states, just good old downhill
-          IF(C%Opts%GeomPrint=='XSF') &
+          IF(C%Opts%GeomPrint=='XSF') THEN
              CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
+          ENDIF
           DO iCLONE=1,C%Geos%Clones
              CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
           ENDDO
        ENDIF
-       IF(ExitQ)EXIT
+       IF(ExitQ) THEN
+         CALL MondoLog(DEBUG_NONE, "Optimizer", "optimization converged")
+         DO iCLONE=1,C%Geos%Clones
+           CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone "//TRIM(IntToChar(iCLONE)))
+           DO j=1, C%Geos%Clone(iCLONE)%NAtms
+             CALL MondoLog(DEBUG_NONE, "Optimizer", "R["//TRIM(IntToChar(j))//"] = "// &
+               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1,j)))//" "// &
+               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2,j)))//" "// &
+               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3,j)))//" ]")
+           ENDDO
+         ENDDO
+         EXIT
+       ENDIF
        CALL New(OldXYZ,(/3,NatmsLoc/))
        DO iCLONE=1,C%Geos%Clones
           OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
@@ -255,7 +268,7 @@ CONTAINS
           ELSE
              Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
           ENDIF
-          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", Mssg)
+          CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
           IF(Converged) EXIT
        ELSE
           ! Take a few small steps along the gradient to start
@@ -272,7 +285,7 @@ CONTAINS
           ! And here is some
           Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
           Mssg=ProcessName('GDicer',' Relax # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
-          CALL MondoLog(DEBUG_MEDIUM, "Optimizer", Mssg)
+          CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
        ENDIF
        ! Compute a new energy
        CALL SCF(iBAS,iGEO+1,C)
@@ -491,7 +504,7 @@ CONTAINS
                   //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
                   //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                   //', Step= '//TRIM(DblToShrtChar(StepLength))
-             CALL MondoLog(DEBUG_MEDIUM, "Optimizer", Mssg)
+             CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
           ENDIF
        ENDDO
     ENDIF
@@ -499,7 +512,7 @@ CONTAINS
          //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        &
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
          //', Step= '//TRIM(DblToShrtChar(StepLength))
-    CALL MondoLog(DEBUG_MEDIUM, "Optimizer", Mssg)
+    CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
        CALL Delete(Carts(iCLONE))
@@ -610,18 +623,18 @@ CONTAINS
      IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
        IF(ConvgdAll/=1) THEN
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Maximum number of optimization steps exceeded, optimization did not converge.")
+         CALL MondoLog(DEBUG_NONE, "Optimizer", "Maximum number of optimization steps exceeded, optimization did not converge.")
        ELSE
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Geometry Optimization converged in "//TRIM(IntToChar(iGEO-1))//" steps.")
+         CALL MondoLog(DEBUG_NONE, "Optimizer", "Geometry Optimization converged in "//TRIM(IntToChar(iGEO-1))//" steps.")
        ENDIF
      ENDIF
 
      ! Convergence is reached at this point, print final energy
      ! and finish optimization.
-     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Energies of final structures:")
-     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone #         Energy")
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Energies of final structures:")
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone #         Energy")
      DO iCLONE=1,C%Geos%Clones
-       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", TRIM(IntToChar(iCLONE))//" "//TRIM(FltToChar(C%Geos%Clone(iCLONE)%ETotal)))
+       CALL MondoLog(DEBUG_NONE, "Optimizer", TRIM(IntToChar(iCLONE))//" "//TRIM(FltToChar(C%Geos%Clone(iCLONE)%ETotal)))
      ENDDO
 
    END SUBROUTINE IntOpt
@@ -713,7 +726,7 @@ CONTAINS
      ! Print current set of internals for debugging
      !
      IF(Print==DEBUG_GEOP_MAX) THEN
-       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals at step #'//TRIM(IntToChar(iGEO)),PBCDim_O=PBCDim)
+       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals at step '//TRIM(IntToChar(iGEO))//", Clone "//TRIM(IntToChar(iCLONE)),PBCDim_O=PBCDim)
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
      !
@@ -724,7 +737,7 @@ CONTAINS
                       IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
                       Refresh)
      ELSE
-       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Geometry optimization of Clone "// &
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Geometry optimization of Clone "// &
          TRIM(IntToChar(iCLONE))//" converged in "//TRIM(IntToChar(iGEO))//" steps.")
        Convgd(iCLONE)=1
      ENDIF
@@ -1046,9 +1059,9 @@ CONTAINS
        ENDDO
      ENDIF
      IF(CtrlStat%GeOpConvgd) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
          " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
-       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max Unconstrained Cart Grad = "// &
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Cart Grad = "// &
          TRIM(DblToShrtChar(MaxCGrad))//" on atom "//TRIM(IntToChar((IMaxCGrad-1)/3+1)))
        IF(PBCDim>0) THEN
          IF(ILMaxCGrad==NatmsLoc-2) THEN
@@ -1058,7 +1071,7 @@ CONTAINS
          ELSE
            ALatt='   C'
          ENDIF
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Max Unconstrained Latt Grad = "// &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Latt Grad = "// &
            TRIM(DblToShrtChar(LMaxCGrad))//" on vect "//TRIM(ALAtt))
          CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
        ENDIF
@@ -1131,15 +1144,15 @@ CONTAINS
      !
      ! Review iterations
      !
-     CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
        " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
 
-     MaxStreDispl=MaxStreDispl/AngstromsToAU
-     MaxBendDispl=MaxBendDispl*180.D0/PI
-     MaxLinBDispl=MaxLinBDispl*180.D0/PI
-     MaxOutPDispl=MaxOutPDispl*180.D0/PI
-     MaxTorsDispl=MaxTorsDispl*180.D0/PI
-     !
+     MaxStreDispl=MaxStreDispl*AUToAngstroms
+     MaxBendDispl=MaxBendDispl*RadToDeg
+     MaxLinBDispl=MaxLinBDispl*RadToDeg
+     MaxOutPDispl=MaxOutPDispl*RadToDeg
+     MaxTorsDispl=MaxTorsDispl*RadToDeg
+
      CALL MondoLog(DEBUG_NONE, "Optimizer", "Max intl Grad = "// &
        TRIM(DblToShrtChar(MaxGrad))//" between atoms "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" "// &
@@ -1225,7 +1238,7 @@ CONTAINS
      REAL(DOUBLE)   :: Fact
      !
      IF(PBCDim>0) THEN
-       CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Lattice Parameter        Old Value      Gradient    Displacement   New Value")
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Lattice Parameter        Old Value      Gradient    Displacement   New Value")
        IF(PBCDim==1) THEN
          NStre=1
          NBend=0
@@ -1240,16 +1253,16 @@ CONTAINS
        ENDIF
        Fact=One/AngstromsToAU
        DO I=1,NStre
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
            TRIM(FltToChar(LatOld%D(I)*Fact))//" "// &
            TRIM(FltToChar(LattIntC%Grad%D(I)))//" "// &
            TRIM(FltToChar(LattIntC%Displ%D(I)*Fact))//" "// &
            TRIM(FltToChar(IntCL%Value%D(I)*Fact)))
        ENDDO
-       Fact=180.D0/PI
+       Fact=RadToDeg
        DO I=NStre+1,NStre+NBend
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
            TRIM(FltToChar(LatOld%D(I)*Fact))//" "// &
            TRIM(FltToChar(LattIntC%Grad%D(I)))//" "// &
@@ -1260,7 +1273,7 @@ CONTAINS
        IF(PBCDim==3.AND.IntCL%Def%C(7)(1:8)=='VOLM_L  ') THEN
          Fact=One/(AngstromsToAU**3)
          I=7
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
            TRIM(FltToChar(LatOld%D(I)*Fact))//" "// &
            TRIM(FltToChar(LattIntC%Grad%D(I)))//" "// &
@@ -1271,7 +1284,7 @@ CONTAINS
        IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
          Fact=One/(AngstromsToAU**2)
          I=4
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", &
            TRIM(IntCL%Def%C(I)(1:6))//" "// &
            TRIM(FltToChar(LatOld%D(I)*Fact))//" "// &
            TRIM(FltToChar(LattIntC%Grad%D(I)))//" "// &
@@ -1683,14 +1696,14 @@ CONTAINS
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
 
-         CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Backtr. step = "//TRIM(IntToChar(iBStep-1))// &
+         CALL MondoLog(DEBUG_NONE, "Optimizer", "Backtr. step = "//TRIM(IntToChar(iBStep-1))// &
            " Old Energy = "//TRIM(FltToChar(EOld))//" "// &
            " New Energy = "//TRIM(FltToChar(ENew))//" "// &
            " Dist = "//TRIM(FltToChar(MeanDist))//" "// &
            " MaxDist = "//TRIM(FltToChar(MaxDist)))
 
          IF(iBStep==MaxBStep+1) THEN
-             CALL MondoLog(DEBUG_MEDIUM, "Optimizer", "Backtracking of clone "// &
+             CALL MondoLog(DEBUG_NONE, "Optimizer", "Backtracking of clone "// &
                TRIM(IntToChar(iCLONE))//" has not converged in "// &
                TRIM(IntToChar(MaxBStep))//" steps. Continue with present geometry.")
              CALL Warn(' Backtracking failed.  May have run into an energy discontinuity due to small cell size ')

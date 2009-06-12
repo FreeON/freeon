@@ -565,7 +565,8 @@ CONTAINS
     LOGICAL OneBase,DoGDIIS,SteepStep
     !-----------------------------------------------------------------------------------------------
     ! Default max geometry steps is 100
-    IF(.NOT.OptIntQ(Inp,GRADIENTS,NSteps))THEN
+    IF(.NOT.OptIntQ(Inp,OPT_NSTEPS,NSteps))THEN
+      CALL MondoLog(DEBUG_MAXIMUM, "ParseGradients", "using default NSteps")
       NSteps=100
     ENDIF
     ! Macro gradient options
@@ -594,6 +595,9 @@ CONTAINS
       Grad=GRAD_NO_GRAD
       NSTeps=1
     ENDIF
+
+    CALL MondoLog(DEBUG_MAXIMUM, "ParseGradients", "NSteps = "//TRIM(IntToChar(NSteps)))
+
     ! Use internal or Cartesian coordinates ?
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_INTERNALS)) THEN
       ! Yes, use internals where available
