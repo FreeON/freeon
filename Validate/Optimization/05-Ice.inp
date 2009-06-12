@@ -1,7 +1,7 @@
 Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
 
 <BeginOptions>
-	
+
 MPIInvoke="mpirun"
 MPIProcessors=4
 MPIProcFlag="-np"
@@ -34,7 +34,7 @@ RatioABC 1.0 1.0 -1.0
 4.511 4.511 7.346 90.000000 90.000000 120.000000
 <EndPeriodic>
 
-<BeginGeometry>  
+<BeginGeometry>
 o    0.33327867D+00   0.66655735D+00   0.43778927D+00
 h    0.50004600D+00   0.91997201D-04   0.50000000D+00
 h    0.50014241D+00   0.50017399D+00   0.50000000D+00

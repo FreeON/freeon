@@ -1209,6 +1209,18 @@ CONTAINS
        ENDDO
     ENDIF
 
+    ! Print out the positions.
+    DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
+      CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
+      DO iATS=1, G%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "Force", "R["//TRIM(IntToChar(iATS))//"] = [ " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" " &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" ]", &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
+    ENDDO
+
     ! Print out the forces.
     DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
       CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -1216,7 +1228,7 @@ CONTAINS
         CALL MondoLog(DEBUG_NONE, "Force", "F["//TRIM(IntToChar(iATS))//"] = [ " &
           //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" " &
           //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2, iATS)))//" " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3, iATS))), &
+          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3, iATS)))//" ]", &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
     ENDDO

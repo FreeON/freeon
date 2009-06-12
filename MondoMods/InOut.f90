@@ -990,6 +990,7 @@ CONTAINS
       ELSE
         !CALL MondoLog(DEBUG_MAXIMUM, "Put_DBL_RNK2", "VarName = "//TRIM(VarName)//", Tag_O not set")
       ENDIF
+      !CALL MondoLog(DEBUG_NONE, "Put_DBL_RNK2", "N = "//TRIM(IntToChar(N)))
       Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,N,Unlimit_O)
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
@@ -1301,6 +1302,7 @@ CONTAINS
   SUBROUTINE Get_CRDS(GM,Tag_O)
     TYPE(CRDS)                           :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+    INTEGER                              :: iAtom
 
     !CALL MondoLog(DEBUG_NONE, "Get_CRDS", "getting CRDS...")
 
@@ -1345,6 +1347,18 @@ CONTAINS
     CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
     CALL Get(GM%Fext      ,'Fext'         ,Tag_O=Tag_O)
 
+    !IF(PRESENT(Tag_O)) THEN
+    !  CALL MondoLog(DEBUG_NONE, "Get_CRDS", "got external forces with tag "//TRIM(Tag_O))
+    !ELSE
+    !  CALL MondoLog(DEBUG_NONE, "Get_CRDS", "got external forces")
+    !ENDIF
+    !DO iAtom = 1, GM%NAtms
+    !  CALL MondoLog(DEBUG_NONE, "Get_CRDS", "F["//TRIM(IntToChar(iAtom))//"] = [ "// &
+    !    TRIM(DblToChar(GM%Fext%D(1, iAtom)))//" "// &
+    !    TRIM(DblToChar(GM%Fext%D(2, iAtom)))//" "// &
+    !    TRIM(DblToChar(GM%Fext%D(3, iAtom)))//" ]")
+    !ENDDO
+
     !---------Variables we REALLY want to get rid of-------
     CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
     CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
@@ -1369,6 +1383,7 @@ CONTAINS
   SUBROUTINE Put_CRDS(GM,Tag_O)
     TYPE(CRDS),               INTENT(IN) :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+    INTEGER                              :: iAtom
 
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
@@ -1411,7 +1426,23 @@ CONTAINS
 
     CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
     CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+
+    !IF(PRESENT(Tag_O)) THEN
+    !  CALL MondoLog(DEBUG_NONE, "Put_CRDS", "putting external forces with tag "//TRIM(Tag_O))
+    !ELSE
+    !  CALL MondoLog(DEBUG_NONE, "Put_CRDS", "putting external forces")
+    !ENDIF
+    !DO iAtom = 1, GM%NAtms
+    !  CALL MondoLog(DEBUG_NONE, "Put_CRDS", "F["//TRIM(IntToChar(iAtom))//"] = [ "// &
+    !    TRIM(DblToChar(GM%Fext%D(1, iAtom)))//" "// &
+    !    TRIM(DblToChar(GM%Fext%D(2, iAtom)))//" "// &
+    !    TRIM(DblToChar(GM%Fext%D(3, iAtom)))//" ]")
+    !ENDDO
+
     CALL Put(GM%Fext      ,'Fext'         ,Tag_O=Tag_O)
+
+    !CALL MondoLog(DEBUG_NONE, "Put_CRDS", "put external forces")
+
     ! PBC INFO ONE -- THE ONE WE SHOULD KEEP
     CALL Put(GM%PBC                       ,Tag_O=Tag_O)
 
@@ -2320,7 +2351,7 @@ CONTAINS
         CALL Halt(' Get_HGRho could not find '//TRIM(FileName))
       ENDIF
 
-      CALL MondoLog(DEBUG_MAXIMUM, "Get_HGRho", "getting rho from "//TRIM(FileName))
+      !CALL MondoLog(DEBUG_MAXIMUM, "Get_HGRho", "getting rho from "//TRIM(FileName))
 
       ! Allocate Memory
       READ(UNIT=Seq,Err=100,IOSTAT=IOS) NSDen,NExpt,NDist,NCoef
@@ -2399,7 +2430,7 @@ CONTAINS
       OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
     ENDIF
 
-    CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", "putting rho to "//TRIM(FileName))
+    !CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", "putting rho to "//TRIM(FileName))
 
     ! Write density to disk
     !CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", &

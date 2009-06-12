@@ -178,7 +178,7 @@ PROGRAM RHEqs
     !CALL PrintProtectR(Out)
     !CLOSE(Out)
   !ENDIF
-  CALL MondoLog(DEBUG_MINIMUM, Prog, 'HOMO = '//TRIM(DblToMedmChar(HOMO))//', LUMO = '//TRIM(DblToMedmChar(LUMO)))
+  CALL MondoLog(DEBUG_MEDIUM, Prog, 'HOMO = '//TRIM(DblToMedmChar(HOMO))//', LUMO = '//TRIM(DblToMedmChar(LUMO)))
   CALL Put(HOMO-LUMO,'HomoLumoGap')
   !
   !--------------------------------------------------------------

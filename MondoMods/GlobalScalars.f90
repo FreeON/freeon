@@ -80,6 +80,7 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: TwoPi5x2   = 3.4986836655249725693D1  ! 2*Pi^(5/2)
   REAL(DOUBLE), PARAMETER :: Sqrt2Pi5x2 = 2.4739429451193148050D1  ! Sqrt(2)*Pi^(5/2)
   REAL(DOUBLE), PARAMETER :: DegToRad   = Pi/180.0D0               ! Pi/180
+  REAL(DOUBLE), PARAMETER :: RadToDeg   = 1/DegToRad               ! 1/(Pi/180)
 #endif
   !-------------------------------------------------------------------------------
   !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])

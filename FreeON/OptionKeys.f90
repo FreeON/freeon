@@ -112,6 +112,8 @@ MODULE OptionKeys
   CHARACTER(LEN=*),  PARAMETER  :: GRADIENTS         ='Grad'
   ! Do no gradeint evaluation
   INTEGER,           PARAMETER  :: GRAD_NO_GRAD      = 1000001
+  ! Maximum number of geometry steps.
+  CHARACTER(LEN=*), PARAMETER   :: OPT_NSTEPS        = "MaxSteps"
   ! Perform one force evaluation, with print out of the forces
   CHARACTER(LEN=*),  PARAMETER  :: GRAD_FORCE        ='OneForce'
   INTEGER,           PARAMETER  :: GRAD_ONE_FORCE    = 1084814

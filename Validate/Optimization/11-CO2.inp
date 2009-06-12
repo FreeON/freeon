@@ -2,7 +2,7 @@ Solid CO_2  C O  Unit Cell, 83K [J Phys Soc Japan, 53(3) 1176-1184 (1984)]
 <BeginOptions>
 
 Output=PDB
-	
+
 MPIInvoke="mpirun"
 MPIProcessors=4
 MPIProcFlag="-np"
@@ -35,13 +35,13 @@ RatioABC 1.0 1.0 1.0
 <EndOptions>
 
 <BeginPeriodic>
-5.575000  5.575000  5.575000  90.00000000 90.00000000 90.00000000 
+5.575000  5.575000  5.575000  90.00000000 90.00000000 90.00000000
 <EndPeriodic>
 
-<BeginGeometry>  
+<BeginGeometry>
 c   0.000000   0.000000   0.000000  c
 c   0.000000   2.787500   2.787500  c
-c   2.787500   0.000000   2.787500  c 
+c   2.787500   0.000000   2.787500  c
 c   2.787500   2.787500   0.000000  c
 o   0.613300   0.613300   0.613300  c
 o  -0.613300  -0.613300  -0.613300  c

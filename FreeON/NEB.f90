@@ -68,74 +68,152 @@ CONTAINS
     INTEGER                                     :: iCLONE,j
     CHARACTER(LEN=DEFAULT_CHR_LEN)              :: Message
 
+    REAL(DOUBLE), DIMENSION(3, 6, 10), PARAMETER :: HardcodedClone = RESHAPE( (/ &
+
+    -0.0387366602204657,     0.0000393965267929,     0.0410905670798839, &
+     0.9530736777049564,     0.0002525697906025,     0.1445955034255581, &
+    -0.0752357325259799,    -0.0001496215393734,    -0.9540061478025289, &
+     2.6556519212575451,     0.0000281399113110,    -0.0500862325818810, &
+     3.0423878849392021,    -0.7590283573696242,     0.4638287628034553, &
+     3.0424989088397254,     0.7590187773407788,     0.4638394736799561, &
+
+    -0.0794497850847175,     0.0000277437598462,     0.0620395952368433, &
+     0.8888604802485919,     0.0002721687111570,     0.2955608810390860, &
+     0.0282124933919739,    -0.0002032686396689,    -0.9280110154374481, &
+     2.6040657379359171,     0.0000266791727028,    -0.0791644284574151, &
+     3.0689305423806683,    -0.7593321897019759,     0.3646128932842665, &
+     3.0690205311195999,     0.7593261701816222,     0.3646167256429593, &
+
+    -0.1178522556007471,     0.0000162244709894,     0.0624815202079251, &
+     0.8006330625464896,     0.0002947321882481,     0.4454547972330142, &
+     0.1516223428270747,    -0.0002501046220511,    -0.8962243886390246, &
+     2.5554102029040431,     0.0000215466708141,    -0.0857827524034297, &
+     3.0948807331078116,    -0.7592959963022474,     0.2637122651323487, &
+     3.0949459142136417,     0.7592921654072674,     0.2637098448399127, &
+
+    -0.1481236723682279,     0.0000068900831750,     0.0447475195245014, &
+     0.6866891940568129,     0.0003122315911442,     0.5856039279406026, &
+     0.2903285979244061,    -0.0002864754847743,    -0.8491221071550005, &
+     2.5151912642506002,     0.0000135050891977,    -0.0667557960058376, &
+     3.1177583294099578,    -0.7591810226142175,     0.1576360147321610, &
+     3.1177962867298197,     0.7591786668962897,     0.1576297122637085, &
+
+    -0.1638838343236930,     0.0000015606479687,     0.0153925297309695, &
+     0.5575079362564702,     0.0003171628820935,     0.7004606590777634, &
+     0.4307653487143945,    -0.0003089456644423,    -0.7826403055898776, &
+     2.4925857934647260,     0.0000043345424929,    -0.0242317439001282, &
+     3.1313265141579647,    -0.7591389334375256,     0.0500325441935843, &
+     3.1313382417208215,     0.7591381316627542,     0.0500248703584339, &
+
+    -0.1638838343236524,    -0.0000015606479686,    -0.0153925297308907, &
+     0.4307653487147219,     0.0003089456644423,     0.7826403055897587, &
+     0.5575079362562541,    -0.0003171628820937,    -0.7004606590779888, &
+     2.4925857934651638,    -0.0000043345424970,     0.0242317439002015, &
+     3.1313382417220108,    -0.7591381316629530,    -0.0500248703582935, &
+     3.1313265141591455,     0.7591389334377275,    -0.0500325441934447, &
+
+    -0.1481236723680223,    -0.0000068900831748,    -0.0447475195245079, &
+     0.2903285979244822,     0.0002864754847735,     0.8491221071550337, &
+     0.6866891940569854,    -0.0003122315911435,    -0.5856039279405969, &
+     2.5151912642508361,    -0.0000135050892006,     0.0667557960063135, &
+     3.1177962867297522,    -0.7591786668962823,    -0.1576297122639786, &
+     3.1177583294098885,     0.7591810226142078,    -0.1576360147324317, &
+
+    -0.1178522556008283,    -0.0000162244709897,    -0.0624815202079347, &
+     0.1516223428272587,     0.0002501046220514,     0.8962243886389735, &
+     0.8006330625463327,    -0.0002947321882482,    -0.4454547972332506, &
+     2.5554102029044734,    -0.0000215466708139,     0.0857827524038935, &
+     3.0949459142140769,    -0.7592921654074238,    -0.2637098448399897, &
+     3.0948807331082504,     0.7592959963024053,    -0.2637122651324246, &
+
+    -0.0794497850847173,    -0.0000277437598465,    -0.0620395952368519, &
+     0.0282124933918858,     0.0002032686396687,     0.9280110154374427, &
+     0.8888604802485930,    -0.0002721687111571,    -0.2955608810390030, &
+     2.6040657379360894,    -0.0000266791727059,     0.0791644284572417, &
+     3.0690205311194405,    -0.7593261701817332,    -0.3646167256429189, &
+     3.0689305423805067,     0.7593321897020844,    -0.3646128932842275, &
+
+    -0.0387366602206245,    -0.0000393965267927,    -0.0410905670797749, &
+    -0.0752357325261671,     0.0001496215393729,     0.9540061478026143, &
+     0.9530736777048092,    -0.0002525697906020,    -0.1445955034254412, &
+     2.6556519212566352,    -0.0000281399113104,     0.0500862325814744, &
+     3.0424989088394474,    -0.7590187773408736,    -0.4638394736798984, &
+     3.0423878849389268,     0.7590283573697194,    -0.4638287628033949  &
+
+    /), (/ 3, 6, 10 /) )
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEBInit", "starting...")
 #endif
 
+    ! Calculate reaction path vector.
     ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
-    iClone=0
+
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
-    DO j=1, G%Clone(iCLONE)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector")
+    DO j=1, G%Clone(0)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "RV["//TRIM(IntToChar(j))//"] = [ "// &
+        TRIM(DblToChar(ReactionVector(1,j)))//" "// &
+        TRIM(DblToChar(ReactionVector(2,j)))//" "// &
+        TRIM(DblToChar(ReactionVector(3,j)))//" ]")
     ENDDO
 #endif
+
+#ifdef NEB_DEBUG
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone "//TRIM(IntToChar(0)))
+    DO j=1, G%Clone(0)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)))//" ]")
+    ENDDO
+#endif
+
+    ! Initialize reaction path.
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
-       CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
+       CALL SetEq(G%Clone(iCLONE),G%Clone(0))
+
+       ! Linear interpolation of path.
+       CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
        G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
+
+       ! Hardcoded path.
+       !CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
+       !DO j = 1, G%Clone(0)%NAtms
+       !  G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)*AngstromsToAU
+       !ENDDO
+
+       ! Set everything else to 0 in this clone.
+       G%Clone(iCLONE)%Velocity%D = Zero
+       G%Clone(iCLONE)%Fext%D = Zero
+       G%Clone(iCLONE)%Gradients%D = Zero
+       G%Clone(iCLONE)%CConstrain%I = 0
+
 #ifdef NEB_DEBUG
-       CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
+       CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE)))
        DO j=1, G%Clone(iCLONE)%NAtms
-         CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
+         CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" ]")
        ENDDO
 #endif
     ENDDO
-    iClone=G%Clones+1
+
+    iCLONE=G%Clones+1
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Image "//TRIM(IntToChar(iCLONE)))
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(iCLONE)))
     DO j=1, G%Clone(iCLONE)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = "// &
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
         TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
         TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j))))
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" ]")
     ENDDO
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Done NEBInit")
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "done NEBInit")
 #endif
   END SUBROUTINE NEBInit
-
-  !===============================================================================
-  ! Make a deep copy of the CRDS structure
-  ! (This should move.  Also figure out PBC issue.)
-  !===============================================================================
-  SUBROUTINE SetEq_CRDS(G1,G2)
-    TYPE(CRDS) :: G1,G2
-    G2%InAU=G1%InAU
-    G2%NElec=G1%NElec
-    G2%Ordrd=G1%Ordrd
-    G2%Multp=G1%Multp
-    G2%TotCh=G1%TotCh
-    G2%NAlph=G1%NAlph
-    G2%NBeta=G1%NBeta
-    G2%Carts%D=G1%Carts%D
-    G2%Carts%D=G1%Carts%D
-    G2%NAtms=G1%NAtms
-    G2%Nkind=G1%Nkind
-    G2%AtNum%D=G1%AtNum%D
-    G2%AtMss%D=G1%AtMss%D
-    G2%AtNam%C=G1%AtNam%C
-    G2%AtTyp%I=G1%AtTyp%I
-    G2%CConstrain%I=G1%CConstrain%I
-    !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
-  END SUBROUTINE SetEq_CRDS
 
   SUBROUTINE NEBPurify(G,Init_O,Print_O)
     TYPE(Geometries)                      :: G
@@ -174,11 +252,19 @@ CONTAINS
        eCLONE=G%Clones+1
     ENDIF
 
+    CALL MondoLog(DEBUG_NONE, "NEB", "not purifying")
+    RETURN
+
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
     CALL MondoLog(DEBUG_NONE, "NEB", "eCLONE = "//TRIM(IntToChar(eCLONE)))
-    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE zero before anything = ")
-    CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
+    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE 0 before anything = ")
+    DO I = 1, G%Clone(0)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(1,I)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(2,I)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(0)))
+    ENDDO
 #endif
 
 !!$    ! Scale the coordinates by Z
@@ -187,8 +273,13 @@ CONTAINS
 !!$    ENDDO
 
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE ZERO AFTER SCALING = ")
-    CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
+    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE 0 AFTER SCALING = ")
+    DO I = 1, G%Clone(0)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(1,I)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(2,I)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(0)))
+    ENDDO
 #endif
 
     ! Constraints over-ride purification
@@ -235,10 +326,21 @@ CONTAINS
           ENDDO
        ENDIF
 #ifdef NEB_DEBUG
-       WRITE(*,*)' CLONE = ',0,' AFTER TRANSLATION '
-       CALL PPrint(G%Clone(0),Unit_O=6,PrintGeom_O='XYZ')
-       WRITE(*,*)' CLONE = ',iCLONE,' BEFORE TRANSLATION'
-       CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O='XYZ')
+       CALL MondoLog(DEBUG_NONE, "NEB", "CLONE 0 AFTER TRANSLATION")
+       DO I = 1, G%Clone(0)%NAtms
+         CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
+           TRIM(DblToChar(G%Clone(0)%Carts%D(1,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(0)%Carts%D(2,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(0)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(0)))
+       ENDDO
+
+       CALL MondoLog(DEBUG_NONE, "NEB", "CLONE "//TRIM(IntToChar(iCLONE))//" BEFORE TRANSLATION")
+       DO I = 1, G%Clone(iCLONE)%NAtms
+         CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(iCLONE)))
+       ENDDO
 #endif
        ! Translation to C2 ...
        DO I=1,G%Clone(0)%NAtms
@@ -249,8 +351,13 @@ CONTAINS
           G%Clone(iCLONE)%Carts%D(:,I)=MATMUL(U,G%Clone(iCLONE)%Carts%D(:,I))
        ENDDO
 #ifdef NEB_DEBUG
-       WRITE(*,*)' CLONE = ',iCLONE,' AFTER TRANSLATION AND ROTATION '
-       CALL PPrint(G%Clone(iCLONE),Unit_O=6,PrintGeom_O='XYZ')
+       CALL MondoLog(DEBUG_NONE, "NEB", "CLONE "//TRIM(IntToChar(iCLONE))//" AFTER TRANSLATION AND ROTATION")
+       DO I = 1, G%Clone(iCLONE)%NAtms
+         CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,I)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(iCLONE)))
+       ENDDO
 #endif
     ENDDO
 
@@ -307,6 +414,7 @@ CONTAINS
 !   ENDIF
 
     CALL MondoLog(DEBUG_NONE, "FreeON", Mssg, "NEBPurify("//TRIM(IntToChar(G%Clone(1)%Confg))//')')
+
   END SUBROUTINE NEBPurify
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
