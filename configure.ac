@@ -853,12 +853,19 @@ AC_LINK_IFELSE(AC_LANG_PROGRAM([char compress2 ();],
   [AC_MSG_NOTICE([I do not have a working zlib installed.])])
 
 # Check for mkstemp or mkostemp.
-AC_CHECK_FUNC([mkstemp],
-              [AC_DEFINE([HAVE_MKSTEMP], [1], [whether we have mkstemp()])],
-              [])
-AC_CHECK_FUNC([mkostemp],
-              [AC_DEFINE([HAVE_MKOSTEMP], [1], [whether we have mkostemp()])],
-              [])
+AC_MSG_CHECKING([whether we have mkstemp()])
+AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <stdlib.h>],
+  [int result = mkstemp("/tmp/testtemp");]),
+  [AC_MSG_RESULT([yes])
+   AC_DEFINE([HAVE_MKSTEMP], [1], [working mkstemp()])],
+  [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([whether we have mkostemp()])
+AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <stdlib.h>],
+  [int result = mkostemp("/tmp/testtemp", 0);]),
+  [AC_MSG_RESULT([yes])
+   AC_DEFINE([HAVE_MKOSTEMP], [1], [working mkostemp()])],
+  [AC_MSG_RESULT([no])])
 
 # Find flags for static linking.
 AC_MSG_CHECKING([whether to link binaries statically])

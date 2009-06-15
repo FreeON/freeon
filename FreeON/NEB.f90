@@ -163,10 +163,11 @@ CONTAINS
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone "//TRIM(IntToChar(0)))
     DO j=1, G%Clone(0)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
+      CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(0)%AtNam%C(j))//" "// &
         TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)))//" "// &
         TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)))//" ]")
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)))//" "// &
+        TRIM(IntToChar(G%Clone(0)%CConstrain%I(j))))
     ENDDO
 #endif
 
@@ -204,10 +205,11 @@ CONTAINS
 #ifdef NEB_DEBUG
        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE)))
        DO j=1, G%Clone(iCLONE)%NAtms
-         CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
+         CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" ]")
+           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" "// &
+           TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
        ENDDO
 #endif
     ENDDO
@@ -216,10 +218,11 @@ CONTAINS
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(iCLONE)))
     DO j=1, G%Clone(iCLONE)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = [ "// &
+      CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
         TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
         TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" ]")
+        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" "// &
+        TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
     ENDDO
     CALL MondoLog(DEBUG_NONE, "NEBInit", "done NEBInit")
 #endif

@@ -372,8 +372,7 @@ Macros.lo : \
   InOut.lo \
   Functionals.lo \
   AtomPairs.lo \
-  Mechanics.lo \
-  $(top_builddir)/MondoConfig.h
+  Mechanics.lo
 
 PBC.lo : \
   DerivedTypes.lo \

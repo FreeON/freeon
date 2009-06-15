@@ -129,13 +129,16 @@ CONTAINS
     ! Start...
     SNC=SIZE(S%Action%C)
 
+    CALL MondoLog(DEBUG_MAXIMUM, "[SetArgV]", "constructing argv")
+
 #ifdef MPI2
-    NArg=8+SNC
+    NArg=9+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(2)=N%SCF_NAME
+    NewDex = 2
     DO K=1,SNC
-      ArgT%C(2+K)=S%Action%C(K)
+      ArgT%C(NewDex+K)=S%Action%C(K)
     ENDDO
     NewDex=2+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
@@ -144,8 +147,9 @@ CONTAINS
     ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
     ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
     ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
+    ArgT%C(NewDex+7)=TRIM(N%M_SCRATCH)
 #elif PARALLEL
-    NArg=13+SNC
+    NArg=14+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1)=M%Invoking
     ArgT%C(2)=M%ProcFlag
@@ -154,8 +158,9 @@ CONTAINS
     ArgT%C(5)=M%MachFile
     ArgT%C(6)=TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(7)=N%SCF_NAME
+    NewDex = 7
     DO K=1,SNC
-      ArgT%C(7+K)=S%Action%C(K)
+      ArgT%C(NewDex+K)=S%Action%C(K)
     ENDDO
     NewDex=7+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
@@ -164,13 +169,15 @@ CONTAINS
     ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
     ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
     ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
+    ArgT%C(NewDex+7)=TRIM(N%M_SCRATCH)
 #else
-    NArg=8+SNC
+    NArg=9+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(2)=N%SCF_NAME
+    NewDex = 2
     DO K=1,SNC
-      ArgT%C(2+K)=S%Action%C(K)
+      ArgT%C(NewDex+K)=S%Action%C(K)
     ENDDO
     NewDex=2+SNC
     ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
@@ -179,6 +186,7 @@ CONTAINS
     ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
     ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
     ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
+    ArgT%C(NewDex+7)=TRIM(N%M_SCRATCH)
 #endif
     K=NArg
     NArg=0

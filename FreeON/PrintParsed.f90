@@ -129,6 +129,10 @@ CONTAINS
       CALL MondoLogPlain("")
     ENDIF
 
+    ! Let the user know where scratch is.
+    CALL MondoLogPlain("current scratch directory at "//TRIM(N%M_SCRATCH))
+    CALL MondoLogPlain("")
+
     ! Print out some file settings.
     CALL MondoLog(DEBUG_MEDIUM, "FreeON", "CWD          = "//TRIM(N%M_PWD), "StartUpHeader")
     CALL MondoLog(DEBUG_MEDIUM, "FreeON", 'InputFile    = '//TRIM(N%IFile), "StartUpHeader")
