@@ -24,8 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-#include "MondoConfig.h"
-
 MODULE Macros
   USE DerivedTypes
   USE GlobalScalars
@@ -61,7 +59,7 @@ CONTAINS
     INTEGER                              :: I
     TYPE(INT_VECT)                       :: SpaceTimeSplit
 
-    REAL(DOUBLE) :: ETag
+    REAL(DOUBLE)                         :: ETag
 #ifdef PARALLEL
     LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc,iTAG
@@ -72,12 +70,13 @@ CONTAINS
     ! Get arguments
     CALL Get(Args)
 
-    ! Get SCRATCH directory from env
-    CALL GetEnv('MONDO_SCRATCH', MONDO_SCRATCH)
-    if(LEN(TRIM(MONDO_SCRATCH)) == 0) then
-      MONDO_SCRATCH = HAVE_MONDO_SCRATCH
-    endif
-    MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+    ! Get SCRATCH directory from last argument.
+    !CALL GetEnv('MONDO_SCRATCH', MONDO_SCRATCH)
+    !if(LEN(TRIM(MONDO_SCRATCH)) == 0) then
+      !MONDO_SCRATCH = HAVE_MONDO_SCRATCH
+    !endif
+    !MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+    MONDO_SCRATCH = Args%C%C(SIZE(Args%C%C, 1))
 
     ! The HDF5 file name
     H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)

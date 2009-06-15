@@ -1167,12 +1167,7 @@ CONTAINS
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
 
-    ! Now add in any NEB force projections
-    IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
-       CALL NEBForce(G,O)
-    ENDIF
-
-    ! Zero forces on constrained atoms again.
+    ! Double check zero forces on constrained atoms.
     DO iCLONE=1,G%Clones
       DO iATS=1,G%Clone(iCLONE)%NAtms
         IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
@@ -1188,8 +1183,15 @@ CONTAINS
       ENDDO
     ENDDO
 
+    ! Now add in any NEB force projections
+    IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
+      CALL MondoLog(DEBUG_NONE, "Force", "adding in NEB forces")
+      CALL NEBForce(G,O)
+    ENDIF
+
     ! Finally, archive the whole mother
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
+
     ! Done with this sucka
     CALL Delete(S%Action)
 
@@ -1214,25 +1216,18 @@ CONTAINS
     DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
       CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
       DO iATS=1, G%Clone(iCLONE)%NAtms
-        CALL MondoLog(DEBUG_NONE, "Force", "R["//TRIM(IntToChar(iATS))//"] = [ " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" ]", &
+        CALL MondoLog(DEBUG_NONE, "Force", TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Gradients%D(2, iATS)))//" "// &
+          TRIM(DblToMedmChar(G%Clone(iCLONE)%Gradients%D(3, iATS)))//" "// &
+          TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(iATS))), &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
     ENDDO
 
-    ! Print out the forces.
-    DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
-      CALL MondoLog(DEBUG_NONE, "Force", "Clone "//TRIM(IntToChar(iCLONE)))
-      DO iATS=1, G%Clone(iCLONE)%NAtms
-        CALL MondoLog(DEBUG_NONE, "Force", "F["//TRIM(IntToChar(iATS))//"] = [ " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1, iATS)))//" " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2, iATS)))//" " &
-          //TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3, iATS)))//" ]", &
-          "Clone "//TRIM(IntToChar(iCLONE)))
-      ENDDO
-    ENDDO
   END SUBROUTINE Force
   !===============================================================================
   ! Numerically compute Lattice Forces for J

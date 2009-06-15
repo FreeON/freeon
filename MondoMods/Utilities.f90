@@ -57,9 +57,9 @@ MODULE Utilities
       CHARACTER(LEN=*) :: pwd
     END SUBROUTINE GetPWDWrapper
 
-    SUBROUTINE TemporaryDirectory (path, max_length)
-      CHARACTER(LEN=*) :: path
-      INTEGER          :: max_length
+    SUBROUTINE TemporaryDirectory (path, length)
+      CHARACTER(LEN=*), INTENT(INOUT) :: path
+      INTEGER, INTENT(IN)             :: length
     END SUBROUTINE TemporaryDirectory
 
   END INTERFACE
