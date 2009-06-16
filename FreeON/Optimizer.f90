@@ -13,6 +13,7 @@ MODULE Optimizer
   USE HessianMod
   USE SetXYZ
   USE Utilities
+  USE GlobalScalars
 
   IMPLICIT NONE
 
@@ -613,9 +614,9 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
 
        ! Clean out scratch.
-       IF(C%Stat%Current%I(3) > 2) THEN
-         CALL CleanScratch(C, iGEO-2)
-       ENDIF
+       !IF(C%Stat%Current%I(3) > 2) THEN
+       !  CALL CleanScratch(C, iGEO-2)
+       !ENDIF
      ENDDO
      CALL Delete(Convgd)
 
@@ -728,9 +729,12 @@ CONTAINS
        CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals at step '//TRIM(IntToChar(iGEO))//", Clone "//TRIM(IntToChar(iCLONE)),PBCDim_O=PBCDim)
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
-     !
+
+     CALL MondoLog(DEBUG_NONE, "ModifyGeom", "MaxStre = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxStre*AUToAngstroms))//" A, MaxAngle = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxAngle*RadToDeg))//" degree")
+
      ! Calculate simple relaxation step
-     !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad%D,iCLONE,ETot, &
                       IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
@@ -776,8 +780,8 @@ CONTAINS
 !--------------------------------------------------------------------
 !
    SUBROUTINE RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad,iCLONE, &
-                    ETot,IntCs,IGEO,SCRPath,PWDPath, &
-                    PBCDim,Print,HFileIn,Refresh)
+                        ETot,IntCs,IGEO,SCRPath,PWDPath, &
+                        PBCDim,Print,HFileIn,Refresh)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
@@ -954,10 +958,14 @@ CONTAINS
      IntCs%PredVal%D=IntCs%Value%D+Displ%D
      CALL SetConstraints(IntCs,IntCs%PredVal%D)
      Displ%D=IntCs%PredVal%D-IntCs%Value%D
-     !
-    !CALL CutOffDispl(Displ%D,IntCs, &
-    !                 GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-     CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
+
+     CALL MondoLog(DEBUG_NONE, "RelaxDiagHess", "MaxStre = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxStre*AUToAngstroms))//" A, MaxAngle = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxAngle*RadToDeg))//" degree")
+
+     CALL CutOffDispl(Displ%D,IntCs,GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
+     !CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
+
    ! CALL RedundancyOff(Displ%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
 
@@ -1171,7 +1179,7 @@ CONTAINS
      ENDIF
      IF(PBCDim>0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Latt Grad = "// &
-         TRIM(DblToChar(LMaxCGrad))//" on vect "//TRIM(ALatt))
+         TRIM(DblToChar(LMaxCGrad))//" on vect "//TRIM(ALatt), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
      IF(CtrlConstr%NConstr/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Grad on Unconstrained Coords = "// &
@@ -1179,30 +1187,30 @@ CONTAINS
          TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,2)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,3)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,4))))
+         TRIM(IntToChar(IntCs%Atoms%I(IMaxGradNoConstr,4))), "Clone "//TRIM(IntToChar(iCLONE)))
        CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Grad on Unconstrained Coords = "// &
-         TRIM(DblToChar(RMSGradNoConstr)))
+         TRIM(DblToChar(RMSGradNoConstr)), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
 
      IF(MaxStre/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max STRE Displ = "// &
-         TRIM(DblToChar(MaxStreDispl))//" between atoms "// &
+         TRIM(DblToChar(MaxStreDispl*AUToAngstroms))//" A between atoms "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxStre,1)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,2))))
+         TRIM(IntToChar(IntCs%Atoms%I(MaxStre,2))), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
      IF(MaxBend/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max BEND Displ = "// &
-         TRIM(DblToChar(MaxBendDispl))//" between atoms "// &
+         TRIM(DblToChar(MaxBendDispl*RadToDeg))//" degrees between atoms "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxBend,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxBend,2)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,3))))
+         TRIM(IntToChar(IntCs%Atoms%I(MaxBend,3))), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
      IF(MaxLinB/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max LINB Displ = "// &
          TRIM(DblToChar(MaxLinBDispl))//" between atoms "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,2)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,3))))
+         TRIM(IntToChar(IntCs%Atoms%I(MaxLinB,3))), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
      IF(MaxOutP/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max OUTP Displ = "// &
@@ -1210,7 +1218,7 @@ CONTAINS
          TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,2)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,3)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,4))))
+         TRIM(IntToChar(IntCs%Atoms%I(MaxOutP,4))), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
      IF(MaxTors/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max TORS Displ = "// &
@@ -1218,10 +1226,10 @@ CONTAINS
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,2)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,3)))//" "// &
-         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,4))))
+         TRIM(IntToChar(IntCs%Atoms%I(MaxTors,4))), "Clone "//TRIM(IntToChar(iCLONE)))
      ENDIF
 
-     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Displ = "//TRIM(DblToChar(RMSIntDispl)))
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS Displ = "//TRIM(DblToChar(RMSIntDispl)), "Clone "//TRIM(IntToChar(iCLONE)))
 
      IF(PBCDim>0) CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
 
@@ -1307,13 +1315,13 @@ CONTAINS
      REAL(DOUBLE)     :: Sum,GCrit
      INTEGER          :: AccL,iGEO,Dimen
      LOGICAL          :: DoNEB
-     !
-     AccL    =Opts%AccuracyLevels(Sets%NBSets)
-     DoNEB   =(Opts%Grad==GRAD_TS_SEARCH_NEB)
+
+     AccL=Opts%AccuracyLevels(Sets%NBSets)
+     DoNEB=(Opts%Grad==GRAD_TS_SEARCH_NEB)
      NatmsLoc=Geos%Clone(1)%Natms
      NCart=3*NatmsLoc
      Dimen=Geos%Clone(1)%PBC%Dimen
-     !
+
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
      CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc)
@@ -1326,8 +1334,7 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE OptSingleMol(GOpt,Nams,Opts, &
-                           GMLoc,Convgd,iGEO,iCLONE)
+   SUBROUTINE OptSingleMol(GOpt,Nams,Opts,GMLoc,Convgd,iGEO,iCLONE)
      TYPE(GeomOpt)        :: GOpt
      TYPE(FileNames)      :: Nams
      TYPE(Options)        :: Opts
@@ -1395,6 +1402,9 @@ CONTAINS
      !
      !--------------------------------------------
      !
+     CALL MondoLog(DEBUG_NONE, "OptSingleMol", "MaxStre = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxStre*AUToAngstroms))//" A, MaxAngle = "// &
+       TRIM(DblToChar(GOpt%CoordCtrl%MaxAngle*RadToDeg))//" degree")
      CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
                      GradNew%D,Convgd,GMLoc%Etotal, &
                      GMLoc%PBC%Dimen,iGEO,iCLONE, &

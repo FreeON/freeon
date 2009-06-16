@@ -2051,8 +2051,8 @@ CONTAINS
            !
            ! check for the size of the displacement
            CALL CheckBigStep(IRep,IntCs,DoRepeat,GCoordCtrl%MaxStre, &
-                   GCoordCtrl%MaxAngle,PredVals,VectIntReq%D, &
-                   ValSt%D,IntCDispl%D,Print2)
+                             GCoordCtrl%MaxAngle,PredVals,VectIntReq%D, &
+                             ValSt%D,IntCDispl%D,Print2)
            IF(DoRepeat) THEN
              VectIntAux%D=VectIntReq%D-ValSt%D
              CALL MapAngleDispl(IntCs,VectIntAux%D)
@@ -2341,7 +2341,7 @@ CONTAINS
      INTEGER                   :: I,IRep,IMax
      TYPE(DBL_VECT)            :: DReq,DReqAct
      !
-     Fact=1.01D0
+     Fact=1.0D0
      IMax=1
      MaxDispl=IntCDispl(1)
      DoRepeat=.FALSE.
@@ -2368,7 +2368,7 @@ CONTAINS
          MaxDispl=IntCDispl(I)
        ENDIF
      ENDDO
-     !
+
      IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
        Crit=Fact*MaxStre
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='VOLM_L') THEN
@@ -2385,7 +2385,7 @@ CONTAINS
      ELSE IF(IntCs%Def%C(IMax)(1:6)=='AREA_L') THEN
        MaxConv=One/AngstromsToAU**2
      ELSE
-       MaxConv=180.D0/PI
+       MaxConv=RadToDeg
      ENDIF
      !
      ! Rigidity
@@ -7432,7 +7432,11 @@ CONTAINS
      INTEGER                   :: I
      REAL(DOUBLE)              :: Fact
      REAL(DOUBLE),OPTIONAL     :: Fact_O
-     !
+
+     CALL MondoLog(DEBUG_NONE, "CutOffDispl", "StreCritIn = "// &
+       TRIM(DblToChar(StreCritIn*AUToAngstroms))//" A, AngleCritIn = "// &
+       TRIM(DblToChar(AngleCritIn*RadToDeg))//" degrees")
+
      Fact=One
      IF(PRESENT(Fact_O)) Fact=Fact_O
      DO I=1,IntCs%N
@@ -7449,7 +7453,7 @@ CONTAINS
      REAL(DOUBLE)     :: StreCritIn,AngleCritIn
      REAL(DOUBLE)     :: Fact
      CHARACTER(LEN=*) :: Def
-     !
+
      IF(Def(1:4)=='STRE') THEN
        StreCrit=StreCritIn*Fact
        IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
@@ -7458,6 +7462,14 @@ CONTAINS
        AngleCrit=AngleCritIn*Fact
        IF(ABS(Displ)>AngleCrit) Displ=SIGN(AngleCrit,Displ)
      ENDIF
+     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Def = "//TRIM(Def))
+     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Displ = "// &
+       TRIM(DblToChar(Displ*AUToAngstroms))//" A or "// &
+       TRIM(DblToChar(Displ*RadToDeg))//" degrees")
+     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "StreCritIn = "// &
+       TRIM(DblToChar(StreCritIn*AUToAngstroms))//" A, AngleCritIn = "// &
+       TRIM(DblToChar(AngleCritIn*RadToDeg))//" degrees")
+
    END SUBROUTINE CtrlDispl
 !
 !-------------------------------------------------------------------
@@ -7747,7 +7759,7 @@ CONTAINS
        Fact=DOT_PRODUCT(IntA4%D,IntA4%D)
        Fact=SQRT(Fact/DBLE(NIntC))
        CALL MondoLog(DEBUG_NONE, "GiInvIter", "ii = "//TRIM(IntToChar(ii))// &
-         "fact = "//TRIM(DblToChar(fact))//", tol = "//TRIM(DblToChar(tol)))
+         ", fact = "//TRIM(DblToChar(fact))//", tol = "//TRIM(DblToChar(tol)))
        IF(Fact<Tol) EXIT
      ENDDO
      IF(Fact>Tol) THEN

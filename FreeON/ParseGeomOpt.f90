@@ -195,20 +195,24 @@ MODULE ParseGeomOpt
      ! Parse for Maximum angle and maximum bondlength displacements
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN
-       GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0  !default value
+       GOpt%CoordCtrl%MaxAngle=5.D0*DegToRad  !default value
       !IF(PBCDim==3) THEN
-      !  GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0
+      !  GOpt%CoordCtrl%MaxAngle=5.D0*DegToRad
       !ELSE
-      !  GOpt%CoordCtrl%MaxAngle=15.D0*PI/180.D0
+      !  GOpt%CoordCtrl%MaxAngle=15.D0*DegToRad
       !ENDIF
      ELSE
-       GOpt%CoordCtrl%MaxAngle=GOpt%CoordCtrl%MaxAngle*PI/180.D0
+       GOpt%CoordCtrl%MaxAngle=GOpt%CoordCtrl%MaxAngle*DegToRad
      ENDIF
+     CALL MondoLog(DEBUG_NONE, "FreeON", "using MaxAngle = "//TRIM(FltToChar(GOpt%CoordCtrl%MaxAngle*RadToDeg))//" degrees")
+
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
        GOpt%CoordCtrl%MaxStre=0.1D0*AngstromsToAU
      ELSE
        GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAU
      ENDIF
+     CALL MondoLog(DEBUG_NONE, "FreeON", "using MaxStre = "//TRIM(FltToChar(GOpt%CoordCtrl%MaxStre*AUToAngstroms))//" Angstrom")
+
      !
      ! Parse for Internal coordinates refresh type
      !
