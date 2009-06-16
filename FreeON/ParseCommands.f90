@@ -83,10 +83,6 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
     ENDIF
 
-    ! Come up with random scratch directory based on MONDO_SCRATCH.
-    N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-XXXXXX"
-    CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
-
     ! Set path names etc
     N%M_PWD=TRIM(N%M_PWD)//'/'
     N%M_HOME=TRIM(N%M_HOME)//'/'
@@ -101,6 +97,11 @@ CONTAINS
     ENDIF
 
     N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
+
+    ! Come up with random scratch directory based on MONDO_SCRATCH.
+    N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-"//TRIM(N%SCF_NAME)//"-XXXXXX"
+    CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
+
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
     ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
 
