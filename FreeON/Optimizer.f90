@@ -1069,7 +1069,8 @@ CONTAINS
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone = "//TRIM(IntToChar(iCLONE))// &
          " GeOp step = "//TRIM(IntToChar(iGEO))//" Total Energy = "//TRIM(DblToChar(ETot)))
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Cart Grad = "// &
-         TRIM(DblToShrtChar(MaxCGrad))//" on atom "//TRIM(IntToChar((IMaxCGrad-1)/3+1)))
+         TRIM(DblToShrtChar(MaxCGrad))//" on atom "//TRIM(IntToChar((IMaxCGrad-1)/3+1)), &
+         "Clone "//TRIM(IntToChar(iCLONE)))
        IF(PBCDim>0) THEN
          IF(ILMaxCGrad==NatmsLoc-2) THEN
            ALatt='   A'
@@ -1079,7 +1080,8 @@ CONTAINS
            ALatt='   C'
          ENDIF
          CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Latt Grad = "// &
-           TRIM(DblToShrtChar(LMaxCGrad))//" on vect "//TRIM(ALAtt))
+           TRIM(DblToShrtChar(LMaxCGrad))//" on vect "//TRIM(ALAtt), &
+           "Clone "//TRIM(IntToChar(iCLONE)))
          CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
        ENDIF
        RETURN
@@ -1165,11 +1167,14 @@ CONTAINS
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,1)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,2)))//" "// &
        TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,3)))//" "// &
-       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))))
+       TRIM(IntToChar(IntCs%Atoms%I(IMaxGrad,4))), &
+       "Clone "//TRIM(IntToChar(iCLONE)))
      CALL MondoLog(DEBUG_NONE, "Optimizer", "Max Unconstrained Cart Grad = "// &
        TRIM(DblToChar(MaxCGrad))//" on atom "// &
-       TRIM(IntToChar(IMaxCGrad)))
-     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS intl Grad = "//TRIM(DblToChar(RMSGrad)))
+       TRIM(IntToChar(IMaxCGrad)), &
+       "Clone "//TRIM(IntToChar(iCLONE)))
+     CALL MondoLog(DEBUG_NONE, "Optimizer", "RMS intl Grad = "//TRIM(DblToChar(RMSGrad)), &
+       "Clone "//TRIM(IntToChar(iCLONE)))
      IF(ILMaxCGrad==NatmsLoc-2) THEN
        ALatt='A'
      ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
@@ -1222,7 +1227,7 @@ CONTAINS
      ENDIF
      IF(MaxTors/=0) THEN
        CALL MondoLog(DEBUG_NONE, "Optimizer", "Max TORS Displ = "// &
-         TRIM(DblToChar(MaxTorsDispl))//" between atoms "// &
+         TRIM(DblToChar(MaxTorsDispl*RadToDeg))//" degrees between atoms "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,1)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,2)))//" "// &
          TRIM(IntToChar(IntCs%Atoms%I(MaxTors,3)))//" "// &
