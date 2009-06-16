@@ -857,8 +857,9 @@ MODULE SetXYZ
 
         ! In case we have not allocated B, we don't have to worry about copying
         ! any bond information from B to A.
-        IF(.NOT.AllocQ(B%Alloc)) THEN
-          WRITE(*,*) "[Set_BONDDATA_EQ_BONDDATA] B is not allocated!"
+        IF(.NOT.AllocQ(B%Alloc) .AND. B%N /= 0) THEN
+          WRITE(*,*) "[Set_BONDDATA_EQ_BONDDATA] B is not allocated and B%N /= 0!"
+          CALL Halt("Fatal")
           OldDim = 0
         ELSE
           OldDim=B%N
