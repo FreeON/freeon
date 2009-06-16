@@ -86,7 +86,6 @@ CONTAINS
     ! Set path names etc
     N%M_PWD=TRIM(N%M_PWD)//'/'
     N%M_HOME=TRIM(N%M_HOME)//'/'
-    N%M_SCRATCH=TRIM(N%M_SCRATCH)//'/'
 
     ! Here is the scf name, tagged with the PID
     PROCESS_ID=IntToChar(GetPID())
@@ -101,6 +100,7 @@ CONTAINS
     ! Come up with random scratch directory based on MONDO_SCRATCH.
     N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-"//TRIM(N%SCF_NAME)//"-XXXXXX"
     CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
+    N%M_SCRATCH=TRIM(N%M_SCRATCH)//'/'
 
     PWDName=TRIM(N%M_PWD)//TRIM(N%SCF_NAME)
     ScrName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)
