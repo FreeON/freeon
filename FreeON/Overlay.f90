@@ -129,8 +129,6 @@ CONTAINS
     ! Start...
     SNC=SIZE(S%Action%C)
 
-    CALL MondoLog(DEBUG_MAXIMUM, "[SetArgV]", "constructing argv")
-
 #ifdef MPI2
     NArg=9+SNC
     CALL New(ArgT,NArg)

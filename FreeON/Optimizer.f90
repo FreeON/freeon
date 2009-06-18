@@ -543,6 +543,7 @@ CONTAINS
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
      ! initial geometry
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
+     CALL MondoLog(DEBUG_NONE, "IntOpt", "optimizing up to MaxSteps = "//TRIM(IntToChar(MaxSteps)))
      ! Build the guess
      DO iBAS=1,C%Sets%NBSets-1
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
@@ -589,8 +590,9 @@ CONTAINS
        ! Loop over all clones and modify geometries.
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
-         Convgd%I=0
+         !Convgd%I=0
          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
+         CALL MondoLog(DEBUG_NONE, "IntOpt", "Convgd("//TRIM(IntToChar(iCLONE))//") = "//TRIM(IntToChar(Convgd%I(iCLONE))))
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO
        !
@@ -861,12 +863,12 @@ CONTAINS
        CALL Delete(FullB)
        !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-                  GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                  iGEO,GOpt%DoGradNorm,GOpt%Pictures,MixMat_O=MixMat%D)
+                     GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
+                     iGEO,GOpt%DoGradNorm,GOpt%Pictures,MixMat_O=MixMat%D)
      ELSE
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-                  GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                  iGEO,GOpt%DoGradNorm,GOpt%Pictures)
+                     GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
+                     iGEO,GOpt%DoGradNorm,GOpt%Pictures)
      ENDIF
      !
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
@@ -1329,7 +1331,7 @@ CONTAINS
 
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
-     CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc)
+     CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc,Opts%NSteps)
      CALL     SetGDIIS(GOpt%GDIIS,GOpt%Optimizer,iGEO)
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
      CALL   SetBackTrf(GOpt%BackTrf,GOpt%GConvCrit)
@@ -1443,16 +1445,16 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE SetGConvCrit(GConv,Hess,AccL,NatmsLoc)
+   SUBROUTINE SetGConvCrit(GConv,Hess,AccL,NatmsLoc,NSteps)
      TYPE(GConvCrit) :: GConv
      TYPE(Hessian)   :: Hess
-     INTEGER         :: AccL,NatmsLoc
+     INTEGER         :: AccL,NatmsLoc,NSteps
      REAL(DOUBLE)    :: GCrit
      !
      GCrit=GTol(AccL)
  !   GCrit=3.D-4
      !
-     GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
+     GConv%MaxGeOpSteps=MAX(3*NatmsLoc,NSteps)
      GConv%Grad= GCrit
      GConv%Stre=      GCrit/Hess%Stre
      GConv%Bend= 1.D0*GCrit/Hess%Bend
