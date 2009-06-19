@@ -274,8 +274,7 @@ CONTAINS
        ELSE
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D &
-                                      -StepLength*C%Geos%Clone(iCLONE)%Gradients%D
+             C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           DO iCLONE=1,C%Geos%Clones
@@ -404,8 +403,7 @@ CONTAINS
     TYPE(Controls)                           :: C
     TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones) :: Carts
     REAL(DOUBLE),   DIMENSION(C%Geos%Clones) :: Energies
-    REAL(DOUBLE)                             :: StepLength,RelErrE,MAXGrad,RMSGrad, &
-         ETest,GTest
+    REAL(DOUBLE)                             :: StepLength,RelErrE,MAXGrad,RMSGrad,ETest,GTest
     INTEGER                                  :: cBAS,cGEO,iSTEP,iCLONE,iATS,AL,K
     INTEGER, PARAMETER                       :: MaxSTEP=4
     LOGICAL                                  :: Converged,ECnvrgd,XCnvrgd,GCnvrgd
@@ -459,9 +457,11 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps
-       StepLength=2.D0
+       StepLength=2.D0*AngstromsToAU
+       CALL MondoLog(DEBUG_NONE, "SteepStep", "Resetting StepLength to "//TRIM(DblToChar(StepLength*AUToAngstroms))//" A")
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
+          CALL MondoLog(DEBUG_NONE, "SteepStep", "cutting StepLength into half to "//TRIM(DblToChar(StepLength*AUToAngstroms))//" A")
           ! Step the absolute positions
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
@@ -503,7 +503,7 @@ CONTAINS
              Mssg="BackTrack "//TRIM(ChGEO)//", dE = "//TRIM(DblToShrtChar(RelErrE))  &
                   //", Grms = "//TRIM(DblToShrtChar(RMSGrad))         &
                   //", Gmax = "//TRIM(DblToShrtChar(MAXGrad))         &
-                  //", Step = "//TRIM(DblToShrtChar(StepLength))
+                  //", StepLength = "//TRIM(DblToShrtChar(StepLength*AUToAngstroms))//" A"
              CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
           ENDIF
        ENDDO
@@ -511,7 +511,7 @@ CONTAINS
     Mssg=TRIM(Mssg)//', dE = '//TRIM(DblToShrtChar(RelErrE)) &
          //', Grms = '//TRIM(DblToShrtChar(RMSGrad))        &
          //', Gmax = '//TRIM(DblToShrtChar(MAXGrad))        &
-         //', Step = '//TRIM(DblToShrtChar(StepLength))
+         //', StepLength = '//TRIM(DblToShrtChar(StepLength*AUToAngstroms))//" A"
     CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg, "SteepStep")
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
@@ -728,7 +728,7 @@ CONTAINS
      ! Print current set of internals for debugging
      !
      IF(Print==DEBUG_GEOP_MAX) THEN
-       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals at step '//TRIM(IntToChar(iGEO))//", Clone "//TRIM(IntToChar(iCLONE)),PBCDim_O=PBCDim)
+       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals before at step '//TRIM(IntToChar(iGEO))//", Clone "//TRIM(IntToChar(iCLONE)),PBCDim_O=PBCDim)
        IF(PBCDim>0) CALL PrtPBCs(XYZ)
      ENDIF
 
@@ -751,6 +751,11 @@ CONTAINS
                      GOpt%GConvCrit,XYZ,ETot,IntCs,IntCL,IntOld,LatOld, &
                      iCLONE,iGEO,DoNEB,GOpt%LattIntC,PBCDim)
      CALL TurnOnGDIIS(GOpt%GOptStat%MaxCGrad,GOpt%GDIIS%On)
+
+     IF(Print==DEBUG_GEOP_MAX) THEN
+       CALL PrtIntCoords(IntCs,IntCs%Value%D,'Internals after at step '//TRIM(IntToChar(iGEO))//", Clone "//TRIM(IntToChar(iCLONE)),PBCDim_O=PBCDim)
+       IF(PBCDim>0) CALL PrtPBCs(XYZ)
+     ENDIF
 
      ! tidy up
      CALL Delete(CartGrad)
@@ -800,7 +805,7 @@ CONTAINS
        CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                           iGEO,XYZ,Print,PBCDim)
      CASE(GRAD_BiSect_OPT)
-       IF(iGEO<2) THEN
+       IF(iGEO < 10) THEN
          CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                             iGEO,XYZ,Print,PBCDim)
        ELSE
@@ -831,7 +836,9 @@ CONTAINS
      INTEGER                     :: I,J,NatmsLoc,NDim,NDimAux,NMem
      INTEGER                     :: HDFFileID,NCart,NMix
      LOGICAL                     :: DoMix,Print2
-     !
+
+     CALL MondoLog(DEBUG_NONE, "RelaxBiSect", "starting...")
+
      NDimAux=MIN(GOpt%GDIIS%MaxMem,iGEO-GOpt%GDIIS%iGEOStart+1)
      NDim=MIN(NDimAux,iGEO)
      NatmsLoc=SIZE(XYZ,2)
@@ -931,7 +938,9 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath,PWDPath
      TYPE(DBL_VECT)              :: Grad,Displ,RefPoints
      LOGICAL                     :: Print2
-     !
+
+     CALL MondoLog(DEBUG_NONE, "RelaxDiagHess", "starting...")
+
      Print2=(Print>=DEBUG_GEOP_MAX)
      CALL New(Grad,IntCs%N)
      CALL New(Displ,IntCs%N)

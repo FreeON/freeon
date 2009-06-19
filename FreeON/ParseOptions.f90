@@ -634,12 +634,17 @@ CONTAINS
     CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
 
     IF(.NOT. OptDblQ(Inp, RSL, StepLength)) THEN
-      StepLength = 0.1D0*AngstromsToAU
+      StepLength = 0.1D0
     ENDIF
+    StepLength = StepLength*AngstromsToAU
+    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using StepLength = "//TRIM(DblToChar(StepLength*AUToAngstroms))//" A")
+
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
       NEBSpring=2D-3
     ENDIF
+    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSpring = "//TRIM(DblToChar(NEBSpring)))
+
     ! Use the climbing image?
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_CLIMB))THEN
       NEBClimb=.TRUE.
