@@ -541,7 +541,7 @@ CONTAINS
             //", Rp = "//TRIM(FltToShrtChar(Rp)) &
             //", Dist = "//TRIM(FltToShrtChar(Dist)) &
             //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal)) &
-            //', F = '//TRIM(DblToMedmChar(FProj)), "Image "//TRIM(IntToChar(I)))
+            //', F = '//TRIM(DblToMedmChar(FProj)), "Clone "//TRIM(IntToChar(I)))
     ENDDO
 
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))

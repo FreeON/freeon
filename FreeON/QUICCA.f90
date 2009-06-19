@@ -580,10 +580,8 @@ CONTAINS
        ABC1T%D(:,2)=One
        ABCT%D=ABC1T%D
        IntCsT%Active%L=.TRUE.
-       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero, &
-   	     MixMat_O,IntCGrads,IntCGradsT%D)
-       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero, &
-   	     MixMat_O,IntCValues,IntCValuesT%D)
+       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero,MixMat_O,IntCGrads,IntCGradsT%D)
+       CALL DGEMM_TNc(NT,NIntC,NDim,One,Zero,MixMat_O,IntCValues,IntCValuesT%D)
      ELSE
        IntCValuesT%D=IntCValues
        IntCGradsT%D=IntCGrads
@@ -860,7 +858,9 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      INTEGER                     :: NIntC,NDim,I,J,I1
      REAL(DOUBLE)                :: MaxStre,MaxAngle
-     !
+
+     CALL MondoLog(DEBUG_NONE, "CleanDispl", "MaxStre = "//TRIM(DblToChar(MaxStre))//", MaxAngle = "//TRIM(DblToChar(MaxAngle)))
+
      NIntC=SIZE(IntCValues,1)
      NDim=SIZE(IntCValues,2)
      DO I=1,NIntC
@@ -873,10 +873,10 @@ CONTAINS
          CALL ChkBendLim(IntCValues(I,NDim),IntCs%PredVal%D(I),5.D0)
          CALL BendTo180(IntCs%PredVal%D(I))
        ENDIF
-       !
+
        Displ(I)=IntCs%PredVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def%C(I),IntCValues(I,NDim),Displ(I))
-       !
+
        CALL CtrlDispl(IntCs%Def%C(I),IntCs%Value%D(I),Displ(I),One,MaxStre,MaxAngle)
        I1=1
        IntCs%PredVal%D(I)=IntCValues(I,NDim)+Displ(I)

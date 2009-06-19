@@ -137,13 +137,13 @@ MODULE OptionKeys
   ! Approximate diagonal Hessian in internal coordinates
   CHARACTER(LEN=*), PARAMETER   :: GRAD_APPRX_HESS   ='ApproxHessian'
   ! Coordinate types for gradient operations
-  CHARACTER(LEN=*),  PARAMETER  :: GRAD_INTERNALS   ='PrimInt'
-  INTEGER,           PARAMETER  :: GRAD_INTS_OPT    =83458086
-  CHARACTER(LEN=*),  PARAMETER  :: GRAD_CARTESIAN   ='Cartesian'
-  INTEGER,           PARAMETER  :: GRAD_CART_OPT    =34243945
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_INTERNALS    ='PrimInt'
+  INTEGER,           PARAMETER  :: GRAD_INTS_OPT     =83458086
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_CARTESIAN    ='Cartesian'
+  INTEGER,           PARAMETER  :: GRAD_CART_OPT     =34243945
   ! Hessian and frequencies
-  CHARACTER(LEN=*),  PARAMETER  :: GRAD_NHESSIAN    ='NumFreq'
-  INTEGER,           PARAMETER  :: GRAD_DO_NHESSIAN =13458986
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_NHESSIAN     ='NumFreq'
+  INTEGER,           PARAMETER  :: GRAD_DO_NHESSIAN  =13458986
   !------------------------------------------------------------------------------
   ! Options:NEB=
   CHARACTER(LEN=*), PARAMETER :: NEB_OPTION         ='NEB'

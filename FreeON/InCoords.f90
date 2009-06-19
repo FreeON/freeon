@@ -1070,7 +1070,7 @@ CONTAINS
      CtrlCoord%NTors=NTorsGeOp
      !
      CALL Delete(AtNum)
-   ! CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals',PBCDim_O=PBCDim)
+     CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals',PBCDim_O=PBCDim)
    END SUBROUTINE GetIntCs
 !
 !---------------------------------------------------------------------
