@@ -67,19 +67,19 @@ temporarydirectory (char *path, int *length)
 #endif
   if (result < 0)
   {
-    printf("[temporarydirectory] error creating temporary file: %s", strerror(errno));
+    printf("[temporarydirectory] error creating temporary file (%s): %s\n", temp, strerror(errno));
   }
 
   /* Create directory. */
   if (unlink(temp) != 0)
   {
-    printf("[temporarydirectory] error unlinking temporary file: %s", strerror(errno));
+    printf("[temporarydirectory] error unlinking temporary file (%s): %s\n", temp, strerror(errno));
     exit(1);
   }
 
   if (mkdir(temp, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
   {
-    printf("[temporarydirectory] error creating temporary directory: %s", strerror(errno));
+    printf("[temporarydirectory] error creating temporary directory (%s): %s\n", temp, strerror(errno));
     exit(1);
   }
 

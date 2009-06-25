@@ -1205,7 +1205,7 @@ CONTAINS
              Ftmp%D(A1:A2) = G%Clone(iCLONE)%Gradients%D(1:3,iATS)
           ENDDO
           PrintFlags%Key=DEBUG_MAXIMUM
-          PrintFlags%MM =DEBUG_FRC
+          PrintFlags%MM=DEBUG_FRC
           CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force')
           CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force')
           CALL Delete(Ftmp)
