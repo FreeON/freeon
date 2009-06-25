@@ -1349,25 +1349,26 @@ MODULE PrettyPrint
 #ifdef PARALLEL
     IF(MyID /= ROOT) RETURN
 #endif
-    PU=OpenPU(Unit_O=Unit_O)
-    IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
-    WRITE(PU,33)
-    WRITE(PU,34)
-    WRITE(PU,33)
+    IF(PRESENT(Unit_O)) THEN
+      CALL MondoLog(DEBUG_NONE, "Print_Force", "Unit_O = "//TRIM(IntToChar(Unit_O)))
+      CALL Halt("[FIXME]")
+    ENDIF
+
+    IF(PRESENT(Name_O)) THEN
+      CALL MondoLog(DEBUG_NONE, "Force", Name_O)
+    ENDIF
+
+    CALL MondoLog(DEBUG_NONE, "Force", "Atom  Z  Forces (ev/A)")
     DO AtA = 1,GM%Natms
        A1=3*(AtA-1)+1
        A2=3*AtA
-       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),Frc%D(A1:A2)
+       CALL MondoLog(DEBUG_NONE, "Force", TRIM(IntToChar(AtA))//" "// &
+         TRIM(IntToChar(INT(GM%AtNum%D(AtA))))//" "// &
+         TRIM(DblToChar((au2eV/AUToAngstroms)*Frc%D(A1)))//" "// &
+         TRIM(DblToChar((au2eV/AUToAngstroms)*Frc%D(A1+1)))//" "// &
+         TRIM(DblToChar((au2eV/AUToAngstroms)*Frc%D(A1+2))))
     ENDDO
-    WRITE(PU,33)
-    CALL ClosePU(PU)
-!
-32  FORMAT(A)
-33  FORMAT(67('-'))
-34  FORMAT('   Atom   Z                Forces (au) ')
-35  FORMAT(I6,'  ',I3,'  ',3(F16.10))
-40  FORMAT(3(2X,F14.10))
-!
+
   END SUBROUTINE Print_Force
 !========================================================================================
 ! Print The Lattice Forces

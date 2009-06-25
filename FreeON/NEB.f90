@@ -68,79 +68,23 @@ CONTAINS
     INTEGER                                     :: iCLONE,j
     CHARACTER(LEN=DEFAULT_CHR_LEN)              :: Message
 
-    REAL(DOUBLE), DIMENSION(3, 6, 10), PARAMETER :: HardcodedClone = RESHAPE( (/ &
+    REAL(DOUBLE), DIMENSION(3, 6, 2), PARAMETER :: HardcodedClone = RESHAPE( (/ &
 
-    -0.0225464956235612,    -0.0004285713489616,     0.0387454186573339, &
-     0.9751275920846620,    -0.0042960384492094,     0.0506019656445768, &
-    -0.1621388796463510,     0.0095236342903110,    -0.9471453669480014, &
-     2.6938736411393824,    -0.0072318358972327,    -0.0334296623125359, &
-     3.0498388619316317,    -0.7575799491160704,     0.5143680388569060, &
-     3.0454854227338406,     0.7601845653217942,     0.4935323175486023, &
+          0.76197,       -1.00108,        3.14924, &
+          0.75124,       -1.15700,        2.16337, &
+          0.84932,       -0.00926,        3.14748, &
+          0.75830,        0.00000,        0.64446, &
+          0.00000,        0.00000,        0.00000, &
+          1.51661,        0.00000,        0.00000, &
 
-    -0.1305492259696334,    -0.0082857636535119,     0.0265697116371085, &
-     0.8283028711231523,    -0.0292584928958058,     0.2954193765789251, &
-     0.0064855967955351,     0.0329530039876786,    -0.9591458276080755, &
-     2.5795878063847093,    -0.0058985801234155,     0.0438999292310092, &
-     3.1538846728040308,    -0.7542490247663468,     0.3592741207384341, &
-     3.1419281383597446,     0.7648725134167307,     0.3247281813295995, &
+          1.02993,        0.55781,        3.28112, &
+          1.00122,       -0.43566,        3.18940, &
+          0.85522,        0.80533,        2.33270, &
+          0.75830,        0.00000,        0.64446, &
+          0.00000,        0.00000,        0.00000, &
+          1.51661,        0.00000,        0.00000  &
 
-    -0.1736336720590211,    -0.0078520708498591,     0.0210405054637412, &
-     0.7124643721444700,    -0.0247696606808161,     0.4730484787551942, &
-     0.1623204675975285,     0.0382669721653310,    -0.9165477049659552, &
-     2.5410820825066538,    -0.0137428757477686,     0.0765028837509381, &
-     3.1859892099654030,    -0.7560859956125755,     0.2272376462008677, &
-     3.1514177048163248,     0.7642791112548130,     0.1835363383651085, &
-
-    -0.1461080880847425,    -0.0028333644132694,     0.0134292927649176, &
-     0.6408738335472759,     0.0011940624274350,     0.6198075606252413, &
-     0.3754369591777665,     0.0297334082200154,    -0.8352112791223436, &
-     2.5325437693113266,    -0.0282364098954122,     0.0875501380912344, &
-     3.1315803819179573,    -0.8142504309060065,     0.0895263280182630, &
-     3.0453131898924779,     0.8144499960044141,     0.0637888764768322, &
-
-    -0.1473028621193182,     0.0322545410301132,    -0.0198941826005811, &
-     0.4803718318184713,     0.0039026802470152,     0.7526539905342892, &
-     0.5418594343384163,    -0.0080572787675319,    -0.7374875182427375, &
-     2.5423914040085274,    -0.0282762390378007,     0.0310524430331555, &
-     3.1206025758993534,    -0.8255101980492303,    -0.0133851199959591, &
-     3.0417175202555828,     0.8257055550252480,     0.0000240429094105, &
-
-    -0.1419630214020312,    -0.0094269906069960,     0.0008680941462734, &
-     0.5076906512334726,    -0.0086758217502434,     0.7557511515971845, &
-     0.5276596232824522,     0.0165263753546337,    -0.7360072065392828, &
-     2.5335147818358124,     0.0009233415058229,     0.0348690700492715, &
-     3.0765399458916276,    -0.8236778295338349,    -0.0249169566452696, &
-     3.0761978116009856,     0.8243118329178392,    -0.0435277812956071, &
-
-    -0.1339390453937901,     0.0129721499871359,    -0.0145904659618596, &
-     0.3999647298812341,    -0.0190824064794037,     0.8267760618979123, &
-     0.6411350857919261,     0.0060282343684871,    -0.6347691041207585, &
-     2.5226678909135596,     0.0022274975188881,    -0.0262084688345510, &
-     3.0696635998558346,    -0.8165173399815321,    -0.0871880151669101, &
-     3.0801476431522699,     0.8143145873167634,    -0.1029109339812010, &
-
-    -0.1799796184726618,     0.0166641121108839,    -0.0186982697704393, &
-     0.1595700834674049,    -0.0092009669993689,     0.9187733795504495, &
-     0.7032843437479059,     0.0109462363073876,    -0.4771406801460116, &
-     2.5426476559944184,    -0.0152149015293707,    -0.0924593416657353, &
-     3.1919881365427090,    -0.7604268303422111,    -0.2050864563875936, &
-     3.1621295338892579,     0.7571369065943794,    -0.1902068313046307, &
-
-    -0.1410595033490503,    -0.0045253414975949,    -0.0191928014463507, &
-     0.0180928200672215,    -0.0030499514254417,     0.9640745513356053, &
-     0.8114115816485612,     0.0048240411196737,    -0.3101856598790826, &
-     2.5719087704922985,     0.0061217130811837,    -0.0706893326492596, &
-     3.1461136104002869,    -0.7616789115083143,    -0.3354275989087419, &
-     3.1731726100405520,     0.7581748147542637,    -0.3193245926171713, &
-
-    -0.0504108072399734,    -0.0022881436498385,    -0.0267860718205956, &
-    -0.1531015288650077,    -0.0063306916302273,     0.9637317725843537, &
-     0.9459759316799826,     0.0083399030917806,    -0.0733605702538127, &
-     2.6620925497342980,     0.0031817943526740,    -0.0049307232880860, &
-     3.0840427677407054,    -0.7602395478294008,    -0.4832686375731840, &
-     3.0910409054693595,     0.7571648603752852,    -0.4920584801642321  &
-
-    /), (/ 3, 6, 10 /) )
+    /), (/ 3, 6, 2 /) )
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
 #ifdef NEB_DEBUG
@@ -188,14 +132,14 @@ CONTAINS
        G%Clone(iCLONE)%CConstrain%I = G%Clone(0)%CConstrain%I
 
        ! Linear interpolation of path.
-       CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
-       G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
+       !CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
+       !G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
 
        ! Hardcoded path.
-       !CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
-       !DO j = 1, G%Clone(0)%NAtms
-       !  G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
-       !ENDDO
+       CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
+       DO j = 1, G%Clone(0)%NAtms
+         G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
+       ENDDO
 
        ! Set everything else to 0 in this clone.
        G%Clone(iCLONE)%Velocity%D = Zero
@@ -478,16 +422,16 @@ CONTAINS
           UPp=G%Clone(I+1)%ETotal>G%Clone(I)%ETotal
        ENDIF
        IF(UPm.NEQV.UPp)THEN
-          ! If we are not at an extrema of energy,
-          ! the tangent is the vector to the lower energy neighbour
+          ! If we are not at an extremum of energy, the tangent is the vector to
+          ! the lower energy neighbour
           IF(UPm)THEN
              N=G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D
           ELSE
              N=G%Clone(I+1)%Carts%D-G%Clone(I)%Carts%D
           ENDIF
        ELSE
-          ! At an extrema of energy,
-          ! interpolate the tangent linearly with the energy
+          ! At an extremum of energy, interpolate the tangent linearly with the
+          ! energy
           Um=G%Clone(I-1)%ETotal-G%Clone(I)%ETotal
           Up=G%Clone(I+1)%ETotal-G%Clone(I)%ETotal
           UMin=MIN(ABS(Up),ABS(Um))
@@ -502,37 +446,71 @@ CONTAINS
        ENDIF
        N=N/SQRT(SUM(N**2))
 
-       !GH       write(*,*)'Crds'
-       !GH       write(*,'(3F13.5)') (G%Clone(I)%Carts%D(:,j),j=1,G%Clone(0)%NAtms)
-       !GH       write(*,*)'Normal'
-       !GH       write(*,'(3F13.5)') (N(:,j),j=1,G%Clone(0)%NAtms)
-       !GH       write(*,*)'In Force'
-       !GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Coordinates", "Clone "//TRIM(IntToChar(I)))
+       DO j = 1, G%Clone(I)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "R["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(G%Clone(I)%Carts%D(1,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Carts%D(2,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Carts%D(3,j)*AUToAngstroms))//" A", &
+          "Clone "//TRIM(IntToChar(I)))
+       ENDDO
 
-       ! Project out the force along the tangent, unless this is the
-       ! climbing image, for which the force along the tangent is inverted
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Normal", "Clone "//TRIM(IntToChar(I)))
+       DO j = 1, G%Clone(I)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "N["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(N(1,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(N(2,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(N(3,j)*AUToAngstroms))//" A", &
+          "Clone "//TRIM(IntToChar(I)))
+       ENDDO
+
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Force in", "Clone "//TRIM(IntToChar(I)))
+       DO j = 1, G%Clone(I)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(1,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(2,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(3,j))), &
+          "Clone "//TRIM(IntToChar(I)))
+       ENDDO
+
+       ! Project out the force along the tangent, unless this is the climbing
+       ! image, for which the force along the tangent is inverted
        FProj=SUM(G%Clone(I)%Gradients%D*N)
-       !GH       write(*,*)'Prj Force'
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Projected Force = "//TRIM(DblToChar(FProj)), "Clone "//TRIM(IntToChar(I)))
        IF(O%NEBClimb.AND.I==UMaxI)THEN
-          !GH          write(*,*)'Climbing Image',I
+          CALL MondoLog(DEBUG_NONE, "NEBForce", "Climbing Image "//TRIM(IntToChar(I)))
           G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D-2.0*N*FProj
        ELSE
           G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D-N*FProj
        ENDIF
-       !GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Force", "Clone "//TRIM(IntToChar(I)))
+       DO j = 1, G%Clone(I)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(1,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(2,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(3,j))), &
+          "Clone "//TRIM(IntToChar(I)))
+       ENDDO
 
        ! Add spring forces along the band (if we are not the climbing image)
        Rm=SQRT(SUM((G%Clone(I)%Carts%D-G%Clone(I-1)%Carts%D)**2))
        Rp=SQRT(SUM((G%Clone(I)%Carts%D-G%Clone(I+1)%Carts%D)**2))
-       !GH       write(*,*)'Rm,Rp',Rm,Rp
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Rm = "//TRIM(DblToChar(Rm))//", Rp = "//TRIM(DblToChar(Rp)))
        IF(O%NEBClimb.AND.I==UMaxI)THEN
           ! Do nothing (no springs for the climbing image)
        ELSE
           G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D+O%NEBSpring*N*(Rp-Rm)
        ENDIF
 
-       !GH       write(*,*)'Out Force'
-       !GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
+       CALL MondoLog(DEBUG_NONE, "NEBForce", "Out Force", "Clone "//TRIM(IntToChar(I)))
+       DO j = 1, G%Clone(I)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(1,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(2,j)))//" "// &
+          TRIM(DblToChar(G%Clone(I)%Gradients%D(3,j))), &
+          "Clone "//TRIM(IntToChar(I)))
+       ENDDO
+
        ! Write distance, energies and forces
        Dist=Dist+Rm
 
@@ -541,7 +519,8 @@ CONTAINS
             //", Rp = "//TRIM(FltToShrtChar(Rp)) &
             //", Dist = "//TRIM(FltToShrtChar(Dist)) &
             //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal)) &
-            //', F = '//TRIM(DblToMedmChar(FProj)), "Clone "//TRIM(IntToChar(I)))
+            //', F = '//TRIM(DblToMedmChar(FProj)), &
+            "Clone "//TRIM(IntToChar(I)))
     ENDDO
 
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%Carts%D-G%Clone(G%Clones)%Carts%D)**2))

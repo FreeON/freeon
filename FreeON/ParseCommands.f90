@@ -95,6 +95,7 @@ CONTAINS
       STOP "Termination of FreeON"
     ENDIF
 
+    CALL MondoLog(DEBUG_NONE, "FreeON", "running intut file "//TRIM(Args%C%C(1)))
     N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
 
     ! Come up with random scratch directory based on MONDO_SCRATCH.
