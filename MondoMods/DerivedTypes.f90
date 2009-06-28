@@ -121,11 +121,9 @@ MODULE DerivedTypes
    TYPE CHR_VECT
       INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
 #ifdef POINTERS_IN_DERIVED_TYPES
-      CHARACTER(LEN=DEFAULT_CHR_LEN), &
-                   POINTER,DIMENSION(:) :: C      !-- Vector of strings
+      CHARACTER(LEN=DEFAULT_CHR_LEN),POINTER,DIMENSION(:) :: C      !-- Vector of strings
 #else
-      CHARACTER(LEN=DEFAULT_CHR_LEN), &
-                   ALLOCATABLE,DIMENSION(:) :: C      !-- Vector of strings
+      CHARACTER(LEN=DEFAULT_CHR_LEN),ALLOCATABLE,DIMENSION(:) :: C      !-- Vector of strings
 #endif
    END TYPE
 !
@@ -134,11 +132,9 @@ MODULE DerivedTypes
    TYPE CHR10_VECT
       INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
 #ifdef POINTERS_IN_DERIVED_TYPES
-      CHARACTER(LEN=10), &
-                   POINTER,DIMENSION(:) :: C      !-- Vector of strings
+      CHARACTER(LEN=10),POINTER,DIMENSION(:) :: C      !-- Vector of strings
 #else
-      CHARACTER(LEN=10), &
-                   ALLOCATABLE,DIMENSION(:) :: C      !-- Vector of strings
+      CHARACTER(LEN=10),ALLOCATABLE,DIMENSION(:) :: C      !-- Vector of strings
 #endif
    END TYPE
 !
@@ -276,14 +272,14 @@ MODULE DerivedTypes
 !----------------------------------------------------------------------
 !
    TYPE BONDDATA
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N
-     TYPE(INT_RNK2) :: IJ
-     TYPE(DBL_VECT) :: Length
+     INTEGER          :: Alloc     !-- Allocation key
+     INTEGER          :: N
+     TYPE(INT_RNK2)   :: IJ
+     TYPE(DBL_VECT)   :: Length
      TYPE(CHR10_VECT) :: Type
-     TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
-     TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
-     TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
+     TYPE(INT_VECT)   :: HBExtraSN !serial # of third atom in HBond
+     TYPE(INT_VECT)   :: HBExtraNC !nuclear charge of third at in HBond
+     TYPE(INT_VECT)   :: LonelyAtom   ! 1 for lonely, 0 otherwise
    END TYPE BONDDATA
 !
 !----------------------------------------------------------------------
@@ -484,7 +480,11 @@ MODULE DerivedTypes
      INTEGER          :: LenDa,LenDc,LenDb,LenDn
      INTEGER          :: NCON
      INTEGER          :: NLOCB1,NLOCB2,NLOCB3,NLOCK2,NLOCK3
-     TYPE(INT_RNK2)   :: GDrv1,GDrv2,GDrv3,GDrv4,GDrv5
+     TYPE(INT_RNK2)   :: GDrv1
+     TYPE(INT_RNK2)   :: GDrv2
+     TYPE(INT_RNK2)   :: GDrv3
+     TYPE(INT_RNK2)   :: GDrv4
+     TYPE(INT_RNK2)   :: GDrv5
   END TYPE GradD
 !--------------------------------------------------------------------------
 !  Bounding Box Type
@@ -631,18 +631,18 @@ MODULE DerivedTypes
 !----------------------------------------------------------------------
 !
    TYPE OUTPDATA
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N
-     TYPE(INT_RNK2) :: IJKL
+     INTEGER          :: Alloc     !-- Allocation key
+     INTEGER          :: N
+     TYPE(INT_RNK2)   :: IJKL
      TYPE(CHR10_VECT) :: Type
    END TYPE OUTPDATA
 !
 !----------------------------------------------------------------------
 !
    TYPE ANGLEDATA
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: N
-     TYPE(INT_RNK2) :: IJK
+     INTEGER          :: Alloc     !-- Allocation key
+     INTEGER          :: N
+     TYPE(INT_RNK2)   :: IJK
      TYPE(CHR10_VECT) :: Type
    END TYPE ANGLEDATA
 !
