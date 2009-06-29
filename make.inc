@@ -79,6 +79,9 @@ REMOVE_PREPROCESSED_FILES = @REMOVE_PREPROCESSED_FILES@
 AM_LIBTOOLFLAGS = --silent
 
 # Suffix rules.
+
+if USE_COMPILER_OPTIMIZATIONS
+
 .f90.o :
 	@$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90 && exit 0; \
 	  echo "The following preprocessor command failed:" 1>&2; \
@@ -134,6 +137,38 @@ AM_LIBTOOLFLAGS = --silent
 	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
 	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
 	fi
+
+else
+
+.f90.o :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	$(FCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
+	fi
+
+.f90.lo :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	$(LTFCCOMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f90
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f90; \
+	fi
+
+.f.o :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
+	@$(F77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
+	fi
+
+.f.lo :
+	$(CPP_COMMAND) $< | grep -v -E "^#" > $(basename $@)$(PREPROCESSED_SUFFIX).f
+	$(LTF77COMPILE) -c -o $@ $(basename $@)$(PREPROCESSED_SUFFIX).f
+	@if test "${REMOVE_PREPROCESSED_FILES}" = "yes"; then \
+	  rm $(basename $@)$(PREPROCESSED_SUFFIX).f; \
+	fi
+
+endif
 
 if USE_DYNAMIC_LINKING
 LIBRARY_DEPENDENCY_FILES =
