@@ -72,6 +72,7 @@ CONTAINS
     ALLOCATE(B%DExpt(1:G%Clones,1:B%NBSets))
     ALLOCATE(B%AtomPairThresh(1:G%Clones,1:B%NBSets))
     ALLOCATE(B%PrimPairThresh(1:G%Clones,1:B%NBSets))
+
     DO J=1,B%NBSets
       BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
       INQUIRE(FILE=BaseFile,EXIST=Exists)
@@ -91,6 +92,8 @@ CONTAINS
           REWIND(Inp)
           CALL AlignLowCase('<beginbasisset'//TRIM(B%BName(J))//'>',Inp)
         ENDIF
+        ! Reset Allocation flag on BSets.
+        CALL Initialize(B%BSets(I,J))
         IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),BasU,B%BSiz(I,J),B%OffS(I,J)))THEN
           CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set '//TRIM(B%BName(J)))
         ENDIF
@@ -169,8 +172,9 @@ CONTAINS
     LOGICAL                               :: ParseBasisSets
     CHARACTER(LEN=DCL)                    :: Line
     INTEGER                               :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell,BasU
-    !-------------------------------------------------------------------------!
+
     ParseBasisSets=.FALSE.
+
     ! Allocate temporary set
     BS%LMNLen=LHGTF(MaxAsymt)
     BS%NCtrt=MaxCntrx
