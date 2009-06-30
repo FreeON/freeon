@@ -597,7 +597,7 @@ CONTAINS
        ENDDO
        !
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
-          CALL NEBPurify(C%Geos,Print_O=.TRUE.)
+          CALL NEBPurify(C%Geos)
           CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ENDIF
        !
