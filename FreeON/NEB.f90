@@ -389,8 +389,18 @@ CONTAINS
     N(:,:,0) = G%Clone(1)%Carts%D - G%Clone(0)%Carts%D
     N(:,:,G%Clones+1) = G%Clone(G%Clones+1)%Carts%D - G%Clone(G%Clones)%Carts%D
 
+    ! Find the climbing image (in case we want to use it).
+    UMax = G%Clone(1)%ETotal
+    UMaxClone = 1
+
     ! Loop over the clones.
     DO iCLONE = 1, G%Clones
+
+      ! Check for climbing image.
+      IF(G%Clone(iCLONE)%ETotal > UMax) THEN
+        UMAX = G%Clone(iCLONE)%ETotal
+        UMaxClone = iCLONE
+      ENDIF
 
       ! Are the neighboring images higher in energy?
       IF(G%Clone(iCLONE-1)%ETotal > G%Clone(iCLONE)%ETotal) THEN
@@ -432,6 +442,10 @@ CONTAINS
         ENDIF
       ENDIF
     ENDDO
+
+    CALL MondoLog(DEBUG_NONE, "NEBForce", "found climbing image, Clone "// &
+      TRIM(IntToChar(UMaxClone))//" with energy "// &
+      TRIM(DblToChar(G%Clone(UMaxClone)%ETotal*au2eV))//" eV")
 
     DO iCLONE = 0, G%Clones+1
       CALL MondoLog(DEBUG_NONE, "NEBForce", "Spring tangent (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -550,6 +564,8 @@ CONTAINS
           fSpring(3, j) = (RPlusMagnitude - RMinusMagnitude)*O%NEBSpring*N(3, j, iCLONE)
 
           ! Double-nudging?
+          IF(O%NEBDoubleNudge) THEN
+          ENDIF
 
         ENDDO
 

@@ -73,7 +73,7 @@ CONTAINS
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
-    CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
+    CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%NEBDoubleNudge,O%EndPts,N%ReactantsFile,N%ProductsFile)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse Misc
@@ -626,10 +626,10 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseNEB(StepLength,NEBSpring,NEBClimb,EndPts,ReactantsFile,ProductsFile)
+  SUBROUTINE ParseNEB(StepLength,NEBSpring,NEBClimb,DoubleNudge,EndPts,ReactantsFile,ProductsFile)
     !-----------------------------------------------------------------------------------------------
     REAL(DOUBLE) :: NEBSpring,StepLength
-    Logical      :: NEBClimb
+    Logical      :: NEBClimb, DoubleNudge
     INTEGER      :: EndPts
     CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
 
@@ -651,6 +651,13 @@ CONTAINS
     ELSE
       NEBClimb=.FALSE.
     ENDIF
+
+    IF(OptKeyQ(Inp, NEB_OPTION, NEB_DOUBLE_NUDGE)) THEN
+      DoubleNudge = .TRUE.
+    ELSE
+      DoubleNudge = .FALSE.
+    ENDIF
+
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_READ_HDF))THEN
       EndPts=ENDPOINTS_FROM_HDF
       ! Read in the reactants file name
