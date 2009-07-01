@@ -148,7 +148,9 @@ MODULE OptionKeys
   ! Options:NEB=
   CHARACTER(LEN=*), PARAMETER :: NEB_OPTION         ='NEB'
   ! Climbing Image
-  CHARACTER(LEN=*),  PARAMETER :: NEB_CLIMB         ='NEBClimb'
+  CHARACTER(LEN=*), PARAMETER :: NEB_CLIMB          ='NEBClimb'
+  ! Double nudging
+  CHARACTER(LEN=*), PARAMETER :: NEB_DOUBLE_NUDGE   = "NEBDoubleNudge"
   ! Start NEB from reactants and products HDF files
   CHARACTER(LEN=*), PARAMETER :: NEB_READ_HDF       ='HDF'
   INTEGER,          PARAMETER :: ENDPOINTS_FROM_HDF =456675

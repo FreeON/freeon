@@ -68,13 +68,14 @@ MODULE ControlStructures
     TYPE(DEBG)                    :: PFlags
     REAL(DOUBLE)                  :: NEBSpring
     LOGICAL                       :: NEBClimb
+    LOGICAL                       :: NEBDoubleNudge
     CHARACTER(LEN=3)              :: GeomPrint
     !
     CHARACTER(LEN=20)             :: GeussToP2Use
     INTEGER                       :: MinSCF
     INTEGER                       :: MaxSCF
     !
-    REAL(DOUBLE)                   :: Pressure
+    REAL(DOUBLE)                  :: Pressure
   END TYPE Options
 
   TYPE Dynamics
