@@ -26,14 +26,16 @@
 MODULE ParseParallel
   USE InOut
 #ifdef NAG
-   USE F90_UNIX
+  USE F90_UNIX
 #endif
   USE ParallelKeys
   USE ControlStructures
+  USE MondoLogger
+
+  IMPLICIT NONE
+
 CONTAINS
-  !============================================================================
-  !
-  !============================================================================
+
   SUBROUTINE LoadParallel(N,O,G,B,M)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
@@ -42,13 +44,13 @@ CONTAINS
     TYPE(Parallel)     :: M
     INTEGER            :: I,J,ITmp
     CHARACTER(LEN=DCL) :: MFile,NodeFile
+
 #ifdef PARALLEL
-    !-------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
 #if !defined(MPI2)
     ! We are doing MPI-1, where mpirun is spawned underneath MondoSCF
     ! Note that this does not work (so far anyway) on AIX with POE
-    !
+
     ! Obtain MPI invocation: mpirun, mpiexe, prun, etc.
     IF(.NOT.OptCharQ(Inp,MPI_INVOCATION,M%Invoking))  &
          CALL MondoHalt(PRSE_ERROR,' MPI invocation not found. Check for option ' &
@@ -115,6 +117,7 @@ CONTAINS
     CALL SpaceTimeSetUp(1,1,G%Clones,M%Clumps,M%Clump)
 #endif
   END SUBROUTINE LoadParallel
+
   !============================================================================
   ! BREAK PARALLELSIM IN SPACE AND TIME INTO GROUPS OF CLONES
   !============================================================================
@@ -131,7 +134,10 @@ CONTAINS
     ! Include leftovers as a reduced clump
     Clumps=Clumps+LeftOvers
     ! Array to hold the grouping info
-    CALL New(Clump,(/3,Clumps/))
+    CALL New(Clump, (/3,Clumps/))
+
+    CALL MondoLog(DEBUG_NONE, "SpaceTimeSetUp", "creating "//TRIM(IntToChar(Clumps))//" clumps")
+
     DO iCLUMP=1,Clumps
        ! Number of clones in a clump
        Clump%I(1,iCLUMP)=ClonesPerClump

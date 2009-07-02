@@ -204,11 +204,10 @@ CONTAINS
   END SUBROUTINE Initialize_DBL_VECT
 
   SUBROUTINE New_DBL_RNK2(A,N,M_O)
-    TYPE(DBL_RNK2),  INTENT(INOUT)  :: A
-    INTEGER                         :: Dbls
-    INTEGER,DIMENSION(2)            :: M,N
-    INTEGER,OPTIONAL, &
-         DIMENSION(2),INTENT(IN) :: M_O
+    TYPE(DBL_RNK2),  INTENT(INOUT)           :: A
+    INTEGER                                  :: Dbls
+    INTEGER,DIMENSION(2)                     :: M,N
+    INTEGER,OPTIONAL,DIMENSION(2),INTENT(IN) :: M_O
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1), M(2):N(2)),STAT=MemStatus)
