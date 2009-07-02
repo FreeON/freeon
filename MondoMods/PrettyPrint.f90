@@ -1343,8 +1343,8 @@ MODULE PrettyPrint
     TYPE(DBL_VECT)                 :: Frc
     CHARACTER(LEN=*),OPTIONAL      :: Name_O
     INTEGER,OPTIONAL               :: Unit_O
-    INTEGER                        :: AtA,A1,A2,PU,I,J
-!----------------------------------------------------------------------------------------
+    INTEGER                        :: AtA,A1,PU,I,J
+
     IF(PrintFlags%Key /= DEBUG_MAXIMUM .OR. PrintFlags%MM /= DEBUG_FRC) RETURN
 #ifdef PARALLEL
     IF(MyID /= ROOT) RETURN
@@ -1361,7 +1361,6 @@ MODULE PrettyPrint
     CALL MondoLog(DEBUG_NONE, "Force", "Atom  Z  Forces (ev/A)")
     DO AtA = 1,GM%Natms
        A1=3*(AtA-1)+1
-       A2=3*AtA
        CALL MondoLog(DEBUG_NONE, "Force", TRIM(IntToChar(AtA))//" "// &
          TRIM(IntToChar(INT(GM%AtNum%D(AtA))))//" "// &
          TRIM(DblToChar((au2eV/AUToAngstroms)*Frc%D(A1)))//" "// &
@@ -1370,6 +1369,7 @@ MODULE PrettyPrint
     ENDDO
 
   END SUBROUTINE Print_Force
+
 !========================================================================================
 ! Print The Lattice Forces
 !========================================================================================

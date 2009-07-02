@@ -95,7 +95,7 @@ CONTAINS
 #ifdef PARALLEL
     ! Get the space-time parallel topology
     CALL New(SpaceTimeSplit,3)
-    CALL Get(SpaceTimeSplit,'spacetime')
+    CALL Get(SpaceTimeSplit,'SpaceTime')
     CALL CloseHDF(HDFFileID)
 
     ! Create Cartesian topology for the clones
@@ -107,7 +107,7 @@ CONTAINS
     ENDIF
     ! CALL AlignNodes(' After CartCommSplit ')
 #else
-    CALL Get(MyClone,'spacetime')
+    CALL Get(MyClone,'SpaceTime')
     CurClone = IntToChar(MyClone)
     CALL CloseHDF(HDFFileID)
 #endif

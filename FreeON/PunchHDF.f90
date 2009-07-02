@@ -55,14 +55,12 @@ CONTAINS
     CALL Put(RecycleHDF, "RecycleHDF")
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE InitArchive
-  !==============================================================================
-  !
-  !==============================================================================
+
   SUBROUTINE MPIsArchive(N,NSpace,Clump)
     TYPE(FileNames)      :: N
     INTEGER,DIMENSION(2) :: Clump
     INTEGER              :: NSpace
-    TYPE(INT_VECT)   :: ST
+    TYPE(INT_VECT)       :: ST
     !---------------------------------------------------------------------------!
     HDF_CurrentID=OpenHDF(N%HFile)
 #ifdef PARALLEL
@@ -75,6 +73,7 @@ CONTAINS
 #endif
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE MPIsArchive
+
   !==============================================================================
   ! THIS IS WHERE ALL SORTS OF MISC DATA SPACE IS INITIALIZED IN THE HDF5 FILE
   ! IN ORDER TO AVOID CHANGING THE DATA SPACE WHEN THE HDF FILE HAS BEEN OPENED
