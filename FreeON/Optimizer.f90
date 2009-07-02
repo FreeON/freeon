@@ -65,14 +65,14 @@ CONTAINS
     ENDDO
     ! Print the starting coordinates and energy
     IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    DO iCLONE=GBeg,GEnd
-       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-    ENDDO
+    CALL PPrint(C%Geos%Clone(0),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+    CALL PPrint(C%Geos%Clone(C%Geos%Clones+1),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
 
     CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
 
     iBAS=C%Sets%NBSets
     IStart=iGEO
+
     ! Follow the gradient downhill for NSteps
     DO iGEO=IStart,C%Opts%NSteps
        ! Compute new gradients
@@ -136,9 +136,7 @@ CONTAINS
 !       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     ENDDO
   END SUBROUTINE SteepD
-  !
-  !=====================================================================================
-  !
+
   SUBROUTINE MergePrintClones(Geos,Nams,Opts,Gradients_O)
     TYPE(Geometries)                     :: Geos
     TYPE(FileNames)                      :: Nams
@@ -396,19 +394,18 @@ CONTAINS
        CALL UnSetDSYEVWork()
     ENDDO
   END SUBROUTINE ForceDStep
-  !=====================================================================================
-  !
-  !=====================================================================================
+
   FUNCTION SteepStep(cBAS,cGEO,Energies,C) RESULT(Converged)
-    TYPE(Controls)                           :: C
-    TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones) :: Carts
-    REAL(DOUBLE),   DIMENSION(C%Geos%Clones) :: Energies
-    REAL(DOUBLE)                             :: StepLength,RelErrE,MAXGrad,RMSGrad,ETest,GTest
-    INTEGER                                  :: cBAS,cGEO,iSTEP,iCLONE,iATS,AL,K
-    INTEGER, PARAMETER                       :: MaxSTEP=4
-    LOGICAL                                  :: Converged,ECnvrgd,XCnvrgd,GCnvrgd
-    CHARACTER(LEN=3)                         :: chGEO
-    !----------------------------------------------------------------------------------!
+    TYPE(Controls)                                    :: C
+    TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones)          :: Carts
+    REAL(DOUBLE),   DIMENSION(C%Geos%Clones)          :: Energies
+    REAL(DOUBLE)                                      :: Alpha, StepLength, ActualStepLength, RelErrE, MAXGrad, RMSGrad, ETest, GTest
+    REAL(DOUBLE), DIMENSION(3, C%Geos%Clone(0)%NAtms) :: deltaR
+    INTEGER                                           :: cBAS,cGEO,iSTEP,iCLONE,iATOM,AL,K
+    INTEGER, PARAMETER                                :: MaxSTEP = 4
+    LOGICAL                                           :: Converged,ECnvrgd,XCnvrgd,GCnvrgd
+    CHARACTER(LEN=3)                                  :: chGEO
+
     chGEO=IntToChar(cGEO)
     AL=C%Opts%AccuracyLevels(cBAS)
     ! Store the current minimum energies ...
@@ -424,36 +421,87 @@ CONTAINS
        MAXGrad=MAX(MAXGrad,C%Geos%Clone(iCLONE)%GradMax)
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
-!   Take some steps, more conservative if we are doing NEB ...
+    ! Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-      !StepLength=0.5D0
-       StepLength = C%Opts%RSL
+       Alpha = C%Opts%NEBSteepAlpha
+       CALL MondoLog(DEBUG_NONE, "SteepStep", "Alpha = "//TRIM(DblToChar(Alpha*AUToAngstroms*AUToAngstroms/au2eV))//" A^2/eV")
+
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
+         deltaR = -Alpha*C%Geos%Clone(iCLONE)%Gradients%D
+
+         CALL MondoLog(DEBUG_NONE, "SteepStep", "deltaR (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
+         DO iATOM = 1, C%Geos%Clone(iCLONE)%NAtms
+           CALL MondoLog(DEBUG_NONE, "SteepStep", "deltaR["//TRIM(IntToChar(iATOM))//"] = "// &
+           TRIM(DblToChar(deltaR(1,iATOM)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(deltaR(2,iATOM)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(deltaR(3,iATOM)*AUToAngstroms)), &
+           "Clone "//TRIM(IntToChar(iCLONE)))
+         ENDDO
+
+         ! Calculate actual steplength.
+         ActualStepLength = Zero
+         DO iATOM = 1, C%Geos%Clone(iCLONE)%NAtms
+           ActualStepLength = ActualStepLength &
+            + deltaR(1, iATOM)**2 &
+            + deltaR(2, iATOM)**2 &
+            + deltaR(3, iATOM)**2
+         ENDDO
+         ActualStepLength = SQRT(ActualStepLength)
+
+         CALL MondoLog(DEBUG_NONE, "SteepStep", "ActualStepLength = "//TRIM(DblToChar(ActualStepLength*AUToAngstroms))//" A")
+
+         IF(ActualStepLength > C%Opts%NEBSteepMaxMove) THEN
+           ! Reduce step so it does not exceed StepLength.
+           CALL MondoLog(DEBUG_NONE, "SteepStep", "reducing step to "//TRIM(DblToChar(C%Opts%NEBSteepMaxMove*AUToAngstroms))//" A")
+           deltaR = deltaR*C%Opts%NEBSteepMaxMove/ActualStepLength
+           CALL MondoLog(DEBUG_NONE, "SteepStep", "deltaR after reduction (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
+           DO iATOM = 1, C%Geos%Clone(iCLONE)%NAtms
+             CALL MondoLog(DEBUG_NONE, "SteepStep", "deltaR["//TRIM(IntToChar(iATOM))//"] = "// &
+             TRIM(DblToChar(deltaR(1,iATOM)*AUToAngstroms))//" "// &
+             TRIM(DblToChar(deltaR(2,iATOM)*AUToAngstroms))//" "// &
+             TRIM(DblToChar(deltaR(3,iATOM)*AUToAngstroms)), &
+             "Clone "//TRIM(IntToChar(iCLONE)))
+           ENDDO
+         ENDIF
+
+         ! Store step.
+         C%Geos%Clone(iCLONE)%Carts%D = Carts(iCLONE)%D + deltaR
+
+         CALL MondoLog(DEBUG_NONE, "SteepStep", "R after step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
+         DO iATOM = 1, C%Geos%Clone(iCLONE)%NAtms
+           CALL MondoLog(DEBUG_NONE, "SteepStep", "R["//TRIM(IntToChar(iATOM))//"] = "// &
+           TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1,iATOM)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2,iATOM)*AUToAngstroms))//" "// &
+           TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3,iATOM)*AUToAngstroms)), &
+           "Clone "//TRIM(IntToChar(iCLONE)))
+         ENDDO
        ENDDO
+
        ! Purify NEB images
        CALL NEBPurify(C%Geos)
        ! Archive geometries
        CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
        ! Evaluate energies at the new geometry
        CALL SCF(cBAS,cGEO+1,C)
+
        ! Relative change in the total Energy
        RelErrE=-1D10
        DO iCLONE=1,C%Geos%Clones
-          RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
-               /C%Geos%Clone(iCLONE)%ETotal)
+         RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
+           /C%Geos%Clone(iCLONE)%ETotal)
        ENDDO
+
        ! Gradients only convergence criteria
        GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)
-!       GCnvrgd=MaxGrad<GTol(AL)
+
        IF(GCnvrgd)THEN
-          ! Cool, we are done
-          Converged=.TRUE.
-          Mssg="Converged "//TRIM(chGEO)
+         ! Cool, we are done
+         Converged=.TRUE.
+         Mssg="Converged "//TRIM(chGEO)
        ELSE
-          Converged=.FALSE.
-          Mssg="Descent "//TRIM(chGEO)
+         Converged=.FALSE.
+         Mssg="Descent "//TRIM(chGEO)
        ENDIF
     ELSE
        ! Take some steps
@@ -2795,86 +2843,10 @@ CONTAINS
        !SvtzTT(I)=SQRT(SvtzT(1,I)**2+SvtzT(2,I)**2+SvtzT(3,I)**2)
        !SvtzRT(I)=SQRT(SvtzR(1,I)**2+SvtzR(2,I)**2+SvtzR(3,I)**2)
     ENDDO
-    !
+
     CALL Delete(SvtzT)
     CALL Delete(SvtzR)
-    !
+
   END SUBROUTINE Sayvetz
-  !
-!!$  SUBROUTINE CompDipole(Dipole,cBAS,cGEO,G,N,S,M)
-!!$    TYPE(DBL_VECT)     :: Dipole
-!!$    TYPE(Geometries)   :: G
-!!$    TYPE(FileNames)    :: N
-!!$    TYPE(State)        :: S
-!!$    TYPE(Parallel)     :: M
-!!$    INTEGER            :: cBAS,cGEO
-!!$    !
-!!$#ifdef PARALLEL
-!!$    TYPE(DBCSR)        :: P,M1,M2
-!!$#else
-!!$    TYPE(BCSR)         :: P,M1,M2
-!!$#endif
-!!$    CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF,TrixName
-!!$    REAL(DOUBLE)       :: NDip
-!!$    REAL(DOUBLE), EXTERNAL :: DDOT
-!!$    !
-!!$    write(*,*) 'dipoleComp -10'
-!!$    CALL New(S%Action,3)
-!!$    CALL New(P)
-!!$    CALL New(M1)
-!!$    CALL New(M2)
-!!$    !
-!!$    chGEO=IntToChar(cGEO)
-!!$    chBAS=IntToChar(cBAS)
-!!$    chSCF=IntToChar(S%Current%I(1)-1)
-!!$    !
-!!$    ! Get DM
-!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-!!$         //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(1))//'.D'
-!!$
-!!$    write(*,*) trim(TrixName)
-!!$
-!!$    CALL Get(P,TrixName)
-!!$    CALL Print_BCSR(P,'DM',Unit_O=6)
-!!$    !
-!!$write(*,*) 'dipoleComp 00'
-!!$    ! Compute dipole matrix.
-!!$    S%Action%C(1)='DipoleBuild'
-!!$    S%Action%C(2)='Dipole'
-!!$    S%Action%C(3)='All'
-!!$    CALL Invoke('MakeM',N,S,M)
-!!$write(*,*) 'dipoleComp 10'
-!!$    !X
-!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
-!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
-!!$write(*,*) 'dipoleComp 11'
-!!$    CALL Get(M1,TrixName)
-!!$    CALL Print_BCSR(M1,'M1',Unit_O=6)
-!!$write(*,*) 'dipoleComp 12'
-!!$    CALL Multiply(P,M1,M2)
-!!$write(*,*) 'dipoleComp 20'
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(1,1),3)
-!!$    Dipole%D(1) = NDip-2D0*Trace(M2)
-!!$    !Y
-!!$write(*,*) 'dipoleComp 30'
-!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
-!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
-!!$    CALL Get(M1,TrixName)
-!!$    CALL Multiply(P,M1,M2)
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(2,1),3)
-!!$    Dipole%D(2) = NDip-2D0*Trace(M2)
-!!$    !Z
-!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
-!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
-!!$    CALL Get(M1,TrixName)
-!!$    CALL Multiply(P,M1,M2)
-!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%Carts%D(3,1),3)
-!!$    Dipole%D(3) = NDip-2D0*Trace(M2)
-!!$    !
-!!$    CALL Delete(S%Action)
-!!$    CALL Delete(P)
-!!$    CALL Delete(M1)
-!!$    CALL Delete(M2)
-!!$  END SUBROUTINE CompDipole
-  !
+
 END MODULE Optimizer

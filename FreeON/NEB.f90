@@ -94,12 +94,12 @@ CONTAINS
     ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
 
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector")
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector (in A)")
     DO j=1, G%Clone(0)%NAtms
       CALL MondoLog(DEBUG_NONE, "NEBInit", "RV["//TRIM(IntToChar(j))//"] = [ "// &
-        TRIM(DblToChar(ReactionVector(1,j)))//" "// &
-        TRIM(DblToChar(ReactionVector(2,j)))//" "// &
-        TRIM(DblToChar(ReactionVector(3,j)))//" ]")
+        TRIM(DblToChar(ReactionVector(1,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(ReactionVector(2,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(ReactionVector(3,j)*AUToAngstroms))//" ]")
     ENDDO
 #endif
 
@@ -393,14 +393,20 @@ CONTAINS
     UMax = G%Clone(1)%ETotal
     UMaxClone = 1
 
-    ! Loop over the clones.
     DO iCLONE = 1, G%Clones
-
       ! Check for climbing image.
       IF(G%Clone(iCLONE)%ETotal > UMax) THEN
-        UMAX = G%Clone(iCLONE)%ETotal
+        UMax = G%Clone(iCLONE)%ETotal
         UMaxClone = iCLONE
       ENDIF
+    ENDDO
+
+    CALL MondoLog(DEBUG_NONE, "NEBForce", "found climbing image, Clone "// &
+      TRIM(IntToChar(UMaxClone))//" with energy "// &
+      TRIM(DblToChar(G%Clone(UMaxClone)%ETotal*au2eV))//" eV")
+
+    ! Loop over the clones.
+    DO iCLONE = 1, G%Clones
 
       ! Are the neighboring images higher in energy?
       IF(G%Clone(iCLONE-1)%ETotal > G%Clone(iCLONE)%ETotal) THEN
@@ -427,25 +433,38 @@ CONTAINS
       ELSE
         ! At an extremum of energy, interpolate the tangent linearly with the
         ! energy
+
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "UPMinus == UPPlus", "Clone "//TRIM(IntToChar(iCLONE)))
+
         UMinus = G%Clone(iCLONE-1)%ETotal - G%Clone(iCLONE)%ETotal
         UPlus  = G%Clone(iCLONE+1)%ETotal - G%Clone(iCLONE)%ETotal
 
         UMin = MIN(ABS(UPlus),ABS(UMinus))
         UMax = MAX(ABS(UPlus),ABS(UMinus))
 
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "UMin = "//TRIM(DblToChar(UMin*au2eV))//" eV", "Clone "//TRIM(IntToChar(iCLONE)))
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "UMax = "//TRIM(DblToChar(UMax*au2eV))//" eV", "Clone "//TRIM(IntToChar(iCLONE)))
+
         IF(UMinus > UPlus) THEN
-          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMin &
-                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMax
+          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMin*au2eV &
+                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMax*au2eV
         ELSE
-          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMax &
-                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMin
+          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMax*au2eV &
+                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMin*au2eV
         ENDIF
       ENDIF
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, "NEBForce", "found climbing image, Clone "// &
-      TRIM(IntToChar(UMaxClone))//" with energy "// &
-      TRIM(DblToChar(G%Clone(UMaxClone)%ETotal*au2eV))//" eV")
+    DO iCLONE = 0, G%Clones+1
+      CALL MondoLog(DEBUG_NONE, "NEBForce", "Coordinates (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
+      DO j = 1, G%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "R["//TRIM(IntToChar(j))//"] = "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms)), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
+    ENDDO
 
     DO iCLONE = 0, G%Clones+1
       CALL MondoLog(DEBUG_NONE, "NEBForce", "Spring tangent (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -482,24 +501,13 @@ CONTAINS
       ENDDO
     ENDDO
 
-    DO iCLONE = 0, G%Clones+1
-      CALL MondoLog(DEBUG_NONE, "NEBForce", "Coordinates (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
-      DO j = 1, G%Clone(iCLONE)%NAtms
-        CALL MondoLog(DEBUG_NONE, "NEBForce", "R["//TRIM(IntToChar(j))//"] = "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms)), &
-          "Clone "//TRIM(IntToChar(iCLONE)))
-      ENDDO
-    ENDDO
-
     DO iCLONE = 1, G%Clones
       CALL MondoLog(DEBUG_NONE, "NEBForce", "Force without NEB (in eV/A)", "Clone "//TRIM(IntToChar(iCLONE)))
       DO j = 1, G%Clone(iCLONE)%NAtms
         CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1,j)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2,j)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3,j)*au2eV/AUToAngstroms)), &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(1,j)*au2eV/AUToAngstroms))//" "// &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(2,j)*au2eV/AUToAngstroms))//" "// &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(3,j)*au2eV/AUToAngstroms)), &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
     ENDDO
@@ -510,9 +518,9 @@ CONTAINS
       magnitude = Zero
       DO j = 1, G%Clone(iCLONE)%NAtms
         magnitude = magnitude &
-                  + G%Clone(iCLONE)%Gradients%D(1, j)*N(1, j, iCLONE) &
-                  + G%Clone(iCLONE)%Gradients%D(2, j)*N(2, j, iCLONE) &
-                  + G%Clone(iCLONE)%Gradients%D(3, j)*N(3, j, iCLONE)
+                  - G%Clone(iCLONE)%Gradients%D(1, j)*N(1, j, iCLONE) &
+                  - G%Clone(iCLONE)%Gradients%D(2, j)*N(2, j, iCLONE) &
+                  - G%Clone(iCLONE)%Gradients%D(3, j)*N(3, j, iCLONE)
       ENDDO
 
       DO j = 1, G%Clone(iCLONE)%NAtms
@@ -520,9 +528,9 @@ CONTAINS
         fParallel(2, j) = magnitude * N(2, j, iCLONE)
         fParallel(3, j) = magnitude * N(3, j, iCLONE)
 
-        fPerpendicular(1, j) = G%Clone(iCLONE)%Gradients%D(1, j) - fParallel(1, j)
-        fPerpendicular(2, j) = G%Clone(iCLONE)%Gradients%D(2, j) - fParallel(2, j)
-        fPerpendicular(3, j) = G%Clone(iCLONE)%Gradients%D(3, j) - fParallel(3, j)
+        fPerpendicular(1, j) = -G%Clone(iCLONE)%Gradients%D(1, j) - fParallel(1, j)
+        fPerpendicular(2, j) = -G%Clone(iCLONE)%Gradients%D(2, j) - fParallel(2, j)
+        fPerpendicular(3, j) = -G%Clone(iCLONE)%Gradients%D(3, j) - fParallel(3, j)
       ENDDO
 
       CALL MondoLog(DEBUG_NONE, "NEBForce", "parallel force component (in eV/A)", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -547,7 +555,7 @@ CONTAINS
         ! If this is the climbing image, the force along the tangent is
         ! inverted.
         CALL MondoLog(DEBUG_NONE, "NEBForce", "Climbing Image "//TRIM(IntToChar(iCLONE)))
-        G%Clone(iCLONE)%Gradients%D = G%Clone(iCLONE)%Gradients%D - 2.0*fParallel
+        G%Clone(iCLONE)%Gradients%D = G%Clone(iCLONE)%Gradients%D + 2.0*fParallel
       ELSE
         ! The non-climbing image.
         !
@@ -600,7 +608,7 @@ CONTAINS
 
         ENDDO
 
-        G%Clone(iCLONE)%Gradients%D = fPerpendicular + fSpring
+        G%Clone(iCLONE)%Gradients%D = -(fPerpendicular + fSpring)
       ENDIF
     ENDDO
 
@@ -615,9 +623,9 @@ CONTAINS
         TRIM(DblToChar(fMax*au2eV/AUToAngstroms))//" (in eV/A)", "Clone "//TRIM(IntToChar(iCLONE)))
       DO j = 1, G%Clone(iCLONE)%NAtms
         CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(1,j)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(2,j)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Gradients%D(3,j)*au2eV/AUToAngstroms)), &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(1,j)*au2eV/AUToAngstroms))//" "// &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(2,j)*au2eV/AUToAngstroms))//" "// &
+          TRIM(DblToChar(-G%Clone(iCLONE)%Gradients%D(3,j)*au2eV/AUToAngstroms)), &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
     ENDDO
