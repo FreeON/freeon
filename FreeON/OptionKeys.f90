@@ -26,7 +26,6 @@
 MODULE OptionKeys
   IMPLICIT NONE
   !  Generic options
-  CHARACTER(LEN=*), PARAMETER :: RSL = 'RSL'
   CHARACTER(LEN=*), PARAMETER :: OPTIONS_BEGIN      ='<BeginOptions>'
   CHARACTER(LEN=*), PARAMETER :: OPTIONS_END        ='<EndOptions>'
   ! Options:SCF=
@@ -146,22 +145,25 @@ MODULE OptionKeys
   INTEGER,           PARAMETER  :: GRAD_DO_NHESSIAN  =13458986
   !------------------------------------------------------------------------------
   ! Options:NEB=
-  CHARACTER(LEN=*), PARAMETER :: NEB_OPTION         ='NEB'
+  CHARACTER(LEN=*), PARAMETER :: NEB_OPTION         = 'NEB'
   ! Climbing Image
-  CHARACTER(LEN=*), PARAMETER :: NEB_CLIMB          ='NEBClimb'
+  CHARACTER(LEN=*), PARAMETER :: NEB_CLIMB          = 'NEBClimb'
   ! Double nudging
   CHARACTER(LEN=*), PARAMETER :: NEB_DOUBLE_NUDGE   = "NEBDoubleNudge"
+  ! Steepest Descent parameters.
+  CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_ALPHA    = "NEBSteepAlpha"
+  CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_MAX_MOVE = "NEBSteepMaxMove"
   ! Start NEB from reactants and products HDF files
-  CHARACTER(LEN=*), PARAMETER :: NEB_READ_HDF       ='HDF'
-  INTEGER,          PARAMETER :: ENDPOINTS_FROM_HDF =456675
+  CHARACTER(LEN=*), PARAMETER :: NEB_READ_HDF       = 'HDF'
+  INTEGER,          PARAMETER :: ENDPOINTS_FROM_HDF = 456675
   ! HDF files to read enpoint info from
-  CHARACTER(LEN=*), PARAMETER :: NEB_REACTANTS_HDF  ='Reactants'
-  CHARACTER(LEN=*), PARAMETER :: NEB_PRODUCTS_HDF   ='Products'
+  CHARACTER(LEN=*), PARAMETER :: NEB_REACTANTS_HDF  = 'Reactants'
+  CHARACTER(LEN=*), PARAMETER :: NEB_PRODUCTS_HDF   = 'Products'
   ! Read NEB reactants and products geometries from input file
-  CHARACTER(LEN=*), PARAMETER :: NEB_READ_INP       ='Inp'
-  INTEGER,          PARAMETER :: ENDPOINTS_FROM_INP =134455
+  CHARACTER(LEN=*), PARAMETER :: NEB_READ_INP       = 'Inp'
+  INTEGER,          PARAMETER :: ENDPOINTS_FROM_INP = 134455
   !
-  CHARACTER(LEN=*),  PARAMETER :: NEB_SPRING        ='NEBSpring'
+  CHARACTER(LEN=*),  PARAMETER :: NEB_SPRING        = 'NEBSpring'
   !------------------------------------------------------------------------------
   ! Options:Density Matrix Projection Order, MaxSCF and MinSCF
   CHARACTER(LEN=*), PARAMETER :: Op_MinSCF          ='MinSCF'

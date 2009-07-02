@@ -73,7 +73,9 @@ CONTAINS
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
-    CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%NEBDoubleNudge,O%EndPts,N%ReactantsFile,N%ProductsFile)
+    CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
+                  O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
+                  N%ProductsFile)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse Misc
@@ -623,21 +625,25 @@ CONTAINS
       SteepStep=.TRUE.
     ENDIF
   END SUBROUTINE ParseGradients
-  !===============================================================================================
-  !
-  !===============================================================================================
-  SUBROUTINE ParseNEB(StepLength,NEBSpring,NEBClimb,DoubleNudge,EndPts,ReactantsFile,ProductsFile)
-    !-----------------------------------------------------------------------------------------------
-    REAL(DOUBLE) :: NEBSpring,StepLength
-    Logical      :: NEBClimb, DoubleNudge
-    INTEGER      :: EndPts
-    CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
 
-    IF(.NOT. OptDblQ(Inp, RSL, StepLength)) THEN
-      StepLength = 0.1D0
+  SUBROUTINE ParseNEB(NEBSteepAlpha, NEBSteepMaxMove, NEBSpring, NEBClimb, DoubleNudge, EndPts, ReactantsFile, ProductsFile)
+
+    REAL(DOUBLE)       :: NEBSpring, NEBSteepAlpha, NEBSteepMaxMove
+    Logical            :: NEBClimb, DoubleNudge
+    INTEGER            :: EndPts
+    CHARACTER(Len=DCL) :: ReactantsFile, ProductsFile
+
+    IF(.NOT. OptDblQ(Inp, NEB_STEEP_ALPHA, NEBSteepAlpha)) THEN
+      NEBSteepAlpha = 1.0D-2*AngstromsToAU*AngstromsToAU/eV2au
     ENDIF
-    StepLength = StepLength*AngstromsToAU
-    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using StepLength = "//TRIM(DblToChar(StepLength*AUToAngstroms))//" A")
+    NEBSteepAlpha = NEBSteepAlpha*AngstromsToAU*AngstromsToAU/eV2au
+    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepAlpha = "//TRIM(DblToChar(NEBSteepAlpha*AUToAngstroms*AUToAngstroms/au2eV))//" A^2/eV")
+
+    IF(.NOT. OptDblQ(Inp, NEB_STEEP_MAX_MOVE, NEBSteepMaxMove)) THEN
+      NEBSteepMaxMove = 1.0D-1*AngstromsToAU
+    ENDIF
+    NEBSteepMaxMove = NEBSteepMaxMove*AngstromsToAU
+    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepMaxMove = "//TRIM(DblToChar(NEBSteepMaxMove*AUToAngstroms))//" A")
 
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN

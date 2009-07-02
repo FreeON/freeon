@@ -48,7 +48,6 @@ MODULE ControlStructures
   END TYPE FileNames
 
   TYPE Options
-    REAL(DOUBLE)                  :: RSL
     INTEGER                       :: NMthds
     INTEGER                       :: NConAls
     INTEGER                       :: NModls
@@ -67,6 +66,8 @@ MODULE ControlStructures
     TYPE(TOLS),DIMENSION(MaxSets) :: Thresholds
     TYPE(DEBG)                    :: PFlags
     REAL(DOUBLE)                  :: NEBSpring
+    REAL(DOUBLE)                  :: NEBSteepAlpha
+    REAL(DOUBLE)                  :: NEBSteepMaxMove
     LOGICAL                       :: NEBClimb
     LOGICAL                       :: NEBDoubleNudge
     CHARACTER(LEN=3)              :: GeomPrint
@@ -164,8 +165,8 @@ MODULE ControlStructures
     INTEGER, DIMENSION(MaxSets)            :: MxAtsNode,MxBlkNode,MxN0sNode
     TYPE(INT_VECT),POINTER, DIMENSION(:,:) :: Beg,End,GLO
 #endif
-    INTEGER                           :: Clumps
-    TYPE(INT_RNK2)                    :: Clump
+    INTEGER                                :: Clumps
+    TYPE(INT_RNK2)                         :: Clump
   END TYPE Parallel
 
   TYPE State
