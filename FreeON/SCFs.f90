@@ -52,15 +52,13 @@ MODULE SCFs
   INTEGER,PARAMETER :: SCF_STALLED =1
   INTEGER,PARAMETER :: DIIS_NOPATH =2
   INTEGER,PARAMETER :: DID_CONVERGE=3
+
 CONTAINS
-  !===============================================================================
-  !
-  !===============================================================================
+
   SUBROUTINE SinglePoints(C)
     TYPE(Controls) :: C
     INTEGER        :: iBAS,iGEO,iBBegin
 
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "SinglePoints", "calculating energy of single geometry")
     ! Loop over geometry
     DO iGEO = 1,1 !C%Geos%NGeom
       ! Init previous state
@@ -78,9 +76,7 @@ CONTAINS
       ENDDO
     ENDDO
   END SUBROUTINE SinglePoints
-  !===============================================================================
-  !
-  !===============================================================================
+
   SUBROUTINE SCF(cBAS,cGEO,C)
     TYPE(Controls)       :: C
     TYPE(DBL_RNK2),SAVE  :: ETot,DMax,DIIS
@@ -103,21 +99,6 @@ CONTAINS
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
 
-    ! For now we are forcing guess to superposition when we run the optimizer.
-    ! This should get fixed in a proper way sometime.
-    !
-    ! DO NOT PUT INTO master YET!
-    !IF(.FALSE.) THEN
-    !  IF(C%Opts%Grad == GRAD_GO_DOWNHILL) THEN
-    !    IF(C%Opts%Guess /= GUESS_EQ_SUPR) THEN
-    !      CALL MondoLog(DEBUG_MAXIMUM, "SCF", "switching guess from "// &
-    !        TRIM(IntToChar(C%Opts%Guess))// " to superposition")
-    !      C%Opts%Guess = GUESS_EQ_SUPR
-    !    ENDIF
-    !  ENDIF
-    !ENDIF
-    ! End of fix.....
-
     DO iSCF=0,MaxSCFs
       ! Do an SCF cycle
       IF(SCFCycle(iSCF,cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,DIIS)) THEN
@@ -133,9 +114,7 @@ CONTAINS
     CALL MondoHalt(DRIV_ERROR,'Failed to converge SCF in '//TRIM(IntToChar(MaxSCFs))//' SCF iterations.')
 
   END SUBROUTINE SCF
-  !===============================================================================
-  !
-  !===============================================================================
+
   SUBROUTINE SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,IConAls,N,S,O,D)
     TYPE(FileNames) :: N
     TYPE(State)     :: S
@@ -144,8 +123,6 @@ CONTAINS
     INTEGER         :: cSCF,cBAS,cGEO,IConAls,MinMDGeo,iREMOVE
     INTEGER         :: SCF_STATUS
     LOGICAL         :: DIIS_FAIL,ODA_DONE
-
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "SCFLogic", "cSCF = "//TRIM(IntToChar(cSCF))//", Action = "//TRIM(S%Action%C(1)))
 
     IF(cSCF == 0) THEN
       SCF_STATUS = NOT_CONVERGE
@@ -314,11 +291,11 @@ CONTAINS
     LOGICAL,OPTIONAL            :: CPSCF_O
     LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
-         GLogic,QLogic,ILogic,OLogic,FLogic
+                                   GLogic,QLogic,ILogic,OLogic,FLogic
     INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE,MinMDGeo,iREMOVE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
-         DETOT,ETOTA,ETOTB,ETOTQ,ETest, &
-         DDMAX,DMAXA,DMAXB,DMAXQ,DTest,ETOTO,ODAQ,DMaxMax
+                                   DETOT,ETOTA,ETOTB,ETOTQ,ETest, &
+                                   DDMAX,DMAXA,DMAXB,DMAXQ,DTest,ETOTO,ODAQ,DMaxMax
     INTEGER,DIMENSION(G%Clones) :: Converged
     INTEGER                     :: ConvergedQ,iSCF,IConAls,MinSCF,MaxSCF
     CHARACTER(LEN=DCL)          :: chGEO
@@ -824,9 +801,7 @@ CONTAINS
       CALL MondoHalt(99,'Unknown method key = '//TRIM(IntToChar(O%Methods(cBAS))))
     ENDIF
   END SUBROUTINE SolveSCF
-  !---------------------------------------------------------------------------------
-  !
-  !---------------------------------------------------------------------------------
+
   SUBROUTINE SameBasisSameGeom(cBAS,cGEO,N,O,S,G)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
@@ -936,9 +911,7 @@ CONTAINS
     CALL DELETE(BS_rs)
 
   END SUBROUTINE SameBasisSameGeom
-  !===============================================================================
-  !
-  !===============================================================================
+
   SUBROUTINE OneEMats(cBAS,cGEO,N,B,S,O,M)
     TYPE(FileNames):: N
     TYPE(BasisSets):: B
@@ -947,10 +920,9 @@ CONTAINS
     TYPE(Parallel) :: M
     INTEGER        :: cBAS,cGEO,pBAS
     LOGICAL        :: DoPFFT
-    !----------------------------------------------------------------------------!
-    !
+
     S%Action%C(1)='OneElectronMatrices'
-    !
+
     DoPFFT = .FALSE.
     IF(O%Guess==GUESS_EQ_CORE)     DoPFFT=.TRUE.
     IF(O%Guess==GUESS_EQ_SUPR)     DoPFFT=.TRUE.
@@ -989,6 +961,7 @@ CONTAINS
       CALL Invoke('MakeU',N,S,M)
     ENDIF
   END SUBROUTINE OneEMats
+
   !===============================================================================
   ! COMPUTE AN ENERGY GRADIENT
   !===============================================================================

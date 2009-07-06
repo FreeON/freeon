@@ -36,15 +36,12 @@ MODULE PunchHDF
   USE OptionKeys
   IMPLICIT NONE
 CONTAINS
-  !==============================================================================
-  !
-  !==============================================================================
+
   SUBROUTINE InitArchive(N)
     TYPE(FileNames)  :: N
 
     CALL MondoLog(DEBUG_MAXIMUM, "InitArchive", "initializing hdf file")
 
-    !---------------------------------------------------------------------------!
     HDF_CurrentID=InitHDF(N%HFile)
     HDF_CurrentID=OpenHDF(N%HFile)
     CALL Put(N%RFile,'oldinfo')
@@ -61,7 +58,7 @@ CONTAINS
     INTEGER,DIMENSION(2) :: Clump
     INTEGER              :: NSpace
     TYPE(INT_VECT)       :: ST
-    !---------------------------------------------------------------------------!
+
     HDF_CurrentID=OpenHDF(N%HFile)
 #ifdef PARALLEL
     CALL New(ST,3)
@@ -222,9 +219,7 @@ CONTAINS
 #endif
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
-  !==============================================================================
-  !
-  !==============================================================================
+
   SUBROUTINE GeomArchive(cBAS,cGEO,N,O,B,G)
     TYPE(Options)      :: O
     TYPE(FileNames)    :: N

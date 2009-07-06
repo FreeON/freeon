@@ -34,7 +34,7 @@ MODULE Overlay
 
 CONTAINS
 
-  SUBROUTINE Invoke(Ex,N,S,M)
+  SUBROUTINE Invoke(Ex,N,S,M, TSSearchEndpoints_O)
     CHARACTER(LEN=*)     :: Ex
     TYPE(FileNames)      :: N
     TYPE(State)          :: S
@@ -44,6 +44,8 @@ CONTAINS
     TYPE(CHR_VECT),SAVE  :: ArgV
     TYPE(INT_VECT),SAVE  :: IChr
     CHARACTER(LEN=2*DCL) :: CmndLine
+    LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
+    INTEGER              :: beginClump, endClump
 #if PARALLEL && MPI2
     INTEGER              :: SPAWN,ALL
 #else
@@ -56,7 +58,21 @@ CONTAINS
     END INTERFACE
 #endif
 
-    DO iCLUMP=1,M%Clumps
+    IF(PRESENT(TSSearchEndpoints_O) .AND. TSSearchEndpoints_O) THEN
+      ! Calculate the clones and the endpoint energies.
+#ifdef PARALLEL
+      CALL Halt("[FIXME] This is not implemented")
+#else
+      beginClump = 0
+      endClump = M%Clumps+1
+#endif
+    ELSE
+      ! Calculate the clones only.
+      beginClump = 1
+      endClump = M%Clumps
+    ENDIF
+
+    DO iCLUMP = beginClump, endClump
 
 #ifdef PARALLEL
       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
