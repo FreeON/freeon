@@ -49,6 +49,7 @@ MODULE ParseOptions
   IMPLICIT NONE
 
 CONTAINS
+
   !============================================================================
   !  LOAD THE OPTIONS OBJECT
   !============================================================================
@@ -73,9 +74,11 @@ CONTAINS
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
-    CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
-                  O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
-                  N%ProductsFile)
+    IF(O%Grad == GRAD_TS_SEARCH_NEB) THEN
+      CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
+                    O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
+                    N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
+    ENDIF
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse Misc
@@ -83,6 +86,7 @@ CONTAINS
     ! close
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
+
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS
   !============================================================================
@@ -557,15 +561,12 @@ CONTAINS
            Names%GFile=TRIM(Names%GFile)//'.xyz'
     ENDIF
 
-!!    CALL MondoLog(DEBUG_NONE, "ParsePrintFlags", "PrintFlags%Key = "//TRIM(IntToChar(PFlags%Key)))
   END SUBROUTINE ParsePrintFlags
-  !===============================================================================================
-  !
-  !===============================================================================================
+
   SUBROUTINE ParseGradients(NSteps,Coordinates,Grad,DoGDIIS,SteepStep)
     INTEGER NSteps,Coordinates,Grad
     LOGICAL OneBase,DoGDIIS,SteepStep
-    !-----------------------------------------------------------------------------------------------
+
     ! Default max geometry steps is 100
     IF(.NOT.OptIntQ(Inp,OPT_NSTEPS,NSteps))THEN
       CALL MondoLog(DEBUG_MAXIMUM, "ParseGradients", "using default NSteps")
@@ -626,9 +627,12 @@ CONTAINS
     ENDIF
   END SUBROUTINE ParseGradients
 
-  SUBROUTINE ParseNEB(NEBSteepAlpha, NEBSteepMaxMove, NEBSpring, NEBClimb, DoubleNudge, EndPts, ReactantsFile, ProductsFile)
+  SUBROUTINE ParseNEB(NEBSteepAlpha, NEBSteepMaxMove, NEBSpring, NEBClimb, &
+                      DoubleNudge, EndPts, ReactantsFile, ProductsFile, &
+                      NEBReactantEnergy, NEBProductEnergy)
 
-    REAL(DOUBLE)       :: NEBSpring, NEBSteepAlpha, NEBSteepMaxMove
+    REAL(DOUBLE)       :: NEBSpring, NEBSteepAlpha, NEBSteepMaxMove, &
+                          NEBReactantEnergy, NEBProductEnergy
     Logical            :: NEBClimb, DoubleNudge
     INTEGER            :: EndPts
     CHARACTER(Len=DCL) :: ReactantsFile, ProductsFile
@@ -651,6 +655,21 @@ CONTAINS
     ENDIF
     CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSpring = "//TRIM(DblToChar(NEBSpring)))
 
+    ! Parse energies of reactant and product configurations.
+    IF(.NOT.OptDblQ(Inp, NEB_REACTANT_ENERGY, NEBReactantEnergy)) THEN
+      CALL Halt("Missing NEBReactantEnergy option. I need the energy of the reactant")
+    ELSE
+      NEBReactantEnergy = NEBReactantEnergy*eV2au
+      CALL MondoLog(DEBUG_NONE, "ParseNEB", "reactant energy = "//TRIM(DblToChar(NEBReactantEnergy*au2eV))//" eV")
+    ENDIF
+
+    IF(.NOT.OptDblQ(Inp, NEB_PRODUCT_ENERGY, NEBProductEnergy)) THEN
+      CALL Halt("Missing NEBProductEnergy option. I need the energy of the product")
+    ELSE
+      NEBProductEnergy = NEBProductEnergy*eV2au
+      CALL MondoLog(DEBUG_NONE, "ParseNEB", "product energy = "//TRIM(DblToChar(NEBProductEnergy*au2eV))//" eV")
+    ENDIF
+
     ! Use the climbing image?
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_CLIMB))THEN
       NEBClimb=.TRUE.
@@ -667,11 +686,14 @@ CONTAINS
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_READ_HDF))THEN
       EndPts=ENDPOINTS_FROM_HDF
       ! Read in the reactants file name
-      IF(.NOT.OptCharQ(Inp,NEB_REACTANTS_HDF,ReactantsFile))  &
-           CALL MondoHalt(PRSE_ERROR,' NEB reactants file missing from input ')
+      IF(.NOT.OptCharQ(Inp,NEB_REACTANTS_HDF,ReactantsFile)) THEN
+        CALL MondoHalt(PRSE_ERROR,' NEB reactants file missing from input ')
+      ENDIF
+
       ! Read in the products file name
-      IF(.NOT.OptCharQ(Inp,NEB_PRODUCTS_HDF,ProductsFile))  &
-           CALL MondoHalt(PRSE_ERROR,' NEB products file missing from input ')
+      IF(.NOT.OptCharQ(Inp,NEB_PRODUCTS_HDF,ProductsFile)) THEN
+        CALL MondoHalt(PRSE_ERROR,' NEB products file missing from input ')
+      ENDIF
     ELSE
       EndPts=ENDPOINTS_FROM_INP
     ENDIF

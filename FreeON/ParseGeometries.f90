@@ -40,19 +40,17 @@ MODULE ParseGeometries
   IMPLICIT NONE
 
 CONTAINS
-  !================================================================================================================
-  !
-  !================================================================================================================
+
   SUBROUTINE LoadCoordinates(N,O,D,G)
-    TYPE(FileNames)  :: N
-    TYPE(Options)    :: O
-    TYPE(Dynamics)   :: D
-    TYPE(Geometries) :: G
-    TYPE(Int_Vect)   :: CurrentState
-    INTEGER          :: I,iCLONE,HDFFileID,J,IGeo
+    TYPE(FileNames)             :: N
+    TYPE(Options)               :: O
+    TYPE(Dynamics)              :: D
+    TYPE(Geometries)            :: G
+    TYPE(Int_Vect)              :: CurrentState
+    INTEGER                     :: I,iCLONE,HDFFileID,J,IGeo
     REAL(DOUBLE),DIMENSION(3,3) :: U
     REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
-    REAL(DOUBLE) :: Error,R2
+    REAL(DOUBLE)                :: Error,R2
 
     CALL OpenASCII(N%IFile,Inp)
     ! NEB
@@ -68,6 +66,7 @@ CONTAINS
         CALL Get(G%Clones,'clones')
         CALL CloseHDF(HDFFileID)
       ENDIF
+
       ! Allocate Clones+2 geometries for NEB
       ALLOCATE(G%Clone(0:G%Clones+1))
       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
@@ -143,6 +142,10 @@ CONTAINS
           CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)
           ! Read in the products geometry from input
           CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)
+
+          ! Set the energies of the reactant and the product.
+          G%Clone(0)%ETotal = O%NEBReactantEnergy
+          G%Clone(G%Clones+1)%ETotal = O%NEBProductEnergy
         ENDIF
         CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
              PrintGeom_O=O%GeomPrint,Clone_O=0,CrdInAng_O=.TRUE.)

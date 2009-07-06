@@ -39,6 +39,7 @@ PROGRAM FreeON
   USE MonteCarlo
   USE MondoLogger
   USE RayleighQuotientIteration
+
   IMPLICIT NONE
 
   TYPE(Controls) :: C

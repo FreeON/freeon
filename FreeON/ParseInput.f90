@@ -65,8 +65,6 @@ CONTAINS
 
     ! Parse generic options
     CALL LoadOptions(C%Nams,C%Opts)
-    ! Print out some more file settings. The following filenames are only set
-    ! now after loading the options.
 
     ! Parse dynamics options
     IF(C%Opts%Grad==GRAD_DO_DYNAMICS .OR. C%Opts%Grad==GRAD_DO_HYBRIDMC ) THEN
@@ -103,7 +101,5 @@ CONTAINS
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
 
-    !CALL PPrint(C%Geos%Clone(1),PrintGeom_O='PDB',Unit_O=6)
-    !STOP
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput

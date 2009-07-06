@@ -70,12 +70,14 @@ MODULE ControlStructures
     REAL(DOUBLE)                  :: NEBSteepMaxMove
     LOGICAL                       :: NEBClimb
     LOGICAL                       :: NEBDoubleNudge
+    REAL(DOUBLE)                  :: NEBReactantEnergy
+    REAL(DOUBLE)                  :: NEBProductEnergy
     CHARACTER(LEN=3)              :: GeomPrint
-    !
+
     CHARACTER(LEN=20)             :: GeussToP2Use
     INTEGER                       :: MinSCF
     INTEGER                       :: MaxSCF
-    !
+
     REAL(DOUBLE)                  :: Pressure
   END TYPE Options
 
@@ -182,7 +184,7 @@ MODULE ControlStructures
     INTEGER :: MaxMem
     INTEGER :: iGEOStart
   END TYPE GDIIS
-  !
+
   TYPE Constr
     INTEGER                   :: NConstr
     INTEGER                   :: NCartConstr
