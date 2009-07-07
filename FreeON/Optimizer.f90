@@ -1,3 +1,29 @@
+!------------------------------------------------------------------------------
+!    This code is part of the MondoSCF suite of programs for linear scaling
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!    Copyright (2004). The Regents of the University of California. This
+!    material was produced under U.S. Government contract W-7405-ENG-36
+!    for Los Alamos National Laboratory, which is operated by the University
+!    of California for the U.S. Department of Energy. The U.S. Government has
+!    rights to use, reproduce, and distribute this software.  NEITHER THE
+!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
+!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!
+!    This program is free software; you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by the
+!    Free Software Foundation; either version 2 of the License, or (at your
+!    option) any later version. Accordingly, this program is distributed in
+!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+!
+!    While you may do as you like with this software, the GNU license requires
+!    that you clearly mark derivative software.  In addition, you are encouraged
+!    to return derivative works to the MondoSCF group for review, and possible
+!    disemination in future releases.
+!------------------------------------------------------------------------------
+
 MODULE Optimizer
   USE SCFs
   USE InOut
@@ -36,9 +62,7 @@ CONTAINS
       CALL IntOpt(C)
     ENDIF
   END SUBROUTINE Descender
-  !=====================================================================================
-  !
-  !=====================================================================================
+
   SUBROUTINE SteepD(C)
     TYPE(Controls)                                      :: C
     INTEGER                                             :: iBAS,iGEO,iCLONE
@@ -46,7 +70,7 @@ CONTAINS
     INTEGER                                             :: NatmsLoc,IStart,gtmp,GBeg,GEnd,j
     TYPE(DBL_RNK2)                                      :: OldXYZ
     LOGICAL                                             :: NewFile,ExitQ
-    !-------------------------------------------------------------------------!
+
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
        GBeg=0
        GEnd=C%Geos%Clones+1
@@ -94,7 +118,9 @@ CONTAINS
              !C%Geos%Clone(iCLONE)%Confg=iCLONE+1
              !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
              !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+             CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = C%Nams%GFile, &
+                         Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Clone_O = iCLONE, &
+                         Gradients_O = 'Gradients')
              !C%Geos%Clone%Confg=gtmp
           ENDDO
 
@@ -463,7 +489,11 @@ CONTAINS
              TRIM(DblToChar(deltaR(3,iATOM)*AUToAngstroms)), &
              "Clone "//TRIM(IntToChar(iCLONE)))
            ENDDO
+           ActualStepLength = C%Opts%NEBSteepMaxMove
          ENDIF
+
+         ! Set variable StepLength for printing.
+         StepLength = ActualStepLength
 
          ! Store step.
          C%Geos%Clone(iCLONE)%Carts%D = Carts(iCLONE)%D + deltaR
@@ -572,9 +602,7 @@ CONTAINS
        Energies(iClone)=C%Geos%Clone(iClone)%ETotal
     ENDDO
   END FUNCTION SteepStep
-!
-!------------------------------------------------------------------
-!
+
    SUBROUTINE IntOpt(C)
      TYPE(Controls) :: C
      INTEGER        :: I,iBAS,iGEO,iGEOst,iCLONE

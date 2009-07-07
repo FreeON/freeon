@@ -37,7 +37,9 @@ MODULE MonteCarlo
   USE SetXYZ
   USE DynamicsKeys
   USE MDynamics
+
   IMPLICIT NONE
+
   TYPE(INT_VECT)      :: MDIter
   TYPE(DBL_VECT)      :: MCEtot0,MCTemp0
   TYPE(DBL_RNK2)      :: Carts

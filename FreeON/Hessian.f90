@@ -41,7 +41,9 @@ USE LinAlg
 USE AInv
 USE CholFactor
 USE ControlStructures
+
 IMPLICIT NONE
+
 CONTAINS
 !
 !-------------------------------------------------------

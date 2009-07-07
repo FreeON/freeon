@@ -36,10 +36,11 @@ MODULE ParseInput
   USE ParseParallel
   USE ParseGeomOpt
   USE ParseExtraCoords
-  USE PrettyPrint
   USE ParseProperties, ONLY: LoadPropertyOptions
   USE PrintParsed
   USE MondoLogger
+
+  IMPLICIT NONE
 
 CONTAINS
   !===============================================================

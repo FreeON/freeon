@@ -36,14 +36,13 @@ MODULE Response
 !H Ref:
 !H
 !H---------------------------------------------------------------------------------
-  !
+
   USE Parse
   USE InOut
   USE LinAlg
   USE GlobalObjects
   USE SCFKeys
   USE Overlay
-  USE SCFKeys
   USE PunchHDF
   USE Numerics
   USE OptionKeys
@@ -53,10 +52,10 @@ MODULE Response
   USE SCFs
   USE SetXYZ
   !USE MLP !ONLY: MLPDriver
-  !
+
   IMPLICIT NONE
   PRIVATE
-  !
+
 !---------------------------------------------------------------------------------
 ! PUBLIC DECLARATIONS
 !---------------------------------------------------------------------------------

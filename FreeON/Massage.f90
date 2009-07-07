@@ -43,7 +43,9 @@ MODULE Massage
   USE DynamicsKeys
   USE GeometryKeys
   USE ControlStructures
+
   IMPLICIT NONE
+
 CONTAINS
   !============================================================================
   ! ALL REORDERING, RESCALING, WRAPPING AND TRANSLATING OF COORDINATES OCCURS

@@ -494,7 +494,7 @@ MODULE PrettyPrint
        CLOSE(Unit)
      END SUBROUTINE XSFPreamble
 
-     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O,Clone_O,CrdInAng_O,Remark_O,Gradients_O)
+     SUBROUTINE Print_CRDS(GM, FileName_O, Unit_O, PrintGeom_O, NewFile_O, Clone_O, CrdInAng_O, Remark_O, Gradients_O)
        TYPE(CRDS)                           :: GM
        INTEGER                              :: K
        LOGICAL                              :: Opened

@@ -40,14 +40,16 @@ MODULE ParseProperties
 !H  Comments:
 !H
 !H---------------------------------------------------------------------------------
+
   USE InOut
   USE ControlStructures
   USE MondoLogger
 #ifdef NAG
   USE F90_UNIX
 #endif
-  !
+
   IMPLICIT NONE
+
   PRIVATE
 !---------------------------------------------------------------------------------
 ! PUBLIC DECLARATIONS

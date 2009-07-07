@@ -35,9 +35,11 @@ MODULE ParseExtraCoords
   USE InCoords
   USE SetXYZ
   USE MemMan
+
   IMPLICIT NONE
+
 CONTAINS
-  !
+
   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos)
     !
     ! This subroutine parses the inPut file for

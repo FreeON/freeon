@@ -30,7 +30,6 @@ MODULE ParseGeometries
   USE PrettyPrint
   USE DynamicsKeys
   USE GeometryKeys
-  USE PrettyPrint
   USE ControlStructures
   USE ls_rmsd
   USE NEB
