@@ -37,7 +37,9 @@ MODULE RayleighQuotientIteration
   USE OptionKeys
   USE McMurchie
   USE MondoLogger
+
   IMPLICIT NONE
+
   TYPE(TIME)          :: TimeTotal,TimeONX,TimeQCTC,TimeBCSR
 CONTAINS
 

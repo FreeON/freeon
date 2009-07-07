@@ -34,7 +34,9 @@ MODULE PunchHDF
   USE GlobalScalars
   USE ControlStructures
   USE OptionKeys
+
   IMPLICIT NONE
+
 CONTAINS
 
   SUBROUTINE InitArchive(N)

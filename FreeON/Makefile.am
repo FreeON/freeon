@@ -58,40 +58,69 @@ FreeON_LINK = $(FCLINK)
 
 # Dependencies.
 ParseCommands.o : \
+  $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
   ControlStructures.o \
-  $(top_builddir)/MondoConfig.h
+  $(top_builddir)/MondoMods/globalcharacters.mod \
+  $(top_builddir)/MondoMods/utilities.mod
 
 ParseOptions.o : \
+  $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/memman.mod \
   Numerics.o \
   ConflictDetect.o \
   OptionKeys.o \
+  $(top_builddir)/MondoMods/functionals.mod \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
+  $(top_builddir)/MondoMods/processcontrol.mod \
+  $(top_builddir)/MondoMods/globalcharacters.mod \
+  $(top_builddir)/MondoMods/parsingconstants.mod \
   ControlStructures.o \
-  $(top_builddir)/MondoConfig.h
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseGeometries.o : \
-  ConflictDetect.o \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
   OptionKeys.o \
+  $(top_builddir)/MondoMods/prettyprint.mod \
   DynamicsKeys.o \
   GeometryKeys.o \
   ControlStructures.o \
   ls_rmsd.o \
-  NEB.o
+  NEB.o \
+  ConflictDetect.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseExtraCoords.o : \
   ControlStructures.o \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
   OptionKeys.o \
   GeometryKeys.o \
   ParseGeometries.o \
+  Massage.o \
   InCoords.o \
-  Massage.o
+  $(top_builddir)/MondoMods/setxyz.mod \
+  $(top_builddir)/MondoMods/memman.mod
 
 ParseGeomOpt.o : \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
   GeomOptKeys.o \
+  $(top_builddir)/MondoMods/macros.mod \
   ControlStructures.o \
-  OptionKeys.o
+  OptionKeys.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseProperties.o : \
-  ControlStructures.o
+  $(top_builddir)/MondoMods/inout.mod \
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseInput.o : \
   Massage.o \
@@ -102,103 +131,203 @@ ParseInput.o : \
   ParsePeriodic.o \
   ParseGeometries.o \
   ControlStructures.o \
+  $(top_builddir)/MondoMods/prettyprint.mod \
   ParseParallel.o \
   ParseGeomOpt.o \
   ParseExtraCoords.o \
   ParseProperties.o \
-  PrintParsed.o
+  PrintParsed.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParsePeriodic.o : \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/pbc.mod \
+  $(top_builddir)/MondoMods/atompairs.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
   OptionKeys.o \
   PeriodicKeys.o \
   ControlStructures.o
 
 ParseParallel.o : \
+  $(top_builddir)/MondoMods/inout.mod \
   ParallelKeys.o \
-  ControlStructures.o
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseBasis.o : \
-  ControlStructures.o
+  $(top_builddir)/MondoMods/order.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/basissetparameters.mod \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseDynamics.o : \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
   DynamicsKeys.o \
   ControlStructures.o \
-  OptionKeys.o
+  OptionKeys.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ConflictDetect.o : \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/functionals.mod \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/processcontrol.mod \
   ControlStructures.o
 
 Overlay.o : \
-  PunchHDF.o
+  $(top_builddir)/MondoMods/inout.mod \
+  PunchHDF.o \
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/utilities.mod
 
 MDynamics.o : \
   $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoMods/order.mod \
   SCFs.o \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/matfunk.mod \
   Numerics.o \
+  $(top_builddir)/MondoMods/atompairs.mod \
   ControlStructures.o \
   GeomOptKeys.o \
   PunchHDF.o \
-  DynamicsKeys.o
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/setxyz.mod \
+  DynamicsKeys.o \
+  $(top_builddir)/MondoMods/utilities.mod \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 Response.o : \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/linalg.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
   SCFKeys.o \
   Overlay.o \
   PunchHDF.o \
+  Numerics.o \
   OptionKeys.o \
   ControlStructures.o \
   NEB.o \
-  SCFs.o
+  SCFs.o \
+  $(top_builddir)/MondoMods/setxyz.mod
 
 Hessian.o : \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
+  $(top_builddir)/MondoMods/globalcharacters.mod \
+  $(top_builddir)/MondoMods/inout.mod \
   InCoords.o \
+  $(top_builddir)/MondoMods/memman.mod \
+  $(top_builddir)/MondoMods/setxyz.mod \
+  $(top_builddir)/MondoMods/processcontrol.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/parsingconstants.mod \
   GeomOptKeys.o \
   PunchHDF.o \
+  $(top_builddir)/MondoMods/linalg.mod \
+  $(top_builddir)/MondoMods/ainv.mod \
+  $(top_builddir)/MondoMods/cholfactor.mod \
   ControlStructures.o
 
 MonteCarlo.o : \
+  $(top_builddir)/MondoMods/order.mod \
   SCFs.o \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/matfunk.mod \
+  Numerics.o \
+  $(top_builddir)/MondoMods/atompairs.mod \
   ControlStructures.o \
   GeomOptKeys.o \
   PunchHDF.o \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/setxyz.mod \
   DynamicsKeys.o \
   MDynamics.o
 
 Optimizer.o : \
   SCFs.o \
-  QUICCA.o
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/matfunk.mod \
+  Numerics.o \
+  $(top_builddir)/MondoMods/atompairs.mod \
+  ControlStructures.o \
+  InCoords.o \
+  QUICCA.o \
+  GeomOptKeys.o \
+  PunchHDF.o \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  Hessian.o \
+  $(top_builddir)/MondoMods/setxyz.mod \
+  $(top_builddir)/MondoMods/utilities.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod
 
 FreeON.o : \
   $(top_builddir)/MondoConfig.h \
   SCFs.o \
+  $(top_builddir)/MondoMods/macros.mod \
   Response.o \
   PunchHDF.o \
   Optimizer.o \
   ParseInput.o \
   ZippyQuote.o \
-  PrintParsed.o \
   MDynamics.o \
   MonteCarlo.o \
+  $(top_builddir)/MondoMods/mondologger.mod \
   RQI.o
 
 QUICCA.o : \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
+  $(top_builddir)/MondoMods/globalcharacters.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/memman.mod \
+  $(top_builddir)/MondoMods/linalg.mod \
+  $(top_builddir)/MondoMods/ainv.mod \
+  $(top_builddir)/MondoMods/cholfactor.mod \
+  ControlStructures.o \
   PunchHDF.o \
-  Hessian.o
+  $(top_builddir)/MondoMods/setxyz.mod \
+  InCoords.o \
+  Hessian.o \
+  $(top_builddir)/MondoMods/slatec.mod
 
 ZippyQuote.o : \
+  $(top_builddir)/MondoMods/order.mod \
   ControlStructures.o
 
 NEB.o : \
   $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoMods/inout.mod \
   ls_rmsd.o \
-  ControlStructures.o
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/order.mod \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 Massage.o : \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/pbc.mod \
+  $(top_builddir)/MondoMods/atompairs.mod \
   OptionKeys.o \
   DynamicsKeys.o \
   GeometryKeys.o \
   ControlStructures.o
 
 SCFs.o : \
+  $(top_builddir)/MondoConfig.h \
+  $(top_builddir)/MondoMods/parse.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/linalg.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
   SCFKeys.o \
   Overlay.o \
   DynamicsKeys.o \
@@ -207,24 +336,69 @@ SCFs.o : \
   OptionKeys.o \
   ControlStructures.o \
   NEB.o \
-  $(top_builddir)/MondoConfig.h
+  $(top_builddir)/MondoMods/setxyz.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/mondologger.mod \
+  $(top_builddir)/MondoMods/utilities.mod
 
 InCoords.o : \
-  ControlStructures.o
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  $(top_builddir)/MondoMods/globalobjects.mod \
+  $(top_builddir)/MondoMods/globalcharacters.mod \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/memman.mod \
+  $(top_builddir)/MondoMods/setxyz.mod \
+  $(top_builddir)/MondoMods/processcontrol.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/parsingconstants.mod \
+  $(top_builddir)/MondoMods/linalg.mod \
+  $(top_builddir)/MondoMods/ainv.mod \
+  $(top_builddir)/MondoMods/cholfactor.mod \
+  $(top_builddir)/MondoMods/pbc.mod \
+  $(top_builddir)/MondoMods/atompairs.mod \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 ParseGeomOpt.o : \
-  GeomOptKeys.o
+  $(top_builddir)/MondoMods/derivedtypes.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  GeomOptKeys.o \
+  $(top_builddir)/MondoMods/macros.mod \
+  ControlStructures.o \
+  OptionKeys.o \
+  $(top_builddir)/MondoMods/mondologger.mod
 
 PunchHDF.o : \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/memman.mod \
+  $(top_builddir)/MondoMods/pbc.mod \
+  $(top_builddir)/MondoMods/indexing.mod \
+  $(top_builddir)/MondoMods/atompairs.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
   ControlStructures.o \
   OptionKeys.o
 
 PrintParsed.o : \
-  ControlStructures.o \
   $(top_builddir)/MondoConfig.h \
-  $(top_builddir)/MondoLocalVersion.h
+  $(top_builddir)/MondoLocalVersion.h \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  ControlStructures.o \
+  $(top_builddir)/MondoMods/utilities.mod
 
 RQI.o : \
+  $(top_builddir)/MondoMods/inout.mod \
+  $(top_builddir)/MondoMods/macros.mod \
+  $(top_builddir)/MondoMods/memman.mod \
 	Overlay.o \
+  $(top_builddir)/MondoMods/indexing.mod \
+  $(top_builddir)/MondoMods/atompairs.mod \
+  PunchHDF.o \
+  $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/globalscalars.mod \
+  ControlStructures.o \
   OptionKeys.o \
-  ControlStructures.o
+  $(top_builddir)/MondoMods/mcmurchie.mod \
+  $(top_builddir)/MondoMods/mondologger.mod

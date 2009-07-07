@@ -34,6 +34,8 @@ MODULE ParsePeriodic
   USE PeriodicKeys
   USE ControlStructures
 
+  IMPLICIT NONE
+
 CONTAINS
   !=========================================================================
   !

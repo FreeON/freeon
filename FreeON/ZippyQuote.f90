@@ -26,7 +26,9 @@
 MODULE ZippyQuote
   USE Order
   USE ControlStructures
+
   IMPLICIT NONE
+
 CONTAINS
   !===========================================================================================================================
   ! LETS NOT TAKE OURSELVES TOO SERIOUSLY ...
