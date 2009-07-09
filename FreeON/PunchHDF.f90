@@ -231,29 +231,42 @@ CONTAINS
     INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID,I,NK,CF,PF
     CHARACTER(LEN=DCL) :: chGEO
     REAL(DOUBLE)       :: MinExpt
-    !---------------------------------------------------------------------------!
+
     chGEO=IntToChar(cGEO)
 
     CALL MondoLog(DEBUG_MAXIMUM, "GeomArchive", "Archiving data in HDF file "//TRIM(N%HFile))
     HDFFileID=OpenHDF(N%HFile)
-    DO iCLONE=1,G%Clones
+
+    ! Set Confg in case we have more clones than 1:G%Clones, as is the case in
+    ! NEB.
+    DO iCLONE = LBOUND(G%Clone, 1), 1
+      G%Clone(iCLONE)%Confg = cGEO
+    ENDDO
+
+    DO iCLONE = G%Clones+1, UBOUND(G%Clone, 1)
+      G%Clone(iCLONE)%Confg = cGEO
+    ENDDO
+
+    DO iCLONE=1, G%Clones
       G%Clone(iCLONE)%Confg=cGEO
       CALL MkGeomPeriodic(G%Clone(iCLONE),B%BSets(iCLONE,cBAS), &
-           O%Thresholds(cBAS)%Dist,O%Thresholds(cBAS)%TwoE)
+                          O%Thresholds(cBAS)%Dist,O%Thresholds(cBAS)%TwoE)
       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-      !      If we have ECPs, temporarily reset this geometries nuclear charges
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) &
-           CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
-      !      Put the geometry to this group ...
+      ! If we have ECPs, temporarily reset this geometries nuclear charges
+      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
+        CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      ENDIF
+      ! Put the geometry to this group ...
       CALL Put(G%Clone(iCLONE),chGEO)
-      !      Close this clones group
+      ! Close this clones group
       CALL CloseHDFGroup(HDF_CurrentID)
-      !      And unset the nuclear charges in the case of ECPs
-      IF(B%BSets(iCLONE,cBAS)%HasECPs) &
-           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      ! And unset the nuclear charges in the case of ECPs
+      IF(B%BSets(iCLONE,cBAS)%HasECPs) THEN
+        CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
+      ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
-    !   CALL PPrint(G%Clone(1),Unit_O=6)
+    !CALL PPrint(G%Clone(1),Unit_O=6)
     CALL MondoLog(DEBUG_MAXIMUM, "GeomArchive", "done archiving")
   END SUBROUTINE GeomArchive
   !==============================================================================
