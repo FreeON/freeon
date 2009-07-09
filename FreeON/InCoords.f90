@@ -7471,35 +7471,33 @@ CONTAINS
                       StreCritIn,AngleCritIn)
      ENDDO
    END SUBROUTINE CutOffDispl
-!
-!-------------------------------------------------------------------
-!
+
    SUBROUTINE CtrlDispl(Def,Value,Displ,Fact,StreCritIn,AngleCritIn)
      REAL(DOUBLE)     :: Displ,StreCrit,AngleCrit,Value
      REAL(DOUBLE)     :: StreCritIn,AngleCritIn
      REAL(DOUBLE)     :: Fact
      CHARACTER(LEN=*) :: Def
 
+     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Def = "//TRIM(Def))
      IF(Def(1:4)=='STRE') THEN
        StreCrit=StreCritIn*Fact
        IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
        IF(ABS(Displ)>0.15D0*Value) Displ=SIGN(0.15D0*Value,Displ)
+       CALL MondoLog(DEBUG_NONE, "CtrlDispl", "StreCritIn = "// &
+         TRIM(DblToChar(StreCritIn*AUToAngstroms))//" A")
+       CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Displ = "// &
+         TRIM(DblToChar(Displ*AUToAngstroms))//" A")
      ELSE
        AngleCrit=AngleCritIn*Fact
        IF(ABS(Displ)>AngleCrit) Displ=SIGN(AngleCrit,Displ)
+       CALL MondoLog(DEBUG_NONE, "CtrlDispl", "AngleCritIn = "// &
+         TRIM(DblToChar(AngleCritIn*RadToDeg))//" degrees")
+       CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Displ = "// &
+         TRIM(DblToChar(Displ*RadToDeg))//" degrees")
      ENDIF
-     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Def = "//TRIM(Def))
-     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "Displ = "// &
-       TRIM(DblToChar(Displ*AUToAngstroms))//" A or "// &
-       TRIM(DblToChar(Displ*RadToDeg))//" degrees")
-     CALL MondoLog(DEBUG_NONE, "CtrlDispl", "StreCritIn = "// &
-       TRIM(DblToChar(StreCritIn*AUToAngstroms))//" A, AngleCritIn = "// &
-       TRIM(DblToChar(AngleCritIn*RadToDeg))//" degrees")
 
    END SUBROUTINE CtrlDispl
-!
-!-------------------------------------------------------------------
-!
+
    SUBROUTINE CtrlRange(Displ,Range,NDim)
      REAL(DOUBLE) :: Displ,Range(:),StepMax
      INTEGER      :: NDim
