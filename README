@@ -5,9 +5,9 @@ build the configure script before you can configure and make the sources. This
 step has to be done only once however. After subsequent updates from git through
 "git pull" you will need to only make "make clean" and then "make" again.
 
-In order to build the configure script run the following commands:
+In order to build the configure script run the script
 
-autoreconf -i -s
+./reconfigure.sh
 
 which executes a series of commands that generate the configure script at the
 end. Now run the configure script. Run "./configure --help" to get a list of
@@ -76,33 +76,33 @@ consequences. It's not for the faint hearted.
 
 ********** Examples for configure **********
 
-Some examples of how to configure MondoSCF. The following configure commands
+Some examples of how to configure FreeON. The following configure commands
 work. In order to use the PHiPAC (P3) optimized dgemms, add --enable-phipac to
 the configure command line.
 
 (1)
-./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/FreeON
 
 (2)
-./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" FFLAGS="-O0 -g" FCFLAGS="-O0 -g" CFLAGS="-O0 -g" --prefix=/tmp/Mondo
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linuxi386-gfortran-4.2.1 -lblas_linuxi386-gfortran-4.2.1" FFLAGS="-O0 -g" FCFLAGS="-O0 -g" CFLAGS="-O0 -g" --prefix=/tmp/FreeON
 
 (3)
-./configure FC=ifort F77=ifort CC=icc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+./configure FC=ifort F77=ifort CC=icc LDFLAGS=-L/usr/local/lapack/lib LIBS="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023" CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/FreeON
 
 (4)
-./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/FreeON
 
 (5)
-./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --with-hdf5=/usr/local/hdf-1.4.5-post2
+./configure FC=/usr/local/gcc-4.2.1/bin/gfortran F77=/usr/local/gcc-4.2.1/bin/gfortran CC=/usr/local/gcc-4.2.1/bin/gcc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/FreeON --with-hdf5=/usr/local/hdf-1.4.5-post2
 
 (6)
-./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/Mondo --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer" FFLAGS="-O3 -fomit-frame-pointer" FCFLAGS="-O3 -fomit-frame-pointer" --prefix=/tmp/FreeON --disable-internal-lapack --with-lapack=/usr/local/lapack --with-lapacklibs="-llapack_linux-ifort-10.0.023 -lblas_linux-ifort-10.0.023"
 
 (7)
-./configure CC=/usr/local/gcc-4.2.4/bin/gcc FC=/usr/local/gcc-4.2.4/bin/gfortran F77=/usr/local/gcc-4.2.4/bin/gfortran CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" -disable-static-binaries --prefix=/tmp/Mondo
+./configure CC=/usr/local/gcc-4.2.4/bin/gcc FC=/usr/local/gcc-4.2.4/bin/gfortran F77=/usr/local/gcc-4.2.4/bin/gfortran CFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" FCFLAGS="-O3 -msse -msse2 -mfpmath=sse -ftree-vectorize" -disable-static-binaries --prefix=/tmp/FreeON
 
 (8)
-./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer -xP" FFLAGS="-O3 -fomit-frame-pointer -xP" FCFLAGS="-O3 -fomit-frame-pointer -xP" --prefix=/tmp/Mondo
+./configure FC=ifort F77=ifort CC=icc CFLAGS="-O3 -fomit-frame-pointer -xP" FFLAGS="-O3 -fomit-frame-pointer -xP" FCFLAGS="-O3 -fomit-frame-pointer -xP" --prefix=/tmp/FreeON
 
 
 
@@ -112,12 +112,12 @@ Some timing information:
 
 Running examples/MD/MD-H2.inp on MacBook Pro 1 (Core Duo) 2.16GHz:
 
-time (MondoSCF MD-H2.inp > /dev/null)
+time (FreeON MD-H2.inp > /dev/null)
 
 gfortran 4.2.1, compiled with (1): real 10m39.911s user 9m46.164s sys 0m15.639s
 ifort 10.0.023, compiled with (3): real  9m10.989s user 8m14.051s sys 0m16.881s
 
-time ( MondoSCF MD-H2-BO.inp > /dev/null )
+time ( FreeON MD-H2-BO.inp > /dev/null )
 
 gfortran 4.2.4, compiled with (7): real 3m24.527s user  2m56.920s sys 0m24.685s
 ifort 10.1.015, compiled with (4): real 2m37.621s user  2m8.828s  sys 0m23.801s
@@ -133,15 +133,15 @@ make -j3: real 15m35.510s user 23m38.548s sys 1m49.434s
 
 
 
-Running Mondo:
+Running FreeON:
 
-Mondo accepts several command line arguments. The most basic mode of running
-Mondo is by specifying only the input file:
+FreeON accepts several command line arguments. The most basic mode of running
+FreeON is by specifying only the input file:
 
-MondoSCF something.inp
+FreeON something.inp
 
 The output files will be named based on the name of the input file with an added
 PID (process ID) tag. One can also specify exactly what the output filename
-should be called by running Mondo in this way:
+should be called by running FreeON in this way:
 
-MondoSCF something.inp something.out something.log something.geometries
+FreeON something.inp something.out something.log something.geometries
