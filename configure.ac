@@ -789,8 +789,8 @@ AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 AC_MSG_CHECKING([for internal hdf5])
 AC_ARG_ENABLE([internal-hdf5],
   [AS_HELP_STRING([--disable-internal-hdf5],
-  [Disable the internal hdf5 (1.4.5-post2) and use your own. You might have to
-   use the option --with-hdf5=DIR to specify where exactly your hdf5 library
+  [Disable the internal hdf5 (1.8.3) and use your own. You might have to use
+   the option --with-hdf5=DIR to specify where exactly your hdf5 library
    is.])],
   [use_internal_hdf5="${enableval}"],
   [use_internal_hdf5="yes"])
@@ -801,7 +801,7 @@ AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 if test "${use_internal_hdf5}" = "yes"; then
 
   AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library.])
-  AC_CONFIG_SUBDIRS([MondoMods/hdf5])
+  AC_CONFIG_SUBDIRS([MondoMods/hdf5-1.8.3])
 
 else
 
@@ -1063,7 +1063,7 @@ else
   AC_MSG_NOTICE([Using external lapack library])
 fi
 if test "${use_internal_hdf5}" = "yes"; then
-  AC_MSG_NOTICE([Using internal hdf5 (1.8.0)])
+  AC_MSG_NOTICE([Using internal hdf5 (1.8.3)])
 else
   AC_MSG_NOTICE([Using external hdf5 library])
 fi

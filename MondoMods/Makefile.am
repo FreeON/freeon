@@ -5,11 +5,11 @@ INTERNAL_LAPACK_DIRS = lapack
 endif
 
 if INTERNAL_HDF5
-INTERNAL_HDF5_DIRS = hdf5
-HDF5_INCLUDES = -I$(srcdir)/hdf5/src -I$(builddir)/hdf5/src
+INTERNAL_HDF5_DIRS = hdf5-1.8.3
+HDF5_INCLUDES = -I$(srcdir)/hdf5-1.8.3/src -I$(builddir)/hdf5-1.8.3/src
 endif
 
-DIST_SUBDIRS = lapack hdf5
+DIST_SUBDIRS = lapack hdf5-1.8.3
 SUBDIRS      = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
 
 if USE_DYNAMIC_LINKING
