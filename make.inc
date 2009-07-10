@@ -17,7 +17,7 @@ LDADD_INTERNAL_LAPACK = \
 endif
 
 if INTERNAL_HDF5
-LDADD_INTERNAL_HDF5 = $(top_builddir)/MondoMods/hdf5/src/libhdf5.la
+LDADD_INTERNAL_HDF5 = $(top_builddir)/MondoMods/hdf5-1.8.3/src/libhdf5.la
 endif
 
 LDADD_MONDOMODS = $(top_builddir)/MondoMods/libMondoMods.la
