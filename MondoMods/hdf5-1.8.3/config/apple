@@ -1,0 +1,72 @@
+#							-*- shell-script -*-
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+
+
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# The default compiler is `gcc'
+if test "X-" = "X-$CC"; then
+    CC=gcc
+    CC_BASENAME=gcc
+fi
+
+# Figure out compiler flags
+. $srcdir/config/gnu-flags
+
+# The default Fortran 90 compiler
+if test "X-" = "X-$FC"; then
+    # Assume G95 compiler
+    FC=g95
+    FC_BASENAME=g95
+fi
+
+case $FC_BASENAME in
+    xlf) 
+        F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
+        FCFLAGS="$FCFLAGS ${F9XSUFFIXFLAG}"
+        H5_FCFLAGS="$H5_FCFLAGS -qmoddir=./ "
+        FSEARCH_DIRS="-I./ -I../src"
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g"
+        f9x_flags_set=yes
+        ;;
+
+    f95)
+
+        F9XSUFFIXFLAG=""
+# We force compiler to use upper case for external names 
+# (just in case since this should be a default EIP)
+        H5_FCFLAGS="$H5_FCFLAGS"
+        FSEARCH_DIRS=""
+        DEBUG_FCFLAGS="-g"
+        PROD_FCFLAGS="-O"
+        PROFILE_FCFLAGS="-g -pg"
+        f9x_flags_set=yes
+
+        ;;
+esac  
+# Fortran doesn't support shared libraries
+# Works with static executable only.
+if test "X-" != "X-$enable_fortran"; then
+        echo '    warning: shared libraries are not supported with Fortran'
+        echo '    disabling shared libraries'
+        enable_shared="no"
+fi
+
