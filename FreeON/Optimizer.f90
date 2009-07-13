@@ -44,12 +44,10 @@ MODULE Optimizer
   IMPLICIT NONE
 
 CONTAINS
-  !=====================================================================================
-  !
-  !=====================================================================================
+
   SUBROUTINE Descender(C)
     TYPE(Controls) :: C
-    !----------------------------------------------------------------------------------!
+
     IF(C%Opts%Coordinates==GRAD_CART_OPT) THEN
       IF(C%Opts%DoGDIIS)THEN
          ! Follow extrapolated Cartesian gradient down hill
@@ -221,7 +219,7 @@ CONTAINS
     CALL PPrint(GMMerge,TRIM(Nams%SCF_NAME)//'.merged',Geo,Opts%GeomPrint,Gradients_O=Gradients_O)
     CALL Delete(GMMerge)
   END SUBROUTINE MergePrintClones
-  !=====================================================================================
+
   SUBROUTINE GDicer(C)
     TYPE(Controls)         :: C
     TYPE(DBL_VECT)         :: GradMax,GradRMS,Grad
@@ -321,6 +319,7 @@ CONTAINS
     CALL Delete(GradMax)
     CALL Delete(GradRMS)
   END SUBROUTINE GDicer
+
   !=====================================================================================
   ! EXTRAPOLATED GEOMETRY STEP USEING GDIIS WITH CARTESIAN FORCE ERRORS
   !=====================================================================================
@@ -612,7 +611,7 @@ CONTAINS
      TYPE(INT_VECT) :: Convgd
      TYPE(INTC)     :: IntCES
      TYPE(State)    :: StateO
-     !
+
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
      ! Set geometry optimization controls
