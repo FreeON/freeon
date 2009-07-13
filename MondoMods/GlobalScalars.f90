@@ -24,12 +24,6 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
-!#define OLD_STYLE
-
-#if defined OLD_STYLE
-#warning using old constants (buggy)
-#endif
-
 MODULE GlobalScalars
   IMPLICIT NONE
   !-------------------------------------------------------------------------------
@@ -62,16 +56,6 @@ MODULE GlobalScalars
   !-------------------------------------------------------------------------------
   !  Pi and related numbers
   !
-#if defined OLD_STYLE
-  REAL(DOUBLE), PARAMETER :: Pi         = 3.1415926535897932385D0  ! Pi
-  REAL(DOUBLE), PARAMETER :: Pi2        = 9.8696044010893586188D0  ! Pi^2
-  REAL(DOUBLE), PARAMETER :: Pi3        = 3.1006276680299820175D1  ! Pi^3
-  REAL(DOUBLE), PARAMETER :: SqrtPi     = 1.7724538509055160273D0  ! Sqrt(Pi)
-  REAL(DOUBLE), PARAMETER :: TwoPi      = 6.2831853071795864770D0  ! 2*Pi
-  REAL(DOUBLE), PARAMETER :: TwoPi5x2   = 3.4986836655249725693D1  ! 2*Pi^(5/2)
-  REAL(DOUBLE), PARAMETER :: Sqrt2Pi5x2 = 2.4739429451193148050D1  ! Sqrt(2)*Pi^(5/2)
-  REAL(DOUBLE), PARAMETER :: DegToRad   = 1.7453292519943295769D-2 ! Pi/180
-#else
   REAL(DOUBLE), PARAMETER :: Pi         = 3.1415926535897932385D0  ! Pi
   REAL(DOUBLE), PARAMETER :: Pi2        = Pi*Pi                    ! Pi^2
   REAL(DOUBLE), PARAMETER :: Pi3        = Pi*Pi*Pi                 ! Pi^3
@@ -81,7 +65,6 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: Sqrt2Pi5x2 = 2.4739429451193148050D1  ! Sqrt(2)*Pi^(5/2)
   REAL(DOUBLE), PARAMETER :: DegToRad   = Pi/180.0D0               ! Pi/180
   REAL(DOUBLE), PARAMETER :: RadToDeg   = 1/DegToRad               ! 1/(Pi/180)
-#endif
   !-------------------------------------------------------------------------------
   !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
   !
@@ -99,17 +82,6 @@ MODULE GlobalScalars
   !-------------------------------------------------------------------------------
   ! MD and others
   !
-#if defined OLD_STYLE
-  REAL(DOUBLE), PARAMETER :: KelvinToHartrees=3.166815208D-6    ! Boltz's Const. in Hartrees/Kelvin (NIST)
-  REAL(DOUBLE), PARAMETER :: HartreesToKelvin=3.157746614D+5
-  REAL(DOUBLE), PARAMETER :: InternalTimeToSeconds=1.032749873D-15
-  REAL(DOUBLE), PARAMETER :: InternalTimeToFemtoseconds=1.032749873D0
-  REAL(DOUBLE), PARAMETER :: SecondsToInternalTime=0.968288669D+15
-  REAL(DOUBLE), PARAMETER :: FemtosecondsToInternalTime=0.968288669D0
-  REAL(DOUBLE), PARAMETER :: BohrsToAngstroms=0.5291772083D0    ! AU ->  Angstronms
-  REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0  ! Angstronms -> AU
-  REAL(DOUBLE), PARAMETER :: GPaToAU=3.398928928849693861282D-5 ! GPa -> AU
-#else
   REAL(DOUBLE), PARAMETER :: KelvinToHartrees=3.166815208D-6    ! Boltz's Const. in Hartrees/Kelvin (NIST)
   REAL(DOUBLE), PARAMETER :: HartreesToKelvin=One/KelvinToHartrees
   REAL(DOUBLE), PARAMETER :: InternalTimeToSeconds=1.032749873D-15
@@ -119,7 +91,6 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: AUToAngstroms=0.52917720859D0      ! AU ->  Angstroms
   REAL(DOUBLE), PARAMETER :: AngstromsToAU=One/AUToAngstroms    ! Angstroms -> AU
   REAL(DOUBLE), PARAMETER :: GPaToAU=3.398928928849693861282D-5 ! GPa -> AU
-#endif
   ! These constants not yet verified:
   REAL(DOUBLE), PARAMETER :: au2eV=27.21139613182D0           ! au to eV
   REAL(DOUBLE), PARAMETER :: eV2au=1/au2eV                    ! eV to au

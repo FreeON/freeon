@@ -532,7 +532,7 @@ MODULE PrettyPrint
           GAA=AUToAngstroms/InternalTimeToFemtoseconds
        ELSEIF(TRIM(Gradients)=='Gradients')THEN
           AA=AUToAngstroms
-          GAA=au2eV*AUToAngstroms
+          GAA=au2eV/AUToAngstroms
        ELSE
           AA=AUToAngstroms
        ENDIF
