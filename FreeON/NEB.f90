@@ -382,12 +382,26 @@ CONTAINS
     REAl(DOUBLE)                                               :: UMin, UMax, UMinus, UPlus, fMax
     REAL(DOUBLE)                                               :: magnitude, RMinusMagnitude, RPlusMagnitude
     REAL(DOUBLE)                                               :: fMagnitude, fSpringMagnitude
+    REAL(DOUBLE), DIMENSION(G%Clones+1)                        :: RMSd
     REAL(DOUBLE), DIMENSION(3, G%Clone(0)%NAtms, 0:G%Clones+1) :: N
     REAL(DOUBLE), DIMENSION(3, G%Clone(0)%NAtms)               :: fParallel, fPerpendicular, RMinus, RPlus, fSpring
 
     ! Set the tangent for the endpoints.
     N(:,:,0) = G%Clone(1)%Carts%D - G%Clone(0)%Carts%D
     N(:,:,G%Clones+1) = G%Clone(G%Clones+1)%Carts%D - G%Clone(G%Clones)%Carts%D
+
+    DO iCLONE = 1, G%Clones+1
+      RMSd(iCLONE) = Zero
+      DO j = 1, G%Clone(iCLONE)%NAtms
+        RMSd(iCLONE) = RMSd(iCLONE) &
+                     + (G%Clone(iCLONE)%Carts%D(1, j) - G%Clone(iCLONE-1)%Carts%D(1, j))**2 &
+                     + (G%Clone(iCLONE)%Carts%D(2, j) - G%Clone(iCLONE-1)%Carts%D(2, j))**2 &
+                     + (G%Clone(iCLONE)%Carts%D(3, j) - G%Clone(iCLONE-1)%Carts%D(3, j))**2
+      ENDDO
+      RMSd(iCLONE) = SQRT(RMSd(iCLONE)/G%Clone(iCLONE)%NAtms)
+      CALL MondoLog(DEBUG_NONE, "NEBForce", "RMSd("//TRIM(IntToChar(iCLONE-1))// &
+        " --> "//TRIM(IntToChar(iCLONE))//") = "//TRIM(DblToChar(RMSd(iCLONE)*AUToAngstroms))//" A")
+    ENDDO
 
     ! Find the climbing image (in case we want to use it).
     UMax = G%Clone(1)%ETotal
