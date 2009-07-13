@@ -652,16 +652,11 @@ CONTAINS
        ! Backtracking can modify geometries too, so this is the right place
        ! to print geometries cooresponding to the energies that have just been computed
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-       !
-       IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
-         DO iCLONE=0,C%Geos%Clones+1
-           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-         ENDDO
-       ELSE
-         DO iCLONE=1,C%Geos%Clones
-           CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-         ENDDO
-       ENDIF
+
+       DO iCLONE = LBOUND(C%Geos%Clone, 1), UBOUND(C%Geos%Clone, 1)
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+       ENDDO
+
        ! Loop over all clones and modify geometries.
        ConvgdAll=1
        DO iCLONE=1,C%Geos%Clones
@@ -670,12 +665,12 @@ CONTAINS
          CALL MondoLog(DEBUG_NONE, "IntOpt", "Convgd("//TRIM(IntToChar(iCLONE))//") = "//TRIM(IntToChar(Convgd%I(iCLONE))))
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO
-       !
+
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) THEN
           CALL NEBPurify(C%Geos)
           CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
        ENDIF
-       !
+
        ! Fill in new geometries
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
@@ -683,10 +678,12 @@ CONTAINS
           CALL MkGeomPeriodic(C%Geos%Clone(iCLONE),C%Sets%BSets(iCLONE,iBAS), &
                               C%Opts%Thresholds(iBAS)%Dist,C%Opts%Thresholds(iBAS)%TwoE)
        ENDDO
+
        ! Bump counter and archive new geometries
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
+
        ! Continue optimization?
        IF(ConvgdAll==1) EXIT
 
@@ -1422,9 +1419,7 @@ CONTAINS
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
      CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,DoNEB,Dimen)
    END SUBROUTINE SetGeOpCtrl
-!
-!---------------------------------------------------------------
-!
+
    SUBROUTINE OptSingleMol(GOpt,Nams,Opts,GMLoc,Convgd,iGEO,iCLONE)
      TYPE(GeomOpt)        :: GOpt
      TYPE(FileNames)      :: Nams
@@ -1526,9 +1521,7 @@ CONTAINS
      CALL Delete(GradNew)
      CALL Delete(RefXYZ)
    END SUBROUTINE OptSingleMol
-!
-!-------------------------------------------------------------------
-!
+
    SUBROUTINE SetGConvCrit(GConv,Hess,AccL,NatmsLoc,NSteps)
      TYPE(GConvCrit) :: GConv
      TYPE(Hessian)   :: Hess
