@@ -66,4 +66,9 @@ uninstall-local:
 h5redeploy: h5redeploy.in
 	@cp $(srcdir)/$@.in $@
 
+EXTRA_DIST = \
+  h5redeploy.in \
+  testh5repart.sh \
+  testh5mkgrp.sh
+
 include $(top_srcdir)/config/conclude.am

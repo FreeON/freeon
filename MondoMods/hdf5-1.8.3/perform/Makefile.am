@@ -62,4 +62,17 @@ iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)
 
+EXTRA_DIST = \
+  build_h5perf_alone.sh \
+  build_h5perf_serial_alone.sh \
+  gen_report.pl \
+  pio_perf.h \
+  pio_standalone.c \
+  pio_standalone.h \
+  pio_timer.h \
+  sio_perf.h \
+  sio_standalone.c \
+  sio_standalone.h \
+  sio_timer.h
+
 include $(top_srcdir)/config/conclude.am

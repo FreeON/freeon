@@ -3928,31 +3928,40 @@ fi
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
+                 config/Makefile
                  src/Makefile
+                 bin/Makefile
                  test/Makefile
                  test/testerror.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile
                  tools/Makefile
+                 tools/testfiles/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
                  tools/h5dump/testh5dumpxml.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
+                 tools/h5import/testfiles/Makefile
                  tools/h5diff/Makefile
+                 tools/h5diff/testfiles/Makefile
                  tools/h5jam/Makefile
+                 tools/h5jam/testfiles/Makefile
                  tools/h5jam/testh5jam.sh
                  tools/h5repack/Makefile
+                 tools/h5repack/testfiles/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
                  tools/h5copy/Makefile
+                 tools/h5copy/testfiles/Makefile
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
+                 tools/h5stat/testfiles/Makefile
                  examples/Makefile
                  examples/testh5cc.sh
                  c++/Makefile
@@ -3972,6 +3981,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/src/Makefile
                  hl/test/Makefile
                  hl/tools/Makefile
+                 hl/tools/testfiles/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/examples/Makefile
                  hl/c++/Makefile

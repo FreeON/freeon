@@ -44,4 +44,8 @@ LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 CHECK_CLEANFILES+=*.h5
 CHECK_CLEANFILES+=*.gif
 
+EXTRA_DIST = \
+  gif.h \
+  h52giftest.sh
+
 include $(top_srcdir)/config/conclude.am

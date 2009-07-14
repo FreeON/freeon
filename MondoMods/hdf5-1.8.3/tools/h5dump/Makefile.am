@@ -42,4 +42,7 @@ LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 CHECK_CLEANFILES+=*.h5 *.bin
 DISTCLEANFILES=testh5dump.sh
 
+EXTRA_DIST = \
+  h5dump.h
+
 include $(top_srcdir)/config/conclude.am

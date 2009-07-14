@@ -88,5 +88,23 @@ mountexample: mountexample.f90
 compound: compound.f90
 ph5example: ph5example.f90
 
+EXTRA_DIST = \
+  attrexample.f90 \
+  compound.f90 \
+  dsetexample.f90 \
+  fileexample.f90 \
+  groupexample.f90 \
+  grpdsetexample.f90 \
+  grpit.f90 \
+  grpsexample.f90 \
+  hyperslab.f90 \
+  mountexample.f90 \
+  ph5example.f90 \
+  refobjexample.f90 \
+  refregexample.f90 \
+  rwdsetexample.f90 \
+  selectele.f90 \
+  testh5fc.sh
+
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

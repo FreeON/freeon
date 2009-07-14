@@ -204,4 +204,13 @@ HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
                      H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo  \
                      H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
+EXTRA_DIST = \
+  H5_DBLE_InterfaceExclude.f90 \
+  H5f90.h \
+  H5f90i.h \
+  H5f90i_gen.h \
+  H5f90proto.h \
+  H5fort_type_defines.h \
+  hdf5_fortrandll.def
+
 include $(top_srcdir)/config/conclude.am

@@ -109,7 +109,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
             tfile[1-4].h5 th5s[1-3].h5 lheap.h5 fheap.h5 ohdr.h5 stab.h5 \
             extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 dt_arith[1-2] \
             links.h5 links[0-6]*.h5 extlinks[0-9].h5 tmp \
-	    big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
+            big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
             stdio.h5 sec2.h5 dtypes[1-8].h5 dt_arith[1-2].h5 tattr.h5        \
             tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
@@ -123,6 +123,41 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
             unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
             objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5
+
+EXTRA_DIST = \
+  be_data.h5 \
+  be_extlink1.h5 \
+  be_extlink2.h5 \
+  cache_common.h \
+  corrupt_stab_msg.h5 \
+  deflate.h5 \
+  family_v16_00000.h5 \
+  family_v16_00001.h5 \
+  family_v16_00002.h5 \
+  family_v16_00003.h5 \
+  fill_old.h5 \
+  gen_filters.c \
+  group_old.h5 \
+  h5test.h \
+  le_data.h5 \
+  le_extlink1.h5 \
+  le_extlink2.h5 \
+  mergemsg.h5 \
+  noencoder.h5 \
+  tarrold.h5 \
+  tbad_msg_count.h5 \
+  tbogus.h5 \
+  test_filters_be.hdf5 \
+  test_filters_le.hdf5 \
+  testerror.sh \
+  testfiles \
+  testhdf5.h \
+  th5s.h5 \
+  tlayouto.h5 \
+  tmtimen.h5 \
+  tmtimeo.h5 \
+  ttsafe.h \
+  vms_data.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
