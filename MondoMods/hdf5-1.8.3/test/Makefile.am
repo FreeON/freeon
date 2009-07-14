@@ -63,9 +63,9 @@ BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow
 
-if BUILD_ALL_CONDITIONAL
-  noinst_PROGRAMS=$(BUILD_ALL_PROGS)
-endif
+#if BUILD_ALL_CONDITIONAL
+#  noinst_PROGRAMS=$(BUILD_ALL_PROGS)
+#endif
 
 # The libh5test library provides common support code for the tests.
 noinst_LTLIBRARIES=libh5test.la
