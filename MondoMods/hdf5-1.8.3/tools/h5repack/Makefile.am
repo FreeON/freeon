@@ -20,6 +20,8 @@
 
 include $(top_srcdir)/config/commence.am
 
+DIST_SUBDIRS = testfiles
+
 # Include src, test, and tools/lib directories
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
@@ -57,5 +59,8 @@ h5repack.sh.chkexe_: h5repacktst.chkexe_
 # copied to the testfiles/ directory if update is required.
 CHECK_CLEANFILES+=*.h5 *.bin
 DISTCLEANFILES=h5repack.sh
+
+EXTRA_DIST = \
+  h5repack.h
 
 include $(top_srcdir)/config/conclude.am

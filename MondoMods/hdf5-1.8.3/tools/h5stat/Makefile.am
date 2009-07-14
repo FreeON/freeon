@@ -20,6 +20,8 @@
 
 include $(top_srcdir)/config/commence.am
 
+DIST_SUBDIRS = testfiles
+
 # Include src directory
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
@@ -48,5 +50,8 @@ DISTCLEANFILES=testh5stat.sh
 
 # All programs rely on hdf5 library and h5tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+EXTRA_DIST = \
+  testh5stat.sh
 
 include $(top_srcdir)/config/conclude.am

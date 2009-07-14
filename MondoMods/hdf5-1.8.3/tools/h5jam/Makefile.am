@@ -20,6 +20,8 @@
 
 include $(top_srcdir)/config/commence.am
 
+DIST_SUBDIRS = testfiles
+
 # Include src and tools/lib directories
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 

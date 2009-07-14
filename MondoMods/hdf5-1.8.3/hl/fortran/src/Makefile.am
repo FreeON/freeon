@@ -79,4 +79,8 @@ H5LTff.lo:          $(srcdir)/H5LTff.f90
 H5IMff.lo:          $(srcdir)/H5IMff.f90
 H5TBff.lo:          $(srcdir)/H5TBff.f90
 
+EXTRA_DIST = \
+  H5IMcc.h \
+  H5LTf90proto.h
+
 include $(top_srcdir)/config/conclude.am

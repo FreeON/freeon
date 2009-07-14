@@ -67,6 +67,28 @@ CHECK_CLEANFILES+=$(EXTLINK_DIRS)
 # Example directory
 EXAMPLEDIR=$(docdir)/hdf5/examples/c
 
+EXTRA_DIST = \
+  Attributes.txt \
+  h5_attribute.c \
+  h5_chunk_read.c \
+  h5_compound.c \
+  h5_drivers.c \
+  h5_dtransform.c \
+  h5_elink_unix2win.c \
+  h5_extend_write.c \
+  h5_extlink.c \
+  h5_group.c \
+  h5_interm_group.c \
+  h5_mount.c \
+  h5_read.c \
+  h5_ref2reg.c \
+  h5_reference.c \
+  h5_select.c \
+  h5_shared_mesg.c \
+  h5_write.c \
+  ph5example.c \
+  testh5cc.sh
+
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it
 # will try to build them with the normal C compiler, not h5cc.  This is

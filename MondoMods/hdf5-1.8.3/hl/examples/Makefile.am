@@ -85,5 +85,30 @@ if BUILD_SZIP_CONDITIONAL
 export LD_LIBRARY_PATH=$(LL_PATH)
 endif
 
+EXTRA_DIST = \
+  ex_ds1.c \
+  ex_image1.c \
+  ex_image2.c \
+  ex_lite1.c \
+  ex_lite2.c \
+  ex_lite3.c \
+  ex_table_01.c \
+  ex_table_02.c \
+  ex_table_03.c \
+  ex_table_04.c \
+  ex_table_05.c \
+  ex_table_06.c \
+  ex_table_07.c \
+  ex_table_08.c \
+  ex_table_09.c \
+  ex_table_10.c \
+  ex_table_11.c \
+  ex_table_12.c \
+  image24pixel.txt \
+  image8.txt \
+  pal_rgb.h \
+  ptExampleFL.c \
+  ptExampleVL.c
+
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

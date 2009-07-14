@@ -56,5 +56,16 @@ extend_ds: $(srcdir)/extend_ds.cpp
 chunks: $(srcdir)/chunks.cpp
 h5group: $(srcdir)/h5group.cpp
 
+EXTRA_DIST = \
+  chunks.cpp \
+  compound.cpp \
+  create.cpp \
+  expected.out \
+  extend_ds.cpp \
+  h5group.cpp \
+  readdata.cpp \
+  testh5c++.sh \
+  writedata.cpp
+
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

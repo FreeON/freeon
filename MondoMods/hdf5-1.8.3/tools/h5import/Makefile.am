@@ -20,6 +20,8 @@
 
 include $(top_srcdir)/config/commence.am
 
+DIST_SUBDIRS = testfiles
+
 # Include src and tools/lib directories
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
@@ -36,5 +38,9 @@ bin_PROGRAMS=h5import
 
 # All programs depend on the main hdf5 library and the tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+EXTRA_DIST = \
+  h5import.h \
+  h5importtestutil.sh
 
 include $(top_srcdir)/config/conclude.am

@@ -74,7 +74,7 @@ endif
 
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
           $(HDF5_HL_DIR) perform
-DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
+DIST_SUBDIRS = src bin test testpar tools . c++ fortran hl perform examples config
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
@@ -193,6 +193,8 @@ check-vfd:
 # The simple solution is to override the dependency Automake supplies
 # for config.status so that it will never be regenerated.
 $(top_builddir)/config.status:
+
+EXTRA_DIST = README.txt
 
 # Don't include conclude.am in root Makefile; tests target needs to
 # recurse into perform directory as well as reguar subdirs.

@@ -33,8 +33,26 @@ TEST_PROG=test_lite test_image test_table test_ds test_packet
 check_PROGRAMS=$(TEST_PROG)
 
 # Temporary files.  These files are the ones created by running `make test'.
-CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-6].h5 test_image[1-3].h5 \
+CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-7].h5 test_image[1-3].h5 \
         test_lite[1-2].h5 test_table.h5 test_packet_table.h5                \
         test_packet_compress.h5
+
+EXTRA_DIST = \
+  dsdata.txt \
+  dslat.txt \
+  dslon.txt \
+  dtype_file.txt \
+  dtype_file_readable.txt \
+  earth.pal \
+  h5hltest.h \
+  image24pixel.txt \
+  image24plane.txt \
+  image8.txt \
+  pal_rgb.h \
+  sepia.pal \
+  test_table_be.hdf5 \
+  test_table_cray.hdf5 \
+  test_table_le.hdf5 \
+  usa.wri
 
 include $(top_srcdir)/config/conclude.am

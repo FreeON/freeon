@@ -24,4 +24,6 @@ include $(top_srcdir)/config/commence.am
 # All subdirectories
 SUBDIRS=gif2h5
 
+DIST_SUBDIRS = gif2h5 testfiles
+
 include $(top_srcdir)/config/conclude.am

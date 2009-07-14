@@ -105,11 +105,92 @@ include_HEADERS = hdf5.h H5api_adpt.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
-	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
+        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h
+
+EXTRA_DIST = \
+  H5ACpkg.h \
+  H5ACprivate.h \
+  H5Apkg.h \
+  H5Aprivate.h \
+  H5B2pkg.h \
+  H5B2private.h \
+  H5B2public.h \
+  H5Bpkg.h \
+  H5Bprivate.h \
+  H5Bpublic.h \
+  H5CSprivate.h \
+  H5Cpkg.h \
+  H5Cprivate.h \
+  H5Dpkg.h \
+  H5Dprivate.h \
+  H5Edefin.h \
+  H5Einit.h \
+  H5Epkg.h \
+  H5Eprivate.h \
+  H5Eterm.h \
+  H5FDpkg.h \
+  H5FDprivate.h \
+  H5FDwindows.c \
+  H5FDwindows.h \
+  H5FLprivate.h \
+  H5FOprivate.h \
+  H5FSpkg.h \
+  H5FSprivate.h \
+  H5FSpublic.h \
+  H5Fpkg.h \
+  H5Fprivate.h \
+  H5Gpkg.h \
+  H5Gprivate.h \
+  H5HFpkg.h \
+  H5HFprivate.h \
+  H5HFpublic.h \
+  H5HGpkg.h \
+  H5HGprivate.h \
+  H5HGpublic.h \
+  H5HLpkg.h \
+  H5HLprivate.h \
+  H5HLpublic.h \
+  H5HPprivate.h \
+  H5Ipkg.h \
+  H5Iprivate.h \
+  H5Lpkg.h \
+  H5Lprivate.h \
+  H5MFpkg.h \
+  H5MFprivate.h \
+  H5MMprivate.h \
+  H5MPpkg.h \
+  H5MPprivate.h \
+  H5Opkg.h \
+  H5Oprivate.h \
+  H5Oshared.h \
+  H5Ppkg.h \
+  H5Pprivate.h \
+  H5RCprivate.h \
+  H5RSprivate.h \
+  H5Rpkg.h \
+  H5Rprivate.h \
+  H5SLprivate.h \
+  H5SMpkg.h \
+  H5SMprivate.h \
+  H5STprivate.h \
+  H5Spkg.h \
+  H5Sprivate.h \
+  H5TSprivate.h \
+  H5Tpkg.h \
+  H5Tprivate.h \
+  H5Vprivate.h \
+  H5WBprivate.h \
+  H5Zpkg.h \
+  H5Zprivate.h \
+  H5config.h \
+  H5err.txt \
+  H5private.h \
+  H5vers.txt \
+  H5win32defs.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

@@ -43,4 +43,8 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 CHECK_CLEANFILES+=MPItest.h5 Para*.h5 CacheTestDummy.h5
 DISTCLEANFILES=go Makefile testph5.sh
 
+EXTRA_DIST = \
+  testpar.h \
+  testphdf5.h
+
 include $(top_srcdir)/config/conclude.am
