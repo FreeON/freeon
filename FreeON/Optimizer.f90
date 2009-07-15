@@ -507,6 +507,11 @@ CONTAINS
          ENDDO
        ENDDO
 
+       CALL MondoLog(DEBUG_NONE, "Optimizer", "Step "//TRIM(chGEO) &
+            //', Grms = '//TRIM(DblToShrtChar(RMSGrad))        &
+            //', Gmax = '//TRIM(DblToShrtChar(MAXGrad))        &
+            //', StepLength = '//TRIM(DblToShrtChar(StepLength*AUToAngstroms))//" A")
+
        ! Purify NEB images
        CALL NEBPurify(C%Geos)
        ! Archive geometries
@@ -532,6 +537,10 @@ CONTAINS
          Converged=.FALSE.
          Mssg="Descent "//TRIM(chGEO)
        ENDIF
+
+       CALL MondoLog(DEBUG_NONE, "Optimizer", TRIM(Mssg)//', relative error in E = '// &
+         TRIM(DblToShrtChar(RelErrE)), "SteepStep (NEB)")
+
     ELSE
        ! Take some steps
        StepLength=2.D0*AngstromsToAU
@@ -584,22 +593,28 @@ CONTAINS
              CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg)
           ENDIF
        ENDDO
+
+       Mssg=TRIM(Mssg)//', dE = '//TRIM(DblToShrtChar(RelErrE)) &
+            //', Grms = '//TRIM(DblToShrtChar(RMSGrad))        &
+            //', Gmax = '//TRIM(DblToShrtChar(MAXGrad))        &
+            //', StepLength = '//TRIM(DblToShrtChar(StepLength*AUToAngstroms))//" A"
+       CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg, "SteepStep")
+
     ENDIF
-    Mssg=TRIM(Mssg)//', dE = '//TRIM(DblToShrtChar(RelErrE)) &
-         //', Grms = '//TRIM(DblToShrtChar(RMSGrad))        &
-         //', Gmax = '//TRIM(DblToShrtChar(MAXGrad))        &
-         //', StepLength = '//TRIM(DblToShrtChar(StepLength*AUToAngstroms))//" A"
-    CALL MondoLog(DEBUG_NONE, "Optimizer", Mssg, "SteepStep")
+
     ! Clean up
     DO iCLONE=1,C%Geos%Clones
        CALL Delete(Carts(iCLONE))
     ENDDO
+
     ! Keep geometry
     CALL GeomArchive(cBAS,cGEO,C%Nams,C%Opts,C%Sets,C%Geos)
+
     ! Store the current minimum energies ...
     DO iCLONE=1,C%Geos%Clones
        Energies(iClone)=C%Geos%Clone(iClone)%ETotal
     ENDDO
+
   END FUNCTION SteepStep
 
    SUBROUTINE IntOpt(C)
