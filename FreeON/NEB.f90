@@ -36,13 +36,16 @@ MODULE NEB
   ! Email: graeme@lanl.gov
   !
   ! NEB References:
-  !  H. Jonsson, G. Mills, and K.W. Jacobsen, "Nudged elastic band method
-  !    for finding minimum energy paths of transitions," in Classical and
-  !    Quantum Dynamics in Condensed Phase Simulations, edited by B.J.Berne,
-  !    G. Ciccotti, and D. F. Coker (World Scientific, Singapore, 1998), p.385
+  !  H. Jonsson, G. Mills, and K.W. Jacobsen, "Nudged elastic band method for
+  !    finding minimum energy paths of transitions," in Classical and Quantum
+  !    Dynamics in Condensed Phase Simulations, edited by B.J.Berne, G.
+  !    Ciccotti, and D. F. Coker (World Scientific, Singapore, 1998), p.385
   !  G. Henkelman, B.P. Uberuaga, and H. Jonsson, "A climbing-image NEB method
-  !     for finding saddle points and minimum energy paths", J. Chem. Phys,
-  !     v113, 9901 (2000).
+  !    for finding saddle points and minimum energy paths", J. Chem. Phys, v113,
+  !    9901 (2000).
+  !  G. Henkelman, H. Jonsson, "Improved tangent estimate in the nudged elastic
+  !    band method for finding minimum energy paths and saddle points", J. Chem.
+  !    Phys. 113, 9978 (2000)
   !
   !===============================================================================
   USE InOut
@@ -396,13 +399,9 @@ CONTAINS
     REAl(DOUBLE)                                               :: UMin, UMax, UMinus, UPlus, fMax
     REAL(DOUBLE)                                               :: magnitude, RMinusMagnitude, RPlusMagnitude
     REAL(DOUBLE)                                               :: fMagnitude, fSpringMagnitude
-    REAL(DOUBLE)                                               :: RMSd
+    REAL(DOUBLE)                                               :: RMSd, theta, thetaNormMinus, thetaNormPlus
     REAL(DOUBLE), DIMENSION(3, G%Clone(0)%NAtms, 0:G%Clones+1) :: N
-    REAL(DOUBLE), DIMENSION(3, G%Clone(0)%NAtms)               :: fParallel, fPerpendicular, RMinus, RPlus, fSpring
-
-    ! Set the tangent for the endpoints.
-    N(:,:,0) = G%Clone(1)%Carts%D - G%Clone(0)%Carts%D
-    N(:,:,G%Clones+1) = G%Clone(G%Clones+1)%Carts%D - G%Clone(G%Clones)%Carts%D
+    REAL(DOUBLE), DIMENSION(3, G%Clone(0)%NAtms)               :: fParallel, fPerpendicular, RMinus, RPlus, fSpring, fDNEB
 
     DO iCLONE = 1, G%Clones+1
       RMSd = Zero
@@ -415,7 +414,9 @@ CONTAINS
       RMSd = SQRT(RMSd/G%Clone(iCLONE)%NAtms)
       CALL MondoLog(DEBUG_NONE, "NEBForce", "RMSd("//TRIM(IntToChar(iCLONE-1))// &
         " --> "//TRIM(IntToChar(iCLONE))//") = "//TRIM(DblToChar(RMSd*AUToAngstroms))//" A")
+    ENDDO
 
+    DO iCLONE = 1, G%Clones+1
       RMSd = Zero
       DO j = 1, G%Clone(iCLONE)%NAtms
         RMSd = RMSd &
@@ -427,6 +428,37 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "NEBForce", "RMSd(0 --> "// &
         TRIM(IntToChar(iCLONE))//") = "//TRIM(DblToChar(RMSd*AUToAngstroms))//" A")
     ENDDO
+
+    DO iCLONE = 1, G%Clones
+      theta = Zero
+      thetaNormMinus = Zero
+      thetaNormPlus = Zero
+      DO j = 1, G%Clone(iCLONE)%NAtms
+        theta = theta &
+          + (G%Clone(iCLONE-1)%Carts%D(1, j)-G%Clone(iCLONE)%Carts%D(1, j)) &
+          * (G%Clone(iCLONE+1)%Carts%D(1, j)-G%Clone(iCLONE)%Carts%D(1, j)) &
+          + (G%Clone(iCLONE-1)%Carts%D(2, j)-G%Clone(iCLONE)%Carts%D(2, j)) &
+          * (G%Clone(iCLONE+1)%Carts%D(2, j)-G%Clone(iCLONE)%Carts%D(2, j)) &
+          + (G%Clone(iCLONE-1)%Carts%D(3, j)-G%Clone(iCLONE)%Carts%D(3, j)) &
+          * (G%Clone(iCLONE+1)%Carts%D(3, j)-G%Clone(iCLONE)%Carts%D(3, j))
+        thetaNormMinus = thetaNormMinus &
+          + (G%Clone(iCLONE-1)%Carts%D(1, j)-G%Clone(iCLONE)%Carts%D(1, j))**2 &
+          + (G%Clone(iCLONE-1)%Carts%D(2, j)-G%Clone(iCLONE)%Carts%D(2, j))**2 &
+          + (G%Clone(iCLONE-1)%Carts%D(3, j)-G%Clone(iCLONE)%Carts%D(3, j))**2
+        thetaNormPlus = thetaNormPlus &
+          + (G%Clone(iCLONE+1)%Carts%D(1, j)-G%Clone(iCLONE)%Carts%D(1, j))**2 &
+          + (G%Clone(iCLONE+1)%Carts%D(2, j)-G%Clone(iCLONE)%Carts%D(2, j))**2 &
+          + (G%Clone(iCLONE+1)%Carts%D(3, j)-G%Clone(iCLONE)%Carts%D(3, j))**2
+      ENDDO
+      theta = theta/SQRT(thetaNormMinus*thetaNormPlus)
+      CALL MondoLog(DEBUG_NONE, "NEBForce", "theta ("//TRIM(IntToChar(iCLONE-1))//" - "// &
+        TRIM(IntToChar(iCLONE))//" - "//TRIM(IntToChar(iCLONE+1))//") = "// &
+        TRIM(FltToShrtChar(ACOS(theta)*RadToDeg))//" degrees")
+    ENDDO
+
+    ! Set the tangent for the endpoints.
+    N(:,:,0) = G%Clone(1)%Carts%D - G%Clone(0)%Carts%D
+    N(:,:,G%Clones+1) = G%Clone(G%Clones+1)%Carts%D - G%Clone(G%Clones)%Carts%D
 
     ! Find the climbing image (in case we want to use it).
     UMax = G%Clone(1)%ETotal
@@ -471,8 +503,9 @@ CONTAINS
         ENDIF
       ELSE
         ! At an extremum of energy, interpolate the tangent linearly with the
-        ! energy
-
+        ! energy. This is done so that the direction of the tangent does not
+        ! change abruptly, improving the stability of the NEB method and
+        ! avoiding artificial kinks in high force regions along the path.
         CALL MondoLog(DEBUG_NONE, "NEBForce", "UPMinus == UPPlus", "Clone "//TRIM(IntToChar(iCLONE)))
 
         UMinus = G%Clone(iCLONE-1)%ETotal - G%Clone(iCLONE)%ETotal
@@ -593,7 +626,7 @@ CONTAINS
       IF(O%NEBClimb .AND. iCLONE == UMaxClone)THEN
         ! If this is the climbing image, the force along the tangent is
         ! inverted.
-        CALL MondoLog(DEBUG_NONE, "NEBForce", "Climbing Image "//TRIM(IntToChar(iCLONE)))
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "no spring force for climbing image", "Clone "//TRIM(IntToChar(iCLONE)))
         G%Clone(iCLONE)%Gradients%D = G%Clone(iCLONE)%Gradients%D + 2.0*fParallel
       ELSE
         ! The non-climbing image.
@@ -612,6 +645,8 @@ CONTAINS
 
           ! Double-nudging?
           IF(O%NEBDoubleNudge) THEN
+          ELSE
+            fDNEB(:, j) = Zero
           ENDIF
 
         ENDDO
@@ -622,6 +657,15 @@ CONTAINS
             TRIM(DblToChar(fSpring(1,j)*au2eV/AUToAngstroms))//" "// &
             TRIM(DblToChar(fSpring(2,j)*au2eV/AUToAngstroms))//" "// &
             TRIM(DblToChar(fSpring(3,j)*au2eV/AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+
+        CALL MondoLog(DEBUG_NONE, "NEBForce", "DNEB spring force (in eV/A)", "Clone "//TRIM(IntToChar(iCLONE)))
+        DO j = 1, G%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "NEBForce", "F["//TRIM(IntToChar(j))//"] = "// &
+            TRIM(DblToChar(fDNEB(1,j)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToChar(fDNEB(2,j)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToChar(fDNEB(3,j)*au2eV/AUToAngstroms)), &
             "Clone "//TRIM(IntToChar(iCLONE)))
         ENDDO
 
