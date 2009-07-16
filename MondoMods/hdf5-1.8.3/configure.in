@@ -609,6 +609,7 @@ export AR
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 
+AC_PROG_LIBTOOL
 
 dnl ----------------------------------------------------------------------
 dnl Check that the tr utility is working properly.
