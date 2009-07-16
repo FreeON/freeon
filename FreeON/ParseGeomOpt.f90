@@ -207,7 +207,7 @@ MODULE ParseGeomOpt
      CALL MondoLog(DEBUG_NONE, "FreeON", "using MaxAngle = "//TRIM(FltToChar(GOpt%CoordCtrl%MaxAngle*RadToDeg))//" degrees")
 
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
-       GOpt%CoordCtrl%MaxStre=0.1D0*AngstromsToAU
+       GOpt%CoordCtrl%MaxStre=0.3D0*AngstromsToAU
      ELSE
        GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAU
      ENDIF

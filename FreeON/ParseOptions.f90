@@ -672,12 +672,14 @@ CONTAINS
 
     ! Use the climbing image?
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_CLIMB))THEN
+      CALL MondoLog(DEBUG_NONE, "ParseNEB", "using climbing image")
       NEBClimb=.TRUE.
     ELSE
       NEBClimb=.FALSE.
     ENDIF
 
     IF(OptKeyQ(Inp, NEB_OPTION, NEB_DOUBLE_NUDGE)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseNEB", "double nudging")
       DoubleNudge = .TRUE.
     ELSE
       DoubleNudge = .FALSE.
