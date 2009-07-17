@@ -6,6 +6,12 @@ import optparse, sys, re, tempfile
 
 parser = optparse.OptionParser()
 
+parser.add_option("--pretend",
+    help = "Just check, but not change any files",
+    action = "store_true",
+    default = False,
+    dest = "pretend")
+
 options, arguments = parser.parse_args()
 
 if len(arguments) == 0:
@@ -28,12 +34,12 @@ for file in arguments:
     lineNumber += 1
     if re.compile("[ \t]+$").search(line):
       fileNeedsFixing = True
-      print("trailing whitespace in file " + file + " on line " + str(lineNumber) + ": " + line.strip())
+      print("trailing whitespace in file " + file + " on line " + str(lineNumber))
 
-  if fileNeedsFixing:
+  if not options.pretend and fileNeedsFixing:
     print("fixing file " + file)
     fd = open(file, "w")
     for line in lines:
-      line = re.sub("[ \t\n]+$", "", line)
+      line = re.sub("\s+$", "", line)
       print >> fd, line
     fd.close()
