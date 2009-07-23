@@ -112,10 +112,13 @@ CONTAINS
 
     ! Print the starting coordinates and energy
     IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    CALL PPrint(C%Geos%Clone(0),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-    CALL PPrint(C%Geos%Clone(C%Geos%Clones+1),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+    DO iCLONE = GBeg, GEnd
+      CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
+    ENDDO
 
-    CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+    IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB)THEN
+      CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+    ENDIF
 
     iBAS=C%Sets%NBSets
     IStart=iGEO
@@ -740,7 +743,7 @@ CONTAINS
     TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones)          :: Carts
     REAL(DOUBLE),   DIMENSION(C%Geos%Clones)          :: Energies
     REAL(DOUBLE)                                      :: Alpha, StepLength, ActualStepLength, RelErrE, MAXGrad, RMSGrad, ETest, GTest
-    REAL(DOUBLE), DIMENSION(3, C%Geos%Clone(0)%NAtms) :: deltaR
+    REAL(DOUBLE), DIMENSION(3, C%Geos%Clone(1)%NAtms) :: deltaR
     INTEGER                                           :: cBAS,cGEO,iSTEP,iCLONE,iATOM,AL,K
     INTEGER, PARAMETER                                :: MaxSTEP = 4
     LOGICAL                                           :: Converged,ECnvrgd,XCnvrgd,GCnvrgd

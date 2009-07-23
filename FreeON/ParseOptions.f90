@@ -74,10 +74,12 @@ CONTAINS
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps, O%Coordinates, O%Grad, O%DoGDIIS, &
                         O%SteepStep, O%CartesianOptimizerMethod)
-    ! Parse for NEB options.
-    CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
-                  O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
-                  N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
+    IF(O%Grad == GRAD_TS_SEARCH_NEB) THEN
+      ! Parse for NEB options.
+      CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
+                    O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
+                    N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
+    ENDIF
     ! Parse Optimizer options.
     CALL ParseOptimizer(O%ConjugateGradientMaxMove, O%ConjugateGradientdR)
     ! Parse SCF convergence overides and DMPOrder
