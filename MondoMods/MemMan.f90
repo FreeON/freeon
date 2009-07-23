@@ -4,7 +4,9 @@ MODULE MemMan
   USE GlobalCharacters
   USE GlobalObjects
   USE ProcessControl
+
   IMPLICIT NONE
+
   INTERFACE New
      MODULE PROCEDURE New_INT_VECT, New_INT_RNK2, &
                       New_INT_RNK3, New_INT_RNK4, &
@@ -208,6 +210,7 @@ CONTAINS
     INTEGER                                  :: Dbls
     INTEGER,DIMENSION(2)                     :: M,N
     INTEGER,OPTIONAL,DIMENSION(2),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1), M(2):N(2)),STAT=MemStatus)
@@ -657,29 +660,30 @@ CONTAINS
   SUBROUTINE New_CRDS(A)
     TYPE(CRDS),INTENT(INOUT)       :: A
     CALL AllocChk(A%Alloc)
+    CALL New(A%ETotalPerSCF, 256, 0)
     CALL New(A%BndBox,(/3,2/))
     CALL New(A%PBC)
+    ! We are not allocating OvCells and InCells here since we don't know
+    ! yet what NCells is going to be.
+    CALL Initialize(A%OvCells)
+    CALL Initialize(A%InCells)
     CALL New(A%AtNum,A%NAtms)
     CALL New(A%AtTyp,A%NAtms)
     CALL New(A%AtNam,A%NAtms)
-    CALL New(A%DoFreq,A%NAtms)
     CALL New(A%AtMss,A%NAtms)
     CALL New(A%CConstrain,A%NAtms)
+    CALL New(A%DoFreq,A%NAtms)
     CALL New(A%Carts,(/3,A%NAtms/))
+    CALL New(A%BoxCarts,(/3,A%NAtms/))
     CALL New(A%Velocity,(/3,A%NAtms/))
     CALL New(A%Gradients,(/3,A%NAtms/))
     CALL New(A%Fext,(/3,A%NAtms/))
-    CALL New(A%BoxCarts,(/3,A%NAtms/))
     CALL New(A%Displ,(/3,A%NAtms/))
     CALL New(A%PBCDispl,(/3,3/))
-    CALL New(A%ETotalPerSCF, 256, 0)
-
-    ! We are not allocating OvCells and InCells here since we don't know
-    ! yet what NCells is going to be.
 
     A%ETotalPerSCF%D = 0.0D0
-    A%Alloc=ALLOCATED_TRUE
-    A%ETotal=Zero
+    A%ETotal = Zero
+    A%Alloc = ALLOCATED_TRUE
   END SUBROUTINE New_CRDS
 
   SUBROUTINE Initialize_CRDS(A)
@@ -702,6 +706,7 @@ CONTAINS
     CALL Initialize(A%Fext)
     CALL Initialize(A%Displ)
     CALL Initialize(A%PBCDispl)
+    A%NAtms = Zero
     A%Alloc = ALLOCATED_FALSE
   END SUBROUTINE Initialize_CRDS
 
@@ -1617,12 +1622,11 @@ CONTAINS
   !--------------------------------------------------------------------------
   ! Create the CellSet
   !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCELL)
-    TYPE(CellSet)                    :: CS
-    INTEGER                          :: NCELL
+  SUBROUTINE New_CellSet(CS, NCells)
+    TYPE(CellSet), INTENT(INOUT) :: CS
+    INTEGER, INTENT(IN)          :: NCells
 
-    !CALL MondoLog(DEBUG_NONE, "New_CellSet", "allocating new CellSet")
-    CS%NCells = NCELL
+    CS%NCells = NCells
     CALL New(CS%CellCarts,(/3,CS%NCells/))
     CS%Alloc=ALLOCATED_TRUE
 
@@ -1630,6 +1634,7 @@ CONTAINS
 
   SUBROUTINE Initialize_CellSet(A)
     TYPE(CellSet), INTENT(INOUT) :: A
+
     CALL Initialize(A%CellCarts)
     A%Alloc = ALLOCATED_FALSE
   END SUBROUTINE Initialize_CellSet

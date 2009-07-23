@@ -32,20 +32,22 @@ MODULE SetXYZ
                        Set_INT_VECT_EQ_INT_SCLR,  &
                        Set_DBL_VECT_EQ_DBL_SCLR,  &
                        Set_INT_VECT_EQ_INT_VECT,  &
-                       Set_DBL_VECT_EQ_DBL_VECT
+                       Set_DBL_VECT_EQ_DBL_VECT,  &
+                       Set_DBL_RNK2_EQ_DBL_RNK2,  &
+                       Set_CHR10_VECT_EQ_CHR10_VECT, &
+                       Set_CellSet_EQ_CellSet
    END INTERFACE
-!
+
    EXTERNAL bcsr_to_dens
+
    CONTAINS
+
 !======================================================================
 !    Set Vector to
 !======================================================================
-!
-!--------------------------------------------------------------------
-!
      SUBROUTINE Set_PBCInfo_EQ_PBCInfo(PBCNew,PBCOld)
        TYPE(PBCInfo) :: PBCNew,PBCOld
-       !
+
        IF(.NOT.AllocQ(PBCNew%Alloc)) CALL Halt('PBCNew needs to be allocated.')
        PBCNew%Dimen=PBCOld%Dimen
        PBCNew%PFFMaxEll=PBCOld%PFFMaxEll
@@ -66,9 +68,7 @@ MODULE SetXYZ
        PBCNew%InvBoxSh%D=PBCOld%InvBoxSh%D
        PBCNew%LatFrc%D=PBCOld%LatFrc%D
      END SUBROUTINE Set_PBCInfo_EQ_PBCInfo
-!
-!--------------------------------------------------------------------
-!
+
      SUBROUTINE VecToAng(PBC,A,B,C,Alpha,Beta,Gamma)
         TYPE(PBCInfo)               :: PBC
         REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
@@ -81,6 +81,7 @@ MODULE SetXYZ
         Alpha = PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3)+PBC%BoxShape%D(2,2)*PBC%BoxShape%D(2,3)
         Alpha = ACOS(Alpha/(B*C))/DegToRad
       END SUBROUTINE VecToAng
+
 !======================================================================
 !     Copy a Timer
 !======================================================================
@@ -91,6 +92,7 @@ MODULE SetXYZ
          T2%Wall=T1%Wall
          T2%FLOP=T1%FLOP
       END SUBROUTINE Set_TIME_EQ_TIME
+
 !======================================================================
 ! Set a Column-vector from BCSR form to DBL_VECT form
 !
@@ -113,6 +115,7 @@ MODULE SetXYZ
           ENDDO
         ENDDO
       END SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect
+
 !======================================================================
 !     Copy a BCSR matrix
 !======================================================================
@@ -888,23 +891,54 @@ MODULE SetXYZ
       !===============================================================================
       SUBROUTINE Set_CRDS_EQ_CRDS(G1,G2)
         TYPE(CRDS) :: G1,G2
+
+        IF(.NOT. AllocQ(G1%Alloc)) THEN
+          CALL Halt("[Set_CRDS_EQ_CRDS] G1 is not allocated")
+        ENDIF
+
         G1%InAU=G2%InAU
         G1%NElec=G2%NElec
         G1%Ordrd=G2%Ordrd
+        G1%Confg=G2%Confg
+        G1%NElec=G2%NElec
         G1%Multp=G2%Multp
         G1%TotCh=G2%TotCh
         G1%NAlph=G2%NAlph
         G1%NBeta=G2%NBeta
-        G1%Carts%D=G2%Carts%D
-        G1%Carts%D=G2%Carts%D
+        G1%ETotal=G2%ETotal
+        CALL SetEq(G1%ETotalPerSCF, G2%ETotalPerSCF)
+        G1%GradRMS=G2%GradRMS
+        G1%GradMax=G2%GradMax
+        G1%Unstable=G2%Unstable
+        CALL SetEq(G1%BndBox, G2%BndBox)
+        CALL SetEq(G1%PBC, G2%PBC)
+        ! A freshly New'ed CRDS will not have properly allocated OvCells and
+        ! InCells. We need to be careful.
+        IF(AllocQ(G2%OvCells%Alloc) .AND. .NOT. AllocQ(G1%OvCells%Alloc)) THEN
+          CALL New(G1%OvCells, G2%OvCells%NCells)
+        ENDIF
+        IF(AllocQ(G2%InCells%Alloc) .AND. .NOT. AllocQ(G1%InCells%Alloc)) THEN
+          CALL New(G1%InCells, G2%InCells%NCells)
+        ENDIF
+        CALL SetEq(G1%OvCells, G2%OvCells)
+        CALL SetEq(G1%InCells, G2%InCells)
         G1%NAtms=G2%NAtms
         G1%Nkind=G2%Nkind
-        G1%AtNum%D=G2%AtNum%D
-        G1%AtMss%D=G2%AtMss%D
-        G1%AtNam%C=G2%AtNam%C
-        G1%AtTyp%I=G2%AtTyp%I
-        G1%CConstrain%I=G2%CConstrain%I
-        ! CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
+        CALL SetEq(G1%AtNum, G2%AtNum)
+        CALL SetEq(G1%AtTyp, G2%AtTyp)
+        CALL SetEq(G1%AtNam, G2%AtNam)
+        CALL SetEq(G1%AtMss, G2%AtMss)
+        CALL SetEq(G1%CConstrain, G2%CConstrain)
+        CALL SetEq(G1%DoFreq, G2%DoFreq)
+        CALL SetEq(G1%Carts, G2%Carts)
+        CALL SetEq(G1%BoxCarts, G2%BoxCarts)
+        CALL SetEq(G1%Velocity, G2%Velocity)
+        CALL SetEq(G1%Gradients, G2%Gradients)
+        CALL SetEq(G1%Fext, G2%Fext)
+        CALL SetEq(G1%Displ, G2%Displ)
+        CALL SetEq(G1%PBCDispl, G2%PBCDispl)
+        G1%LatticeOnly=G2%LatticeOnly
+        G1%AltCount=G2%AltCount
       END SUBROUTINE Set_CRDS_EQ_CRDS
 
       SUBROUTINE Set_Bond_EQ_Bond(A,IA,B,IB)
@@ -915,15 +949,13 @@ MODULE SetXYZ
         A%Length%D(IA)=B%Length%D(IB)
         A%Type%C(IA)=B%Type%C(IB)
       END SUBROUTINE Set_Bond_EQ_Bond
-!
-!---------------------------------------------------------------
-!
+
       SUBROUTINE  Set_BMATR_EQ_BMATR(A,B)
         TYPE(BMATR) :: A,B
         INTEGER     :: NIntC
-!
+
         NIntC=SIZE(B%IB%I,1)
-!
+
         IF(.NOT.AllocQ(A%Alloc)) THEN
           CALL New(A,NIntC)
         ELSE
@@ -1043,5 +1075,42 @@ MODULE SetXYZ
        ENDDO
      ENDIF
    END SUBROUTINE CartRNK2ToCartRNK1
-!===============================================================
+
+   SUBROUTINE Set_DBL_RNK2_EQ_DBL_RNK2(A, B)
+    TYPE(DBL_RNK2), INTENT(IN)    :: B
+    TYPE(DBL_RNK2), INTENT(INOUT) :: A
+
+    IF(SIZE(A%D, 1) /= SIZE(B%D, 1)) THEN
+      WRITE(*,*) "SIZE(A%D, 1) = ", SIZE(A%D, 1)
+      WRITE(*,*) "SIZE(B%D, 1) = ", SIZE(B%D, 1)
+      CALL Halt("size mismatch in dimension 1")
+    ENDIF
+
+    IF(SIZE(A%D, 2) /= SIZE(B%D, 2)) THEN
+      WRITE(*,*) "SIZE(A%D, 2) = ", SIZE(A%D, 2)
+      WRITE(*,*) "SIZE(B%D, 2) = ", SIZE(B%D, 2)
+      CALL Halt("size mismatch in dimension 2")
+    ENDIF
+
+    A%D = B%D
+   END SUBROUTINE Set_DBL_RNK2_EQ_DBL_RNK2
+
+   SUBROUTINE Set_CHR10_VECT_EQ_CHR10_VECT(A, B)
+    TYPE(CHR10_VECT), INTENT(IN)    :: B
+    TYPE(CHR10_VECT), INTENT(INOUT) :: A
+
+    A%C = B%C
+   END SUBROUTINE Set_CHR10_VECT_EQ_CHR10_VECT
+
+   SUBROUTINE Set_CellSet_EQ_CellSet(A, B)
+    TYPE(CellSet), INTENT(IN)    :: B
+    TYPE(CellSet), INTENT(INOUT) :: A
+
+    IF(AllocQ(B%Alloc)) THEN
+      A%NCells = B%NCells
+      A%Radius = B%Radius
+      CALL SetEq(A%CellCarts, B%CellCarts)
+    ENDIF
+   END SUBROUTINE Set_CellSet_EQ_CellSet
+
 END MODULE

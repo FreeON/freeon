@@ -69,9 +69,9 @@ MODULE DerivedTypes
 !  DOUBLE RANK2 ARRAY
 !
    TYPE DBL_RNK2
-      INTEGER                              :: Alloc  !-- Is the array allocated yet?
+      INTEGER                                  :: Alloc  !-- Is the array allocated yet?
 #ifdef POINTERS_IN_DERIVED_TYPES
-      REAL(DOUBLE),POINTER,DIMENSION(:,:) :: D      !-- Rank 2 array of doubles
+      REAL(DOUBLE),POINTER,DIMENSION(:,:)      :: D      !-- Rank 2 array of doubles
 #else
       REAL(DOUBLE),ALLOCATABLE, DIMENSION(:,:) :: D      !-- Rank 2 array of doubles
 #endif

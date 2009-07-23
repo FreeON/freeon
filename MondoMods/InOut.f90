@@ -1381,7 +1381,7 @@ CONTAINS
   !     Put a coordinate set
 
   SUBROUTINE Put_CRDS(GM,Tag_O)
-    TYPE(CRDS),               INTENT(IN) :: GM
+    TYPE(CRDS), INTENT(INOUT)            :: GM
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     INTEGER                              :: iAtom
 
@@ -2912,17 +2912,17 @@ CONTAINS
       CALL Get(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
       CALL Get(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
       ! Allocate a new CellSet with the information just read.
-      CALL New_CellSet(CS,CS%NCells)
+      CALL New(CS,CS%NCells)
       CALL Get(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O)
     ELSE
       CALL Get(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
       CALL Get(CS%NCells   ,'cell_number',Tag_O=Tag_O)
       ! Allocate a new CellSet with the information just read.
-      CALL New_CellSet(CS,CS%NCells)
+      CALL New(CS,CS%NCells)
       CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
     ENDIF
   END SUBROUTINE Get_CellSet
-  !
+
   SUBROUTINE Get_Sp1x1(A,Tag,Symb_O)
     TYPE(Sp1x1)               :: A
     CHARACTER(LEN=*)          :: Tag
