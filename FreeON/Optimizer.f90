@@ -54,7 +54,29 @@ CONTAINS
          CALL GDicer(C)
       ELSE
          ! Follow Cartesian gradient down hill
-         CALL SteepD(C)
+         SELECT CASE(C%Opts%CartesianOptimizerMethod)
+         CASE(GRAD_OPTIMIZE_SD_VALUE)
+           CALL SteepD(C)
+
+         CASE(GRAD_OPTIMIZE_CG_VALUE)
+           CALL ConjugateGradient(C)
+
+         CASE(GRAD_OPTIMIZE_GLOBAL_CG_VALUE)
+           CALL ConjugateGradient(C, Global_O = .TRUE.)
+
+         CASE(GRAD_OPTIMIZE_LBFGS_VALUE)
+           CALL LBFGS(C)
+
+         CASE(GRAD_OPTIMIZE_GLOBAL_LBFGS_VALUE)
+           CALL GlobalLBFGS(C)
+
+         CASE DEFAULT
+           CALL MondoLog(DEBUG_NONE, "Optimizer", &
+             "illegal value for cartesian optimizer method: "// &
+             TRIM(IntToChar(C%Opts%CartesianOptimizerMethod)))
+           CALL Halt("fatal")
+
+         END SELECT
       ENDIF
     ELSE
       CALL IntOpt(C)
@@ -76,15 +98,18 @@ CONTAINS
        GBeg=1
        GEnd=C%Geos%Clones
     ENDIF
+
     ! initial geometry
     iGEO=C%Stat%Previous%I(3)
     NatmsLoc=C%Geos%Clone(1)%Natms
+
     ! Build the guess
     DO iBAS=1,C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
+
     ! Print the starting coordinates and energy
     IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
     CALL PPrint(C%Geos%Clone(0),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
@@ -157,9 +182,299 @@ CONTAINS
           C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
        ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
-!       CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
+       ! CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
     ENDDO
   END SUBROUTINE SteepD
+
+  SUBROUTINE ConjugateGradient(C, Global_O)
+    TYPE(Controls)                              :: C
+    LOGICAL, OPTIONAL                           :: Global_O
+    LOGICAL                                     :: Global, Converged
+    INTEGER                                     :: iGeo, iStart, iBAS, iCLONE, iAtom
+    REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: oldConfiguration, oldGradient
+    REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: direction
+    REAL(DOUBLE)                                :: norm, beta, stepsize, fPrime, f
+
+    ! Set default behavior.
+    IF(PRESENT(Global_O)) THEN
+      Global = Global_O
+    ELSE
+      Global = .FALSE.
+    ENDIF
+
+    IF(Global) THEN
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "global optimization")
+    ENDIF
+
+    ! initial geometry
+    iGEO = C%Stat%Previous%I(3)
+
+    ! Build the guess
+    DO iBAS=1,C%Sets%NBSets
+      CALL GeomArchive(iBAS, iGEO, C%Nams, C%Opts, C%Sets, C%Geos)
+      CALL BSetArchive(iBAS, C%Nams, C%Opts, C%Geos, C%Sets, C%MPIs)
+      CALL SCF(iBAS, iGEO, C)
+    ENDDO
+
+    ! Hardcode stepsize.
+    CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "initiating conjugate gradient optimization")
+
+    ! Set some variables correctly.
+    iBAS = C%Sets%NBSets
+    iStart = iGEO
+
+    ! Calculate the gradient.
+    CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating initial force")
+    CALL Force(iBAS, iGEO, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
+    ! Allocate memory for search direction.
+    ALLOCATE(direction(3, C%Geos%Clone(1)%NAtms, C%Geos%Clones))
+
+    ! Initialize the search direction.
+    DO iCLONE = 1, C%Geos%Clones
+      DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+        direction(1, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)
+        direction(2, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)
+        direction(3, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)
+      ENDDO
+    ENDDO
+
+    ! Normalize the search direction.
+    IF(Global) THEN
+      norm = Zero
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          norm = norm + direction(1, iAtom, iCLONE)**2 + direction(2, iAtom, iCLONE)**2 + direction(3, iAtom, iCLONE)**2
+        ENDDO
+      ENDDO
+      direction = direction/SQRT(norm)
+    ELSE
+      DO iCLONE = 1, C%Geos%Clones
+        norm = Zero
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          norm = norm + direction(1, iAtom, iCLONE)**2 + direction(2, iAtom, iCLONE)**2 + direction(3, iAtom, iCLONE)**2
+        ENDDO
+        direction(:, :, iCLONE) = direction(:, :, iCLONE)/SQRT(norm)
+      ENDDO
+    ENDIF
+
+    DO iCLONE = 1, C%Geos%Clones
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "search direction", "Clone "//TRIM(IntToChar(iCLONE)))
+      DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", &
+          TRIM(DblToChar(direction(1, iAtom, iCLONE)))//" "// &
+          TRIM(DblToChar(direction(2, iAtom, iCLONE)))//" "// &
+          TRIM(DblToChar(direction(3, iAtom, iCLONE))), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
+    ENDDO
+
+    ! Allocate memory for trial step.
+    ALLOCATE(oldConfiguration(3, C%Geos%Clone(1)%NAtms, C%Geos%Clones))
+    ALLOCATE(oldGradient(3, C%Geos%Clone(1)%NAtms, C%Geos%Clones))
+
+    ! Minimize.
+    DO iGEO = iStart, C%Opts%NSteps, 2
+
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "Geometry "// &
+        TRIM(IntToChar(iGEO))//" out of a maximum of "//TRIM(IntToChar(C%Opts%NSteps)))
+
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB)THEN
+        DO iCLONE = 0, C%Geos%Clones+1
+          CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = C%Nams%GFile, &
+                      Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Clone_O = iCLONE, &
+                      Gradients_O = 'Gradients')
+        ENDDO
+
+        CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
+      ELSE
+        DO iCLONE=1,C%Geos%Clones
+          CALL PPrint(C%Geos%Clone(iCLONE), TRIM(C%Nams%GFile)//IntToChar(iCLONE), Geo, C%Opts%GeomPrint)
+        ENDDO
+      ENDIF
+
+      ! Instead of a line search we will guess the step size based on a local
+      ! approximation of the curvature.
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          oldConfiguration(1, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)
+          oldConfiguration(2, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)
+          oldConfiguration(3, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)
+          oldGradient(1, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)
+          oldGradient(2, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)
+          oldGradient(3, iAtom, iCLONE) = C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)
+
+          C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) + C%Opts%ConjugateGradientdR*direction(1, iAtom, iCLONE)
+          C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) + C%Opts%ConjugateGradientdR*direction(2, iAtom, iCLONE)
+          C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) + C%Opts%ConjugateGradientdR*direction(3, iAtom, iCLONE)
+        ENDDO
+      ENDDO
+
+      ! Calculate the gradient for the trial step.
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating trial step force")
+      CALL GeomArchive(iBAS, iGEO+1, C%Nams, C%Opts, C%Sets, C%Geos)
+      CALL SCF(iBAS, iGEO+1, C)
+      CALL Force(iBAS, iGEO+1, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
+      ! Calculate an approximate step towards the minimum using Newton's method.
+      IF(Global) THEN
+        fPrime = Zero
+        f = Zero
+        DO iCLONE = 1, C%Geos%Clones
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE))*direction(1, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE))*direction(2, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))*direction(3, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            f = f - oldGradient(1, iAtom, iCLONE)*direction(1, iAtom, iCLONE)
+            f = f - oldGradient(2, iAtom, iCLONE)*direction(2, iAtom, iCLONE)
+            f = f - oldGradient(3, iAtom, iCLONE)*direction(3, iAtom, iCLONE)
+          ENDDO
+        ENDDO
+
+        stepsize = f/fPrime
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
+        IF(ABS(stepsize) > C%Opts%ConjugateGradientMaxMove) THEN
+          stepsize = C%Opts%ConjugateGradientMaxMove*SIGN(1.0D0, stepsize)
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
+        ENDIF
+
+        DO iCLONE = 1, C%Geos%Clones
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+          ENDDO
+        ENDDO
+      ELSE
+        DO iCLONE = 1, C%Geos%Clones
+          fPrime = Zero
+          f = Zero
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE))*direction(1, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE))*direction(2, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))*direction(3, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
+            f = f - oldGradient(1, iAtom, iCLONE)*direction(1, iAtom, iCLONE)
+            f = f - oldGradient(2, iAtom, iCLONE)*direction(2, iAtom, iCLONE)
+            f = f - oldGradient(3, iAtom, iCLONE)*direction(3, iAtom, iCLONE)
+          ENDDO
+
+          stepsize = f/fPrime
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
+          IF(ABS(stepsize) > C%Opts%ConjugateGradientMaxMove) THEN
+            stepsize = C%Opts%ConjugateGradientMaxMove*SIGN(1.0D0, stepsize)
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
+          ENDIF
+
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+          ENDDO
+        ENDDO
+      ENDIF
+
+      ! Calculate the gradient for the final step.
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating final step force")
+      CALL GeomArchive(iBAS, iGEO+2, C%Nams, C%Opts, C%Sets, C%Geos)
+      CALL SCF(iBAS, iGEO+2, C)
+      CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
+      ! Calculate new search direction. We follow Polak-Ribi\`{e}re.
+      IF(Global) THEN
+        norm = Zero
+        beta = Zero
+        DO iCLONE = 1, C%Geos%Clones
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            norm = norm &
+              + oldGradient(1, iAtom, iCLONE)*oldGradient(1, iAtom, iCLONE) &
+              + oldGradient(2, iAtom, iCLONE)*oldGradient(2, iAtom, iCLONE) &
+              + oldGradient(3, iAtom, iCLONE)*oldGradient(3, iAtom, iCLONE)
+            beta = beta &
+              + C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE)) &
+              + C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE)) &
+              + C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))
+          ENDDO
+        ENDDO
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)))
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)))
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)))
+        beta = MAX(Zero, beta/norm)
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)))
+
+        DO iCLONE = 1, C%Geos%Clones
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            direction(1, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom) + beta*direction(1, iAtom, iCLONE)
+            direction(2, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom) + beta*direction(2, iAtom, iCLONE)
+            direction(3, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom) + beta*direction(3, iAtom, iCLONE)
+          ENDDO
+        ENDDO
+      ELSE
+        DO iCLONE = 1, C%Geos%Clones
+          norm = Zero
+          beta = Zero
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            norm = norm &
+              + oldGradient(1, iAtom, iCLONE)*oldGradient(1, iAtom, iCLONE) &
+              + oldGradient(2, iAtom, iCLONE)*oldGradient(2, iAtom, iCLONE) &
+              + oldGradient(3, iAtom, iCLONE)*oldGradient(3, iAtom, iCLONE)
+            beta = beta &
+              + C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE)) &
+              + C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE)) &
+              + C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))
+          ENDDO
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)))
+          beta = MAX(Zero, beta/norm)
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)), "Clone "//TRIM(IntToChar(iCLONE)))
+
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            direction(1, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom) + beta*direction(1, iAtom, iCLONE)
+            direction(2, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom) + beta*direction(2, iAtom, iCLONE)
+            direction(3, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom) + beta*direction(3, iAtom, iCLONE)
+          ENDDO
+        ENDDO
+      ENDIF
+
+      DO iCLONE = 1, C%Geos%Clones
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "new search direction", "Clone "//TRIM(IntToChar(iCLONE)))
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", &
+          TRIM(DblToChar(direction(1, iAtom, iCLONE)))//" "// &
+          TRIM(DblToChar(direction(2, iAtom, iCLONE)))//" "// &
+          TRIM(DblToChar(direction(3, iAtom, iCLONE))), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Free memory.
+    DEALLOCATE(direction)
+    DEALLOCATE(oldConfiguration)
+
+    IF(Converged) THEN
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we have converged")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we did not converge")
+    ENDIF
+
+  END SUBROUTINE ConjugateGradient
+
+  SUBROUTINE LBFGS(C)
+    TYPE(Controls) :: C
+
+    CALL MondoLog(DEBUG_NONE, "LBFGS", "[FIXME]")
+    CALL Halt("Fatal")
+
+  END SUBROUTINE LBFGS
+
+  SUBROUTINE GlobalLBFGS(C)
+    TYPE(Controls) :: C
+
+    CALL MondoLog(DEBUG_NONE, "GlobalLBFGS", "[FIXME]")
+    CALL Halt("Fatal")
+
+  END SUBROUTINE GlobalLBFGS
 
   SUBROUTINE MergePrintClones(Geos,Nams,Opts,Gradients_O)
     TYPE(Geometries)                     :: Geos
@@ -629,11 +944,14 @@ CONTAINS
 
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
+
      ! Set geometry optimization controls
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,iGEO)
+
      ! initial geometry
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      CALL MondoLog(DEBUG_NONE, "IntOpt", "optimizing up to MaxSteps = "//TRIM(IntToChar(MaxSteps)))
+
      ! Build the guess
      DO iBAS=1,C%Sets%NBSets-1
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
@@ -641,7 +959,7 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
      ENDDO
      iBAS=C%Sets%NBSets
-     !
+
    ! CALL New(IntCES,C%GOpt%ExtIntCs%N)
    ! CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
      C%GOpt%GConvCrit%DoLattStep=.TRUE.
