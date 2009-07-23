@@ -732,7 +732,7 @@ CONTAINS
     REAL(DOUBLE) :: ConjugateGradientMaxMove, ConjugateGradientdR
 
     IF(.NOT. OptDblQ(Inp, CG_MAX_MOVE, ConjugateGradientMaxMove)) THEN
-      ConjugateGradientMaxMove = 5.0D-2
+      ConjugateGradientMaxMove = 1.0D0
     ENDIF
     ConjugateGradientMaxMove = ConjugateGradientMaxMove*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientMaxMove = "//TRIM(DblToChar(ConjugateGradientMaxMove*AUToAngstroms))//" A")
