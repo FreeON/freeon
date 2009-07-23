@@ -159,23 +159,24 @@ CONTAINS
        ! images to be summed over in the Coulomb sums and in the periodic sum over basis functions:
        CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Overlap',Dist_O,MinExpt,GM%NElec)
        !       CALL SetCellSets(GM%OvCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=1)
-       ! If WellSeperated (WS) criteria is not zero, then we use a strict FMM definition to
-       ! determine the penetration cell sets.  NOTE: use of WS criteria can lead to errors for small cells,
-       ! and also for non-cubic cells, but is usefull in debugging Coulomb sums.
+       ! If WellSeperated (WS) criteria is not zero, then we use a strict FMM
+       ! definition to determine the penetration cell sets.  NOTE: use of WS
+       ! criteria can lead to errors for small cells, and also for non-cubic
+       ! cells, but is usefull in debugging Coulomb sums.
        IF(GM%PBC%PFFWelSep.NE.0)THEN
           CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','HardCell',HardCell_O=GM%PBC%PFFWelSep)
-          CALL Warn(' Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))//Rtrn &
-               //', may lead to errors for small or non-cubic cells ')
+          CALL Warn('Fixed FMM style WS = '//TRIM(IntToChar(GM%PBC%PFFWelSep))// &
+            ', may lead to errors for small or non-cubic cells')
        ELSE
           !          CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'HardCell',HardCell_O=2)
           CALL SetCellSets(GM%InCells,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,'FreeON','Penetration', &
                CellSetsThreshold_O=TwoE_O,MinExpt_O=MinExpt,NElect_O=GM%NElec,MaxEll_O=GM%PBC%PFFMaxEll)
        ENDIF
     ELSE
-       CALL Warn(' Soft reset of the PBC cell-sets ')
+       CALL Warn('Soft reset of the PBC cell-sets')
        ! Check to see if the cell set is already allocated
-       IF(.NOT.AllocQ(GM%OvCells%Alloc))CALL MondoHalt(DRIV_ERROR,' Resetting of non allocated cell sets ')
-       IF(.NOT.AllocQ(GM%InCells%Alloc))CALL MondoHalt(DRIV_ERROR,' Resetting of non allocated cell sets ')
+       IF(.NOT.AllocQ(GM%OvCells%Alloc))CALL MondoHalt(DRIV_ERROR,'Resetting of non allocated cell sets')
+       IF(.NOT.AllocQ(GM%InCells%Alloc))CALL MondoHalt(DRIV_ERROR,'Resetting of non allocated cell sets')
        ! OK, basis set is already allocated, stick with existing number
        ! of cells, but reset the existing displacements etc
        DO N=1,GM%InCells%NCells
@@ -305,17 +306,16 @@ CONTAINS
        ! >>This option will give horrible results for strongly non-orthorombic cells<<
        !-----------------------------------------------------------------------------------------
        NCell=(2*IXM+1)*(2*IYM+1)*(2*IZM+1)
-       CALL New_CellSet(CS,NCELL)
-       CS%NCells=NCELL
-       NCELL = 0
+       CALL New(CS,NCell)
+       NCell = 0
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
                 X=I*MAT(1,1)+J*MAT(1,2)+K*MAT(1,3)
                 Y=I*MAT(2,1)+J*MAT(2,2)+K*MAT(2,3)
                 Z=I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
-                NCELL = NCELL+1
-                CS%CellCarts%D(:,NCELL)=(/X,Y,Z/)
+                NCell = NCell+1
+                CS%CellCarts%D(:,NCell)=(/X,Y,Z/)
              ENDDO
           ENDDO
        ENDDO
@@ -323,7 +323,7 @@ CONTAINS
        !------------------------------------------------------------------------------------
        ! Radial sets a fixed cell set with spherical shape based on input parameters
        !-----------------------------------------------------------------------------------
-       NCELL=0
+       NCell=0
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
@@ -332,14 +332,14 @@ CONTAINS
                 Z=I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
                 R2=X*X+Y*Y+Z*Z
                 IF(R2<=R2Min)THEN
-                   NCELL = NCELL+1
+                   NCell = NCell+1
                 ENDIF
              ENDDO
           ENDDO
        ENDDO
-       CALL New_CellSet(CS,NCELL)
-       CS%NCells=NCELL
-       NCELL = 0
+       CALL New_CellSet(CS,NCell)
+       CS%NCells=NCell
+       NCell = 0
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
@@ -348,8 +348,8 @@ CONTAINS
                 Z=I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
                 R2=X*X+Y*Y+Z*Z
                 IF(R2<=R2Min)THEN
-                   NCELL = NCELL+1
-                   CS%CellCarts%D(:,NCELL)=(/X,Y,Z/)
+                   NCell = NCell+1
+                   CS%CellCarts%D(:,NCell)=(/X,Y,Z/)
                 ENDIF
              ENDDO
           ENDDO
@@ -439,11 +439,11 @@ CONTAINS
        !-------------------------------------------------------------------------------------
        ! Now allocate the CellSet data structure that was just counted out.
        !-------------------------------------------------------------------------------------
-       CALL New_CellSet(CS,NCELL)
-       CS%NCells=NCELL
-       CheckNCell=NCELL
+       CALL New_CellSet(CS,NCell)
+       CS%NCells=NCell
+       CheckNCell=NCell
        !
-       NCELL = 0
+       NCell = 0
        DO I=-IXM,IXM
           DO J=-IYM,IYM
              DO K=-IZM,IZM
@@ -517,21 +517,21 @@ CONTAINS
                 ! Here is the filling in of the cell sets array
                 !----------------------------------------------------------------------
                 IF(InCell)THEN
-                   NCELL = NCELL+1
+                   NCell = NCell+1
                    X=DBLE(I)*MAT(1,1)+DBLE(J)*MAT(1,2)+DBLE(K)*MAT(1,3)
                    Y=DBLE(I)*MAT(2,1)+DBLE(J)*MAT(2,2)+DBLE(K)*MAT(2,3)
                    Z=DBLE(I)*MAT(3,1)+DBLE(J)*MAT(3,2)+DBLE(K)*MAT(3,3)
-                   CS%CellCarts%D(:,NCELL)=(/X,Y,Z/)
+                   CS%CellCarts%D(:,NCell)=(/X,Y,Z/)
                 ENDIF
              ENDDO
           ENDDO
        ENDDO
 
-       IF(NCELL.NE.CheckNCell)THEN
+       IF(NCell.NE.CheckNCell)THEN
           WRITE(*,*)' Option = ',Option
           WRITE(*,*)' NCell counting= ',CheckNCell
           WRITE(*,*)' NCell filling = ',NCell
-          CALL Halt(' Counting and filling NCELL values off in SetCellSets ')
+          CALL Halt(' Counting and filling NCell values off in SetCellSets ')
        ENDIF
 
     ELSE
@@ -1008,9 +1008,9 @@ CONTAINS
     REAL(DOUBLE)                         :: Radius,Radius_min
     REAL(DOUBLE),OPTIONAL                :: Rmin_O
     INTEGER,OPTIONAL                     :: MaxCell_O
-    !
+
     INTEGER                              :: I,J,K
-    INTEGER                              :: IXM,IYM,IZM,NCELL
+    INTEGER                              :: IXM,IYM,IZM,NCell
     REAL(DOUBLE)                         :: X,Y,Z,Rad,R
 
 
@@ -1036,7 +1036,7 @@ CONTAINS
 
 
     !
-    NCELL = 0
+    NCell = 0
     DO I=-IXM,IXM
        DO J=-IYM,IYM
           DO K=-IZM,IZM
@@ -1045,7 +1045,7 @@ CONTAINS
              Z  = I*MAT(3,1)+J*MAT(3,2)+K*MAT(3,3)
              R = SQRT(X*X+Y*Y+Z*Z)
              IF(R .GE. Radius_min .AND. R .LT. Radius) THEN
-                NCELL = NCELL+1
+                NCell = NCell+1
              ENDIF
           ENDDO
        ENDDO
@@ -1054,18 +1054,18 @@ CONTAINS
     !
     IF(PRESENT(MaxCell_O)) THEN
        IF(NCELL > MaxCell_O) THEN
-          WRITE(*,*) 'NCELL   = ',NCELL
+          WRITE(*,*) 'NCell   = ',NCell
           WRITE(*,*) 'MaxCell = ',MaxCell_O
           CALL Halt('NCELL is Greater then MaxCell')
        ELSE
-          CALL New_CellSet(CS,MaxCell_O)
+          CALL New(CS,MaxCell_O)
           CS%NCells=NCELL
        ENDIF
     ELSE
-       CALL New_CellSet(CS,NCELL)
+       CALL New(CS,NCELL)
        CS%NCells=NCELL
     ENDIF
-    !
+
     NCELL=0
     DO I=-IXM,IXM
        DO J=-IYM,IYM
