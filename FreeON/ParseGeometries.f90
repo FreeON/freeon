@@ -68,6 +68,10 @@ CONTAINS
 
       ! Allocate Clones+2 geometries for NEB
       ALLOCATE(G%Clone(0:G%Clones+1))
+      DO iCLONE = 0, G%Clones+1
+        CALL Initialize(G%Clone(iCLONE))
+      ENDDO
+
       IF(O%Guess==GUESS_EQ_RESTART.OR.O%Guess==GUESS_EQ_NUGUESS)THEN
         ! Get all the images, including endpoints from HDF
         HDFFileID=OpenHDF(N%RFile)

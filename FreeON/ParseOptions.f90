@@ -72,13 +72,14 @@ CONTAINS
     ! Parse for model chemistries
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for gradient options.
-    CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
+    CALL ParseGradients(O%NSteps, O%Coordinates, O%Grad, O%DoGDIIS, &
+                        O%SteepStep, O%CartesianOptimizerMethod)
     ! Parse for NEB options.
-    IF(O%Grad == GRAD_TS_SEARCH_NEB) THEN
-      CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
-                    O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
-                    N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
-    ENDIF
+    CALL ParseNEB(O%NEBSteepAlpha, O%NEBSteepMaxMove, O%NEBSpring, &
+                  O%NEBClimb, O%NEBDoubleNudge, O%EndPts, N%ReactantsFile, &
+                  N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
+    ! Parse Optimizer options.
+    CALL ParseOptimizer(O%ConjugateGradientMaxMove, O%ConjugateGradientdR)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse Misc
@@ -563,15 +564,16 @@ CONTAINS
 
   END SUBROUTINE ParsePrintFlags
 
-  SUBROUTINE ParseGradients(NSteps,Coordinates,Grad,DoGDIIS,SteepStep)
-    INTEGER NSteps,Coordinates,Grad
-    LOGICAL OneBase,DoGDIIS,SteepStep
+  SUBROUTINE ParseGradients(NSteps, Coordinates, Grad, DoGDIIS, SteepStep, CartesianOptimizerMethod)
+    INTEGER :: NSteps, Coordinates, Grad, CartesianOptimizerMethod
+    LOGICAL :: OneBase, DoGDIIS, SteepStep
 
     ! Default max geometry steps is 100
     IF(.NOT.OptIntQ(Inp,OPT_NSTEPS,NSteps))THEN
       CALL MondoLog(DEBUG_MAXIMUM, "ParseGradients", "using default NSteps")
       NSteps=100
     ENDIF
+
     ! Macro gradient options
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_FORCE))THEN
       Grad=GRAD_ONE_FORCE
@@ -609,6 +611,7 @@ CONTAINS
       ! Default is Cartesians
       Coordinates=GRAD_CART_OPT
     ENDIF
+
     ! Use GDIIS in optimization ?
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_GDIIS))THEN
       ! Yep
@@ -617,6 +620,7 @@ CONTAINS
       ! Nope
       DoGDIIS=.FALSE.
     ENDIF
+
     ! Use approximate second order methods in optimization
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_APPRX_HESS))THEN
       ! Yeah, but only if using internal coordinates
@@ -625,6 +629,28 @@ CONTAINS
       ! No, gradients only
       SteepStep=.TRUE.
     ENDIF
+
+    ! In case of cartesian optimizer, which method to use?
+    IF(OptKeyQ(Inp, GRADIENTS, GRAD_OPTIMIZE_SD)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_SD))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_SD_VALUE
+    ELSEIF(OptKeyQ(Inp, GRADIENTS, GRAD_OPTIMIZE_CG)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_CG))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_CG_VALUE
+    ELSEIF(OptKeyQ(Inp, GRADIENTS, GRAD_OPTIMIZE_GLOBAL_CG)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_GLOBAL_CG))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_GLOBAL_CG_VALUE
+    ELSEIF(OptKeyQ(Inp, GRADIENTS, GRAD_OPTIMIZE_LBFGS)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_LBFGS))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_LBFGS_VALUE
+    ELSEIF(OptKeyQ(Inp, GRADIENTS, GRAD_OPTIMIZE_GLOBAL_LBFGS)) THEN
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_GLOBAL_LBFGS))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_GLOBAL_LBFGS_VALUE
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "ParseGradients", "cartesian optimizer method = "//TRIM(GRAD_OPTIMIZE_SD))
+      CartesianOptimizerMethod = GRAD_OPTIMIZE_SD_VALUE
+    ENDIF
+
   END SUBROUTINE ParseGradients
 
   SUBROUTINE ParseNEB(NEBSteepAlpha, NEBSteepMaxMove, NEBSpring, NEBClimb, &
@@ -638,22 +664,23 @@ CONTAINS
     CHARACTER(Len=DCL) :: ReactantsFile, ProductsFile
 
     IF(.NOT. OptDblQ(Inp, NEB_STEEP_ALPHA, NEBSteepAlpha)) THEN
-      NEBSteepAlpha = 1.0D-2*AngstromsToAU*AngstromsToAU/eV2au
+      NEBSteepAlpha = 1.0D-2
     ENDIF
     NEBSteepAlpha = NEBSteepAlpha*AngstromsToAU*AngstromsToAU/eV2au
     CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepAlpha = "//TRIM(DblToChar(NEBSteepAlpha*AUToAngstroms*AUToAngstroms/au2eV))//" A^2/eV")
 
     IF(.NOT. OptDblQ(Inp, NEB_STEEP_MAX_MOVE, NEBSteepMaxMove)) THEN
-      NEBSteepMaxMove = 1.0D-1*AngstromsToAU
+      NEBSteepMaxMove = 1.0D-1
     ENDIF
     NEBSteepMaxMove = NEBSteepMaxMove*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepMaxMove = "//TRIM(DblToChar(NEBSteepMaxMove*AUToAngstroms))//" A")
 
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
-      NEBSpring=2D-3
+      NEBSpring = 2.0D-3
     ENDIF
-    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSpring = "//TRIM(DblToChar(NEBSpring)))
+    NEBSpring = NEBSpring*eV2au/AngstromsToAU/AngstromsToAU
+    CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSpring = "//TRIM(DblToChar(NEBSpring*au2eV/AUToAngstroms/AUToAngstroms))//" eV/A^2")
 
     ! Parse energies of reactant and product configurations.
     IF(.NOT.OptDblQ(Inp, NEB_REACTANT_ENERGY, NEBReactantEnergy)) THEN
@@ -700,11 +727,27 @@ CONTAINS
       EndPts=ENDPOINTS_FROM_INP
     ENDIF
   END SUBROUTINE ParseNEB
-  !===============================================================================================
-  !
-  !===============================================================================================
+
+  SUBROUTINE ParseOptimizer(ConjugateGradientMaxMove, ConjugateGradientdR)
+    REAL(DOUBLE) :: ConjugateGradientMaxMove, ConjugateGradientdR
+
+    IF(.NOT. OptDblQ(Inp, CG_MAX_MOVE, ConjugateGradientMaxMove)) THEN
+      ConjugateGradientMaxMove = 5.0D-2
+    ENDIF
+    ConjugateGradientMaxMove = ConjugateGradientMaxMove*AngstromsToAU
+    CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientMaxMove = "//TRIM(DblToChar(ConjugateGradientMaxMove*AUToAngstroms))//" A")
+
+    IF(.NOT. OptDblQ(Inp, CG_STEPSIZE, ConjugateGradientdR)) THEN
+      ConjugateGradientdR = 1.0D-4
+    ENDIF
+    ConjugateGradientdR = ConjugateGradientdR*AngstromsToAU
+    CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientdR = "//TRIM(DblToChar(ConjugateGradientdR*AUToAngstroms))//" A")
+
+  END SUBROUTINE ParseOptimizer
+
   SUBROUTINE ParseSCF(MinSCF,MaxSCF)
-    INTEGER      :: MinSCF,MaxSCF
+    INTEGER :: MinSCF,MaxSCF
+
     ! Parse for Min and Max SCF
     IF(.NOT. OptIntQ(Inp,Op_MinSCF,MinSCF)) THEN
       MinSCF = 0
@@ -712,13 +755,8 @@ CONTAINS
     IF(.NOT. OptIntQ(Inp,Op_MaxSCF,MaxSCF)) THEN
       MaxSCF = HAVE_MAX_SCF
     ENDIF
-
-!    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))
-!    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MaxSCF = "//TRIM(IntToChar(MaxSCF)))
   END SUBROUTINE ParseSCF
-  !===============================================================================================
-  !
-  !===============================================================================================
+
   SUBROUTINE ParseMISC(Pressure)
     REAL(DOUBLE) :: Pressure
 

@@ -67,11 +67,14 @@ MODULE ControlStructures
     TYPE(DEBG)                    :: PFlags
     REAL(DOUBLE)                  :: NEBSpring
     REAL(DOUBLE)                  :: NEBSteepAlpha
-    REAL(DOUBLE)                  :: NEBSteepMaxMove
     LOGICAL                       :: NEBClimb
     LOGICAL                       :: NEBDoubleNudge
     REAL(DOUBLE)                  :: NEBReactantEnergy
     REAL(DOUBLE)                  :: NEBProductEnergy
+    REAL(DOUBLE)                  :: NEBSteepMaxMove
+    INTEGER                       :: CartesianOptimizerMethod
+    REAL(DOUBLE)                  :: ConjugateGradientMaxMove
+    REAL(DOUBLE)                  :: ConjugateGradientdR
     CHARACTER(LEN=3)              :: GeomPrint
 
     CHARACTER(LEN=20)             :: GeussToP2Use

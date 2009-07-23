@@ -140,6 +140,17 @@ MODULE OptionKeys
   INTEGER,           PARAMETER  :: GRAD_INTS_OPT     =83458086
   CHARACTER(LEN=*),  PARAMETER  :: GRAD_CARTESIAN    ='Cartesian'
   INTEGER,           PARAMETER  :: GRAD_CART_OPT     =34243945
+  ! Different cartesian optimizer types.
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_OPTIMIZE_SD                 = "SteepestDescent"
+  INTEGER,           PARAMETER  :: GRAD_OPTIMIZE_SD_VALUE           = 1
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_OPTIMIZE_CG                 = "CG"
+  INTEGER,           PARAMETER  :: GRAD_OPTIMIZE_CG_VALUE           = 2
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_OPTIMIZE_GLOBAL_CG          = "Global-CG"
+  INTEGER,           PARAMETER  :: GRAD_OPTIMIZE_GLOBAL_CG_VALUE    = 3
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_OPTIMIZE_LBFGS              = "LBFGS"
+  INTEGER,           PARAMETER  :: GRAD_OPTIMIZE_LBFGS_VALUE        = 4
+  CHARACTER(LEN=*),  PARAMETER  :: GRAD_OPTIMIZE_GLOBAL_LBFGS       = "Global-LBFGS"
+  INTEGER,           PARAMETER  :: GRAD_OPTIMIZE_GLOBAL_LBFGS_VALUE = 5
   ! Hessian and frequencies
   CHARACTER(LEN=*),  PARAMETER  :: GRAD_NHESSIAN     ='NumFreq'
   INTEGER,           PARAMETER  :: GRAD_DO_NHESSIAN  =13458986
@@ -153,6 +164,9 @@ MODULE OptionKeys
   ! Steepest Descent parameters.
   CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_ALPHA      = "NEBSteepAlpha"
   CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_MAX_MOVE   = "NEBSteepMaxMove"
+  ! Conjugate Gradient parameters.
+  CHARACTER(LEN=*), PARAMETER :: CG_STEPSIZE          = "ConjugateGradientdR"
+  CHARACTER(LEN=*), PARAMETER :: CG_MAX_MOVE          = "ConjugateGradientMaxMove"
   ! Start NEB from reactants and products HDF files
   CHARACTER(LEN=*), PARAMETER :: NEB_READ_HDF         = 'HDF'
   INTEGER,          PARAMETER :: ENDPOINTS_FROM_HDF   = 456675
