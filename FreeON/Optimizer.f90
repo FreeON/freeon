@@ -333,8 +333,8 @@ CONTAINS
 
         stepsize = f/fPrime
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
-        IF(ABS(stepsize) > C%Opts%ConjugateGradientMaxMove) THEN
-          stepsize = C%Opts%ConjugateGradientMaxMove*SIGN(1.0D0, stepsize)
+        IF(ABS(stepsize) > C%Opts%ConjugateGradientMaxMove*C%Geos%Clones) THEN
+          stepsize = C%Opts%ConjugateGradientMaxMove*C%Geos%Clones*SIGN(1.0D0, stepsize)
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize*AUToAngstroms))//" A")
         ENDIF
 
