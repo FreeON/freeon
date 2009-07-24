@@ -56,7 +56,7 @@ CONTAINS
          ! Follow Cartesian gradient down hill
          SELECT CASE(C%Opts%CartesianOptimizerMethod)
          CASE(GRAD_OPTIMIZE_SD_VALUE)
-           CALL SteepD(C)
+           CALL ConjugateGradient(C, Global_O = .FALSE., SteepestDescent_O = .TRUE.)
 
          CASE(GRAD_OPTIMIZE_CG_VALUE)
            CALL ConjugateGradient(C)
@@ -189,14 +189,15 @@ CONTAINS
     ENDDO
   END SUBROUTINE SteepD
 
-  SUBROUTINE ConjugateGradient(C, Global_O)
+  SUBROUTINE ConjugateGradient(C, Global_O, SteepestDescent_O)
     TYPE(Controls)                              :: C
-    LOGICAL, OPTIONAL                           :: Global_O
-    LOGICAL                                     :: Global, Converged
+    LOGICAL, OPTIONAL                           :: Global_O, SteepestDescent_O
+    LOGICAL                                     :: Global, SteepestDescent, converged
     INTEGER                                     :: iGeo, iStart, iBAS, iCLONE, iAtom
     REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: oldConfiguration, oldGradient
     REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: direction
     REAL(DOUBLE)                                :: norm, beta, stepsize, stepRMSd, fPrime, f
+    REAL(DOUBLE)                                :: maxGrad, RMSGrad
 
     ! Set default behavior.
     IF(PRESENT(Global_O)) THEN
@@ -209,8 +210,23 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "global optimization")
     ENDIF
 
+    IF(PRESENT(SteepestDescent_O)) THEN
+      SteepestDescent = SteepestDescent_O
+    ELSE
+      SteepestDescent = .FALSE.
+    ENDIF
+
+    IF(SteepestDescent) THEN
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "doing steepest descent")
+    ENDIF
+
     ! initial geometry
     iGEO = C%Stat%Previous%I(3)
+
+    ! Purify NEB images.
+    IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+      CALL NEBPurify(C%Geos)
+    ENDIF
 
     ! Build the guess
     DO iBAS=1,C%Sets%NBSets
@@ -277,6 +293,7 @@ CONTAINS
     ALLOCATE(oldGradient(3, C%Geos%Clone(1)%NAtms, C%Geos%Clones))
 
     ! Minimize.
+    converged = .FALSE.
     DO iGEO = iStart, C%Opts%NSteps, 2
 
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "Geometry "// &
@@ -401,31 +418,56 @@ CONTAINS
 
       ! Calculate the gradient for the final step.
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating final step force")
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+        CALL NEBPurify(C%Geos)
+      ENDIF
       CALL GeomArchive(iBAS, iGEO+2, C%Nams, C%Opts, C%Sets, C%Geos)
       CALL SCF(iBAS, iGEO+2, C)
       CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
+      ! Check for convergence.
+      maxGrad = Zero
+      RMSGrad = Zero
+      DO iCLONE = 1, C%Geos%Clones
+        maxGrad = MAX(maxGrad, C%Geos%Clone(iCLONE)%GradMax)
+        RMSGrad = MAX(RMSGrad, C%Geos%Clone(iCLONE)%GradRMS)
+      ENDDO
+
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxGrad = "//TRIM(DblToChar(maxGrad*au2eV/AUToAngstroms))//" eV/A")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSGrad = "//TRIM(DblToChar(RMSGrad*au2eV/AUToAngstroms))//" eV/A")
+
+      IF(RMSGrad < GTol(C%Opts%AccuracyLevels(iBAS)) .AND. &
+         maxGrad < GTol(C%Opts%AccuracyLevels(iBAS))) THEN
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "converged in gradients")
+        converged = .TRUE.
+        EXIT
+      ENDIF
+
       ! Calculate new search direction. We follow Polak-Ribi\`{e}re.
       IF(Global) THEN
-        norm = Zero
-        beta = Zero
-        DO iCLONE = 1, C%Geos%Clones
-          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            norm = norm &
+        IF(SteepestDescent) THEN
+          beta = Zero
+        ELSE
+          norm = Zero
+          beta = Zero
+          DO iCLONE = 1, C%Geos%Clones
+            DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+              norm = norm &
               + oldGradient(1, iAtom, iCLONE)*oldGradient(1, iAtom, iCLONE) &
               + oldGradient(2, iAtom, iCLONE)*oldGradient(2, iAtom, iCLONE) &
               + oldGradient(3, iAtom, iCLONE)*oldGradient(3, iAtom, iCLONE)
-            beta = beta &
+              beta = beta &
               + C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE)) &
               + C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE)) &
               + C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))
+            ENDDO
           ENDDO
-        ENDDO
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)))
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)))
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)))
-        beta = MAX(Zero, beta/norm)
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)))
+          beta = MAX(Zero, beta/norm)
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)))
+        ENDIF
 
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
@@ -436,23 +478,27 @@ CONTAINS
         ENDDO
       ELSE
         DO iCLONE = 1, C%Geos%Clones
-          norm = Zero
-          beta = Zero
-          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            norm = norm &
+          IF(SteepestDescent) THEN
+            beta = Zero
+          ELSE
+            norm = Zero
+            beta = Zero
+            DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+              norm = norm &
               + oldGradient(1, iAtom, iCLONE)*oldGradient(1, iAtom, iCLONE) &
               + oldGradient(2, iAtom, iCLONE)*oldGradient(2, iAtom, iCLONE) &
               + oldGradient(3, iAtom, iCLONE)*oldGradient(3, iAtom, iCLONE)
-            beta = beta &
+              beta = beta &
               + C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE)) &
               + C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE)) &
               + C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))
-          ENDDO
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)))
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)))
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)))
-          beta = MAX(Zero, beta/norm)
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)), "Clone "//TRIM(IntToChar(iCLONE)))
+            ENDDO
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta numerator = "//TRIM(DblToChar(beta*(au2eV/AUToAngstroms)**2)), "Clone "//TRIM(IntToChar(iCLONE)))
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta denominator = "//TRIM(DblToChar(norm*(au2eV/AUToAngstroms)**2)), "Clone "//TRIM(IntToChar(iCLONE)))
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta before = "//TRIM(DblToChar(beta/norm)), "Clone "//TRIM(IntToChar(iCLONE)))
+            beta = MAX(Zero, beta/norm)
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "beta = "//TRIM(DblToChar(beta)), "Clone "//TRIM(IntToChar(iCLONE)))
+          ENDIF
 
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             direction(1, iAtom, iCLONE) = -C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom) + beta*direction(1, iAtom, iCLONE)
@@ -472,13 +518,14 @@ CONTAINS
           "Clone "//TRIM(IntToChar(iCLONE)))
         ENDDO
       ENDDO
+
     ENDDO
 
     ! Free memory.
     DEALLOCATE(direction)
     DEALLOCATE(oldConfiguration)
 
-    IF(Converged) THEN
+    IF(converged) THEN
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we have converged")
     ELSE
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we did not converge")
