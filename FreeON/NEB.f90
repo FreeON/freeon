@@ -41,7 +41,7 @@ MODULE NEB
   !    Dynamics in Condensed Phase Simulations, edited by B.J.Berne, G.
   !    Ciccotti, and D. F. Coker (World Scientific, Singapore, 1998), p.385
   !  G. Henkelman, B.P. Uberuaga, and H. Jonsson, "A climbing-image NEB method
-  !    for finding saddle points and minimum energy paths", J. Chem. Phys, v113,
+  !    for finding saddle points and minimum energy paths", J. Chem. Phys 113,
   !    9901 (2000).
   !  G. Henkelman, H. Jonsson, "Improved tangent estimate in the nudged elastic
   !    band method for finding minimum energy paths and saddle points", J. Chem.
@@ -464,8 +464,8 @@ CONTAINS
     UMax = G%Clone(1)%ETotal
     UMaxClone = 1
 
+    ! Check for climbing image.
     DO iCLONE = 1, G%Clones
-      ! Check for climbing image.
       IF(G%Clone(iCLONE)%ETotal > UMax) THEN
         UMax = G%Clone(iCLONE)%ETotal
         UMaxClone = iCLONE
@@ -505,7 +505,8 @@ CONTAINS
         ! At an extremum of energy, interpolate the tangent linearly with the
         ! energy. This is done so that the direction of the tangent does not
         ! change abruptly, improving the stability of the NEB method and
-        ! avoiding artificial kinks in high force regions along the path.
+        ! avoiding artificial kinks in high force regions along the path. See
+        ! discussion in Secs. 3 and 4 of JCP 113, 9978.
         CALL MondoLog(DEBUG_NONE, "NEBForce", "UPMinus == UPPlus", "Clone "//TRIM(IntToChar(iCLONE)))
 
         UMinus = G%Clone(iCLONE-1)%ETotal - G%Clone(iCLONE)%ETotal
@@ -518,11 +519,11 @@ CONTAINS
         CALL MondoLog(DEBUG_NONE, "NEBForce", "UMax = "//TRIM(DblToChar(UMax*au2eV))//" eV", "Clone "//TRIM(IntToChar(iCLONE)))
 
         IF(UMinus > UPlus) THEN
-          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMin*au2eV &
-                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMax*au2eV
+          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMin &
+                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMax
         ELSE
-          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMax*au2eV &
-                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMin*au2eV
+          N(:,:,iCLONE) = (G%Clone(iCLONE+1)%Carts%D - G%Clone(iCLONE)%Carts%D)*UMax &
+                        + (G%Clone(iCLONE)%Carts%D - G%Clone(iCLONE-1)%Carts%D)*UMin
         ENDIF
       ENDIF
     ENDDO
@@ -586,7 +587,6 @@ CONTAINS
 
     DO iCLONE = 1, G%Clones
       ! Project out the force along the tangent.
-      !CALL vectorProjection(fParallel, G%Clone(iCLONE)%Gradients%D, N(:,:,iCLONE))
       magnitude = Zero
       DO j = 1, G%Clone(iCLONE)%NAtms
         magnitude = magnitude &
@@ -637,7 +637,7 @@ CONTAINS
 
         DO j = 1, G%Clone(iCLONE)%NAtms
           RMinusMagnitude = SQRT(RMinus(1, j)**2 + RMinus(2, j)**2 + RMinus(3, j)**2)
-          RPlusMagnitude = SQRT(RPlus(1, j)**2 + RPlus(2, j)**2 + RPlus(3, j)**2)
+          RPlusMagnitude  = SQRT(RPlus(1, j)**2  + RPlus(2, j)**2  + RPlus(3, j)**2)
 
           fSpring(1, j) = (RPlusMagnitude - RMinusMagnitude)*O%NEBSpring*N(1, j, iCLONE)
           fSpring(2, j) = (RPlusMagnitude - RMinusMagnitude)*O%NEBSpring*N(2, j, iCLONE)
@@ -645,6 +645,9 @@ CONTAINS
 
           ! Double-nudging?
           IF(O%NEBDoubleNudge) THEN
+            ! Do double nudging...
+            !
+            ! JCP 120, 2082 (2004).
           ELSE
             fDNEB(:, j) = Zero
           ENDIF
