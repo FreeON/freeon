@@ -974,7 +974,7 @@ CONTAINS
     TYPE(BasisSets)    :: B
     INTEGER            :: cBAS,cGEO,I,J,K,iATS,iCLONE,A1,A2
     CHARACTER(LEN=DCL) :: chGEO,chBAS
-    REAL(DOUBLE)       :: GradVal,Pres,Vol,PMat
+    REAL(DOUBLE)       :: GradVal,Pres,Vol,PMat, FMagnitude, FMax
     TYPE(DBL_RNK2)     :: AuxLatF
     TYPE(DBL_VECT)     :: Ftmp
 
@@ -1118,8 +1118,25 @@ CONTAINS
 
     ! Print out the positions.
     DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
-      CALL MondoLog(DEBUG_NONE, "Force", "Positions (in A) and forces (in eV/A)", &
+      FMagnitude = Zero
+      FMax = Zero
+      DO iATS=1, G%Clone(iCLONE)%NAtms
+        FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(1, iATS)))
+        FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(2, iATS)))
+        FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(3, iATS)))
+
+        FMagnitude = FMagnitude &
+          + G%Clone(iCLONE)%Gradients%D(1, iATS)**2 &
+          + G%Clone(iCLONE)%Gradients%D(2, iATS)**2 &
+          + G%Clone(iCLONE)%Gradients%D(3, iATS)**2
+      ENDDO
+
+      CALL MondoLog(DEBUG_NONE, "Force", "Positions (in A) and forces (in eV/A), "// &
+        "|F| = "//TRIM(DblToMedmChar(SQRT(FMagnitude)*au2eV/AUToAngstroms))//" eV/A, "// &
+        "RMSd(F) = "//TRIM(DblToMedmChar(SQRT(FMagnitude/G%Clone(iCLONE)%NAtms)*au2eV/AUToAngstroms))//" eV/A, "// &
+        "max(F_{i}) = "//TRIM(DblToMedmChar(FMax*au2eV/AUToAngstroms))//" eV/A", &
         "Clone "//TRIM(IntToChar(iCLONE)))
+
       DO iATS=1, G%Clone(iCLONE)%NAtms
         CALL MondoLog(DEBUG_NONE, "Force", &
           TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
