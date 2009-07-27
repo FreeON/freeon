@@ -185,6 +185,7 @@ InOut.lo : \
   SetEq.lo \
   MondoLogger.lo \
   Utilities.lo \
+  MondoMPI.lo \
   $(top_builddir)/MondoConfig.h
 
 DerivedTypes.lo : \
@@ -208,7 +209,8 @@ Parse.lo : \
   MemMan.lo \
   MondoLogger.lo
 
-Clock.lo : DerivedTypes.lo
+Clock.lo : DerivedTypes.lo \
+  MondoMPI.lo
 
 GlobalObjects.lo : DerivedTypes.lo
 
@@ -227,7 +229,8 @@ SetEq.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
   GlobalObjects.lo \
-  MemMan.lo
+  MemMan.lo \
+  MondoMPI.lo
 
 Order.lo : \
   DerivedTypes.lo \
@@ -253,7 +256,8 @@ PrettyPrint.lo : \
   Parse.lo \
   SetEq.lo \
   InOut.lo \
-  MondoLogger.lo
+  MondoLogger.lo \
+  MondoMPI.lo
 
 LinAlg.lo : \
   GlobalCharacters.lo \
@@ -267,7 +271,8 @@ LinAlg.lo : \
   InOut.lo \
   Order.lo \
   Clock.lo \
-  Thresholding.lo
+  Thresholding.lo \
+  MondoMPI.lo
 
 GlobalCharacters.lo : GlobalScalars.lo
 
@@ -349,7 +354,8 @@ FastMat.lo : \
   MemMan.lo \
   Order.lo \
   LinAlg.lo \
-  Thresholding.lo
+  Thresholding.lo \
+  MondoMPI.lo
 
 CholFact.lo : \
   DerivedTypes.lo \
@@ -373,7 +379,8 @@ Macros.lo : \
   InOut.lo \
   Functionals.lo \
   AtomPairs.lo \
-  Mechanics.lo
+  Mechanics.lo \
+  MondoMPI.lo
 
 PBC.lo : \
   DerivedTypes.lo \
