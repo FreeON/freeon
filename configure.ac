@@ -64,10 +64,39 @@ user_FCFLAGS=${FCFLAGS}
 # Check the build system.
 AC_CANONICAL_BUILD
 
+# Check whether to build for parallel (MPI).
+AC_MSG_CHECKING([whether to build MPI version])
+AC_ARG_ENABLE([MPI],
+  [AS_HELP_STRING([--enable-MPI],
+  [Enable MPI, i.e. build a parallel version.])],
+  [use_MPI="${enableval}"],
+  [use_MPI="no"])
+
+if test "${use_MPI}" = "yes"; then
+  AC_MSG_RESULT([yes, building parallel version with MPI])
+  AC_DEFINE([PARALLEL], [1], [Build parallel version])
+else
+  AC_MSG_RESULT([no, building serial version])
+fi
+
 # Find compilers.
-AC_PROG_CC([gcc icc pgc])
-AC_PROG_FC([gfortran ifort pgf90])
-AC_PROG_F77([gfortran ifort pgf90])
+if test "${use_MPI}" = "yes"; then
+  C_COMPILERS="mpicc"
+  FC_COMPILERS="mpif90"
+  F77_COMPILERS="mpif90"
+else
+  C_COMPILERS="gcc icc pgc"
+  FC_COMPILERS="gfortran ifort pgf90"
+  F77_COMPILERS="gfortran ifort pgf90"
+fi
+
+AC_PROG_CC([${C_COMPILERS}])
+AC_PROG_FC([${FC_COMPILERS}])
+AC_PROG_F77([${F77_COMPILERS}])
+
+#AC_PROG_CC([gcc icc pgc])
+#AC_PROG_FC([gfortran ifort pgf90])
+#AC_PROG_F77([gfortran ifort pgf90])
 
 if test -z "${CC}"; then
   AC_MSG_FAILURE([no C compiler found: set the CC variable])
@@ -83,24 +112,24 @@ fi
 
 # Identify compiler.
 case ${CC} in
-  *gcc*) CC_COMPILERNAME="GCC" ;;
-  *icc*) CC_COMPILERNAME="Intel" ;;
-  *pgc*) CC_COMPILERNAME="PGI" ;;
-  *)     CC_COMPILERNAME="unknown" ;;
+  gcc*) CC_COMPILERNAME="GCC" ;;
+  icc*) CC_COMPILERNAME="Intel" ;;
+  pgc*) CC_COMPILERNAME="PGI" ;;
+  *)    CC_COMPILERNAME="unknown" ;;
 esac
 
 case ${F77} in
-  *gfortran*) F77_COMPILERNAME="GCC" ;;
-  *ifort*)    F77_COMPILERNAME="Intel" ;;
-  *pgf*)      F77_COMPILERNAME="PGI" ;;
-  *)          F77_COMPILERNAME="unknown" ;;
+  gfortran*) F77_COMPILERNAME="GCC" ;;
+  ifort*)    F77_COMPILERNAME="Intel" ;;
+  pgf*)      F77_COMPILERNAME="PGI" ;;
+  *)         F77_COMPILERNAME="unknown" ;;
 esac
 
 case ${FC} in
-  *gfortran*) FC_COMPILERNAME="GCC" ;;
-  *ifort*)    FC_COMPILERNAME="Intel" ;;
-  *pgf*)      FC_COMPILERNAME="PGI" ;;
-  *)          FC_COMPILERNAME="unknown" ;;
+  gfortran*) FC_COMPILERNAME="GCC" ;;
+  ifort*)    FC_COMPILERNAME="Intel" ;;
+  pgf*)      FC_COMPILERNAME="PGI" ;;
+  *)         FC_COMPILERNAME="unknown" ;;
 esac
 
 AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
@@ -651,12 +680,27 @@ LAPACK_TIMER="NONE"
 if test "${use_internal_lapack}" = "yes"; then
 
   # Check for naming convention for external etime().
-  case ${F77_COMPILERNAME} in
-    GCC)   use_external_timer="no" ;;
-    Intel) use_external_timer="yes" ;;
-    PGI)   use_external_timer="yes" ;;
-    *)     use_external_timer="yes" ;;
-  esac
+  AC_ARG_ENABLE([lapack-external-timer],
+    [AS_HELP_STRING([--enable-lapack-external-timer],
+    [Use an external timer in lapack. This setting should normally be
+     automatically detected by this script, but in some cases the
+     autodetection can fail and one has to set the use of an external timer
+     explicitly with this option.])],
+    [use_external_timer="${enableval}"],
+    [use_external_timer="unset"])
+
+  AC_MSG_CHECKING([for whether to use an external timer for lapack])
+  if test "${use_external_timer}" = "unset"; then
+    case ${F77_COMPILERNAME} in
+      GCC)   use_external_timer="no" ;;
+      Intel) use_external_timer="yes" ;;
+      PGI)   use_external_timer="yes" ;;
+      *)     use_external_timer="yes" ;;
+    esac
+    AC_MSG_RESULT([${use_external_timer}])
+  else
+    AC_MSG_RESULT([command line override: ${use_external_timer}])
+  fi
 
   if test "${use_external_timer}" = "yes"; then
     use_etime_underscore="no"
@@ -705,7 +749,7 @@ if test "${use_internal_lapack}" = "yes"; then
     fi
 
   else
-    AC_MSG_NOTICE([using internal etime()])
+    AC_MSG_NOTICE([not using external etime()])
   fi
 
   # Test for no-optimization compiler flag.
