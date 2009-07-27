@@ -984,8 +984,9 @@ AC_ARG_ENABLE([NEB-debug],
   [use_NEB_debug="${enableval}"],
   [use_NEB_debug="no"])
 AC_MSG_RESULT([${use_NEB_debug}])
-AC_DEFINE(NEB_DEBUG, [test "${use_NEB_debug}" = "yes"], [Print out additional
-  debugging information in NEB])
+if test "${use_NEB_debug}" = "yes"; then
+  AC_DEFINE(NEB_DEBUG, [1], [Print out additional debugging information in NEB])
+fi
 
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
@@ -1082,6 +1083,9 @@ AC_DEFINE(LOG_MEMORY_USAGE,
 AC_DEFINE_UNQUOTED(HAVE_CFLAGS_STRING,  ["${CFLAGS}"],  [The C-compiler flags used])
 AC_DEFINE_UNQUOTED(HAVE_FFLAGS_STRING,  ["${FFLAGS}"],  [The F77-compiler flags used])
 AC_DEFINE_UNQUOTED(HAVE_FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags used])
+
+# Store information on how we were configured.
+AC_DEFINE_UNQUOTED(HAVE_CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command line arguments to the configure script])
 
 # Print out a summary of options used to compile.
 AC_MSG_NOTICE([***   Summary   ***])
