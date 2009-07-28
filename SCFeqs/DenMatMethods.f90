@@ -637,8 +637,7 @@ CONTAINS
     !-------------------------------------------------------------------------------
     CALL Multiply(S,P ,T1)            ! T1=S.P
     CALL Multiply(P,T1,T2)            ! T2=P.S.P
-    TrP  = Trace(T1)
-    TrP2 = Trace(T2)
+
     IF(Action) THEN
       CALL Filter(P,T2)              ! P = P.S.P
       !         CALL SetEq(P,T2)
