@@ -98,6 +98,8 @@ PROGRAM P2Use
   ! CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
   ! Do what needs to be done CASE by CASE
 
+  CALL MondoLog(DEBUG_NONE, "P2Use", "Clone "//TRIM(IntToChar(MyClone)))
+
   SELECT CASE(SCFActn)
 
     ! P=0

@@ -225,8 +225,10 @@ CONTAINS
        eCLONE=G%Clones+1
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "NEB", "not purifying")
-    RETURN
+    IF(.NOT. Init) THEN
+      CALL MondoLog(DEBUG_NONE, "NEB", "not purifying")
+      RETURN
+    ENDIF
 
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
@@ -246,13 +248,13 @@ CONTAINS
 !!$    ENDDO
 
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEB", "CLONE 0 AFTER SCALING = ")
-    DO I = 1, G%Clone(0)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(1,I)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(2,I)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(0)))
-    ENDDO
+    !CALL MondoLog(DEBUG_NONE, "NEB", "CLONE 0 AFTER SCALING = ")
+    !DO I = 1, G%Clone(0)%NAtms
+    !  CALL MondoLog(DEBUG_NONE, "NEB", "R["//TRIM(IntToChar(I))//"] = [ "// &
+    !    TRIM(DblToChar(G%Clone(0)%Carts%D(1,I)*AUToAngstroms))//" "// &
+    !    TRIM(DblToChar(G%Clone(0)%Carts%D(2,I)*AUToAngstroms))//" "// &
+    !    TRIM(DblToChar(G%Clone(0)%Carts%D(3,I)*AUToAngstroms))//" ]", "Clone "//TRIM(IntToChar(0)))
+    !ENDDO
 #endif
 
     ! Constraints over-ride purification

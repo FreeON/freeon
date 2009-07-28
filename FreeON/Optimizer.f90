@@ -217,7 +217,9 @@ CONTAINS
     ENDIF
 
     IF(SteepestDescent) THEN
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "doing steepest descent")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "steepest descent")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "conjugate gradient (Polak-Ribiere)")
     ENDIF
 
     ! initial geometry
