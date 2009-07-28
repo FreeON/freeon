@@ -56,9 +56,9 @@ PROGRAM P2Use
   TYPE(CRDS)                    :: GM,GM_old
 #ifdef PARALLEL
   TYPE(BCSR)  :: P_BCSR,F_BCSR
-  TYPE(DBCSR) :: F,P,P0,PV,X,S,S0,S1,Tmp1,Tmp2
+  TYPE(DBCSR) :: F,P,P0,PV,X,S,S0,S1,Tmp1,Tmp2,T1,T2
 #else
-  TYPE(BCSR) :: F,P,P0,PV,X,S,S0,S1,Tmp1,Tmp2
+  TYPE(BCSR) :: F,P,P0,PV,X,S,S0,S1,Tmp1,Tmp2,T1,T2
 #endif
 
   TYPE(INT_VECT)                :: Stat
@@ -97,8 +97,6 @@ PROGRAM P2Use
   logtag = TRIM(Prog)//":"//TRIM(SCFActn)
   ! CALL MondoLog(DEBUG_NONE, "P2Use", "SCFActn = "//TRIM(SCFActn))
   ! Do what needs to be done CASE by CASE
-
-  CALL MondoLog(DEBUG_NONE, "P2Use", "Clone "//TRIM(IntToChar(MyClone)))
 
   SELECT CASE(SCFActn)
 
@@ -1757,6 +1755,8 @@ PROGRAM P2Use
     CALL New(S)
     CALL New(S0)
     CALL New(S1)
+    CALL New(T1)
+    CALL New(T2)
     CALL New(Tmp1)
     CALL New(Tmp2)
 
@@ -1909,32 +1909,33 @@ PROGRAM P2Use
       ConvergeAOSP = .FALSE.
       AOSPExit     = .FALSE.
       DO I=1,20
-        IF((ABS(Ipot_Error) > 0.5D0 .OR. ABS(Norm_Error) > 0.5D0) .AND. I > 1) THEN
-          IF(Norm_Error > Zero) THEN
-            CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-          ELSE
-            CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-          ENDIF
-        ELSE
-          IF(I > 1) Qstep = Qstep+1
-          IF(Norm_Error > Zero) THEN
-            CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-            CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-          ELSE
-            CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-            CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-          ENDIF
-        ENDIF
+        ! Calculate new norm error.
+        CALL Multiply(S, P, T1)   ! T1 = S.P
+        CALL Multiply(P, T1, T2)  ! T2 = P.S.P
+
+        TrP = Trace(P, S)
+        TrP2 = Trace(T2, S)
+
         Norm_Error = TrP-DBLE(NEl)/SFac
-        Ipot_Error = TrP2-Trace(P)
+        Ipot_Error = TrP2-TrP
+
+        IF(ABS(2*TrP-TrP2-DBLE(Nel)/SFac) > ABS(TrP2-DBLE(Nel)/SFac)) THEN
+          CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+        ELSE
+          CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+        ENDIF
+
+        IF(Ipot_Error < 1.0D-2) THEN
+          Qstep = Qstep + 1
+        ENDIF
+
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
           PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-          CALL MondoLog(DEBUG_MEDIUM, Prog,                      &
-                        'dN='//TRIM(DblToShrtChar(Norm_Error))  &
-                      //', %Non0='//TRIM(DblToShrtChar(PNon0s)), &
-                       'AO-DMX '//TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I)))
+          CALL MondoLog(DEBUG_MEDIUM, Prog, 'norm error = '//TRIM(DblToShrtChar(Norm_Error))// &
+            ", Ipot error = "//TRIM(DblToShrtChar(Ipot_Error))//", %Non0 = "//TRIM(DblToShrtChar(PNon0s)), &
+            'AO-DMX '//TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I)))
 
 #ifdef PARALLEL
         ENDIF
@@ -1944,7 +1945,7 @@ PROGRAM P2Use
           AOSPExit = .TRUE.
           ConvergeAOSP = .TRUE.
           IF(Lam > (One-1.D-14)) ConvergeAll = .TRUE.
-        ELSEIF(Qstep > 5) THEN
+        ELSEIF(Qstep > 8) THEN
           AOSPExit = .TRUE.
           IF(ABS(Ipot_Error) < 1.0D-4 .AND. ABS(Norm_Error) < 1.0D-4) ConvergeAOSP = .TRUE.
           IF(ConvergeAOSP) THEN
@@ -1955,6 +1956,7 @@ PROGRAM P2Use
         ENDIF
         IF(AOSPExit) EXIT
       ENDDO
+
       ! Logic
       IF(ConvergeAll) THEN
         CALL SetEq(P0,P)
@@ -1983,6 +1985,8 @@ PROGRAM P2Use
     CALL Delete(S)
     CALL Delete(S0)
     CALL Delete(S1)
+    CALL Delete(T1)
+    CALL Delete(T2)
     CALL Delete(Tmp1)
     CALL Delete(Tmp2)
 

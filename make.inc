@@ -246,7 +246,7 @@ $(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h
 	@if test ! -f $(top_builddir)/MondoLocalVersion.h; then \
 	  mv -f $(top_builddir)/tempconf $(top_builddir)/MondoLocalVersion.h; \
 	  echo "MondoLocalVersion.h did not exist"; \
-	elif (diff -u $(top_builddir)/tempconf $(top_builddir)/MondoLocalVersion.h > $(top_builddir)/MondoLocalVersion.diff); then \
+	elif (diff -u $(top_builddir)/MondoLocalVersion.h $(top_builddir)/tempconf > $(top_builddir)/MondoLocalVersion.diff); then \
 	  rm -f $(top_builddir)/tempconf; \
 	  echo "MondoLocalVersion.h unchanged"; \
 	else \
