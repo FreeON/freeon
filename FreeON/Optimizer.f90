@@ -400,9 +400,12 @@ CONTAINS
           ENDDO
           stepRMSD = SQRT(stepRMSd/(C%Geos%Clone(iCLONE)%NAtms))
 
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)), "Clone "//TRIM(IntToChar(iCLONE)))
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(stepsize*direction) "//TRIM(FltToChar(stepRMSd*stepsize*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A", &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(stepsize*direction) "//TRIM(FltToChar(stepRMSd*stepsize*AUToAngstroms))//" A", &
+            "Clone "//TRIM(IntToChar(iCLONE)))
           IF(ABS(stepsize*stepRMSd) > C%Opts%ConjugateGradientMaxMove) THEN
             stepsize = C%Opts%ConjugateGradientMaxMove/stepRMSd*SIGN(1.0D0, stepsize)
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize)), "Clone "//TRIM(IntToChar(iCLONE)))
@@ -424,6 +427,14 @@ CONTAINS
       CALL GeomArchive(iBAS, iGEO+2, C%Nams, C%Opts, C%Sets, C%Geos)
       CALL SCF(iBAS, iGEO+2, C)
       CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
+      ! Print out the energy.
+      DO iCLONE = 1, C%Geos%Clones
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
+          TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" hartree = "// &
+          TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal*au2eV))//" eV", &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+      ENDDO
 
       ! Check for convergence.
       maxGrad = Zero
