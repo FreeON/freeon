@@ -64,14 +64,14 @@ PROGRAM P2Use
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale
-  INTEGER                       :: MDDampStep, m_step, mm_step, Imin
+  INTEGER                       :: MDDampStep, m_step, mm_step, Imin, Imin_divergence_check
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-       Ipot_Error,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax,Occ3,Occ2,Occ1,Occ0
-  INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, &
+       Ipot_Error,Ipot_Error_start,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax,Occ3,Occ2,Occ1,Occ0
+  INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0, &
        OldFileID,ICart,N,NStep,iGEO,iBAS,iSCF,DMPOrder,NSMat,MM,ICycle,Cycle
   CHARACTER(LEN=2)              :: Cycl
-  LOGICAL                       :: Present,DoingMD,ConvergeAOSP,ConvergeAll,AOSPExit
+  LOGICAL                       :: Present,DoingMD,AOSPExit
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile,logtag
   CHARACTER(LEN=8)              :: MDGeuss
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
@@ -1868,11 +1868,26 @@ PROGRAM P2Use
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "Trace Error: Tr[P0,S1] = "//TRIM(FltToChar(ABS(Trace(P0,S1)-DBLE(NEl)/SFac))))
     ENDIF
 #endif
+
+    ! Calculate norm error and idempotency error in last geometry.
+    CALL Multiply(S0, P0, T1)  ! T1 = S0.P0
+    CALL Multiply(P0, T1, T2)  ! T2 = P0.S0.P0
+    TrP = Trace(P0, S0)
+    TrP2 = Trace(T2, S0)
+
+    Norm_Error = TrP-DBLE(NEl)/SFac
+    Ipot_Error = TrP2-TrP
+
+    Ipot_Error_start = Ipot_Error
+
+    CALL MondoLog(DEBUG_MAXIMUM, logtag, "initial norm error = "//TRIM(DblToShrtChar(Norm_Error))// &
+      ", initial idempotency error = "//TRIM(DblToShrtChar(Ipot_Error_start)))
+
     ! Initialize
     NStep       = 0
     Lam         = Zero
     DLam        = One
-    ConvergeAll = .FALSE.
+
     ! Purify
     DO
       NStep = NStep + 1
@@ -1888,9 +1903,8 @@ PROGRAM P2Use
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
-        CALL MondoLog(DEBUG_MEDIUM,Prog,  &
-          'Nstep  = '//TRIM(IntToChar(NStep))// &
-          ', Lambda = '//TRIM(DblToMedmChar(Lam)),'AO-DMX ')
+        CALL MondoLog(DEBUG_MEDIUM,Prog, "Nstep  = "//TRIM(IntToChar(NStep))// &
+          ", Lambda = "//TRIM(FltToMedmChar(Lam)), "AO-DMX")
 
 #ifdef PARALLEL
       ENDIF
@@ -1905,10 +1919,16 @@ PROGRAM P2Use
       Norm_Error = TrP-DBLE(NEl)/SFac
       Ipot_Error = One
 
-      Qstep        = 0
-      ConvergeAOSP = .FALSE.
       AOSPExit     = .FALSE.
-      DO I=1,20
+
+      Occ0 = 0.D0
+      Occ1 = TrP
+      Occ2 = 0.D0
+      Occ3 = 0.D0
+      Imin_divergence_check = 6
+      Imin = 10
+
+      DO I = 1, 20
         ! Calculate new norm error.
         CALL Multiply(S, P, T1)   ! T1 = S.P
         CALL Multiply(P, T1, T2)  ! T2 = P.S.P
@@ -1925,53 +1945,70 @@ PROGRAM P2Use
           CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
         ENDIF
 
-        IF(Ipot_Error < 1.0D-2) THEN
-          Qstep = Qstep + 1
-        ENDIF
+        Occ0 = Trace(P, S)
 
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
           PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-          CALL MondoLog(DEBUG_MEDIUM, Prog, 'norm error = '//TRIM(DblToShrtChar(Norm_Error))// &
-            ", Ipot error = "//TRIM(DblToShrtChar(Ipot_Error))//", %Non0 = "//TRIM(DblToShrtChar(PNon0s)), &
-            'AO-DMX '//TRIM(IntToChar(NStep))//":"//TRIM(IntToChar(I)))
+          CALL MondoLog(DEBUG_MEDIUM, Prog, 'norm error = '//TRIM(DblToMedmChar(Norm_Error))// &
+            ", idempotency error = "//TRIM(DblToMedmChar(Ipot_Error))//", %Non0 = "//TRIM(FltToShrtChar(PNon0s)), &
+            "AO-DMX "//TRIM(IntToChar(NStep))//", "//TRIM(IntToChar(I)))
 
 #ifdef PARALLEL
         ENDIF
 #endif
         ! Logic
-        IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) THEN
-          AOSPExit = .TRUE.
-          ConvergeAOSP = .TRUE.
-          IF(Lam > (One-1.D-14)) ConvergeAll = .TRUE.
-        ELSEIF(Qstep > 8) THEN
-          AOSPExit = .TRUE.
-          IF(ABS(Ipot_Error) < 1.0D-4 .AND. ABS(Norm_Error) < 1.0D-4) ConvergeAOSP = .TRUE.
-          IF(ConvergeAOSP) THEN
-            IF(Lam > (One-1.D-14)) ConvergeAll = .TRUE.
-          ENDIF
-        ELSEIF(ABS(Norm_Error) > 100.D0*TError0) THEN
+
+        IF(IdmpCnvrgChck(Occ0,Occ1,Occ2,Occ3,Imin,I)) THEN
+          CALL MondoLog(DEBUG_MAXIMUM, Prog, "converged in "//TRIM(IntToChar(I))//" iterations")
+          CALL MondoLog(DEBUG_MAXIMUM, Prog, "idempotency error = "//TRIM(DblToChar(ABS(Occ0-Occ1))))
+          CALL MondoLog(DEBUG_MAXIMUM, Prog, "previous idempotency error = "//TRIM(DblToChar(ABS(Occ2-Occ3))))
           AOSPExit = .TRUE.
         ENDIF
+        Occ3 = Occ2
+        Occ2 = Occ1
+        Occ1 = Occ0
+
+        IF(I >= Imin_divergence_check) THEN
+          IF(ABS(Occ0-Occ1)/ABS(Ipot_Error_start) >= 1.0D0 .AND. &
+             ABS(Occ0-Occ1)/ABS(Ipot_Error_start) <  2.0D0) THEN
+            CALL MondoLog(DEBUG_MAXIMUM, Prog, "converged in "//TRIM(IntToChar(I))//" iterations")
+            CALL MondoLog(DEBUG_MAXIMUM, Prog, "Idempotency error between 1 and 2 times initial error")
+            AOSPExit = .TRUE.
+          ELSEIF(ABS(Occ0-Occ1)/ABS(Ipot_Error_start) > 10.0D0) THEN
+            CALL MondoLog(DEBUG_MAXIMUM, Prog, "failed convergence")
+            CALL MondoLog(DEBUG_MAXIMUM, Prog, "idempotency error diverging, greater 10 times initial error")
+            AOSPExit = .TRUE.
+          ENDIF
+        ENDIF
+
         IF(AOSPExit) EXIT
       ENDDO
 
-      ! Logic
-      IF(ConvergeAll) THEN
-        CALL SetEq(P0,P)
-        EXIT
-      ELSE
-        IF(DLam < 1.D-2 .OR. NStep > 50) THEN
-          CALL Halt("[P2Use:"//TRIM(SCFActn)//"] Density Matrix Extrapolater Failed to converge in "//TRIM(IntToChar(NStep))//" steps")
+      ! Check convergence of the last Dlam step.
+      IF(.NOT. AOSPExit .AND. ABS(Occ0-Occ1)/Abs(Ipot_Error_start) < 1.0D-2 .AND. ABS(Occ0-Occ1) < 1.0D-3) THEN
+        CALL MondoLog(DEBUG_MAXIMUM, Prog, "forced convergence, exceeded maximum number of inner iterations")
+        CALL SetEq(P0, P)
+      ELSEIF(.NOT. AOSPExit) THEN
+        CALL MondoLog(DEBUG_MAXIMUM, Prog, "could not converge in inner loop, repeating with half step")
+        Lam  = Lam - DLam
+        DLam = Half*DLam
+
+        IF(DLam < 1.0D-2) THEN
+          CALL Halt("[P2Use:"//TRIM(SCFActn)//"] DLam < 0.01, density matrix extrapolater failed to converge in "//TRIM(IntToChar(NStep))//" steps")
         ENDIF
-        IF(.NOT. ConvergeAOSP) THEN
-          Lam  = Lam - DLam
-          DLam = Half*DLam
-        ELSE
-          CALL SetEq(P0,P)
-        ENDIF
+
+      ELSEIF(AOSPExit) THEN
+        CALL MondoLog(DEBUG_MAXIMUM, Prog, "converged in this Dlam step")
+        CALL SetEq(P0, P)
       ENDIF
+
+      IF(Lam > (One-1.0D-14)) THEN
+        CALL MondoLog(DEBUG_MAXIMUM, Prog, "density matrix converged in "//TRIM(IntToChar(NStep))//" steps")
+        EXIT
+      ENDIF
+
     ENDDO
 
     ! Save back to be sure.
@@ -2001,4 +2038,3 @@ PROGRAM P2Use
   CALL ShutDown(Prog)
 
 END PROGRAM P2Use
-
