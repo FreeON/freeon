@@ -311,7 +311,7 @@ CONTAINS
         CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
       ELSE
         DO iCLONE=1,C%Geos%Clones
-          CALL PPrint(C%Geos%Clone(iCLONE), TRIM(C%Nams%GFile)//IntToChar(iCLONE), Geo, C%Opts%GeomPrint)
+          CALL PPrint(C%Geos%Clone(iCLONE), TRIM(C%Nams%GFile), Geo, C%Opts%GeomPrint)
         ENDDO
       ENDIF
 
