@@ -116,6 +116,7 @@ CONTAINS
     IF(G%Clones.GT.1) CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
 #endif
     CALL Put(G%Clones,'clones')
+
     ! If we are doing NEB, then put the endpoints to HDF as well
     IF(SIZE(G%Clone)==G%Clones+2)THEN
       ! All thats going into the endpoints is the geometry
@@ -332,7 +333,7 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
     CALL Delete(GMLoc)
   END SUBROUTINE ReArchIGEO
-  !
+
   !==============================================================================
   !
   !==============================================================================
@@ -352,6 +353,7 @@ CONTAINS
     CALL Put(B%MxBlk(cBAS),'maxblks',chBAS)
     CALL Put(B%MxN0s(cBAS),'maxnon0',chBAS)
     CALL Put(O%Models(cBAS),'ModelChemistry',chBAS)
+    CALL Put(O%NSMat(cBAS),'NSMat',chBAS)
 #ifdef PARALLEL
     CALL Put(M%MxAtsNode(cBAS),'maxatmsnode',Tag_O=chBAS)
     CALL Put(M%MxBlkNode(cBAS),'maxblksnode',Tag_O=chBAS)

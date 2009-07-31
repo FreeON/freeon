@@ -90,11 +90,22 @@ MODULE Functionals
    INTEGER, PARAMETER :: PURE_HCTH147     =41243262 !
    INTEGER, PARAMETER :: PURE_HCTH407     =41243263 !
    INTEGER, PARAMETER :: PURE_XLYP        =10685609 ! Xtended LYP hybrid
-!-----------------------------------------------------------------------------------------------------
+
+   ! Spin model keys.
+   CHARACTER(LEN=*), PARAMETER :: SPIN_MODEL_OPTION       = "SpinModel"
+   CHARACTER(LEN=*), PARAMETER :: SPIN_MODEL_RESTRICTED   = "R"
+   CHARACTER(LEN=*), PARAMETER :: SPIN_MODEL_UNRESTRICTED = "U"
+   CHARACTER(LEN=*), PARAMETER :: SPIN_MODEL_GENERALIZED  = "G"
+
+   INTEGER, PARAMETER          :: SPIN_MODEL_RESTRICTED_VALUE   = 1
+   INTEGER, PARAMETER          :: SPIN_MODEL_UNRESTRICTED_VALUE = 2
+   INTEGER, PARAMETER          :: SPIN_MODEL_GENERALIZED_VALUE  = 4
+
 !  Avoid under and over flows
    REAL(DOUBLE), PARAMETER :: NoNAN=1.D-30
 !  Global variable set to the current model chemistry
    INTEGER :: ModelChem
+   INTEGER :: NSMat
 !  Global intermediates for optimized functional forms
    REAL(DOUBLE),DIMENSION(500) :: UTmp
    REAL(DOUBLE),DIMENSION(500) :: VTmp

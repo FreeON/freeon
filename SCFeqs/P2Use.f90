@@ -69,7 +69,7 @@ PROGRAM P2Use
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
        Ipot_Error,Ipot_Error_start,Norm_Error,Lam,DLam,TError0,SFac,Dum,Fmin,Fmax,Occ3,Occ2,Occ1,Occ0
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0, &
-       OldFileID,ICart,N,NStep,iGEO,iBAS,iSCF,DMPOrder,NSMat,MM,ICycle,Cycle
+       OldFileID,ICart,N,NStep,iGEO,iBAS,iSCF,DMPOrder,MM,ICycle,Cycle
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,AOSPExit
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile,logtag
@@ -81,13 +81,11 @@ PROGRAM P2Use
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   Cycl=IntToChar(Args%I%I(1))
 
-  ! Load
-  NSMat=1
-  IF(NAlph.NE.NBeta)NSMat=2
-
   ! Select spin factor for R/U/G theory.
-  SFac=2D0
-  IF(NSMat.GT.1)SFac=1D0
+  SFac = 2D0
+  IF(NSMat > 1) SFac = 1D0
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "CurBase = "//TRIM(IntToChar(Args%I%I(2)))// &
+    ", NSMat = "//TRIM(IntToChar(NSMat)))
 
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
