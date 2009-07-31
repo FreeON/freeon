@@ -123,7 +123,7 @@ CONTAINS
     INTEGER                      :: default_NSMat, iCLONE, iBAS
 
     DO iCLONE = LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
-      CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "checking clone "//TRIM(IntToChar(iCLONE)))
+      CALL MondoLog(DEBUG_MAXIMUM, "SpinModelConflictCheck", "checking clone "//TRIM(IntToChar(iCLONE)))
 
       default_NSMat = 1
       IF(G%Clone(iCLONE)%NAlph /= G%Clone(iCLONE)%NBeta) THEN
@@ -131,9 +131,9 @@ CONTAINS
       ENDIF
 
       DO iBAS = 1, O%NModls
-        CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "checking basis "//TRIM(IntToChar(iBAS)))
+        CALL MondoLog(DEBUG_MAXIMUM, "SpinModelConflictCheck", "checking basis "//TRIM(IntToChar(iBAS)))
         IF(O%NSMat(iBAS) < default_NSMat) THEN
-          CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "fixing spin model for clone "// &
+          CALL MondoLog(DEBUG_MAXIMUM, "SpinModelConflictCheck", "fixing spin model for clone "// &
             TRIM(IntToChar(iCLONE))//" to NSMat = "//TRIM(IntToChar(default_NSMat)))
           O%NSMat(iBAS) = default_NSMat
         ENDIF
