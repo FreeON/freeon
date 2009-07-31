@@ -273,6 +273,7 @@ CONTAINS
 #endif
     STOP
   END SUBROUTINE ShutDown
+
   !==============================================================
   ! LOAD GLOBAL VARIABLES FROM THE TOP LEVEL OF THE HDF FILE
   !==============================================================
@@ -325,6 +326,7 @@ CONTAINS
     ENDIF
 #endif
     CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+    CALL Get(NSMat,'NSMat',Tag_O=CurBase)
     CALL Get(NClones,'clones')
 
   END SUBROUTINE LoadTopLevelGlobals

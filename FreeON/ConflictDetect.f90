@@ -47,7 +47,7 @@ CONTAINS
     TYPE(Controls) :: C
     CALL GlbConflictCheck(C)
     CALL OptConflictCheck(C%Opts)
-    CALL GeoConflictCheck(C%Geos)
+    CALL GeoConflictCheck(C%Geos, C%Opts)
     CALL PBCConflictCheck(C%Geos)
     CALL BStConflictCheck(C)
   END SUBROUTINE ConflictCheck
@@ -109,10 +109,39 @@ CONTAINS
            CALL MondoHalt(PRSE_ERROR,' Basis sets in sequence is short.')
   END SUBROUTINE GlbConflictCheck1
   !
-  SUBROUTINE GeoConflictCheck(G)
-    TYPE(Geometries) :: G
-!    CALL GeoConflictCheck1(G)
+  SUBROUTINE GeoConflictCheck(G, O)
+    TYPE(Geometries), INTENT(IN) :: G
+    TYPE(Options), INTENT(INOUT) :: O
+
+    ! CALL GeoConflictCheck1(G)
+    CALL SpinModelConflictCheck(G, O)
   END SUBROUTINE GeoConflictCheck
+
+  SUBROUTINE SpinModelConflictCheck(G, O)
+    TYPE(Geometries), INTENT(IN) :: G
+    TYPE(Options), INTENT(INOUT) :: O
+    INTEGER                      :: default_NSMat, iCLONE, iBAS
+
+    DO iCLONE = LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
+      CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "checking clone "//TRIM(IntToChar(iCLONE)))
+
+      default_NSMat = 1
+      IF(G%Clone(iCLONE)%NAlph /= G%Clone(iCLONE)%NBeta) THEN
+        default_NSMat = 2
+      ENDIF
+
+      DO iBAS = 1, O%NModls
+        CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "checking basis "//TRIM(IntToChar(iBAS)))
+        IF(O%NSMat(iBAS) < default_NSMat) THEN
+          CALL MondoLog(DEBUG_NONE, "SpinModelConflictCheck", "fixing spin model for clone "// &
+            TRIM(IntToChar(iCLONE))//" to NSMat = "//TRIM(IntToChar(default_NSMat)))
+          O%NSMat(iBAS) = default_NSMat
+        ENDIF
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SpinModelConflictCheck
+
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE GeoConflictCheck1(G)
 !H  This routine checks if a pair of atoms are too close from each other.

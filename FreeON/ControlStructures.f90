@@ -51,6 +51,7 @@ MODULE ControlStructures
     INTEGER                       :: NMthds
     INTEGER                       :: NConAls
     INTEGER                       :: NModls
+    INTEGER                       :: NSpinModels
     INTEGER                       :: NThrsh
     INTEGER                       :: NSteps
     INTEGER                       :: Guess
@@ -60,6 +61,7 @@ MODULE ControlStructures
     INTEGER,   DIMENSION(MaxSets) :: Methods
     INTEGER,   DIMENSION(MaxSets) :: ConAls
     INTEGER,   DIMENSION(MaxSets) :: Models
+    INTEGER,   DIMENSION(MaxSets) :: NSMat
     INTEGER,   DIMENSION(MaxSets) :: AccuracyLevels
     LOGICAL                       :: DoGDIIS,SteepStep
     TYPE(INT_VECT)                :: RestartState,ProductsState,ReactantsState

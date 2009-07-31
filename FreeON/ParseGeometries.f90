@@ -448,12 +448,11 @@ CONTAINS
     ! End of file error message
 1   CALL Halt('While parsing, failed to find '//EndDelimiter)
   END SUBROUTINE ParseCoordinates
-  !------------------------------------------------------------------------!
-  !
-  !------------------------------------------------------------------------!
+
   SUBROUTINE SpinCoords(G)
     TYPE(CRDS)     :: G
     INTEGER        :: I,J,NUnPEl
+
     ! Calculate the electronic coordinates
     G%NElec=0
     DO I=1,G%NAtms
@@ -461,19 +460,18 @@ CONTAINS
         G%NElec=G%NElec+INT(G%AtNum%D(I))
       ENDIF
     ENDDO
+    CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NElec = "//TRIM(IntToChar(G%NElec)))
     G%NElec=G%NElec-G%TotCh
+    CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NElec-TotalCharge = "//TRIM(IntToChar(G%NElec)))
     NUnPEl=G%Multp-1
-    !vw    IF(NUnPEl.NE.0) &
-    !vw         CALL MondoHalt(PRSE_ERROR,'Open shell not supported yet.'   &
-    !vw         //' NElectrons = '//TRIM(IntToChar(G%NElec)) &
-    !vw         //' NUnPairedE = '//TRIM(IntToChar(NUnPEl)))
+    CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "UnpairedElectrons = "//TRIM(IntToChar(NUnPEl)))
     G%NAlph=(G%NElec+NUnPEl)/2
     G%NBeta=(G%NElec-NUnPEl)/2
+    CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NAlpha = "//TRIM(IntToChar(G%NAlph)))
+    CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NBeta  = "//TRIM(IntToChar(G%NBeta)))
     IF(G%NAlph+G%NBeta.NE.G%NElec)CALL Halt('SpinCoords: Did you give the right charge/multiplicity!')
   END SUBROUTINE SpinCoords
-  !------------------------------------------------------------------------!
-  !
-  !------------------------------------------------------------------------!
+
   SUBROUTINE ReSetAtNum(G)
     TYPE(CRDS) :: G
     INTEGER :: I,J,IAtomNo
@@ -489,9 +487,7 @@ CONTAINS
       ENDIF
     ENDDO
   END SUBROUTINE ReSetAtNum
-  !------------------------------------------------------------------------!
-  !
-  !------------------------------------------------------------------------!
+
   FUNCTION GTag(State) RESULT(Tag)
     TYPE(INT_VECT)   :: State
     CHARACTER(LEN=4) :: Tag

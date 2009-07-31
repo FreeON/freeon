@@ -71,6 +71,8 @@ CONTAINS
     CALL ParseConAls(O%NConAls,O%ConAls)
     ! Parse for model chemistries
     CALL ParseModelChems(O%NModls,O%Models)
+    ! Parse for spin model.
+    CALL ParseSpinModels(O%NModls, O%NSpinModels, O%NSMat)
     ! Parse for gradient options.
     CALL ParseGradients(O%NSteps, O%Coordinates, O%Grad, O%DoGDIIS, &
                         O%SteepStep, O%CartesianOptimizerMethod)
@@ -265,6 +267,43 @@ CONTAINS
       ENDDO
     ENDIF
   END SUBROUTINE ParseModelChems
+
+  SUBROUTINE ParseSpinModels(NModls, NSpinModels, NSMat)
+    INTEGER, INTENT(IN)                         :: NModls
+    INTEGER, INTENT(INOUT)                      :: NSpinModels
+    INTEGER, DIMENSION(MaxSets), INTENT(INOUT)  :: NSMat
+    INTEGER                                     :: i
+
+    NSpinModels = 0
+
+    ! Reset spin models.
+    DO i = 1, NModls
+      NSMat(i) = 0
+    ENDDO
+
+    IF(OptKeyLocQ(Inp, SPIN_MODEL_OPTION, SPIN_MODEL_RESTRICTED, MaxSets, NLoc, Location)) THEN
+      NSpinModels = NSpinModels + NLoc
+      DO i = 1, NLoc
+        NSMat(Location(i)) = SPIN_MODEL_RESTRICTED_VALUE
+      ENDDO
+    ENDIF
+
+    IF(OptKeyLocQ(Inp, SPIN_MODEL_OPTION, SPIN_MODEL_UNRESTRICTED, MaxSets, NLoc, Location)) THEN
+      NSpinModels = NSpinModels + NLoc
+      DO i = 1, NLoc
+        NSMat(Location(i)) = SPIN_MODEL_UNRESTRICTED_VALUE
+      ENDDO
+    ENDIF
+
+    IF(OptKeyLocQ(Inp, SPIN_MODEL_OPTION, SPIN_MODEL_GENERALIZED, MaxSets, NLoc, Location)) THEN
+      NSpinModels = NSpinModels + NLoc
+      DO i = 1, NLoc
+        NSMat(Location(i)) = SPIN_MODEL_GENERALIZED_VALUE
+      ENDDO
+    ENDIF
+
+  END SUBROUTINE ParseSpinModels
+
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS
   !============================================================================
