@@ -1069,6 +1069,9 @@ if test -n "$ORGANIZATION"; then
   AC_DEFINE_UNQUOTED(CONFIG_USER, ["$CONFIG_USER at $ORGANIZATION"], [The user running the configure script.])
 fi
 
+# Date this was built.
+AC_DEFINE_UNQUOTED(CONFIG_BUILD_DATE, ["`date`"], [The date FreeON was built.])
+
 # Define the maximum number of SCF cycles.
 AC_DEFINE(HAVE_MAX_SCF, [256], [The maximum number of SCF cycles. After going
                          through this many SCF cycles, the SCF process is
