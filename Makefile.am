@@ -75,3 +75,18 @@ depcheck :
 	$(MAKE) -C QCTC  depcheck-bin
 	$(MAKE) -C HiCu  depcheck-bin
 	$(MAKE) -C ONX  depcheck-bin
+
+$(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h
+	@echo "checking MondoLocalVersion.h"
+	@grep LOCAL_VERSION $(top_builddir)/config_localversion.h > $(top_builddir)/tempconf
+	@if test ! -f $(top_builddir)/MondoLocalVersion.h; then \
+	  mv -f $(top_builddir)/tempconf $(top_builddir)/MondoLocalVersion.h; \
+	  echo "MondoLocalVersion.h did not exist"; \
+	elif (diff -u $(top_builddir)/MondoLocalVersion.h $(top_builddir)/tempconf > $(top_builddir)/MondoLocalVersion.diff); then \
+	  rm -f $(top_builddir)/tempconf; \
+	  echo "MondoLocalVersion.h unchanged"; \
+	else \
+	  mv -f $(top_builddir)/tempconf $(top_builddir)/MondoLocalVersion.h; \
+	  echo "MondoLocalVersion.h updated"; \
+	  cat $(top_builddir)/MondoLocalVersion.diff; \
+	fi
