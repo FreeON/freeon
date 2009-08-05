@@ -75,7 +75,6 @@ PROGRAM MakeRho
   REAL(DOUBLE)                    :: DistThresh,RSumE,RSumE2,RSumN,dNel,RelRhoErr,PcntCharge
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
-  INTEGER                         :: NSMat
 
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -165,7 +164,10 @@ PROGRAM MakeRho
   ENDIF
   CALL New(PTmp,4*MaxBlkSize**2)
   CALL NewBraBlok(BS)
-  NSMat=DMat%NSMat
+
+  ! We are getting NSMat now from hdf via StartUp.
+  !NSMat=DMat%NSMat
+
   !--------------------------------------------------------------
   ! Main loops: First pass calculates the size.
   ! Second pass calculates the density

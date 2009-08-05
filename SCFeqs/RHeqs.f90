@@ -50,7 +50,7 @@ PROGRAM RHEqs
   REAL(DOUBLE)                   :: CJK,HOMO,LUMO,dt
   REAL(DOUBLE)                   :: Mu,Entropy,Ek,Z,A1,A2,H1,H3,H4,Fk,Sigma,Dum
   REAL(DOUBLE)                   :: kB,Temperature,Occ,OccErr,EPS,dOccdMu,Ne,Beta,Xk
-  INTEGER                        :: I,J,K,LgN,NRow,NCol,NSMat,m
+  INTEGER                        :: I,J,K,LgN,NRow,NCol,m
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile,smearing
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
@@ -87,7 +87,8 @@ PROGRAM RHEqs
     CALL Get(sF,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
   ENDIF
 
-  NSMat=sF%NSMat
+  ! We get NSMat from hdf via StartUp.
+  !NSMat=sF%NSMat
   IF(NSMat.GT.1.AND.Smearing.NE.'NoSmearing') CALL Halt('Smearing with unrestricted are not supported!')
 
   SELECT CASE(NSMat)
