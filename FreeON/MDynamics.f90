@@ -60,7 +60,7 @@ CONTAINS
     TYPE(Controls)  :: C
     INTEGER         :: I,iSCF,iBAS,iGEO,iCLONE,iATS,iREMOVE
     INTEGER         :: iGEOBegin,iMDStep
-    REAL(DOUBLE)    :: Temp
+    REAL(DOUBLE)    :: Temp, MDDeltaTime
     LOGICAL         :: NewECMD,OrthogDM
     INTEGER         :: oldState
 
@@ -97,6 +97,8 @@ CONTAINS
     ! Initial Guess
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
 
+      iGEOBegin = C%Stat%Current%I(3)
+
       ! Init from old hdf file.
       CALL MondoLog(DEBUG_NONE, "MD", "loading from restart hdf file "//TRIM(C%Nams%RFile))
       HDFFileID=OpenHDF(C%Nams%RFile)
@@ -104,6 +106,7 @@ CONTAINS
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Get(iMDStep,"iMDStep")
         CALL Get(MDTime%D(iCLONE),"MDTime")
+        CALL Get(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEOBegin)))
         CALL Get(C%Dyns%MDGeuss,"MDGeuss")
         CALL CloseHDFGroup(HDF_CurrentID)
       ENDDO
@@ -116,6 +119,7 @@ CONTAINS
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Put(iMDStep,"iMDStep")
         CALL Put(MDTime%D(iCLONE),"MDTime")
+        CALL Put(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEOBegin)))
         CALL Put(.TRUE.,"DoingMD")
         CALL Put(C%Dyns%MDGeuss,"MDGeuss")
         CALL CloseHDFGroup(HDF_CurrentID)
@@ -123,7 +127,6 @@ CONTAINS
       CALL CloseHDF(HDFFileID)
 
       ! Determine the Begin Step
-      iGEOBegin = C%Stat%Current%I(3)
       IF(iMDStep > iGEOBegin) THEN
         CALL MondoLog(DEBUG_NONE, "MD", "iMDStep ("//TRIM(IntToChar(iMDStep)) &
           //") > iGEOBegin ("//TRIM(IntToChar(iGEOBegin))//")")
@@ -156,10 +159,12 @@ CONTAINS
     ELSE
       ! Init the Time
       MDTime%D(:) = Zero
+      MDDeltaTime = C%Dyns%DTime
       HDFFileID=OpenHDF(C%Nams%HFile)
       DO iCLONE=1,C%Geos%Clones
         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
         CALL Put(MDTime%D(iCLONE),"MDTime")
+
         CALL Put(.TRUE.,"DoingMD")
         CALL Put(C%Dyns%MDGeuss,"MDGeuss")
         CALL CloseHDFGroup(HDF_CurrentID)
@@ -174,16 +179,26 @@ CONTAINS
 
       ! Print some stuff out.
       CALL MondoLog(DEBUG_NONE, "MD", "new MD calculation")
-      CALL MondoLog(DEBUG_NONE, "MD", "iMDStep    = "//TRIM(IntToChar(iMDStep)))
-      CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin  = "//TRIM(IntToChar(iGEOBegin)))
-      CALL MondoLog(DEBUG_NONE, "MD", "MDTime     = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
-      CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo   = "//TRIM(IntToChar(MinMDGeo)))
-      CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE    = "//TRIM(IntToChar(iREMOVE)))
-      CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iMDStep     = "//TRIM(IntToChar(iMDStep)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iGEOBegin   = "//TRIM(IntToChar(iGEOBegin)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDTime      = "//TRIM(FltToChar(MDTime%D(1)*InternalTimeToFemtoseconds))//" fs")
+      CALL MondoLog(DEBUG_NONE, "MD", "MDDeltaTime = "//TRIM(FltToChar(C%Dyns%DTime*InternalTimeToFemtoseconds))//" fs")
+      CALL MondoLog(DEBUG_NONE, "MD", "MinMDGeo    = "//TRIM(IntToChar(MinMDGeo)))
+      CALL MondoLog(DEBUG_NONE, "MD", "iREMOVE     = "//TRIM(IntToChar(iREMOVE)))
+      CALL MondoLog(DEBUG_NONE, "MD", "MDMaxSteps  = "//TRIM(IntToChar(C%Dyns%MDMaxSteps)))
     ENDIF
 
     ! Do MD
     DO iGEO = iGEOBegin, C%Dyns%MDMaxSteps+iGEOBegin-1
+
+      ! Write time step size to hdf.
+      HDFFileID = OpenHDF(C%Nams%HFile)
+      DO iCLONE = 1, C%Geos%Clones
+        HDF_CurrentID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEO)))
+        CALL CloseHDFGroup(HDF_CurrentID)
+      ENDDO
+      CALL CloseHDF(HDFFileID)
 
       ! Initialize with temperature distribution.
       IF((iGEO == 1) .AND. C%Dyns%Initial_Temp) THEN
@@ -333,6 +348,7 @@ CONTAINS
           CALL CleanScratch(C,iGEO-iREMOVE-1,.TRUE.)
         ENDIF
       ENDIF
+
     ENDDO
 
     ! Clean up.

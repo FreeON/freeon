@@ -63,7 +63,7 @@ PROGRAM P2Use
 
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale
+  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale, MDDeltaTime
   INTEGER                       :: MDDampStep, m_step, mm_step, Imin, Imin_divergence_check
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
@@ -80,6 +80,10 @@ PROGRAM P2Use
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   Cycl=IntToChar(Args%I%I(1))
+
+  iSCF = Args%I%I(1)
+  iBAS = Args%I%I(2)
+  iGEO = Args%I%I(3)
 
   ! Select spin factor for R/U/G theory.
   SFac = 2D0
@@ -346,10 +350,6 @@ PROGRAM P2Use
     !
   CASE("DMLinear")
 
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
-
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
@@ -419,9 +419,9 @@ PROGRAM P2Use
 
   CASE("DMTRBO")
 
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
+    ! Get the current time step size.
+    CALL Get(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEO)))
+    CALL MondoLog(DEBUG_NONE, logtag, "MDDeltaTime = "//TRIM(FltToChar(MDDeltaTime*InternalTimeToFemtoseconds)))
 
     IF(iGEO < 4) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -568,10 +568,6 @@ PROGRAM P2Use
     ! DMTRBO with solid super-duper high order damping.
   CASE("DMTRBO_Damp_dt3")
 
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
-
     IF(iGEO < 5) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
       CALL Halt("["//TRIM(logtag)//"] Fatal error")
@@ -712,10 +708,6 @@ PROGRAM P2Use
 
     ! DMTRBO with solid super-duper high order damping.
   CASE("DMTRBO_Damp_dt5")
-
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
 
     IF(iGEO < 6) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -869,10 +861,6 @@ PROGRAM P2Use
 
     ! DMTRBO with super-duper high order damping.
   CASE("DMTRBO_Damp_dt7")
-
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
 
     IF(iGEO < 7) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -1036,10 +1024,6 @@ PROGRAM P2Use
 
     ! DMTRBO with even more super-duper high order damping.
   CASE("DMTRBO_Damp_dt9")
-
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
 
     IF(iGEO < 8) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -1206,10 +1190,6 @@ PROGRAM P2Use
 
     ! DMTRBO with industrial strength super-duper high order damping.
   CASE("DMTRBO_Damp_dt11")
-
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
 
     IF(iGEO < 9) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -1382,10 +1362,6 @@ PROGRAM P2Use
 
     ! DMSymplectic for 4th order symplecitc integration scheme 4.617
   CASE("DMSymplectic")
-
-    iSCF = Args%I%I(1)
-    iBAS = Args%I%I(2)
-    iGEO = Args%I%I(3)
 
     IF(iGEO < 7) THEN
       CALL MondoLog(DEBUG_MAXIMUM, logtag, "No previous density matrix defined")
@@ -1570,11 +1546,11 @@ PROGRAM P2Use
 
   CASE('FMVerlet0')
 
-    iGEO = Args%I%I(3)
     CALL New(F)
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
+
     IF(iGEO .LE. 2) THEN
       CALL Halt("[P2Use:FMVerlet0] No Previous Fock Matrix Defined")
     ENDIF
@@ -1650,12 +1626,11 @@ PROGRAM P2Use
 
   CASE('FMVerlet1')
 
-    iGEO = Args%I%I(3)
-
     CALL New(F)
     CALL New(P)
     CALL New(Tmp1)
     CALL New(Tmp2)
+
     IF(iGEO .LE. 4) THEN
       CALL Halt("[P2Use:FMVerlet1] No Previous Fock Matrix Defined")
     ENDIF

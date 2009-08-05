@@ -17,7 +17,7 @@ Geometry=(InAngstroms)
 MinSCF=12
 MaxSCF=12
 
-MDProjection=DMVerlet
+MDProjection=DMTRBO
 MDMethod=Verlet
 DeltaTime=0.25
 MaxMDStep=100
