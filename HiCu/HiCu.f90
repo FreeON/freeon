@@ -71,7 +71,6 @@ PROGRAM HaiKu
   CHARACTER(LEN=12),PARAMETER    :: Sub3='HiCu.MakeKxc'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   TYPE(BBox)                     :: WBox
-  INTEGER                        :: NSMat
   REAL(DOUBLE)                   :: VolRho,VolExc
   LOGICAL                        :: DoingMD
   !-------------------------------------------------------------------------------
@@ -143,9 +142,12 @@ PROGRAM HaiKu
 #endif
   ! CALL New(Kxc)
   NSDen=Rho%NSDen
-  NSMat=1
-  IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
+
+  ! We are getting NSMat from hdf via StartUp.
+  !NSMat=1
+  !IF(NSDen.EQ.3) NSMat=2 !<<< SPIN
   !write(*,*) '_HiCu_: NSMat',NSMat,' NSDen',NSDen,'MyID',MyID
+
   IF(NSDen.NE.1.AND.NSDen.NE.3)CALL Halt('HiCu: noncollinear spin DFT not yet implemented!')
 #ifdef PARALLEL
   CALL New_FASTMAT(Kxc,0,(/0,0/),NSMat_O=NSMat) !<<< SPIN

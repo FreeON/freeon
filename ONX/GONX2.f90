@@ -79,7 +79,6 @@ PROGRAM GONX2
   INTEGER                    :: CMin,CMax,DMin,DMax,IErr
   INTEGER                    :: ANbr,BNbr,CNbr,DNbr
 #endif
-  INTEGER                    :: NSMat
   REAL(DOUBLE)               :: Time1,Time2
   REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
   REAL(DOUBLE),DIMENSION(3)  :: Frc
@@ -146,12 +145,13 @@ PROGRAM GONX2
   !
   SELECT CASE(SCFActn)
   CASE('ForceEvaluation')
+    ! We are getting NSMat now from hdf via StartUp.
 #ifdef ONX2_PARALLEL
      CALL PDrv_Initialize(DFMcd,TrixFile('D',Args,1),'GONXPart',Args,WhenPartS_O='GEO')
-     NSMat=DFMcd%NSMat
+     !NSMat=DFMcd%NSMat
 #else
      CALL Get(D,TrixFile('D',Args,1))
-     NSMat=D%NSMat
+     !NSMat=D%NSMat
 #endif
   CASE DEFAULT
      CALL Halt('GONX2: Do not recognize this action <'//TRIM(SCFActn)//'>.')
