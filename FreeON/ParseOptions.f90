@@ -86,6 +86,8 @@ CONTAINS
     CALL ParseOptimizer(O%ConjugateGradientMaxMove, O%ConjugateGradientdR)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
+    ! Parse RQI guess and max iteration count
+    CALL ParseRQI(O%RQIGuess,O%MaxRQI)
     ! Parse Misc
     CALL ParseMISC(O%Pressure)
     ! close
@@ -798,6 +800,23 @@ CONTAINS
     ENDIF
   END SUBROUTINE ParseSCF
 
+  SUBROUTINE ParseRQI(RQIGuess,MaxRQI)
+    INTEGER           :: MaxRQI
+    CHARACTER(Len=DCL) :: GuessDCL
+    CHARACTER(LEN=*) :: RQIGuess
+    IF(.NOT.OptIntQ(Inp,RQICycles,MaxRQI)) THEN
+      MaxRQI=30
+    ENDIF
+    IF(.NOT.OptCharQ(Inp,'RQIGuess',GuessDCL)) THEN
+       GuessDCL='Koopmans'
+    ENDIF
+    RQIGuess=ADJUSTL(GuessDCL)
+    WRITE(*,*)'<',TRIM(RQIGuess),'>'
+
+  END SUBROUTINE ParseRQI
+  !===============================================================================================
+  !
+  !===============================================================================================
   SUBROUTINE ParseMISC(Pressure)
     REAL(DOUBLE) :: Pressure
 
