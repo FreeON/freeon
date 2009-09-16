@@ -41,14 +41,14 @@ PROGRAM QCTC
 
   !
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
-  !------------------------------------------------------------------------------- 
+  !-------------------------------------------------------------------------------
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   NukesOn=.TRUE.
 
   ! ---------------------------------------------------------------------------------
-  ! Begin building a density 
+  ! Begin building a density
   !
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
@@ -80,7 +80,7 @@ PROGRAM QCTC
      ! Compute a sparse matrix blocking scheme for the old BS
      CALL BlockBuild(GM,BS,BSiz,OffS)
      NBasF=BS%NBasF
-     ! Close the old hdf up 
+     ! Close the old hdf up
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)
      ! Reopen current group and HDF
@@ -106,7 +106,7 @@ PROGRAM QCTC
         CALL Get(D2,TrixFile('D',Args,0))
         CALL Multiply(D1,-One)
         CALL Add(D1,D2,DMat)
-        IF(HasHF(ModelChem))THEN                
+        IF(HasHF(ModelChem))THEN
            CALL Filter(D1,DMat)
            CALL Put(D1,TrixFile('DeltaD',Args,0))
         ENDIF
@@ -126,13 +126,13 @@ PROGRAM QCTC
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF
-  ENDIF 
+  ENDIF
   ! Set thresholds local to the density build
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! -------------------------------------------------------------------------
   ! Build the density
   Density_Time_Start=MTimer()
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
   ! RhoHead is the start of a linked density list
   ALLOCATE(RhoHead)
   RhoHead%LNum=0
@@ -150,9 +150,9 @@ PROGRAM QCTC
   ! -------------------------------------------------------------------------
   Density_Time=MTimer()-Density_Time_Start
   ! Done building density
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
   ! Take care of some micilaneous book keeping
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
   ! Set some values of the angular symmetry for use in computing the Lorentz field
   MaxPFFFEll=GM%PBC%PFFMaxEll
   ! Local expansion order of the multipoles to use in the tree
@@ -167,8 +167,8 @@ PROGRAM QCTC
   ELSE
      CALL Get(Etot,'Etot')
   ENDIF
-  ! Now that we are done with the density, lets make sure we have the 
-  ! current basis set, matrix block sizes etc:  
+  ! Now that we are done with the density, lets make sure we have the
+  ! current basis set, matrix block sizes etc:
 
   CALL Get(BS,CurBase)
   CALL Get(BSiz,'atsiz',CurBase)
@@ -187,7 +187,7 @@ PROGRAM QCTC
   MaxTier=0
   RhoLevel=0
   PoleNodes=0
-  ! Initialize the root node   
+  ! Initialize the root node
   CALL NewPoleNode(PoleRoot,0)
   ! Initialize the auxiliary density arrays
   CALL InitRhoAux
@@ -197,15 +197,15 @@ PROGRAM QCTC
   NPrim=0
   NFarAv=0
   NNearAv=0
-  ! ------------------------------------------------------------------------- 
-  ! Done with book keeping.  
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
+  ! Done with book keeping.
+  ! -------------------------------------------------------------------------
   ! Now build the multipole tree
   TreeMake_Time_Start=MTimer()
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
   ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-  ! Set up the crystal field     
+  ! Set up the crystal field
 
 
   CALL PBCFarFieldSetUp(GM,Rho,'QCTC',MaxPFFFEll,Etot)
@@ -213,7 +213,7 @@ PROGRAM QCTC
   CALL DeleteRhoAux
   ! Delete the Density
   !  CALL Delete(Rho)
-  ! ------------------------------------------------------------------------- 
+  ! -------------------------------------------------------------------------
   TreeMake_Time=MTimer()-TreeMake_Time_Start
   ! Done making the pole-tree
   ! -------------------------------------------------------------------------
@@ -225,7 +225,7 @@ PROGRAM QCTC
   ALLOCATE(NNearCount(1:CS_IN%NCells))
   NNearCount=0D0
   ! -------------------------------------------------------------------------
-  CALL New(J) 
+  CALL New(J)
   CALL MakeJ(J,NoWrap_O=NoWrap) ! <<<<<<<<<
   ! -------------------------------------------------------------------------
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
@@ -255,7 +255,7 @@ PROGRAM QCTC
         CALL Elapsed_Time(TimeNukE,'Init')
         E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
         CALL Elapsed_Time(TimeNukE,'Accum')
-     ELSE     
+     ELSE
         CALL Elapsed_Time(TimeNukE,'Init')
         E_Nuc_Tot=NukE(GM,Rho,NoWrap)
         CALL Elapsed_Time(TimeNukE,'Accum')
@@ -287,12 +287,12 @@ PROGRAM QCTC
 !!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
 !!$11 FORMAT(A20,D12.6)
 
-  PerfMon%FLOP=Zero 
-!  CALL MondoLog(DEBUG_MAXIMUM,Prog,'Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>')
+  PerfMon%FLOP=Zero
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,'Coulomb Energy      = <'//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//'>')
   !
-  CALL MondoLog(DEBUG_MAXIMUM,Prog,'CPUSec='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) & 
-                               //'; RhoBld='//TRIM(DblToShrtChar(Density_Time))                  & 
-                               //', TreeBld='//TRIM(DblToShrtChar(TreeMake_Time))) 
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,'CPUSec='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) &
+                               //'; RhoBld='//TRIM(DblToShrtChar(Density_Time))                  &
+                               //', TreeBld='//TRIM(DblToShrtChar(TreeMake_Time)))
   CALL MondoLog(DEBUG_MAXIMUM,Prog,'Walk='//TRIM(DblToShrtChar(JWalk_Time))                     &
                                 //', Ints='//TRIM(DblToShrtChar(Integral_Time))                  &
                                 //', Mults='//TRIM(DblToShrtChar(Multipole_Time)))
