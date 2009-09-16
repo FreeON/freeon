@@ -182,7 +182,7 @@ CONTAINS
     ! Parse supercell options
     SC(:)=0
     IF(FindKey(SUPERC,Inp))THEN
-      DO K=1,10
+      DO K=1,100
         IF(OptKeyLocQ(Inp,SUPERC,IntToChar(K),MaxSets,NLoc,Location)) THEN
           Ntot = NLoc
           DO I=1,NLoc
