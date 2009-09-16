@@ -1,4 +1,3 @@
-
 #define KWERQY
 !------------------------------------------------------------------------------
 !    This code is part of the MondoSCF suite of programs for linear scaling
@@ -64,7 +63,7 @@ MODULE RayleighQuotientIteration
   TYPE QUIRQIKontrol
      CHARACTER(LEN=2) :: chBas
      TYPE(TOLS)   :: Current
-     TYPE(TOLS)   :: Ultimate                                       
+     TYPE(TOLS)   :: Ultimate
      INTEGER,DIMENSION(3) :: Status
      LOGICAL      :: CholFact
      REAL(DOUBLE) :: Threshold
@@ -154,8 +153,8 @@ CONTAINS
   ! EOM FORMULATION OF TD-SCF IS NEARLY HERMETIAN, COUPLED ONLY THROUGH
   ! THE ORTHOGONALITY RELATIONSHIP BETWEEN EOM VARIABLES P AND Q (NOT PROJECTORS,
   ! BUT COMPONENTS OF THE TRANSITION DENSITY MATRIX).  NEW IDEA IS TO SOLVE THE
-  ! TD-SCF IN EOM REPRESENTATION ASSUMING P AND Q ARE NEARLY INDEPENDENT.  WEAK 
-  ! COUPLING GIVES RISE TO NONLINEARITY, SOLVED BY USE OF DUAL TRACK POLAK-RIBIERE 
+  ! TD-SCF IN EOM REPRESENTATION ASSUMING P AND Q ARE NEARLY INDEPENDENT.  WEAK
+  ! COUPLING GIVES RISE TO NONLINEARITY, SOLVED BY USE OF DUAL TRACK POLAK-RIBIERE
   ! NLCG AND EXACT, ANALYTIC LINE SEARCH.
   ! ===================================================================================
 
@@ -167,7 +166,7 @@ CONTAINS
     REAL(DOUBLE)                   :: Norm
     TYPE(BCSR)                     :: sP,sT1,sT2,sT3
     INTEGER,DIMENSION(3)           :: Status
-    ! 
+    !
     C%POpt%Resp%StcAlpha=.TRUE.
     C%POpt%Resp%StcBeta=.FALSE.
     C%POpt%Resp%StcGamma=.FALSE.
@@ -204,7 +203,7 @@ CONTAINS
     CALL Put(QN%Ultimate,QN%chBas)
     CALL CloseHDFGroup(HDF_CurrentID)
     CALL CloseHDF(HDFFileID)
-    ! Rename the response 
+    ! Rename the response
     IF(TRIM(C%Opts%RQIGuess)=='PolarX')THEN
        Guess=TrixFile("OrthoDPrimeX",PWD_O=C%Nams%M_SCRATCH,Name_O=C%Nams%SCF_NAME,Stats_O=C%Stat%Current%I,OffSet_O=0)
     ELSEIF(TRIM(C%Opts%RQIGuess)=='PolarY')THEN
@@ -222,7 +221,7 @@ CONTAINS
     CALL Put(sT1,QN%Xk%Ortho)
     CALL Delete(sT1)
     ! Split, replicate and recombine
-    CALL SplitPQ(QN,QN%Xk,.TRUE.)    
+    CALL SplitPQ(QN,QN%Xk,.TRUE.)
     CALL Get(sT1,QN%Xk%PosP)
     CALL Multiply(sT1,-One)
     CALL Put(sT1,QN%Xk%MomQ)
@@ -239,7 +238,7 @@ CONTAINS
     TYPE(State)        :: S,RQIStat
     TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
-    TYPE(Geometries)   :: G 
+    TYPE(Geometries)   :: G
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
     REAL(DOUBLE)       :: Ek_P,Ek_Q,Ek,ErrAbs,EkOld0,EkOld1,ErrRel,Delta,BetaP,BetaQ, &
@@ -260,7 +259,7 @@ CONTAINS
     IF(TRIM(O%RQIGuess)=='Koopmans')THEN
        QN%Threshold=1D-8
        CALL Koopmans(QN)
-    ELSE       
+    ELSE
        CALL PolarizationGuess(C,qn)
     ENDIF
     !
@@ -283,20 +282,20 @@ CONTAINS
     GTau=1D-4
     !
     CALL LOn2AO(Nam,MPI,S,QN,RQIStat,QN%Xk,QN%LXk)
-    CALL SNihilate(QN,QN%LXk,DoTDA) 
+    CALL SNihilate(QN,QN%LXk,DoTDA)
     CALL OrthoPrune(QN,QN%LXk%Ortho,.FALSE.,XTau,XkPcnt)
     CALL SplitPQ(QN,QN%LXk,PQThreshold_O=XTau)
     CALL OrthoPrune(QN,QN%LXk%PosP ,.FALSE.,XTau,XkPcnt)
     CALL OrthoPrune(QN,QN%LXk%MomQ ,.FALSE.,XTau,XkPcnt)
     !
     DO K=0,O%MaxRQI-1
-       ! - - - - - - - - - - - - - - - - - - - - - 
-       CALL GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ) 
+       ! - - - - - - - - - - - - - - - - - - - - -
+       CALL GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ)
        CALL Recomb(QN,QN%Gk)
        CALL SNihilate(QN,QN%Gk,DoTDA)
        CALL SplitPQ(QN,QN%Gk,Switch_O=.TRUE.,PQThreshold_O=GTau)
        !
-       Ek=Half*(Ek_P+Ek_Q)       
+       Ek=Half*(Ek_P+Ek_Q)
        EConverge(K)=Ek
        IF(MOD(K,2)==0)THEN
           EkOld0=MIN(EkOld0,Ek)
@@ -323,9 +322,9 @@ CONTAINS
           CALL Recomb(QN,QN%Gk)
           CALL FileCopy(QN%Gk%Ortho,QN%Pk%Ortho)
        ENDIF
-       ! - - - - - - - - - - - - - - - - - - - - - 
+       ! - - - - - - - - - - - - - - - - - - - - -
        ! Polak Ribierre step to generate P
-       ! - - - - - - - - - - - - - - - - - - - - - 
+       ! - - - - - - - - - - - - - - - - - - - - -
        CALL PRStep(QN,K)
        !
        IF(K>0)THEN
@@ -343,9 +342,9 @@ CONTAINS
        CALL SplitPQ(QN,QN%LPk,PQThreshold_O=GTau)
        CALL OrthoPrune(QN,QN%LPk%PosP,.FALSE.,GTau,PkPcnt)
        CALL OrthoPrune(QN,QN%LPk%MomQ,.FALSE.,GTau,PkPcnt)
-       ! - - - - - - - - - - - - - - - - - - - - - 
+       ! - - - - - - - - - - - - - - - - - - - - -
        ! Line search
-       ! - - - - - - - - - - - - - - - - - - - - - 
+       ! - - - - - - - - - - - - - - - - - - - - -
        IF(.NOT. &
             LinSrch(QN)    )EXIT
        CALL Recomb(QN,QN%Xk)
@@ -356,7 +355,7 @@ CONTAINS
        CALL SNihilate(QN,QN%Xk,DoTDA)
 
        CALL LOn2AO(Nam,MPI,S,QN,RQIStat,QN%Xk,QN%LXk,KTau_O=KTau)
-       CALL SNihilate(QN,QN%LXk,DoTDA) 
+       CALL SNihilate(QN,QN%LXk,DoTDA)
        CALL OrthoPrune(QN,QN%LXk%Ortho,.FALSE.,XTau,XkPcnt)
        CALL SplitPQ(QN,QN%LXk,PQThreshold_O=XTau)
        CALL OrthoPrune(QN,QN%LXk%PosP ,.FALSE.,XTau,XkPcnt)
@@ -365,10 +364,10 @@ CONTAINS
     ENDDO
     !
     EConverge(K)=E_RPA
-    CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,QN%Current%TwoE,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,.TRUE.)    
+    CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,QN%Current%TwoE,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,.TRUE.)
     CALL Get(sX,QN%Xk%Ortho)
     CALL SetEq(dX,sX)
-    
+
 !    CALL OpenASCII(QN%ASCII_Xk,77)
 !    WRITE(77,*)' Atoms = ',NAtoms
 !    WRITE(77,*)' Basis Functions = ',NBasF
@@ -402,32 +401,32 @@ CONTAINS
     Iteration="RPA(1,"//TRIM(IntToChar(K))//')'
     Statistics1="Ev = "//TRIM(DblToMedmChar(Ek*27.21139613182D0))   &
          //", Err = "//TRIM(DblToShrtChar(ErrRel))                  &
-         //", Torq = "//TRIM(DblToShrtChar(ABS(Ek_Q-Ek_P)/ABS(Ek)))           
+         //", Torq = "//TRIM(DblToShrtChar(ABS(Ek_Q-Ek_P)/ABS(Ek)))
     !
     !       CALL MondoLog(DEBUG_NONE, "QUIRQI",Statistics1,Iteration)
     !
     Statistics2="tK = "//TRIM(DblToMedmChar(TimeONX%Wall))  &
          //", tQ = "//TRIM(DblToMedmChar(TimeQCTC%Wall)) &
-         //", tM = "//TRIM(DblToMedmChar(TimeBCSR%Wall)) 
+         //", tM = "//TRIM(DblToMedmChar(TimeBCSR%Wall))
     !       CALL MondoLog(DEBUG_NONE, "QUIRQI",Statistics2)
     Statistics3=" Ev = "//TRIM(DblToChar(Ek*27.21139613182D0))   &
-         //", ErrRel = "//TRIM(DblToShrtChar(ErrRel)) &       
+         //", ErrRel = "//TRIM(DblToShrtChar(ErrRel)) &
          //", TrueEr = "//TRIM(DblToShrtChar(         &
          ABS(E_RPA -Ek*27.21139613182D0)/E_RPA))  &
-         //", ETau = "//TRIM(DblToShrtChar(ETau)) & 
-         //", XTau = "//TRIM(DblToShrtChar(XTau)) & 
-         //", GTau = "//TRIM(DblToShrtChar(GTau)) & 
+         //", ETau = "//TRIM(DblToShrtChar(ETau)) &
+         //", XTau = "//TRIM(DblToShrtChar(XTau)) &
+         //", GTau = "//TRIM(DblToShrtChar(GTau)) &
          //", %X = "//TRIM(DblToShrtChar(XkPcnt)) &
-         //", %P = "//TRIM(DblToShrtChar(PkPcnt))   
+         //", %P = "//TRIM(DblToShrtChar(PkPcnt))
 
     CALL MondoLog(DEBUG_NONE, "QUIRQI",Statistics3,Iteration)
 
-    SCF_NAME=Nam%SCF_NAME 
+    SCF_NAME=Nam%SCF_NAME
     !       SCF_NAME='p20_X_FULL_RPA_PRMOD'
 
 
     CALL OpenASCII( TRIM(Nam%M_PWD)//'/'//TRIM(SCF_NAME)//'_XkPcnt_'//TRIM(DblToShrtChar(QN%Threshold)),77)
-    WRITE(77,*)K,XkPcnt       
+    WRITE(77,*)K,XkPcnt
     CLOSE(Unit=77)
 
 
@@ -440,7 +439,7 @@ CONTAINS
              WRITE(77,*)I,LOG10((MAX(1D-10,ABS(EConverge(K)-EConverge(I))/EConverge(K)))),EConverge(I)
           ENDDO
           CLOSE(Unit=77)
-          ! 
+          !
           CALL OpenASCII( TRIM(Nam%M_PWD)//'TD-SCF_ONX',77)
           WRITE(77,*)NAtoms,TimeONX%Wall
           CLOSE(Unit=77)
@@ -491,7 +490,7 @@ CONTAINS
 
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     !
-    CALL New(sXk) ! Kluge, shouldn't have to do this!! 
+    CALL New(sXk) ! Kluge, shouldn't have to do this!!
     Kount=1
 111 CALL Get(sXk,Xk)
 
@@ -521,12 +520,12 @@ CONTAINS
 !!$            CALL Halt(' Logical error in RQI: OrthoPrune ')
 !!$       GOTO 111
 !!$    ENDIF
-    !    
+    !
     XkPcnt=1D2*DBLE(sXk%NNon0)/DBLE(NBasF**2)
     !    WRITE(*,*)Threshold,XkPcnt
     !
     CALL Put(sXk,Xk)
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sXk)
     ! All done
     CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
@@ -545,7 +544,7 @@ CONTAINS
     !-----------------------------------------------------------------------------
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     !
-    CALL New(sXk) ! Kluge, shouldn't have to do this!! 
+    CALL New(sXk) ! Kluge, shouldn't have to do this!!
     Kount=1
 111 CALL Get(sT,Xk)
     !
@@ -561,11 +560,11 @@ CONTAINS
             CALL Halt(' Logical error in RQI: OrthoPrune ')
        GOTO 111
     ENDIF
-    !    
+    !
     XkPcnt=MAX(XkPcnt,1D2*DBLE(sXk%NNon0)/DBLE(NBasF**2))
     !
     CALL Put(sXk,Xk)
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sXk)
     ! All done
     CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
@@ -578,7 +577,7 @@ CONTAINS
     REAL(DOUBLE)                  :: EkRaw,EkFiltered,Delta,dEk,Ek,XkPcnt,Norm
     TYPE(BCSR)                    :: sP,sXk,sLXk,sT1
     INTEGER :: L
-    !    
+    !
     CALL Get(sP,QN%P)
     CALL Get(sXk,QN%Xk%Ortho)
     CALL Get(sLXk,QN%LXk%Ortho)
@@ -685,7 +684,7 @@ CONTAINS
   SUBROUTINE GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ,NoQGrad_O)
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
-    TYPE(Parallel)                :: MPI    
+    TYPE(Parallel)                :: MPI
     TYPE(QUIRQIKontrol)           :: QN
     TYPE(BCSR)                    :: sP,sXk_PosP,sXk_MomQ,sLXk_PosP,sLXk_MomQ, &
          sGk_PosP,sGk_MomQ,sXk,sLXk,sGk
@@ -714,7 +713,7 @@ CONTAINS
           MaxGP=MAX(MaxGP,ABS(sGk%MTrix%D(I)))
        ENDDO
        MaxGQ=MaxGP
-       !       
+       !
        CALL Put(sGk,QN%Gk%Ortho)
        !
        CALL Delete(sP)
@@ -825,7 +824,7 @@ CONTAINS
     CALL Delete(sP)
     !
     E_EOM=Half*(Ap+Aq)/Rpq
-    !!    WRITE(*,44)E_EOM,Spq,Tpq,Upq           
+    !!    WRITE(*,44)E_EOM,Spq,Tpq,Upq
 44  FORMAT(' E_EOM TO START = ',F20.10,' Spq = ',D20.10,' Tpq = ',D20.10,' Upq = ',D20.10)
 
     PosP_MIN=Zero
@@ -837,9 +836,9 @@ CONTAINS
           LamQ=KK*0.1D0
           Tmp_EOM=Half*(Ap+Bp*LamP+Cp*LamP**2+Aq+Bq*LamQ+Cq*LamQ**2)/(Rpq+LamP*Spq+LamQ*Tpq+LamP*LamQ*Upq)
           IF(Tmp_EOM<E_EOM.AND.Tmp_EOM>0D0)THEN
-             E_EOM=Tmp_EOM                                            
+             E_EOM=Tmp_EOM
              PosP_MIN=LamP
-             MomQ_MIN=LamQ                      
+             MomQ_MIN=LamQ
           ENDIF
        ENDDO
     ENDDO
@@ -850,10 +849,10 @@ CONTAINS
 
     !!    WRITE(*,46)E_EOM,LamP,LamQ
 46  FORMAT(' E_EOM AT PT  A = ',F20.10,' LapP = ',D20.10,' LamQ = ',D20.10)
-    DO I=1,1000                   
+    DO I=1,1000
        LamQ_Old=LamQ
-       LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - & 
-            4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - & 
+       LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - &
+            4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - &
             Aq*LamP*Upq - Bp*LamP**2*Upq - Cp*LamP**3*Upq)))/(2D0*(Cq*Tpq + Cq*LamP*Upq))
        LamP_Old=LamP
        LamP= (-2D0*Cp*Rpq - 2D0*Cp*LamQ*Tpq + Sqrt((2D0*Cp*Rpq + 2D0*Cp*LamQ*Tpq)**2 -          &
@@ -865,7 +864,7 @@ CONTAINS
        dLamQ=ABS((LamQ_Old-LamQ)/LamQ)
        dLamP=ABS((LamP_Old-LamP)/LamP)
        dEOM=ABS((EOM_Old-E_EOM)/E_EOM)
-       IF(dEOM<1D-8.AND.I>4)EXIT                   
+       IF(dEOM<1D-8.AND.I>4)EXIT
     ENDDO
     !
     IF( (I==1001).OR.(ABS(LamP)<1D-8).OR.(ABS(LamQ)<1D-8) )THEN
@@ -875,7 +874,7 @@ CONTAINS
     !
     Den=(Rpq+LamP*Spq+LamQ*Tpq+LamP*LamQ*Upq)
     Ek_P=Half*(Ap+Bp*LamP+Cp*LamP**2)/Den
-    Ek_Q=Half*(Aq+Bq*LamQ+Cq*LamQ**2)/Den      
+    Ek_Q=Half*(Aq+Bq*LamQ+Cq*LamQ**2)/Den
     E_EOM=Ek_P+Ek_Q
     !
     IF(E_EOM<Zero.OR.E_EOM>E_EOM_AT_A)THEN
@@ -883,7 +882,7 @@ CONTAINS
        LamQ=MomQ_MIN
        Den=(Rpq+LamP*Spq+LamQ*Tpq+LamP*LamQ*Upq)
        Ek_P=Half*(Ap+Bp*LamP+Cp*LamP**2)/Den
-       Ek_Q=Half*(Aq+Bq*LamQ+Cq*LamQ**2)/Den      
+       Ek_Q=Half*(Aq+Bq*LamQ+Cq*LamQ**2)/Den
        E_EOM=Ek_P+Ek_Q
        WRITE(*,46)Half*(Ap+Aq)/Rpq,0D0,0D0
        WRITE(*,46)E_EOM,LamP,LamQ
@@ -939,10 +938,10 @@ CONTAINS
     LamQ=MomQ_MIN
     WRITE(*,446)E_EOM_AT_A,LamP,LamQ
 446 FORMAT(' E_EOM AT PT  A = ',F20.10,' LapP = ',D20.10,' LamQ = ',D20.10)
-    DO I=1,10                  
+    DO I=1,10
        LamQ_Old=LamQ
-       LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - & 
-            4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - & 
+       LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - &
+            4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - &
             Aq*LamP*Upq - Bp*LamP**2*Upq - Cp*LamP**3*Upq)))/(2D0*(Cq*Tpq + Cq*LamP*Upq))
        LamP_Old=LamP
        LamP= (-2D0*Cp*Rpq - 2D0*Cp*LamQ*Tpq + Sqrt((2D0*Cp*Rpq + 2D0*Cp*LamQ*Tpq)**2 -          &
@@ -962,7 +961,7 @@ CONTAINS
   SUBROUTINE LOn2AO(Nam,MPI,S,QN,RQIStat,Xk,LXk,KTau_O,JTau_O)
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
-    TYPE(Parallel)                :: MPI    
+    TYPE(Parallel)                :: MPI
     TYPE(QUIRQIKontrol)             :: QN
     TYPE(PQName)                  :: Xk,LXk
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
@@ -972,11 +971,11 @@ CONTAINS
     CALL New(sX) ! Kluge for now.  Shouldn't have to do this
     CALL Get(sX,Xk%Ortho)
     CALL Get(sZ,QN%Z)
-    ! Xao = Z^t.Xor.Z 
-    CALL Multiply(sZ,sX,sT1) 
+    ! Xao = Z^t.Xor.Z
+    CALL Multiply(sZ,sX,sT1)
     CALL Get(sZ,QN%ZT)
     CALL Multiply(sT1,sZ,sX)
-    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient) 
+    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient)
     ! Done with sX and sZ for now
     CALL Delete(sZ)
     CALL Delete(sX)
@@ -990,7 +989,7 @@ CONTAINS
     IF(PRESENT(KTau_O))THEN
        HDFFileID=OpenHDF(Nam%HFile)
        HDF_CurrentID=HDFFileID
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #1")      
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #1")
        QN%Current%Dist=KTau_O*1D-2
        QN%Current%TwoE=KTau_O
        CALL Put(QN%Current,QN%chBas)
@@ -1001,7 +1000,7 @@ CONTAINS
     IF(PRESENT(KTau_O))THEN
        HDFFileID=OpenHDF(Nam%HFile)
        HDF_CurrentID=HDFFileID
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #1")      
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #1")
        CALL Put(QN%Ultimate,QN%chBas)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
@@ -1018,11 +1017,11 @@ CONTAINS
     CALL Delete(sK)
     ! JK[X]=Zt.JKao[X].Z==JKor
     CALL Get(sZ,QN%ZT)
-    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sZ,sJK,sT1)
     CALL Get(sZ,QN%Z)
     CALL Multiply(sT1,sZ,sJK)
     ! Done with Z
-    CALL Delete(sZ)    
+    CALL Delete(sZ)
     CALL Get(sP,QN%P)
     ! T1=[JKor,Por]
     CALL Multiply(sP,sJK,sT1)
@@ -1042,7 +1041,7 @@ CONTAINS
     CALL Delete(sX)
     ! L[Xk]=[F,Xk]+[P,JK[X]] (orthogonal)
     CALL Add(sT1,sT2,sT3)
-    ! Put orthogonal L[Xk] or L[Pk] to disk 
+    ! Put orthogonal L[Xk] or L[Pk] to disk
     CALL Put(sT3,LXk%Ortho)
     ! Tidy up
     CALL Delete(sT1)
@@ -1055,7 +1054,7 @@ CONTAINS
   SUBROUTINE LOn2AOpq(Nam,MPI,S,QN,RQIStat,Xk,LXk,JTau_O,KTau_O)
     TYPE(FileNames)               :: Nam
     TYPE(State)                   :: S,RQIStat
-    TYPE(Parallel)                :: MPI    
+    TYPE(Parallel)                :: MPI
     TYPE(QUIRQIKontrol)           :: QN
     TYPE(PQName)                  :: Xk,LXk
     TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sQ,sJK,sT1,sT2,sT3
@@ -1065,7 +1064,7 @@ CONTAINS
     CALL Elapsed_TIME(TimeLON2,Init_O='Start')
     !===================================================================
     ! DO THE PosP part
-    ! 
+    !
     CALL New(sX) ! Kluge for now.  Shouldn't have to do this
     CALL Get(sX,Xk%PosP)
 
@@ -1075,13 +1074,13 @@ CONTAINS
     CALL Get(sZ,QN%Z)
 
     !    ENDIF
-    ! Xao = Z^t.Xor.Z 
-    CALL Multiply(sZ,sX,sT1) 
+    ! Xao = Z^t.Xor.Z
+    CALL Multiply(sZ,sX,sT1)
     IF(QN%CholFact) &
          CALL Get(sZ,QN%ZT)
 
     CALL Multiply(sT1,sZ,sX)
-    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient) 
+    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient)
     ! Done with sX and sZ for now
     CALL Delete(sZ)
     CALL Delete(sX)
@@ -1104,18 +1103,18 @@ CONTAINS
     CALL Delete(sK)
     ! JK[X]=Zt.JKao[X].Z==JKor
     CALL Get(sZ,QN%Z)
-    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sZ,sJK,sT1)
     IF(QN%CholFact) &
          CALL Get(sZ,QN%ZT)
-    ! Xao = Z^t.Xor.Z 
-    CALL Multiply(sZ,sX,sT1) 
+    ! Xao = Z^t.Xor.Z
+    CALL Multiply(sZ,sX,sT1)
     IF(QN%CholFact) &
          CALL Get(sZ,QN%Z)
     CALL Multiply(sT1,sZ,sX)
 
     CALL Multiply(sT1,sZ,sJK)
     ! Done with Z
-    CALL Delete(sZ)    
+    CALL Delete(sZ)
     CALL Get(sP,QN%P)
     ! T1=[JKor,Por]
     CALL Multiply(sP,sJK,sT1)
@@ -1132,7 +1131,7 @@ CONTAINS
     CALL Delete(sX)
     ! L[Xk]=[F,Xk]+[P,JK[X]] (orthogonal)
     CALL Add(sT1,sT2,sT3)
-    ! Put orthogonal L[Xk] or L[Pk] to disk 
+    ! Put orthogonal L[Xk] or L[Pk] to disk
     CALL Put(sT3,LXk%PosP)
     ! Tidy up
     CALL Delete(sT1)
@@ -1140,14 +1139,14 @@ CONTAINS
     CALL Delete(sT3)
     !===================================================================
     ! DO THE MomQ part
-    ! 
+    !
     CALL New(sX) ! Kluge for now.  Shouldn't have to do this
     CALL Get(sX,Xk%MomQ)
     CALL Get(sZ,QN%Z)
-    ! Xao = Z^t.Xor.Z 
-    CALL Multiply(sZ,sX,sT1) 
+    ! Xao = Z^t.Xor.Z
+    CALL Multiply(sZ,sX,sT1)
     CALL Multiply(sT1,sZ,sX)
-    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient) 
+    CALL Put(sX,Xk%AO) ! AO transition density matrix (or CG gradient)
     ! Done with sX and sZ for now
     CALL Delete(sZ)
     CALL Delete(sX)
@@ -1168,10 +1167,10 @@ CONTAINS
     CALL Delete(sK)
     ! JK[X]=Zt.JKao[X].Z==JKor
     CALL Get(sZ,QN%Z)
-    CALL Multiply(sZ,sJK,sT1)        
+    CALL Multiply(sZ,sJK,sT1)
     CALL Multiply(sT1,sZ,sJK)
     ! Done with Z
-    CALL Delete(sZ)    
+    CALL Delete(sZ)
     CALL Get(sP,QN%P)
     ! T1=[JKor,Por]
     CALL Multiply(sP,sJK,sT1)
@@ -1188,7 +1187,7 @@ CONTAINS
     CALL Delete(sX)
     ! L[Xk]=[F,Xk]+[P,JK[X]] (orthogonal)
     CALL Add(sT1,sT2,sT3)
-    ! Put orthogonal L[Xk] or L[Pk] to disk 
+    ! Put orthogonal L[Xk] or L[Pk] to disk
     !    CALL PPrint(sT3,'pq L[MomQ] RAW ',Unit_O=6)
     CALL Put(sT3,LXk%MomQ)
     ! Tidy up
@@ -1197,23 +1196,23 @@ CONTAINS
     CALL Delete(sT3)
     !===================================================================
     ! Now, do the folding
-    ! 
+    !
     CALL Get(sP,QN%P)
     CALL Multiply(sP,Two)
     CALL SetEq(sQ,sP)
     CALL Multiply(sQ,-One)
     CALL Add(sQ,Two)
-    ! - - - - - - - - - - - - - - - - - - - - - - - - 
+    ! - - - - - - - - - - - - - - - - - - - - - - - -
     ! First the PosP part
     CALL Get(sX,LXk%PosP)
 
     ! TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
     CALL Multiply(sQ,sX,sT1)
     CALL Multiply(sT1,sP,sT2)
-    CALL XPose(sT2,sT1) 
+    CALL XPose(sT2,sT1)
     ! MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sX,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! PosP=P.X.Q-TRANSPOSE(Q.X.P)
     CALL Multiply(sT1,-One)
     CALL Add(sT1,sT3,sT2)
@@ -1226,21 +1225,21 @@ CONTAINS
     CALL Delete(sT1)
     CALL Delete(sT2)
     CALL Delete(sT3)
-    ! - - - - - - - - - - - - - - - - - - - - - - - - 
+    ! - - - - - - - - - - - - - - - - - - - - - - - -
     CALL Get(sX,LXk%MomQ)
     ! TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
     CALL Multiply(sQ,sX,sT1)
     CALL Multiply(sT1,sP,sT2)
-    CALL XPose(sT2,sT1) 
+    CALL XPose(sT2,sT1)
     ! MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sX,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! PosP=P.X.Q+TRANSPOSE(Q.X.P)
     CALL Add(sT1,sT3,sT2)
     CALL Multiply(sT2,25D-2)
     !    CALL PPrint(sT2,'pq L[PosP]',Unit_O=6)
     CALL Put(sT2,LXk%MomQ)
-    ! - - - - - - - - - - - - - - - - - - - - - - - - 
+    ! - - - - - - - - - - - - - - - - - - - - - - - -
     CALL Delete(sX)
     CALL Delete(sT1)
     CALL Delete(sT2)
@@ -1268,7 +1267,7 @@ CONTAINS
     CALL Multiply(sMomQ,-One)
     CALL Add(sPosP,sMomQ,sT1)
     CALL Add(sT1,sT2,sT3)
-    CALL Multiply(sT3,Half)    
+    CALL Multiply(sT3,Half)
     CALL Put(sT3,Xk%Ortho)
     ! Tidy
     CALL Delete(sT1)
@@ -1303,17 +1302,17 @@ CONTAINS
     ! TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
     CALL Multiply(sQ,sXk,sT1)
     CALL Multiply(sT1,sP,sT2)
-    CALL XPose(sT2,sT1) 
+    CALL XPose(sT2,sT1)
     ! MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sXk,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! PosP=P.X.Q+TRANSPOSE(Q.X.P)
     CALL Add(sT1,sT3,sT2)
     CALL Multiply(sT2,25D-2)
     !
     IF(PRESENT(Switch_O))THEN
        IF(Switch_O)THEN
-          CALL Put(sT2,Xk%PosP) 
+          CALL Put(sT2,Xk%PosP)
        ELSE
           CALL Put(sT2,Xk%MomQ)
        ENDIF
@@ -1328,12 +1327,12 @@ CONTAINS
        IF(Switch_O)THEN
           CALL Put(sT2,Xk%MomQ)
        ELSE
-          CALL Put(sT2,Xk%PosP) 
+          CALL Put(sT2,Xk%PosP)
        ENDIF
     ELSE
-       CALL Put(sT2,Xk%PosP) 
+       CALL Put(sT2,Xk%PosP)
     ENDIF
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sP)
     CALL Delete(sQ)
     CALL Delete(sXk)
@@ -1344,7 +1343,7 @@ CONTAINS
     CALL Elapsed_TIME(TimeSPLT,Init_O='Accum')
   END SUBROUTINE SplitPQ
 
-  SUBROUTINE SNihilate(QN,Xk,DoTDA) 
+  SUBROUTINE SNihilate(QN,Xk,DoTDA)
     REAL(DOUBLE)          :: Norm
     TYPE(PQName)          :: Xk
     TYPE(QUIRQIKontrol)     :: QN
@@ -1355,13 +1354,13 @@ CONTAINS
     !-----------------------------------------------------------------------------
     CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
     !
-    CALL New(sXk) ! Kluge, shouldn't have to do this!! 
+    CALL New(sXk) ! Kluge, shouldn't have to do this!!
     CALL Get(sXk,Xk%Ortho)
     CALL Get(sP,QN%P)
     CALL Get(sQ,QN%P)
     CALL Multiply(sP,Two)
     CALL Multiply(sQ,-Two)
-    CALL Add(sQ,Two) 
+    CALL Add(sQ,Two)
     IF(DoTDA)THEN
        CALL Multiply(sQ,sXk,sT1)
        CALL Multiply(sT1,sP,sXk)
@@ -1384,7 +1383,7 @@ CONTAINS
     ENDIF
     CALL Multiply(sXk,25D-2)
     CALL Put(sXk,Xk%Ortho)
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sXk)
     ! All done
     CALL Elapsed_TIME(TimeBCSR,Init_O='Accum')
@@ -1400,7 +1399,7 @@ CONTAINS
     TYPE(State)        :: S,RQIStat
     TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
-    TYPE(Geometries)   :: G 
+    TYPE(Geometries)   :: G
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
     REAL(DOUBLE)       :: Ek_P,Ek_Q,Ek,ErrAbs,EkOld,ErrRel,MaxGP,MaxGQ, &
@@ -1444,9 +1443,9 @@ CONTAINS
 !!$!          DoTDA=.FALSE.
 !!$       ENDIF
 !!$
-       CALL GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ) 
+       CALL GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ)
        !
-       Ek=Half*(Ek_P+Ek_Q)       
+       Ek=Half*(Ek_P+Ek_Q)
        !
        EConverge(K)=Ek
        ErrAbs=EkOld-Ek
@@ -1471,10 +1470,10 @@ CONTAINS
        !
        CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,QN%Current%TwoE,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,.FALSE.)
        CALL PRStep(QN,K)
-!!$       ! 
+!!$       !
        CALL Recomb(QN,QN%Pk)
        CALL SNihilate(QN,QN%Pk,DoTDA)
-       CALL SplitPQ(QN,QN%Pk,.TRUE.) 
+       CALL SplitPQ(QN,QN%Pk,.TRUE.)
 !!$       CALL PrunePH(QN,QN%Pk%PosP,.FALSE.,GTau,PkPcntP)
 !!$       CALL PrunePH(QN,QN%Pk%MomQ,.FALSE.,GTau,PkPcntQ)
        !
@@ -1482,7 +1481,7 @@ CONTAINS
        !
        CALL Recomb(QN,QN%LPk)
        CALL SNihilate(QN,QN%LPk,DoTDA)
-       CALL SplitPQ(QN,QN%LPk,.TRUE.) 
+       CALL SplitPQ(QN,QN%LPk,.TRUE.)
 !!$       CALL PrunePH(QN,QN%LPk%PosP,.FALSE.,1D-10,PkPcntP)
 !!$       CALL PrunePH(QN,QN%LPk%MomQ,.FALSE.,1D-10,PkPcntQ)
        !
@@ -1490,7 +1489,7 @@ CONTAINS
        !
        CALL Recomb(QN,QN%Xk)
        CALL SNihilate(QN,QN%Xk,DoTDA)
-       CALL SplitPQ(QN,QN%Xk,.TRUE.) 
+       CALL SplitPQ(QN,QN%Xk,.TRUE.)
 
        CALL OrthoPrune(QN,QN%Xk%PosP,.FALSE.,XTau,XkPcntP)
        CALL OrthoPrune(QN,QN%Xk%MomQ,.FALSE.,XTau,XkPcntQ)
@@ -1505,7 +1504,7 @@ CONTAINS
        !
        CALL Recomb(QN,QN%LXk)
        CALL SNihilate(QN,QN%LXk,DoTDA)
-       CALL SplitPQ(QN,QN%LXk,.TRUE.) 
+       CALL SplitPQ(QN,QN%LXk,.TRUE.)
 !!$       CALL PrunePH(QN,QN%LXk%PosP,.FALSE.,1D-10,PkPcntP)
 !!$       CALL PrunePH(QN,QN%LXk%MomQ,.FALSE.,1D-10,PkPcntQ)
        !
@@ -1544,7 +1543,7 @@ CONTAINS
     CALL XPose(sT2,sT1)
     ! T3=MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sXk,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! T2=PosP=P.X.Q+TRANSPOSE(Q.X.P)
     CALL Add(sT1,sT3,sT2)
     CALL Multiply(sT2,25D-2)
@@ -1559,14 +1558,14 @@ CONTAINS
     ! TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
     CALL Multiply(sQ,sXk,sT1)
     CALL Multiply(sT1,sP,sT2)
-    CALL XPose(sT2,sT1) 
+    CALL XPose(sT2,sT1)
     ! MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sXk,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! PosP=P.X.Q+TRANSPOSE(Q.X.P)
     CALL Add(sT1,sT3,sT2)
     CALL Multiply(sT2,25D-2)
-    !       
+    !
     CALL Get(sXk,Xk%PosP)
     CALL Put(sT2,Xk%PosP)
     !-----------------------------------
@@ -1574,17 +1573,17 @@ CONTAINS
     ! TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
     CALL Multiply(sQ,sXk,sT1)
     CALL Multiply(sT1,sP,sT2)
-    CALL XPose(sT2,sT1) 
+    CALL XPose(sT2,sT1)
     CALL Multiply(sT1,-One)
     ! MATMUL(P,MATMUL(X,Q))
     CALL Multiply(sP,sXk,sT2)
-    CALL Multiply(sT2,sQ,sT3) 
+    CALL Multiply(sT2,sQ,sT3)
     ! MomQ=P.X.Q-TRANSPOSE(Q.X.P)
     CALL Add(sT3,sT1,sT2)
     CALL Multiply(sT2,25D-2)
     CALL Put(sT2,Xk%MomQ)
     !       CALL PPrint(sT3,'Xk_Q = ',Unit_O=6)
-    ! Tidy up 
+    ! Tidy up
     CALL Delete(sP)
     CALL Delete(sQ)
     CALL Delete(sXk)
@@ -1608,7 +1607,7 @@ CONTAINS
     REAL(DOUBLE)       :: MaxP,Ek,EkOld,dEk,Beta,Lambda,ErrRel,ErrAbs,Err,Norm,Num,Den, &
          XkPcnt,PkPcnt,GkPcnt,LXkPcnt,LPkPcnt
     TYPE(BCSR)         :: sP,sQ,sF,sXk,sGk,sPk,sXkOld,sGkOld,sPkOld,sLXk,sLPk,sT1,sT2,sT3
-    CHARACTER(LEN=DCL) :: Iteration,Statistics1,Statistics2,Statistics3    
+    CHARACTER(LEN=DCL) :: Iteration,Statistics1,Statistics2,Statistics3
 
     TYPE(DBL_VECT)    :: EigenEs
     TYPE(DBL_RNK2)    :: X
@@ -1622,7 +1621,7 @@ CONTAINS
     !
     CALL Multiply(sP,Two)
     CALL Multiply(sQ,-Two)
-    CALL Add(sQ,Two) 
+    CALL Add(sQ,Two)
     !
     CALL New(sT1)
     CALL New(sT2)
@@ -1639,7 +1638,7 @@ CONTAINS
     !
     CALL SetEq(sXk,sP)
     !
-    ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D) 
+    ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D)
     DO I=1,sXk%NNon0
        MaxP=ABS(sXk%MTrix%D(I))
        sXk%MTrix%D(I)=RANDOM_DBL((/-MaxP,MaxP/))
@@ -1669,7 +1668,7 @@ CONTAINS
 
 
 
-    ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D) 
+    ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D)
     CALL Multiply(sF,sXk,sT1)
     CALL Multiply(sXk,sF,sT2)
     CALL Multiply(sT2,-One)
@@ -1678,7 +1677,7 @@ CONTAINS
     CALL Multiply(sQ,sLXk,sT1)
     CALL Multiply(sT1,sP,sLXk)
     CALL Multiply(sLXk,25D-2)
-    ! Ek=ThoulessQ(N,P%D,Xk,LXk) 
+    ! Ek=ThoulessQ(N,P%D,Xk,LXk)
     EkOld=1D100
     Ek=OneDotT(sP,sXk,sLXk)
     DO K=0,300
@@ -1691,7 +1690,7 @@ CONTAINS
        IF(K==0)THEN
           Beta=Zero
        ELSE
-          ! Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)   
+          ! Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)
           CALL Multiply(sGkOld,-One)
           CALL Add(sGk,sGkOld,sT1)
           CALL Multiply(sGkOld,-One)
@@ -1699,11 +1698,11 @@ CONTAINS
           Den=OneDotT(sP,sGkOld,sGkOld)
           Beta=Num/Den
        ENDIF
-       IF(K==0)THEN             
+       IF(K==0)THEN
           ! Pk=Gk
           CALL SetEq(sPk,sGk)
-       ELSE 
-          ! Pk=Gk+Beta*PkOld  
+       ELSE
+          ! Pk=Gk+Beta*PkOld
           CALL Multiply(sPkOld,Beta)
           CALL Add(sPkOld,sGk,sPk)
        ENDIF
@@ -1713,7 +1712,7 @@ CONTAINS
        CALL Multiply(sPk,One/Norm)
        CALL Filter(sPk,Tol_O=QN%Threshold)
        PkPcnt=1D2*DBLE(sPk%NNon0)/DBLE(NBasF**2)
-       ! LPk=MATMUL(F%D,Pk)-MATMUL(Pk,F%D) 
+       ! LPk=MATMUL(F%D,Pk)-MATMUL(Pk,F%D)
        CALL Multiply(sF,sPk,sT1)
        CALL Multiply(sPk,sF,sT2)
        CALL Multiply(sT2,-One)
@@ -1733,7 +1732,7 @@ CONTAINS
        CALL Multiply(sPk,Norm)
        CALL Multiply(sLPk,Norm)
        !
-       CALL SparseRQILineSearch(sP,sPk,sXk,sLXk,sLPk,Lambda)          
+       CALL SparseRQILineSearch(sP,sPk,sXk,sLXk,sLPk,Lambda)
        !
        EkOld=Ek
        CALL SetEq(sXkOld,sXk)
@@ -1753,7 +1752,7 @@ CONTAINS
        CALL Filter(sXk,Tol_O=QN%Threshold)
        XkPcnt=1D2*DBLE(sXk%NNon0)/DBLE(NBasF**2)
        !
-       ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D) 
+       ! LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D)
        CALL Multiply(sF,sXk,sT1)
        CALL Multiply(sXk,sF,sT2)
        CALL Multiply(sT2,-One)
@@ -1768,7 +1767,7 @@ CONTAINS
        !       CALL Filter(sLXk,Tol_O=QN%Threshold)
        !       LXkPcnt=1D2*DBLE(sLXk%NNon0)/DBLE(NBasF**2)
        !
-       ! Ek=ThoulessQ(N,P%D,Xk,LXk) 
+       ! Ek=ThoulessQ(N,P%D,Xk,LXk)
        Ek=OneDotT(sP,sXk,sLXk)
        ErrAbs=EkOld-Ek
        ErrRel=ErrAbs/Ek
@@ -1778,7 +1777,7 @@ CONTAINS
 
 
 
-!!$       
+!!$
 !!$       CALL Multiply(sXk,-Ek)
 !!$       CALL Add(sXk,sLXk,sT1)
 !!$       CALL Multiply(sXk,-One/Ek) ! Multiply back
@@ -1793,9 +1792,9 @@ CONTAINS
        Statistics1="Ev = "//TRIM(DblToMedmChar(Ek*27.21139613182D0))   &
             //", Err = "//TRIM(DblToShrtChar(ErrRel)) &
             //", %X = "//TRIM(FltToShrtChar(XkPcnt))   &
-            //", %LX = "//TRIM(FltToShrtChar(LXkPcnt)) & 
+            //", %LX = "//TRIM(FltToShrtChar(LXkPcnt)) &
             //", %P = "//TRIM(FltToShrtChar(PkPcnt))   &
-            //", %LP = "//TRIM(FltToShrtChar(LPkPcnt)) 
+            //", %LP = "//TRIM(FltToShrtChar(LPkPcnt))
 
        CALL MondoLog(DEBUG_NONE, "QUIRQI",Statistics1,Iteration)
 
@@ -1859,7 +1858,7 @@ CONTAINS
     CALL Delete(sPkOld)
 
     ! Split the guess
-    CALL SplitPQ(QN,QN%Xk,.TRUE.)    
+    CALL SplitPQ(QN,QN%Xk,.TRUE.)
     !
 
     !
@@ -1870,7 +1869,7 @@ CONTAINS
   SUBROUTINE SetQName(Nam,S,QN,RQIStat)
     !
     TYPE(State)          :: S,RQIStat
-    TYPE(QUIRQIKontrol)    :: QN 
+    TYPE(QUIRQIKontrol)    :: QN
     TYPE(FileNames)      :: Nam
     LOGICAL              :: Present
     !
@@ -1879,7 +1878,7 @@ CONTAINS
     CALL New(RQIStat%Previous,3)
     RQIStat%Current%I=S%Current%I
     RQIStat%Previous%I=S%Previous%I
-    ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk]) 
+    ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk])
     RQIStat%Action%C(1)="TD-SCF"
     RQIStat%Action%C(2)="" ! To be determined throughout RQI cycle
     !
@@ -1895,8 +1894,8 @@ CONTAINS
     INQUIRE(FILE=QN%Z,EXIST=Present)
     IF(.NOT.Present)THEN
        QN%CholFact=.TRUE.
-       QN%Z=          TrixFile("Z",           PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)    
-       QN%ZT=         TrixFile("ZT",          PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)    
+       QN%Z=          TrixFile("Z",           PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)
+       QN%ZT=         TrixFile("ZT",          PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I)
     ELSE
        QN%ZT=QN%Z
     ENDIF
@@ -1945,7 +1944,7 @@ CONTAINS
     TYPE(State)        :: S,RQIStat
     TYPE(Parallel)     :: MPI
     TYPE(Options)      :: O
-    TYPE(Geometries)   :: G 
+    TYPE(Geometries)   :: G
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
     !
@@ -1998,12 +1997,12 @@ CONTAINS
     !
     CALL Multiply(sP,Two)
     CALL Multiply(sQ,-Two)
-    CALL Add(sQ,Two) 
+    CALL Add(sQ,Two)
     !
 
     P%D=Two*P%D
     Q%D=-Two*Q%D
-    DO I=1,N 
+    DO I=1,N
        Q%D(I,I)=Q%D(I,I)+Two
     ENDDO
     !
@@ -2039,7 +2038,7 @@ CONTAINS
     CALL F4Rot(NBasF,Orbitals%D,DoubleSlash)
     ! Now set Z->I, avoiding any further AO->OR action
     Z%D=0D0
-    DO I=1,NBasF; Z%D(I,I)=1D0; ENDDO      
+    DO I=1,NBasF; Z%D(I,I)=1D0; ENDDO
        !
 !!$       CALL PPrint(F,'F_MO',Unit_O=6)
 !!$       CALL PPrint(P,'P_MO',Unit_O=6)
@@ -2056,7 +2055,7 @@ CONTAINS
        !
 
 33     FORMAT('St=',I2,', It=',I3,', Ev=',F10.6,', dE=',D8.2,', dN=',D7.2, &
-            ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2) 
+            ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2)
 
 
 44     FORMAT(A4,' State=',I2,', Nk=',I3,', Ev=',F9.6,', dE=',D7.2,', WallSec=',D12.4)
@@ -2077,7 +2076,7 @@ CONTAINS
 
 
              PosP_Xk=pOp(NBasF,P%D,Q%D,Xk)
-             MomQ_Xk=qOp(NBasF,P%D,Q%D,Xk)    
+             MomQ_Xk=qOp(NBasF,P%D,Q%D,Xk)
 
 
              !    CALL PPrint(PosP_Xk,'PosPPP',Unit_O=6)
@@ -2104,22 +2103,22 @@ CONTAINS
              !
              ErrAbs=1D10
              ErrRel=1D10
-             Ek=ThoulessQ(N,P%D,Xk,LXk) 
-             PosP_Ek=Trace_EOM(N,PosP_Xk,L_PosP_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk) 
-             MomQ_Ek=Trace_EOM(N,MomQ_Xk,L_MomQ_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk) 
+             Ek=ThoulessQ(N,P%D,Xk,LXk)
+             PosP_Ek=Trace_EOM(N,PosP_Xk,L_PosP_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk)
+             MomQ_Ek=Trace_EOM(N,MomQ_Xk,L_MomQ_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk)
 
-             WRITE(*,*)' Ek = ',Ek !*27.21139613182D0 
+             WRITE(*,*)' Ek = ',Ek !*27.21139613182D0
 
              !          RETURN
 
              DO K=0,10
                 !------------------------------------------------------------------------------
-                ! QUASI-INDEPENDENT GRADIENTS OF THE EOM FUNCTIONAL 
+                ! QUASI-INDEPENDENT GRADIENTS OF THE EOM FUNCTIONAL
                 !------------------------------------------------------------------------------
                 PosP_Gk=-L_PosP_Xk+MomQ_Ek*MomQ_Xk
                 MomQ_Gk=-L_MomQ_Xk+PosP_Ek*PosP_Xk
                 !------------------------------------------------------------------------------
-                ! QUASI-INDEPENDENT POLAK-RIBIERE NLCG UPDATE CONSTANTS 
+                ! QUASI-INDEPENDENT POLAK-RIBIERE NLCG UPDATE CONSTANTS
                 !------------------------------------------------------------------------------
                 IF(K==0)THEN
                    PosP_Beta=Zero
@@ -2137,8 +2136,8 @@ CONTAINS
                    PosP_Pk=PosP_Gk
                    MomQ_Pk=MomQ_Gk
                 ELSE
-                   PosP_Pk=PosP_Gk+PosP_Beta*PosP_PkOld  
-                   MomQ_Pk=MomQ_Gk+MomQ_Beta*MomQ_PkOld  
+                   PosP_Pk=PosP_Gk+PosP_Beta*PosP_PkOld
+                   MomQ_Pk=MomQ_Gk+MomQ_Beta*MomQ_PkOld
                 ENDIF
                 !------------------------------------------------------------------------------
                 ! L ONTO Pk, THEN SPLIT
@@ -2158,7 +2157,7 @@ CONTAINS
                 CALL EOMLineSearch(N,P%D,Q%D,F%D,Z%D,DoubleSlash,DoTDA, &
                      PosP_Xk,MomQ_Xk,L_PosP_Xk,L_MomQ_Xk, &
                      PosP_Pk,MomQ_Pk,L_PosP_Pk,L_MomQ_Pk, &
-                     LamP,LamQ,E_EOM)     
+                     LamP,LamQ,E_EOM)
                 !------------------------------------------------------------------------------
                 ! SET OLD VARIABLES FOR NLCG ETC
                 !------------------------------------------------------------------------------
@@ -2170,7 +2169,7 @@ CONTAINS
                 PosP_PkOld=PosP_Pk
                 MomQ_PkOld=MomQ_Pk
                 !------------------------------------------------------------------------------
-                ! APPLY CONJUGATE GRADIENTS 
+                ! APPLY CONJUGATE GRADIENTS
                 !------------------------------------------------------------------------------
                 PosP_Xk=PosP_Xk+LamP*PosP_Pk
                 MomQ_Xk=MomQ_Xk+LamQ*MomQ_Pk
@@ -2186,7 +2185,7 @@ CONTAINS
                 !------------------------------------------------------------------------------
                 CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
                 CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
-                EkT=ThoulessQ(N,P%D,Xk,LXk) 
+                EkT=ThoulessQ(N,P%D,Xk,LXk)
                 L_PosP_Xk=qOp(NBasF,P%D,Q%D,LXk)
                 L_MomQ_Xk=pOp(NBasF,P%D,Q%D,LXk)
 !!$
@@ -2197,11 +2196,11 @@ CONTAINS
                 !------------------------------------------------------------------------------
                 ! ENERGIES AND ERRORS
                 !------------------------------------------------------------------------------
-                PosP_Ek=Trace_EOM(N,PosP_Xk,L_PosP_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk) 
-                MomQ_Ek=Trace_EOM(N,MomQ_Xk,L_MomQ_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk) 
+                PosP_Ek=Trace_EOM(N,PosP_Xk,L_PosP_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk)
+                MomQ_Ek=Trace_EOM(N,MomQ_Xk,L_MomQ_Xk)/Trace_EOM(N,PosP_Xk,MomQ_Xk)
                 Ek=Half*(PosP_Ek+MomQ_Ek)
                 PosP_Xk=pOp(NBasF,P%D,Q%D,Xk)
-                MomQ_Xk=qOp(NBasF,P%D,Q%D,Xk)     
+                MomQ_Xk=qOp(NBasF,P%D,Q%D,Xk)
 
                 ErrAbs=Ek-EkOld
                 ErrRel=-1D10
@@ -2214,7 +2213,7 @@ CONTAINS
                 IF(JTDA==-1)THEN
                    Err=LOG10(ABS(Ek-0.663332701870816D0)+1D-20)
                    WRITE(*,*)K,Err,ErrRel,EkT
-#ifdef KWERQY                
+#ifdef KWERQY
                    WRITE(46,*)K,Err
 #else
                    WRITE(36,*)K,Err
@@ -2222,17 +2221,17 @@ CONTAINS
                 ELSEIF(JTDA==0)THEN
                    Err=LOG10(ABS(Ek-0.432987734557198D0)+1D-20)
                    WRITE(*,*)K,Err,ErrRel,EkT
-#ifdef KWERQY                
+#ifdef KWERQY
                    WRITE(45,*)K,Err
 #else
                    WRITE(35,*)K,Err
 #endif
                 ELSEIF(JTDA==1)THEN
                    Err=LOG10(ABS(Ek-0.406088110418702D0)+1D-20)
-                   WRITE(*,*)K,Err,ErrRel,Ek*27.21139613182D0 
+                   WRITE(*,*)K,Err,ErrRel,Ek*27.21139613182D0
                    WRITE(34,*)K,Err
                 ELSE
-                   WRITE(*,*)K,ErrRel,Ek*27.21139613182D0 
+                   WRITE(*,*)K,ErrRel,Ek*27.21139613182D0
                 ENDIF
 
              ENDDO
@@ -2249,7 +2248,7 @@ CONTAINS
                 Xk_Guess%D=Xk
              ENDIF
 
-             Values(I)=Ek 
+             Values(I)=Ek
              Vectors(:,:,I)=Xk
           ENDDO
        ENDDO
@@ -2281,7 +2280,7 @@ CONTAINS
           ENDDO
        ENDIF
        !
-       LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D) 
+       LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D)
        !
        IF(.NOT.PRESENT(DoTDA))THEN
           LXk=0.25D0*(MATMUL(MATMUL(Q%D,LXk),P%D))
@@ -2295,7 +2294,7 @@ CONTAINS
        IF(PRESENT(E2))THEN
           Ek=ThoulessQ(N,P%D,Xk,LXk)
        ELSE
-          Ek=ThoulessQ(N,P%D,Xk,LXk) 
+          Ek=ThoulessQ(N,P%D,Xk,LXk)
        ENDIF
 
        !    WRITE(*,*) ' EK KOOP = ',Ek
@@ -2319,16 +2318,16 @@ CONTAINS
           IF(K==0)THEN
              Beta=Zero
           ELSE
-             Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)    			
+             Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)
           ENDIF
 
           IF(K==0)THEN
              Pk=Gk
           ELSE
-             Pk=Gk+Beta*PkOld  
+             Pk=Gk+Beta*PkOld
           ENDIF
           !
-          LPk=MATMUL(F%D,Pk)-MATMUL(Pk,F%D) 
+          LPk=MATMUL(F%D,Pk)-MATMUL(Pk,F%D)
           !
           IF(.NOT.PRESENT(DoTDA))THEN
              LPk=0.25D0*(MATMUL(MATMUL(Q%D,LPk),P%D))
@@ -2337,18 +2336,18 @@ CONTAINS
           ENDIF
           !
           IF(PRESENT(E2))THEN
-             CALL RQILineSearch2E(N,P%D,F%D,Pk,Xk,E2,Lambda)          
+             CALL RQILineSearch2E(N,P%D,F%D,Pk,Xk,E2,Lambda)
 
-             !          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda,E2)          
+             !          CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda,E2)
           ELSE
-             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)
           ENDIF
 
           EkOld=Ek
           XkOld=Xk
           EkOld=Ek
           GkOld=Gk
-          PkOld=Pk	   
+          PkOld=Pk
           !
           Xk=XkOld+Lambda*Pk
 
@@ -2368,7 +2367,7 @@ CONTAINS
           LXk=MATMUL(F%D,Xk)-MATMUL(Xk,F%D)
 
           !      IF(PRESENT(E2)) &
-          !      WRITE(*,*)' AFTER UPDATE 1 IN KOOP, EK = ',ThoulessQ(N,P%D,Xk,LXk)+E2          
+          !      WRITE(*,*)' AFTER UPDATE 1 IN KOOP, EK = ',ThoulessQ(N,P%D,Xk,LXk)+E2
 
 
           IF(.NOT.PRESENT(DoTDA))THEN
@@ -2378,9 +2377,9 @@ CONTAINS
           ENDIF
 
           IF(PRESENT(E2))THEN
-             Ek=ThoulessQ(N,P%D,Xk,LXk)+E2          
+             Ek=ThoulessQ(N,P%D,Xk,LXk)+E2
           ELSE
-             Ek=ThoulessQ(N,P%D,Xk,LXk) 
+             Ek=ThoulessQ(N,P%D,Xk,LXk)
           ENDIF
 
           ErrAbs=Ek-EkOld
@@ -2402,7 +2401,7 @@ CONTAINS
      END SUBROUTINE KOOPMANSGUESS
 
 
-     Subroutine RQILineSearch2E(N,P,F,Pk,Xk,E2,Lambda)          
+     Subroutine RQILineSearch2E(N,P,F,Pk,Xk,E2,Lambda)
        INTEGER :: N,I
        REAL(DOUBLE) :: L,Lambda,Lambda_p,Lambda_m,EkMin,Ek,E2
        REAL (DOUBLE),DIMENSION(N,N)::P,F,Pk,Xk,Tmp1
@@ -2429,7 +2428,7 @@ CONTAINS
        !    CC=PP*(PF-FP+PLX)             !XX*(PLX+XLP)-XLX*(PX+XP)
 !!$
 !!$    lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-!!$    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+!!$    lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
 !!$    Lambda=Lambda_P
 
        Ek=XFX-XXF+E2
@@ -2437,7 +2436,7 @@ CONTAINS
 
 
        EkMin=1D5
-       DO I=-10,10 
+       DO I=-10,10
           L=DBLE(I)*1D-2
           Ek=( (XFX+L*(PFX+XFP)+L**2*PFP) &
                -(XXF+L*(PXF+XPF)+L**2*PPF) &
@@ -2466,7 +2465,7 @@ CONTAINS
      END Subroutine RQILineSearch2E
 
 
-     Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda,E2)          
+     Subroutine RQILineSearch(N,P,Pk,Xk,LXk,LPk,Lambda,E2)
        INTEGER :: N
        REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
        REAL (DOUBLE),DIMENSION(N,N)::P,Pk,Xk,LXk,LPk,Tmp1
@@ -2491,7 +2490,7 @@ CONTAINS
        BB=2.0*PLP*XX-2.0*XLX*PP
        CC=XX*(PLX+XLP)-XLX*(PX+XP)
        lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
        Lambda=Lambda_P
 
        !    WRITE(*,*)'L = ',Lambda,' AFTER EK P= ',(XLX+lambda_p*XLP+lambda_p*PLX+lambda_p**2 * PLP) /(XX+lambda_p*XP+lambda_p*PX+lambda_p**2 * PP)
@@ -2505,7 +2504,7 @@ CONTAINS
      SUBROUTINE EOMLineSearch(N,P,Q,F,Z,DoubleSlash,DoTDA, &
           PosP_Xk,MomQ_Xk,L_PosP_Xk,L_MomQ_Xk, &
           PosP_Pk,MomQ_Pk,L_PosP_Pk,L_MomQ_Pk, &
-          Lambda_PosP,Lambda_MomQ,E_EOM)   
+          Lambda_PosP,Lambda_MomQ,E_EOM)
        INTEGER                      :: N,II,JJ,KK,I
        LOGICAL                      :: DoTDA
        REAL(DOUBLE), DIMENSION(N,N) :: P,Q,F,Z,PosP_Xk,MomQ_Xk,L_PosP_Xk,L_MomQ_Xk, &
@@ -2551,7 +2550,7 @@ CONTAINS
 !!$    WRITE(*,*)' Upq = ',Upq
 
        E_EOM=Half*(Ap+Aq)/Rpq
-       !     WRITE(*,44)E_EOM,Spq,Tpq,Upq           
+       !     WRITE(*,44)E_EOM,Spq,Tpq,Upq
 44     FORMAT(' E_EOM TO START = ',F20.10,' Spq = ',D20.10,' Tpq = ',D20.10,' Upq = ',D20.10)
 
        PosP_MIN=Zero
@@ -2563,9 +2562,9 @@ CONTAINS
              LamQ=KK*0.1D0
              Tmp_EOM=Half*(Ap+Bp*LamP+Cp*LamP**2+Aq+Bq*LamQ+Cq*LamQ**2)/(Rpq+LamP*Spq+LamQ*Tpq+LamP*LamQ*Upq)
              IF(Tmp_EOM<E_EOM.AND.Tmp_EOM>0D0)THEN
-                E_EOM=Tmp_EOM                                            
+                E_EOM=Tmp_EOM
                 PosP_MIN=LamP
-                MomQ_MIN=LamQ                      
+                MomQ_MIN=LamQ
              ENDIF
           ENDDO
        ENDDO
@@ -2576,10 +2575,10 @@ CONTAINS
        !    WRITE(*,46)E_EOM,LamP,LamQ
 46     FORMAT(' E_EOM AT PT  A = ',F20.10,' LapP = ',D20.10,' LamQ = ',D20.10)
 
-       DO I=1,5000                   
+       DO I=1,5000
           LamQ_Old=LamQ
-          LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - & 
-               4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - & 
+          LamQ=(-2D0*Cq*Rpq - 2D0*Cq*LamP*Spq +  Sqrt((2D0*Cq*Rpq + 2D0*Cq*LamP*Spq)**2 - &
+               4D0*(Cq*Tpq + Cq*LamP*Upq)*(Bq*Rpq + Bq*LamP*Spq - Ap*Tpq - Aq*Tpq - Bp*LamP*Tpq - Cp*LamP**2*Tpq - Ap*LamP*Upq - &
                Aq*LamP*Upq - Bp*LamP**2*Upq - Cp*LamP**3*Upq)))/(2D0*(Cq*Tpq + Cq*LamP*Upq))
           LamP_Old=LamP
           LamP= (-2D0*Cp*Rpq - 2D0*Cp*LamQ*Tpq + Sqrt((2D0*Cp*Rpq + 2D0*Cp*LamQ*Tpq)**2 -          &
@@ -2591,7 +2590,7 @@ CONTAINS
           dLamQ=ABS((LamQ_Old-LamQ)/LamQ)
           dLamP=ABS((LamP_Old-LamP)/LamP)
           dEOM=ABS((EOM_Old-E_EOM)/E_EOM)
-          IF(dEOM<1D-10.AND.I>5)EXIT                   
+          IF(dEOM<1D-10.AND.I>5)EXIT
        ENDDO
        Lambda_PosP=LamP
        Lambda_MomQ=LamQ
@@ -2671,7 +2670,7 @@ CONTAINS
        TYPE(State)        :: S,RQIStat
        TYPE(Parallel)     :: MPI
        TYPE(Options)      :: O
-       TYPE(Geometries)   :: G 
+       TYPE(Geometries)   :: G
        TYPE(BSET)         :: B
        LOGICAL            :: DoTDA
        INTEGER,DIMENSION(3) :: Cur
@@ -2708,7 +2707,7 @@ CONTAINS
 !!$    CALL SetEq(Q,sP)
 !!$    P%D=Two*P%D
 !!$    Q%D=-Two*Q%D
-!!$    DO I=1,N 
+!!$    DO I=1,N
 !!$       Q%D(I,I)=Q%D(I,I)+Two
 !!$    ENDDO
 !!$    !
@@ -2753,7 +2752,7 @@ CONTAINS
                 ! Compute L[Pk]
                 CALL LOn2BakEnd(N,I,K,Shift,'Pk',Nam,S,MPI,PkThreshold,PkNon0s,PMax)
                 ! Line Search: Min_Lambda{ E[Xk+Lambda*Pk] }
-                CALL RQLSBakEnd(I,Nam,S,Lambda)                    
+                CALL RQLSBakEnd(I,Nam,S,Lambda)
                 ! Anhiliate and renorm Xk
                 CALL NihilateXk(I,Nam,S,MPI,Lambda,dNorm,TDA_O=DoTDA)
                 ! Compute L[Xk]
@@ -2777,7 +2776,7 @@ CONTAINS
                 !             IF(JTDA==0.AND.K>5)EXIT
 
                 IF(K>3.AND.dNorm<1D-2)THEN
-                   ! Look for bad behavior 
+                   ! Look for bad behavior
 !!$                IF( Ek > EkOld .AND. ABS((Ek-EkOld)/Ek) > O%Thresholds(cBAS)%ETol )THEN
 !!$
 !!$                   ! Sign of variational principle broken, ostensibly due to N-scaling
@@ -2813,7 +2812,7 @@ CONTAINS
 
 
 33     FORMAT('St=',I2,', It=',I3,', Ev=',F10.6,', dE=',D8.2,', dN=',D7.2, &
-            ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2) 
+            ', Tk=',D10.4,', Tj=',D10.4,', Tm=',D10.4,', |Gk|=',D8.2,', %Xk=',F6.2,', %Pk=',F6.2)
 
 
 44     FORMAT(A4,' State=',I2,', Nk=',I3,', Ev=',F9.6,', dE=',D7.2,', WallSec=',D12.4)
@@ -2831,7 +2830,7 @@ CONTAINS
 !!$          ELSE
 !!$             DoTDA=.FALSE.
 !!$!             CALL RPAGuess(N,Xk)
-!!$             
+!!$
 !!$          ENDIF
 !!$
 !!$          CALL Anihilate(N,P%D,Q%D,Xk,TDA_O=DoTDA)
@@ -2842,22 +2841,22 @@ CONTAINS
 !!$          Beta=Zero
 !!$          XkOld=Zero
 !!$          PkOld=Zero
-!!$          Ek=ThoulessQ(N,P%D,Xk,LXk) 
+!!$          Ek=ThoulessQ(N,P%D,Xk,LXk)
 !!$          DO K=0,200
 !!$             !
 !!$             Gk=Two*(LXk-Ek*Xk)
-!!$             IF(K>0)Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)    			
+!!$             IF(K>0)Beta=Pdot1(N,P%D,Gk,Gk-Gkold)/Pdot1(N,P%D,GkOld,GkOld)
 !!$
-!!$             Pk=Gk+Beta*PkOld  
+!!$             Pk=Gk+Beta*PkOld
 !!$             !
 !!$             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Pk,LPk)
-!!$             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)          
+!!$             CALL RQILineSearch(N,P%D,Pk,Xk,LXk,LPk,Lambda)
 !!$             !
 !!$             EkOld=Ek
 !!$             XkOld=Xk
 !!$             EkOld=Ek
 !!$             GkOld=Gk
-!!$             PkOld=Pk	   
+!!$             PkOld=Pk
 !!$             !
 !!$             Xk=XkOld+Lambda*Pk
 !!$             !
@@ -2866,7 +2865,7 @@ CONTAINS
 !!$             CALL ReNorm(N,P%D,Xk)
 !!$             CALL LOn2(N,I,Shift,F%D,P%D,Z%D,DoubleSlash,Values,Vectors,Xk,LXk)
 !!$             CALL Anihilate(N,P%D,Q%D,LXk,TDA_O=DoTDA)
-!!$             Ek=ThoulessQ(N,P%D,Xk,LXk) 
+!!$             Ek=ThoulessQ(N,P%D,Xk,LXk)
 !!$             ErrAbs=Ek-EkOld
 !!$             ErrRel=-1D10
 !!$             DO U=1,N
@@ -2883,7 +2882,7 @@ CONTAINS
 !!$             ELSE
 !!$                Err=LOG10(Ek- 0.406088082593828D0)!
 !!$!0.406088110418713D0)
-!!$!                WRITE(*,*)K,Err,Ek,Ek*27.21139613182D0 
+!!$!                WRITE(*,*)K,Err,Ek,Ek*27.21139613182D0
 !!$                WRITE(*,*)K,Err,Ek
 !!$                WRITE(34,*)K,Err
 !!$             ENDIF
@@ -2897,7 +2896,7 @@ CONTAINS
 !!$             !
 !!$          ENDDO
 !!$          WRITE(*,*)I,K,Ek*27.21139613182D0,ErrRel,ErrAbs
-!!$          Values(I)=Ek 
+!!$          Values(I)=Ek
 !!$          Vectors(:,:,I)=Xk
 !!$
 !!$       ENDDO
@@ -2910,12 +2909,12 @@ CONTAINS
        REAL(DOUBLE), DIMENSION(N,N) :: P,Q,Tmp
        REAL(DOUBLE) :: TRACE_EOM
        Tmp=MATMUL(TRANSPOSE(P),Q)
-       TRACE_EOM=0D0 
+       TRACE_EOM=0D0
 
-       !    CALL PPrint(TMP,'TMP',Unit_O=6)         
+       !    CALL PPrint(TMP,'TMP',Unit_O=6)
 
-       DO II=1,N 
-          TRACE_EOM=TRACE_EOM+Tmp(II,II) 
+       DO II=1,N
+          TRACE_EOM=TRACE_EOM+Tmp(II,II)
        ENDDO
        !    WRITE(*,*)' TRACE_EOM = ',TRACE_EOM
      END FUNCTION TRACE_EOM
@@ -2926,7 +2925,7 @@ CONTAINS
        REAL(DOUBLE)          :: Norm
        TYPE(FileNames)       :: Nam
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR)            :: sP,sQ,sXk,sI,sT,sT1 ! Nihilate0 delete list
        INTEGER, DIMENSION(3) :: Cur
        CHARACTER(LEN=DCL)    :: XkName,PName,QName
@@ -2942,7 +2941,7 @@ CONTAINS
        XkName=TrixFile('OrthoXk',PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=Cur,OffSet_O=0)
        PName= TrixFile("OrthoD", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
        QName= TrixFile("OrthoQ", PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
-       ! Get occupied projector 
+       ! Get occupied projector
        CALL Get(sP,PName)
        ! Generate virtual space projector if first time through
        IF(I==1)THEN
@@ -2994,7 +2993,7 @@ CONTAINS
 
 
 
-       ! Tidy up 
+       ! Tidy up
        CALL Delete(sT)
        CALL Delete(sP)
        CALL Delete(sXk)
@@ -3007,29 +3006,29 @@ CONTAINS
        INTEGER :: N,II
        REAL(DOUBLE), DIMENSION(N,N) :: P,Q,Tmp
        REAL(DOUBLE) :: TRACE_EOM2
-       CALL PPrint(P,'P',Unit_O=6)          
-       CALL PPrint(Q,'Q',Unit_O=6)          
+       CALL PPrint(P,'P',Unit_O=6)
+       CALL PPrint(Q,'Q',Unit_O=6)
 
 
        Tmp=MATMUL(TRANSPOSE(P),Q)
-       TRACE_EOM2=0D0 
+       TRACE_EOM2=0D0
 
-       CALL PPrint(TMP,'TMP',Unit_O=6)          
+       CALL PPrint(TMP,'TMP',Unit_O=6)
 
-       DO II=1,N 
-          TRACE_EOM2=TRACE_EOM2+Tmp(II,II) 
+       DO II=1,N
+          TRACE_EOM2=TRACE_EOM2+Tmp(II,II)
        ENDDO
        WRITE(*,*)' TRACE_EOM = ',TRACE_EOM2
      END FUNCTION TRACE_EOM2
 
-     FUNCTION pOp(N,P,Q,X) 
+     FUNCTION pOp(N,P,Q,X)
        INTEGER :: N
        REAL(DOUBLE), DIMENSION(N,N) :: P,Q,X,pOp
        pOp=MATMUL(P,MATMUL(X,Q))+TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
        pOp=25D-2*pOp
      END FUNCTION POp
 
-     FUNCTION qOp(N,P,Q,X) 
+     FUNCTION qOp(N,P,Q,X)
        INTEGER :: N
        REAL(DOUBLE), DIMENSION(N,N) :: P,Q,X,qOp
        qOp=MATMUL(P,MATMUL(X,Q))-TRANSPOSE(MATMUL(Q,MATMUL(X,P)))
@@ -3043,7 +3042,7 @@ CONTAINS
        REAL(DOUBLE), DIMENSION(N,N) :: Two2,Tmp2
        alpha=0
        DO I=1,N
-          DO J=1,N 
+          DO J=1,N
              Tmp2(I,J)=0D0
              DO II=1,N
                 DO JJ=1,N
@@ -3062,15 +3061,15 @@ CONTAINS
        REAL(DOUBLE), DIMENSION(N,N,N,N) :: Four4,Tmp4
        alpha=0
        DO I=1,N
-          DO J=1,N 
+          DO J=1,N
              DO K=1,N
                 DO L=1,N
                    Tmp4(I,J,K,L)=0D0
                    DO II=1,N
                       DO JJ=1,N
                          DO KK=1,N
-                            DO LL=1,N                           
-                               Tmp4(I,J,K,L)=Tmp4(I,J,K,L)+Four4(II,JJ,KK,LL)*C(II,I)*C(JJ,J)*C(KK,K)*C(LL,L) 
+                            DO LL=1,N
+                               Tmp4(I,J,K,L)=Tmp4(I,J,K,L)+Four4(II,JJ,KK,LL)*C(II,I)*C(JJ,J)*C(KK,K)*C(LL,L)
                             END DO
                          END DO
                       END DO
@@ -3121,7 +3120,7 @@ CONTAINS
        REAL(DOUBLE)          :: Ek
        TYPE(FileNames)       :: N
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR)            :: sP,sQ,sXk,sLXk,sT,sT1,sT2,sT3 ! Nihilate1 delete list
        INTEGER, DIMENSION(3) :: Cur
        CHARACTER(LEN=DCL)    :: XkName,LXkName,PName,QName
@@ -3140,7 +3139,7 @@ CONTAINS
        LXkName=TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0)
        PName= TrixFile("OrthoD", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
        QName= TrixFile("OrthoQ", PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0)
-       ! Get occupied projector 
+       ! Get occupied projector
        CALL Get(sP,PName)
        CALL Get(sQ,QName)
        ! Kluge due to poor memory management:
@@ -3193,7 +3192,7 @@ CONTAINS
        REAL(DOUBLE)          :: Lambda,Norm,dNorm
        TYPE(FileNames)       :: N
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateXk delete list
        INTEGER, DIMENSION(3) :: Cur
        CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
@@ -3274,7 +3273,7 @@ CONTAINS
        REAL(DOUBLE)          :: dEk,Ek
        TYPE(FileNames)       :: N
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR)            :: sP,sQ,sXk,sPk,sLXk,sT,sT1,sT2,sT3 ! NihilateLXk delete list
        INTEGER, DIMENSION(3) :: Cur
        CHARACTER(LEN=DCL)    :: XkName,PkName,LXkName,PName,QName
@@ -3359,7 +3358,7 @@ CONTAINS
        REAL(DOUBLE)          :: Ek
        TYPE(FileNames)       :: N
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR),SAVE       :: sXk,sLXk,sGk,sGkOld,sPkOld,sP,sT,sT1 ! NLCGradient delete list
        INTEGER, DIMENSION(3) :: Cur
        REAL(DOUBLE)          :: Num,Den,Beta
@@ -3413,14 +3412,14 @@ CONTAINS
        !    CALL PPrint(sGkOld,' GkOld ',Unit_O=6)
 
        !
-       ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p    			
+       ! Beta=(Gk-Gkold,Gk)_p/(GkOld,GkOld)_p
        sGkOld%MTrix%D=-sGkOld%MTrix%D
        CALL Add(sGk,sGkOld,sT1)
        sGkOld%MTrix%D=-sGkOld%MTrix%D
-       CALL XPose(sGk,sT)    
-       Num=OneDot(sP,sT1,sT) 
-       CALL XPose(sGkOld,sT)    
-       Den=OneDot(sP,sGkOld,sT) 
+       CALL XPose(sGk,sT)
+       Num=OneDot(sP,sT1,sT)
+       CALL XPose(sGkOld,sT)
+       Den=OneDot(sP,sGkOld,sT)
        Beta=Num/Den
        !    WRITE(*,*)' Beta = ',Beta
 
@@ -3429,7 +3428,7 @@ CONTAINS
        CALL Delete(sT)
        CALL Delete(sP)
        CALL Delete(sGkOld)
-       ! Pk=Gk+Beta*PkOld  
+       ! Pk=Gk+Beta*PkOld
        CALL Get(sPkOld,PkOldName)
 
        sPkOld%MTrix%D=Beta*sPkOld%MTrix%D
@@ -3452,11 +3451,11 @@ CONTAINS
        INTEGER                       :: N,I,J,K,MatrixNon0s
        TYPE(FileNames)               :: Nam
        TYPE(State)                   :: S,RQIStat
-       TYPE(Parallel)                :: MPI    
+       TYPE(Parallel)                :: MPI
        REAL(DOUBLE),DIMENSION(N,N)   :: LX,X
        TYPE(BCSR)                    :: sF,sX,sJ,sK,sZ,sP,sJK,sT1,sT2,sT3
        REAL(DOUBLE)                  :: Shift,MatrixThreshold,LocalThreshold,PMax
-       CHARACTER(LEN=*)              :: Trgt 
+       CHARACTER(LEN=*)              :: Trgt
        REAL(DOUBLE),OPTIONAL         :: PMax_O
        !----------------------------------------------------------------------------
        CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
@@ -3466,13 +3465,13 @@ CONTAINS
        CALL New(RQIStat%Previous,3)
        RQIStat%Current%I=S%Current%I
        RQIStat%Previous%I=S%Previous%I
-       ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk]) 
+       ! Action is TD-SCF with secondary parameter the product LX or LP (L[Xk], L[Pk])
        RQIStat%Action%C(1)="TD-SCF"
        RQIStat%Action%C(2)=TRIM(Trgt) !//TRIM(IntToChar(I))
-       ! "SCF cycle" is the RQI State number 
+       ! "SCF cycle" is the RQI State number
        RQIStat%Current%I(1)=I
        RQIStat%Previous%I(1)=I
-       ! Get the orthogonal transition density matrix Xk (or CG gradient Pk) corresponding to the 
+       ! Get the orthogonal transition density matrix Xk (or CG gradient Pk) corresponding to the
        ! resultant of this subroutine, namely L[Xk] or L[Pk] in an orthongal representation
        CALL New(sX) ! Kluge.  Somehow, dimensioning not quite right here:
        CALL Get(sX,TrixFile('Ortho'//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
@@ -3483,10 +3482,10 @@ CONTAINS
        CALL Multiply(sF,sX,sT2,-One)
        ! Done with F
        CALL Delete(sF)
-       ! Z is the sparse inverse factor of S  
-       CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))    
-       ! Xao = Z^t.Xor.Z 
-       CALL Multiply(sZ,sX,sT1)        
+       ! Z is the sparse inverse factor of S
+       CALL Get(sZ,TrixFile("X",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=S%Current%I))
+       ! Xao = Z^t.Xor.Z
+       CALL Multiply(sZ,sX,sT1)
        CALL Multiply(sT1,sZ,sX)
 
        IF(PRESENT(PMax_O))THEN
@@ -3500,7 +3499,7 @@ CONTAINS
        ! Filter small blocks and return the # of non zero elements
        CALL Filter(sX,Tol_O=LocalThreshold)
        MatrixNon0s=sX%NNon0
-       ! This is the AO transition density matrix (or CG gradient) 
+       ! This is the AO transition density matrix (or CG gradient)
        CALL Put(sX,TrixFile(Trgt,PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
        ! Done with sX
        CALL Delete(sX)
@@ -3515,14 +3514,14 @@ CONTAINS
        CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
        ! Pick up J and K
        CALL Get(sJ,TrixFile("J",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
-       CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+       CALL Get(sK,TrixFile("K",PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
        ! JK=Jao[X]+Kao[X]
        CALL Add(sJ,sK,sJK)
        ! Done with J and K
        CALL Delete(sJ)
        CALL Delete(sK)
        ! JK[X]=Zt.JKao[X].Z==JKor
-       CALL Multiply(sZ,sJK,sT1)        
+       CALL Multiply(sZ,sJK,sT1)
        CALL Multiply(sT1,sZ,sJK)
        ! Done with Z
        CALL Delete(sZ)
@@ -3540,7 +3539,7 @@ CONTAINS
        CALL Delete(sT1)
        CALL Delete(sT2)
        ! Put orthogonal L[Xk] or L[Pk] to disk (*.LX or *.LP)
-       CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))    
+       CALL Put(sT3,TrixFile("L"//TRIM(Trgt),PWD_O=Nam%M_SCRATCH,Name_O=Nam%SCF_NAME,Stats_O=RQIStat%Current%I,OffSet_O=0))
        ! Done with temp #3
        CALL Delete(sT3)
        ! Done with invokation parameters
@@ -3552,16 +3551,16 @@ CONTAINS
        IF(I>1)STOP
      END SUBROUTINE LOn2BakEnd
 
-     SUBROUTINE RQLSBakEnd(I,N,S,Lambda)          
+     SUBROUTINE RQLSBakEnd(I,N,S,Lambda)
        INTEGER               :: I
        TYPE(FileNames)       :: N
        TYPE(State)           :: S
-       TYPE(Parallel)        :: MPI    
+       TYPE(Parallel)        :: MPI
        TYPE(BCSR)            :: sP,sXk,sPk,sLXk,sLPk,sT
        INTEGER, DIMENSION(3) :: Cur
        REAL(DOUBLE)          :: Lambda,Lambda_p,Lambda_m
        REAL(DOUBLE)          :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
-       ! 
+       !
        CALL Elapsed_TIME(TimeBCSR,Init_O='Start')
        !
 
@@ -3571,22 +3570,22 @@ CONTAINS
        CALL Get(sP ,TrixFile("OrthoD",PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=S%Current%I,OffSet_O=0))
        CALL Get(sXk,TrixFile('OrthoXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
        CALL Get(sPk,TrixFile('OrthoPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
-       !    
+       !
        CALL XPose(sXk,sT)
-       XX =OneDot(sP,sXk,sT) 
+       XX =OneDot(sP,sXk,sT)
        PX =OneDot(sP,sPk,sT)
        !
        CALL XPose(sPk,sT)
        PP =OneDot(sP,sPk,sT)
        XP =OneDot(sP,sXk,sT)
        !
-       CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+       CALL Get(sLXk,TrixFile('LXk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
        CALL XPose(sLXk,sT)
        CALL Delete(sLXk)
        XLX=OneDot(sP,sXk,sT)
        PLX=OneDot(sP,sPk,sT)
        !
-       CALL Get(sLPk,TrixFile('LPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))    
+       CALL Get(sLPk,TrixFile('LPk',PWD_O=N%M_SCRATCH,Name_O=N%SCF_NAME,Stats_O=Cur,OffSet_O=0))
        CALL XPose(sLPk,sT)
        CALL Delete(sLPk)
        PLP=OneDot(sP,sPk,sT)
@@ -3602,7 +3601,7 @@ CONTAINS
        CC=XX*(PLX+XLP)-XLX*(PX+XP)
        !
        lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
        !
        Lambda=Lambda_P
        !
@@ -3610,13 +3609,13 @@ CONTAINS
        !
      END SUBROUTINE RQLSBakEnd
      !===============================================================================
-     ! HERE ARE THE CONVENTIONAL DENSE MATRIX RQI ROUTINES 
+     ! HERE ARE THE CONVENTIONAL DENSE MATRIX RQI ROUTINES
      !===============================================================================
-     FUNCTION OneDotT(sP,sA,sB,TDA) RESULT(Tr) 
+     FUNCTION OneDotT(sP,sA,sB,TDA) RESULT(Tr)
        TYPE(BCSR) :: sP,sA,sB,sT1,sT2
        REAL(DOUBLE) :: Tr
        LOGICAL,OPTIONAL  :: TDA
-       CALL XPose(sB,sT1)    
+       CALL XPose(sB,sT1)
        CALL Multiply(sP,sA,sT2)
        CALL Multiply(sA,sP,sT2,-One)
        Tr=Half*Trace(sT1,sT2)
@@ -3626,8 +3625,8 @@ CONTAINS
      !---------------------------------------------------------------------
      ! Calculates TD-SCF scalar product Tr=Tr([A,P],B^+)
      ! Assumes B^t on input
-     !---------------------------------------------------------------------  
-     FUNCTION OneDot(sP,sA,sBt) RESULT(Tr) 
+     !---------------------------------------------------------------------
+     FUNCTION OneDot(sP,sA,sBt) RESULT(Tr)
        TYPE(BCSR) :: sP,sA,sBt,sT1
        REAL(DOUBLE) :: Tr
        CALL Multiply(sP,sA,sT1)
@@ -3662,9 +3661,9 @@ CONTAINS
        REAL(DOUBLE)                  :: Shift,OmegaPls,OmegaMns,WS
        REAL(DOUBLE),DIMENSION(:)     :: Values
        REAL(DOUBLE),DIMENSION(:,:,:) :: Vectors
-       LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )  
+       LX=LiouvAO(N,F  ,P  ,Z,TwoE,X )
        IF(M==1)RETURN
-       WS=Values(M-1)-Values(1)+Shift 
+       WS=Values(M-1)-Values(1)+Shift
        Com=MATMUL(X,P)-MATMUL(P,X)
        DO J=1,M-1
           OmegaPls=Trace2(MATMUL(TRANSPOSE(Vectors(:,:,J)),Com),N)
@@ -3674,19 +3673,19 @@ CONTAINS
      END SUBROUTINE LOn2
      !
 
-     Subroutine SparseRQILineSearch(P,Pk,Xk,LXk,LPk,Lambda,TDA)       
+     Subroutine SparseRQILineSearch(P,Pk,Xk,LXk,LPk,Lambda,TDA)
        REAL(DOUBLE) :: Lambda,Lambda_p,Lambda_m
        TYPE(BCSR)   :: P,Pk,Xk,LXk,LPk,Tmp1
        REAL(DOUBLE) :: XX,PP,XP,PX,PLP,XLP,XLX,PLX,AA,BB,CC
        LOGICAL,OPTIONAL  :: TDA
-       XX =OneDotT(P,Xk,Xk,TDA) 
-       PP =OneDotT(P,Pk,Pk,TDA) 
-       XP =OneDotT(P,Xk,Pk,TDA) 
-       PX =OneDotT(P,Pk,Xk,TDA) 
-       PLP=OneDotT(P,Pk,LPk,TDA) 
-       XLX=OneDotT(P,Xk,LXk,TDA) 
-       XLP=OneDotT(P,Xk,LPk,TDA) 
-       PLX=OneDotT(P,Pk,LXk,TDA) 
+       XX =OneDotT(P,Xk,Xk,TDA)
+       PP =OneDotT(P,Pk,Pk,TDA)
+       XP =OneDotT(P,Xk,Pk,TDA)
+       PX =OneDotT(P,Pk,Xk,TDA)
+       PLP=OneDotT(P,Pk,LPk,TDA)
+       XLX=OneDotT(P,Xk,LXk,TDA)
+       XLP=OneDotT(P,Xk,LPk,TDA)
+       PLX=OneDotT(P,Pk,LXk,TDA)
 
 !!$       WRITE(*,*)' XX = ',XX
 !!$       WRITE(*,*)' PP = ',PP
@@ -3703,7 +3702,7 @@ CONTAINS
        BB=2.0*PLP*XX-2.0*XLX*PP
        CC=XX*(PLX+XLP)-XLX*(PX+XP)
        lambda_p=(-BB+SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
-       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)	  
+       lambda_m=(-BB-SQRT(BB*BB-4.0*AA*CC))/(2.0*AA)
        Lambda=Lambda_P
        !    WRITE(*,*)' AFTER EK P= ',(XLX+lambda_p*XLP+lambda_p*PLX+lambda_p**2 * PLP) /(XX+lambda_p*XP+lambda_p*PX+lambda_p**2 * PP)
        !    WRITE(*,*)' AFTER EK M= ',(XLX+lambda_m*XLP+lambda_m*PLX+lambda_m**2 * PLP) /(XX+lambda_m*XP+lambda_m*PX+lambda_m**2 * PP)
@@ -3718,22 +3717,22 @@ CONTAINS
        Ek=Pdot1(N,P,X,LX)
      END FUNCTION ThoulessQ
 
-     FUNCTION LiouvDot(N,BB,DSao,temp2)  RESULT(temp1) 
-       ! Calculates action of the Coulomb operator in AO space temp1=BB * (ij||kl) 
+     FUNCTION LiouvDot(N,BB,DSao,temp2)  RESULT(temp1)
+       ! Calculates action of the Coulomb operator in AO space temp1=BB * (ij||kl)
        IMPLICIT NONE
        INTEGER :: I,J,K,N,one
        REAL (DOUBLE),DIMENSION(N*N):: BB,temp2
        REAL (DOUBLE),DIMENSION(N,N):: temp1
-       REAL(DOUBLE),DIMENSION(N*N,N*N)::	DSao                
+       REAL(DOUBLE),DIMENSION(N*N,N*N):: DSao
        REAL(DOUBLE) :: ddot
 
-       one=1 
-       K=0    
+       one=1
+       K=0
        DO I=1,N
           DO J=1,N
              K=K+1
              temp2=DSao(:,K)
-             !		temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is 
+             ! temp1(J,I)= ddot(N*N,BB,one,temp2,one)     ! This line is
              temp1(J,I)=DOT_PRODUCT(BB,Temp2)           ! the most CPU consuming step
           ENDDO
        END DO
@@ -3741,16 +3740,16 @@ CONTAINS
      END FUNCTION LiouvDot
 
      FUNCTION LiouvAO(N,For,Por,X,DSao,AA)  RESULT(BB)
-       ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
+       ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl)
        IMPLICIT NONE
        INTEGER :: I,J,M,K,L,N,one
        REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,temp1,temp2,X
-       REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
+       REAL(DOUBLE),DIMENSION(N,N,N,N):: DSao
        REAL(DOUBLE) :: E,ddot
 
        ! AA to AO
-       one=1 
-       BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
+       one=1
+       BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))
        !    CALL PPrint(BB,'INPUT 2',Unit_O=6)
 
        temp1=Zero
@@ -3765,7 +3764,7 @@ CONTAINS
              END DO
           END DO
        ENDIF
-       !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)    
+       !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)
        BB=MATMUL(For,AA)-MATMUL(AA,For)
        ! temp back to orthog
        temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
@@ -3774,16 +3773,16 @@ CONTAINS
 
 
      FUNCTION LiouvAO2E(N,For,Por,X,DSao,AA)  RESULT(BB)
-       ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl) 
+       ! Calculates action of the Liouville operator in AO space BB=L AA, (ij||kl)
        IMPLICIT NONE
        INTEGER :: I,J,M,K,L,N,one
        REAL (DOUBLE),DIMENSION(N,N)::For,Por,AA,BB,temp1,temp2,X
-       REAL(DOUBLE),DIMENSION(N,N,N,N)::	DSao                
+       REAL(DOUBLE),DIMENSION(N,N,N,N):: DSao
        REAL(DOUBLE) :: E,ddot
 
        ! AA to AO
-       one=1 
-       BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))      
+       one=1
+       BB=MATMUL(TRANSPOSE(X),(MATMUL(AA,X)))
        !    CALL PPrint(BB,'INPUT 2',Unit_O=6)
 
        temp1=Zero
@@ -3798,7 +3797,7 @@ CONTAINS
              END DO
           END DO
        ENDIF
-       !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)    
+       !   CALL PPrint(temp1,'AO_JK[X]',Unit_O=6)
        !    BB=MATMUL(For,AA)-MATMUL(AA,For)
        ! temp back to orthog
        temp2=MATMUL(TRANSPOSE(X),(MATMUL(temp1,X)))
@@ -3818,7 +3817,7 @@ CONTAINS
 
        !    X=HALF*(X-TRANSPOSE(X))
 
-       !    temp1 = ProjectPH(N,Qor,Por,Xk)       
+       !    temp1 = ProjectPH(N,Qor,Por,Xk)
        !    Xk = temp1/sqrt(abs(Pdot1(N,Por,temp1,temp1,tmp1)))
      END SUBROUTINE RPAGuess
 
@@ -3843,8 +3842,8 @@ CONTAINS
        X=X/Norm
      END SUBROUTINE ReNorm
 
-     !************************************************************************      
-     FUNCTION Pdot(N,P,AA,BB,CC) RESULT(Tr) 
+     !************************************************************************
+     FUNCTION Pdot(N,P,AA,BB,CC) RESULT(Tr)
        ! Calculates RPA scalar product Tr=Tr([AA^+,P],BB)
 
        IMPLICIT NONE
@@ -3857,8 +3856,8 @@ CONTAINS
 
      END FUNCTION Pdot
 
-     !************************************************************************      
-     FUNCTION Pdot1(N,P,AA,BB) RESULT(Tr) 
+     !************************************************************************
+     FUNCTION Pdot1(N,P,AA,BB) RESULT(Tr)
        ! Calculates RPA scalar product Tr=Tr([AA,P],BB^+)
 
        IMPLICIT NONE
@@ -3870,7 +3869,7 @@ CONTAINS
        Tr=0.5*Trace2(CC,N)
 
      END FUNCTION Pdot1
-     !-------------------------------------------------------------------------------      
+     !-------------------------------------------------------------------------------
      FUNCTION Project(N,P,Q,AA)  RESULT(BB)
        ! BB=P AA Q + Q AA P
        ! calculates  projection to p-h an h-p space using Q and P
@@ -3881,7 +3880,7 @@ CONTAINS
        BB=0.25*(MATMUL(MATMUL(P,AA),Q)+MATMUL(MATMUL(Q,AA),P))
      END FUNCTION Project
 
-     !-------------------------------------------------------------------------------      
+     !-------------------------------------------------------------------------------
      FUNCTION ProjectPH(N,P,Q,AA)  RESULT(BB)
        ! BB=Q AA P (X-component, large)   (0  Y)
        ! BB=P AA Q (Y-component, small)   (X  0)
