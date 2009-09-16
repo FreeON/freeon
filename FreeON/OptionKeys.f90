@@ -159,9 +159,12 @@ MODULE OptionKeys
   !
   CHARACTER(LEN=*),  PARAMETER :: NEB_SPRING        ='NEBSpring'
   !------------------------------------------------------------------------------
-  ! Options:Density Matrix Projection Order, MaxSCF and MinSCF
+  ! Options:
   CHARACTER(LEN=*), PARAMETER :: Op_MinSCF          ='MinSCF'
   CHARACTER(LEN=*), PARAMETER :: Op_MaxSCF          ='MaxSCF'
+  CHARACTER(LEN=*), PARAMETER :: RQICycles          ='MaxRQI'
+  CHARACTER(LEN=*), PARAMETER :: RQIGuess           ='RQIGuess'
+
   !------------------------------------------------------------------------------
   ! Option: misc
   CHARACTER(LEN=*), PARAMETER :: Op_Pressure        ='Pressure'
