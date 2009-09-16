@@ -74,6 +74,9 @@ MODULE ControlStructures
     INTEGER                        :: MinSCF
     INTEGER                        :: MaxSCF
     !
+    INTEGER                        :: MaxRQI
+    CHARACTER(LEN=20)              :: RQIGuess
+    !
     REAL(DOUBLE)                   :: Pressure
   END TYPE Options
 

@@ -74,8 +74,10 @@ CONTAINS
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
     CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
-    ! Parse SCF convergence overides and DMPOrder
+    ! Parse SCF convergence overides
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
+    ! Parse RQI guess and max iteration count
+    CALL ParseRQI(O%RQIGuess,O%MaxRQI)
     ! Parse Misc
     CALL ParseMISC(O%Pressure)
     ! close
@@ -666,10 +668,24 @@ CONTAINS
     IF(.NOT. OptIntQ(Inp,Op_MaxSCF,MaxSCF)) THEN
       MaxSCF = HAVE_MAX_SCF
     ENDIF
-
 !    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MinSCF = "//TRIM(IntToChar(MinSCF)))
 !    CALL MondoLog(DEBUG_NONE, "ParseSCF", "MaxSCF = "//TRIM(IntToChar(MaxSCF)))
   END SUBROUTINE ParseSCF
+
+  SUBROUTINE ParseRQI(RQIGuess,MaxRQI)
+    INTEGER           :: MaxRQI
+    CHARACTER(Len=DCL) :: GuessDCL
+    CHARACTER(LEN=*) :: RQIGuess
+    IF(.NOT.OptIntQ(Inp,RQICycles,MaxRQI)) THEN
+      MaxRQI=30
+    ENDIF
+    IF(.NOT.OptCharQ(Inp,'RQIGuess',GuessDCL)) THEN
+       GuessDCL='Koopmans'
+    ENDIF
+    RQIGuess=ADJUSTL(GuessDCL)
+    WRITE(*,*)'<',TRIM(RQIGuess),'>'
+
+  END SUBROUTINE ParseRQI
   !===============================================================================================
   !
   !===============================================================================================
