@@ -392,13 +392,14 @@ RQI.o : \
   $(top_builddir)/MondoMods/inout.mod \
   $(top_builddir)/MondoMods/macros.mod \
   $(top_builddir)/MondoMods/memman.mod \
-	Overlay.o \
+  Overlay.o \
   $(top_builddir)/MondoMods/indexing.mod \
   $(top_builddir)/MondoMods/atompairs.mod \
   PunchHDF.o \
   $(top_builddir)/MondoMods/prettyprint.mod \
+  $(top_builddir)/MondoMods/globalcharacters.mod \
   $(top_builddir)/MondoMods/globalscalars.mod \
   ControlStructures.o \
   OptionKeys.o \
-  $(top_builddir)/MondoMods/mcmurchie.mod \
+  Response.o \
   $(top_builddir)/MondoMods/mondologger.mod
