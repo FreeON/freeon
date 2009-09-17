@@ -36,101 +36,56 @@ CONTAINS
   SUBROUTINE ZippySez(C)
     TYPE(Controls)  :: C
     INTEGER         :: N,PU
-    !------------------------------------------------------------------------------------------------------------------------!
-    PU=6
-    WRITE(PU,*)'Zippy sez:'
-    N=Random((/1,45/))
-    SELECT CASE(N)
-    CASE (1)
-      WRITE(PU,*)"Are we having fun yet?"
-    CASE (2)
-      WRITE(PU,*)"I am demographically correct."
-    CASE (3)
-      WRITE(PU,*)"I just became one with my browser software."
-    CASE (4)
-      WRITE(PU,*)"Virtual reality isn't what it used to be."
-    CASE (5)
-      WRITE(PU,*)"I want a mega-meal in a mega-mall."
-    CASE (6)
-      WRITE(PU,*)"Adopt my lifestyle or I'll have to press charges."
-    CASE (7)
-      WRITE(PU,*)"If you can't say something nice say something surrealistic."
-    CASE (8)
-      WRITE(PU,*)"I'm afraid! I need something in a heavy cream sauce."
-    CASE (9)
-      WRITE(PU,*)"I can silence Joan Rivers with a single slice of Kraft cheese."
-    CASE (10)
-      WRITE(PU,*)"I am protected by the power of stain-reistant Scotchguard"
-    CASE (11)
-      WRITE(PU,*)"I just accepted provolone into my life."
-    CASE (12)
-      WRITE(PU,*)"Frivolity is a stern taskmaster."
-    CASE (13)
-      WRITE(PU,*)"All life is a blur of Republicans and meat."
-    CASE (14)
-      WRITE(PU,*)"I'm Zippy the Pinhead and I'm totally committed to the festive mode."
-    CASE (15)
-      WRITE(PU,*)"I just felt a paradigm shift."
-    CASE (16)
-      WRITE(PU,*)"My boxer shorts just went on a rampage through a Long Island bowling alley."
-    CASE (17)
-      WRITE(PU,*)"Glazed donuts are the building blocks of the universe."
-    CASE (18)
-      WRITE(PU,*)"Nobody brings small problems into a laundromat."
-    CASE (19)
-      WRITE(PU,*)"Consciousness is vastly overrated."
-    CASE (20)
-      WRITE(PU,*)"I hope my sensitive female side is wearing sensible leather pumps."
-    CASE (21)
-      WRITE(PU,*)"Reality distorts my sense of television."
-    CASE (22)
-      WRITE(PU,*)"AIEEEEE!  I am having an UNDULATING EXPERIENCE!"
-    CASE (23)
-      WRITE(PU,*)"Am I accompanied by a PARENT or GUARDIAN?"
-    CASE (24)
-      WRITE(PU,*)"Am I in GRADUATE SCHOOL yet?"
-    CASE (25)
-      WRITE(PU,*)"Are we live or on tape?"
-    CASE (26)
-      WRITE(PU,*)"As a FAD follower my BEVERAGE choices are rich and fulfilling!"
-    CASE (27)
-      WRITE(PU,*)"BELA LUGOSI is my co-pilot.."
-    CASE (28)
-      WRITE(PU,*)"Can I have an IMPULSE ITEM instead?"
-    CASE (29)
-      WRITE(PU,*)"I used to be a FUNDAMENTALIST but then I heard about the HIGH RADIATION LEVELS and bought an ENCYCLOPEDIA!!"
-    CASE (30)
-      WRITE(PU,*)"Everywhere I look I see NEGATIVITY and ASPHALT..."
-    CASE (31)
-      WRITE(PU,*)"Half a mind is a terrible thing to waste!"
-    CASE (32)
-      WRITE(PU,*)"He is the MELBA-BEING...  the ANGEL CAKE... XEROX him...  XEROX him --"
-    CASE (33)
-      WRITE(PU,*)"Hmmm...  an arrogant bouquet with a subtle suggestion of POLYVINYL CHLORIDE..."
-    CASE (34)
-      WRITE(PU,*)"I can't decide which WRONG TURN to make first!!"
-    CASE (35)
-      WRITE(PU,*)"I guess you guys got BIG MUSCLES from doing too much STUDYING!"
-    CASE (36)
-      WRITE(PU,*)"I had pancake makeup for brunch!"
-    CASE (37)
-      WRITE(PU,*)"I just heard the SEVENTIES were over!!  And I was just getting in touch with my LEISURE SUIT!!"
-    CASE (38)
-      WRITE(PU,*)"I think I am an overnight sensation right now!!"
-    CASE (39)
-      WRITE(PU,*)"I think I'd better go back to my DESK and toy with a few common MISAPPREHENSIONS..."
-    CASE (40)
-      WRITE(PU,*)"I will SHAVE and buy JELL-O and bring my MARRIAGE MANUAL!!"
-    CASE (41)
-      WRITE(PU,*)"Impudent..  Yet possessing a certain ALUMINUM SILICATE overbite....Needs REDDY-WHIP!!"
-    CASE (42)
-      WRITE(PU,*)"If I had a Q-TIP, I could prevent th'collapse of NEGOTIATIONS!!"
-    CASE (43)
-      WRITE(PU,*)"If this was a SWEDISH MOVIE, I'd take off your GO-GO BOOTS!!"
-    CASE (44)
-      WRITE(PU,*)"Hand me a pair of leather pants and a CASIO keyboard -- I'm living for today!"
-    CASE (45)
-      WRITE(PU,*)"I'm using my X-RAY VISION to obtain a rare glimpse of the INNER WORKINGS of this POTATO!!"
-    END SELECT
+
+    CHARACTER(LEN=*), DIMENSION(45), PARAMETER :: quotes = (/ &
+      "Are we having fun yet?", &
+      "I am demographically correct.", &
+      "I just became one with my browser software.", &
+      "Virtual reality isn't what it used to be.", &
+      "I want a mega-meal in a mega-mall.", &
+      "Adopt my lifestyle or I'll have to press charges.", &
+      "If you can't say something nice say something surrealistic.", &
+      "I'm afraid! I need something in a heavy cream sauce.", &
+      "I can silence Joan Rivers with a single slice of Kraft cheese.", &
+      "I am protected by the power of stain-reistant Scotchguard", &
+      "I just accepted provolone into my life.", &
+      "Frivolity is a stern taskmaster.", &
+      "All life is a blur of Republicans and meat.", &
+      "I'm Zippy the Pinhead and I'm totally committed to the festive mode.", &
+      "I just felt a paradigm shift.", &
+      "My boxer shorts just went on a rampage through a Long Island bowling alley.", &
+      "Glazed donuts are the building blocks of the universe.", &
+      "Nobody brings small problems into a laundromat.", &
+      "Consciousness is vastly overrated.", &
+      "I hope my sensitive female side is wearing sensible leather pumps.", &
+      "Reality distorts my sense of television.", &
+      "AIEEEEE!  I am having an UNDULATING EXPERIENCE!", &
+      "Am I accompanied by a PARENT or GUARDIAN?", &
+      "Am I in GRADUATE SCHOOL yet?", &
+      "Are we live or on tape?", &
+      "As a FAD follower my BEVERAGE choices are rich and fulfilling!", &
+      "BELA LUGOSI is my co-pilot..", &
+      "Can I have an IMPULSE ITEM instead?", &
+      "I used to be a FUNDAMENTALIST but then I heard about the HIGH RADIATION LEVELS and bought an ENCYCLOPEDIA!!", &
+      "Everywhere I look I see NEGATIVITY and ASPHALT...", &
+      "Half a mind is a terrible thing to waste!", &
+      "He is the MELBA-BEING...  the ANGEL CAKE... XEROX him...  XEROX him --", &
+      "Hmmm...  an arrogant bouquet with a subtle suggestion of POLYVINYL CHLORIDE...", &
+      "I can't decide which WRONG TURN to make first!!", &
+      "I guess you guys got BIG MUSCLES from doing too much STUDYING!", &
+      "I had pancake makeup for brunch!", &
+      "I just heard the SEVENTIES were over!!  And I was just getting in touch with my LEISURE SUIT!!", &
+      "I think I am an overnight sensation right now!!", &
+      "I think I'd better go back to my DESK and toy with a few common MISAPPREHENSIONS...", &
+      "I will SHAVE and buy JELL-O and bring my MARRIAGE MANUAL!!", &
+      "Impudent..  Yet possessing a certain ALUMINUM SILICATE overbite....Needs REDDY-WHIP!!", &
+      "If I had a Q-TIP, I could prevent th'collapse of NEGOTIATIONS!!", &
+      "If this was a SWEDISH MOVIE, I'd take off your GO-GO BOOTS!!", &
+      "Hand me a pair of leather pants and a CASIO keyboard -- I'm living for today!", &
+      "I'm using my X-RAY VISION to obtain a rare glimpse of the INNER WORKINGS of this POTATO!!" &
+    /)
+
+    CALL MondoLogPlain("Zippy sez: "//TRIM(quotes(Random((/ 1, SIZE(quotes) /)))))
+
   END SUBROUTINE ZippySez
 END MODULE ZippyQuote
