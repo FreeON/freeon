@@ -174,6 +174,11 @@ EXTRA_INCLUDES = \
 
 SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
 
+# In case we have ctags installed, make the necessary tags files.
+.PHONY : tags
+tags :
+	ctags --Fortran-kinds=+i+L *.{c,f,f90}
+
 # Dependencies.
 InOut.lo : \
   DerivedTypes.lo \

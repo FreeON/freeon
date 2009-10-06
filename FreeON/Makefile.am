@@ -56,6 +56,11 @@ CPPMISC = -DNEB2
 # Link rule for FreeON.
 FreeON_LINK = $(FCLINK)
 
+# In case we have ctags installed, make the necessary tags files.
+.PHONY : tags
+tags :
+	ctags --Fortran-kinds=+i+L *.{c,f90} ../MondoMods/*.{c,f,f90}
+
 # Dependencies.
 ParseCommands.o : \
   $(top_builddir)/MondoConfig.h \

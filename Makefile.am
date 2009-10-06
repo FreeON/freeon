@@ -18,7 +18,7 @@ include_HEADERS = config.h MondoConfig.h MondoLocalVersion.h
 DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
 # Phony targets.
-.PHONY : validate
+.PHONY : validate tags
 
 # Clean out everything except for things that are excrutiatingly long to
 # rebuild.
@@ -90,3 +90,9 @@ $(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h
 	  echo "MondoLocalVersion.h updated"; \
 	  cat $(top_builddir)/MondoLocalVersion.diff; \
 	fi
+
+# In case we have ctags installed, make the necessary tags files.
+tags :
+	$(MAKE) -C MondoMods tags
+	$(MAKE) -C FreeON tags
+	$(MAKE) -C SCFeqs tags
