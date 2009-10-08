@@ -75,9 +75,10 @@ CONTAINS
 
     DO J=1,B%NBSets
       BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
+      CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "trying to open basis set file: "//TRIM(BaseFile), "LoadBasisSets")
       INQUIRE(FILE=BaseFile,EXIST=Exists)
       IF(Exists)THEN
-        CALL MondoLog(DEBUG_MAXIMUM, "FreeON","loading external basis set  "//TRIM(BaseFile),"LoadBasisSets")
+        CALL MondoLog(DEBUG_MAXIMUM, "FreeON","loading external basis set  "//TRIM(BaseFile), "LoadBasisSets")
         CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
         BasU=Bas
       ELSE
