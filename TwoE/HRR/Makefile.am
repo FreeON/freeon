@@ -26,6 +26,4 @@ libHRR_la_SOURCES = \
   KetHRR64.f90 \
   KetHRR66.f90
 
-libHRR_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
-
 EXTRA_INCLUDES = -I$(builddir)/../MSC

@@ -69,7 +69,7 @@ EXTRA_INCLUDES = \
   -I$(top_builddir)/TwoE/MSC
 
 LDADD = \
-  $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
+  $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
   $(builddir)/../TwoE/GRD/libGRD.la \
   $(builddir)/../TwoE/INT/libINT.la \
   $(builddir)/../TwoE/VRR/libVRR.la \

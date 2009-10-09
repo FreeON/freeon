@@ -55,7 +55,7 @@ To clean out the sources, there are several options:
 make quickclean
 
 will clean out most directories and avoid cleaning directories that are lengthy
-to rebuild, as for instance MondoMods.
+to rebuild, as for instance Modules.
 
 make clean
 

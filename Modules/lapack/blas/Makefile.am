@@ -1,12 +1,12 @@
 include $(top_srcdir)/make.inc
 
 if USE_DYNAMIC_LINKING
-lib_LTLIBRARIES = libMondoBLAS.la
+lib_LTLIBRARIES = libfreeonblas.la
 else
-noinst_LTLIBRARIES = libMondoBLAS.la
+noinst_LTLIBRARIES = libfreeonblas.la
 endif
 
-libMondoBLAS_la_SOURCES = \
+libfreeonblas_la_SOURCES = \
   $(c_source_files) \
   $(d_source_files) \
   $(s_source_files) \

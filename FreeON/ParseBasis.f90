@@ -119,7 +119,7 @@ CONTAINS
     CALL Delete(ArrMaxNBlks)
   END SUBROUTINE LoadBasisSets
   !============================================================================
-  ! THIS ROUTINE IS A CLONE OF THOSE IN MONDOMODS/THRESHOLDING.F90, BUT DOES
+  ! THIS ROUTINE IS A CLONE OF THOSE IN Modules/Thresholding.f90, BUT DOES
   ! NOT USE GLOBAL VARIABLES, WHICH ARE VERBOTEN IN THE FRONT END
   !============================================================================
   SUBROUTINE DistanceThresholdSetUp(Tau,MinZab,AtomPairThresh,PrimPairThresh)

@@ -25,9 +25,9 @@ EXTRA_DIST = \
   MMA/CubeRules/RuleD.Inc \
   MMA/CubeRules/RuleE.Inc
 
-LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
-EXTRA_INCLUDES = -I$(top_srcdir)/MondoMods/MMA/Functionals
+EXTRA_INCLUDES = -I$(top_srcdir)/Modules/MMA/Functionals
 CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 
 # Dependencies.

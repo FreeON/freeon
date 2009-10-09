@@ -9,8 +9,6 @@ libTwoEMisc_la_SOURCES = \
   GetAtomPair.f90 \
   InitDbl.f
 
-libTwoEMisc_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
-
 # Dependencies.
 GetAtomPair.lo : \
   ShellPairStruct.lo

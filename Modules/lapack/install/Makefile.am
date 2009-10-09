@@ -4,12 +4,12 @@ include $(top_srcdir)/make.inc
 LIBS =
 
 if USE_DYNAMIC_LINKING
-lib_LTLIBRARIES = libMondoLAPACKEXTRA.la
+lib_LTLIBRARIES = libfreeonlapackextra.la
 else
-noinst_LTLIBRARIES = libMondoLAPACKEXTRA.la
+noinst_LTLIBRARIES = libfreeonlapackextra.la
 endif
 
-libMondoLAPACKEXTRA_la_SOURCES = \
+libfreeonlapackextra_la_SOURCES = \
   ilaver.f \
 	lsame.f \
 	slamch.f \
@@ -20,24 +20,24 @@ libMondoLAPACKEXTRA_la_SOURCES = \
 noinst_PROGRAMS = testlsame testslamch testdlamch testsecond testdsecnd testieee testversion
 
 testlsame_SOURCES = lsametst.f
-testlsame_LDADD = libMondoLAPACKEXTRA.la
+testlsame_LDADD = libfreeonlapackextra.la
 
 testslamch_SOURCES = slamchtst.f
-testslamch_LDADD = libMondoLAPACKEXTRA.la
+testslamch_LDADD = libfreeonlapackextra.la
 
 testdlamch_SOURCES = dlamchtst.f
-testdlamch_LDADD = libMondoLAPACKEXTRA.la
+testdlamch_LDADD = libfreeonlapackextra.la
 
 testsecond_SOURCES = secondtst.f
-testsecond_LDADD = libMondoLAPACKEXTRA.la
+testsecond_LDADD = libfreeonlapackextra.la
 
 testdsecnd_SOURCES = dsecndtst.f
-testdsecnd_LDADD = libMondoLAPACKEXTRA.la
+testdsecnd_LDADD = libfreeonlapackextra.la
 
 testieee_SOURCES = tstiee.f
 
 testversion_SOURCES = LAPACK_version.f
-testversion_LDADD = libMondoLAPACKEXTRA.la
+testversion_LDADD = libfreeonlapackextra.la
 
 EXTRA_DIST = \
   dsecnd_EXT_ETIME.f \

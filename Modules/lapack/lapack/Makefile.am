@@ -1,12 +1,12 @@
 include $(top_srcdir)/make.inc
 
 if USE_DYNAMIC_LINKING
-lib_LTLIBRARIES = libMondoLAPACK.la
+lib_LTLIBRARIES = libfreeonlapack.la
 else
-noinst_LTLIBRARIES = libMondoLAPACK.la
+noinst_LTLIBRARIES = libfreeonlapack.la
 endif
 
-libMondoLAPACK_la_SOURCES = \
+libfreeonlapack_la_SOURCES = \
   $(c_source_files) \
   $(d_source_files) \
   $(s_source_files) \
