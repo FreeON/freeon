@@ -845,7 +845,7 @@ AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
 if test "${use_internal_hdf5}" = "yes"; then
 
   AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library.])
-  AC_CONFIG_SUBDIRS([MondoMods/hdf5-1.8.3])
+  AC_CONFIG_SUBDIRS([Modules/hdf5-1.8.3])
 
 else
 
@@ -941,8 +941,8 @@ else
 fi
 
 # Set some preprocessor command line options.
-FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/MondoMods"
-FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/MondoMods"
+FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/Modules"
+FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/Modules"
 
 # Set this stuff in the makefiles.
 AC_SUBST(CPP, ${CPP})
@@ -1025,16 +1025,16 @@ AC_CONFIG_FILES([
 config_localversion.h
 Makefile
 FreeON/Makefile
-MondoMods/Makefile
-MondoMods/lapack/Makefile
-MondoMods/lapack/install/Makefile
-MondoMods/lapack/blas/Makefile
-MondoMods/lapack/lapack/Makefile
-MondoMods/lapack/blas_testing/Makefile
-MondoMods/lapack/lapack_testing/Makefile
-MondoMods/lapack/lapack_testing/lin/Makefile
-MondoMods/lapack/lapack_testing/eig/Makefile
-MondoMods/lapack/lapack_testing/matgen/Makefile
+Modules/Makefile
+Modules/lapack/Makefile
+Modules/lapack/install/Makefile
+Modules/lapack/blas/Makefile
+Modules/lapack/lapack/Makefile
+Modules/lapack/blas_testing/Makefile
+Modules/lapack/lapack_testing/Makefile
+Modules/lapack/lapack_testing/lin/Makefile
+Modules/lapack/lapack_testing/eig/Makefile
+Modules/lapack/lapack_testing/matgen/Makefile
 SCFeqs/Makefile
 OneE/Makefile
 QCTC/Makefile

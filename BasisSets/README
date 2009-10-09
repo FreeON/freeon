@@ -2,7 +2,7 @@ These basis sets were obtained in Gaussian 94 format
 from the EMSL Gaussian Basis Set Order Form at
 http://www.emsl.pnl.gov:2080/forms/basisform.html.
 To add a basis set, copy it here, strip off extraneous
-ascii, modify MondoMods/BasisSetParameters.F90 as
+ascii, modify Modules/BasisSetParameters.F90 as
 appropriate and remake. 
 
 Alternatively, you can create your own basis sets (mix and match or whatever)

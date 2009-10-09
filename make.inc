@@ -11,16 +11,16 @@ builddir = .
 
 if INTERNAL_LAPACK
 LDADD_INTERNAL_LAPACK = \
-  $(top_builddir)/MondoMods/lapack/lapack/libMondoLAPACK.la \
-  $(top_builddir)/MondoMods/lapack/blas/libMondoBLAS.la \
-  $(top_builddir)/MondoMods/lapack/install/libMondoLAPACKEXTRA.la
+  $(top_builddir)/Modules/lapack/lapack/libfreeonlapack.la \
+  $(top_builddir)/Modules/lapack/blas/libfreeonblas.la \
+  $(top_builddir)/Modules/lapack/install/libfreeonlapackextra.la
 endif
 
 if INTERNAL_HDF5
-LDADD_INTERNAL_HDF5 = $(top_builddir)/MondoMods/hdf5-1.8.3/src/libhdf5.la
+LDADD_INTERNAL_HDF5 = $(top_builddir)/Modules/hdf5-1.8.3/src/libhdf5.la
 endif
 
-LDADD_MONDOMODS = $(top_builddir)/MondoMods/libMondoMods.la
+LDADD_MODULES = $(top_builddir)/Modules/libfreeonmodules.la
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
 # we can not preprocess into a filename that differs by the case only, i.e. .C
@@ -177,68 +177,68 @@ LIBRARY_DEPENDENCY_FILES = $(LIBRARY_DEPENDENCY_FILES_LIBS)
 endif
 
 LIBRARY_DEPENDENCY_FILES_MODS = \
-  $(top_builddir)/MondoMods/ainv.mod \
-  $(top_builddir)/MondoMods/annealmap.mod \
-  $(top_builddir)/MondoMods/atompairs.mod \
-  $(top_builddir)/MondoMods/basissetparameters.mod \
-  $(top_builddir)/MondoMods/boundingbox.mod \
-  $(top_builddir)/MondoMods/brabloks.mod \
-  $(top_builddir)/MondoMods/pbc.mod \
-  $(top_builddir)/MondoMods/cholfactor.mod \
-  $(top_builddir)/MondoMods/clock.mod \
-  $(top_builddir)/MondoMods/common_debug.mod \
-  $(top_builddir)/MondoMods/derivedtypes.mod \
-  $(top_builddir)/MondoMods/erffunk.mod \
-  $(top_builddir)/MondoMods/fastmatrices.mod \
-  $(top_builddir)/MondoMods/functionals.mod \
-  $(top_builddir)/MondoMods/gammaassymp.mod \
-  $(top_builddir)/MondoMods/gammaf0.mod \
-  $(top_builddir)/MondoMods/gammaf1.mod \
-  $(top_builddir)/MondoMods/gammaf10.mod \
-  $(top_builddir)/MondoMods/gammaf11.mod \
-  $(top_builddir)/MondoMods/gammaf12.mod \
-  $(top_builddir)/MondoMods/gammaf13.mod \
-  $(top_builddir)/MondoMods/gammaf2.mod \
-  $(top_builddir)/MondoMods/gammaf3.mod \
-  $(top_builddir)/MondoMods/gammaf4.mod \
-  $(top_builddir)/MondoMods/gammaf5.mod \
-  $(top_builddir)/MondoMods/gammaf6.mod \
-  $(top_builddir)/MondoMods/gammaf7.mod \
-  $(top_builddir)/MondoMods/gammaf8.mod \
-  $(top_builddir)/MondoMods/gammaf9.mod \
-  $(top_builddir)/MondoMods/gammafunctions.mod \
-  $(top_builddir)/MondoMods/globalcharacters.mod \
-  $(top_builddir)/MondoMods/globalobjects.mod \
-  $(top_builddir)/MondoMods/globalscalars.mod \
-  $(top_builddir)/MondoMods/indexing.mod \
-  $(top_builddir)/MondoMods/inout.mod \
-  $(top_builddir)/MondoMods/invexp.mod \
-  $(top_builddir)/MondoMods/linalg.mod \
-  $(top_builddir)/MondoMods/macros.mod \
-  $(top_builddir)/MondoMods/matfunk.mod \
-  $(top_builddir)/MondoMods/mcmurchie.mod \
-  $(top_builddir)/MondoMods/mechanics.mod \
-  $(top_builddir)/MondoMods/memman.mod \
-  $(top_builddir)/MondoMods/mondologger.mod \
-  $(top_builddir)/MondoMods/mondompi.mod \
-  $(top_builddir)/MondoMods/mpiinclude.mod \
-  $(top_builddir)/MondoMods/opt_trav_band.mod \
-  $(top_builddir)/MondoMods/order.mod \
-  $(top_builddir)/MondoMods/parse.mod \
-  $(top_builddir)/MondoMods/parsingconstants.mod \
-  $(top_builddir)/MondoMods/prettyprint.mod \
-  $(top_builddir)/MondoMods/processcontrol.mod \
-  $(top_builddir)/MondoMods/setxyz.mod \
-  $(top_builddir)/MondoMods/slatec.mod \
-  $(top_builddir)/MondoMods/specfun.mod \
-  $(top_builddir)/MondoMods/specfunmesh.mod \
-  $(top_builddir)/MondoMods/thresholding.mod \
-  $(top_builddir)/MondoMods/utilities.mod
+  $(top_builddir)/Modules/ainv.mod \
+  $(top_builddir)/Modules/annealmap.mod \
+  $(top_builddir)/Modules/atompairs.mod \
+  $(top_builddir)/Modules/basissetparameters.mod \
+  $(top_builddir)/Modules/boundingbox.mod \
+  $(top_builddir)/Modules/brabloks.mod \
+  $(top_builddir)/Modules/pbc.mod \
+  $(top_builddir)/Modules/cholfactor.mod \
+  $(top_builddir)/Modules/clock.mod \
+  $(top_builddir)/Modules/common_debug.mod \
+  $(top_builddir)/Modules/derivedtypes.mod \
+  $(top_builddir)/Modules/erffunk.mod \
+  $(top_builddir)/Modules/fastmatrices.mod \
+  $(top_builddir)/Modules/functionals.mod \
+  $(top_builddir)/Modules/gammaassymp.mod \
+  $(top_builddir)/Modules/gammaf0.mod \
+  $(top_builddir)/Modules/gammaf1.mod \
+  $(top_builddir)/Modules/gammaf10.mod \
+  $(top_builddir)/Modules/gammaf11.mod \
+  $(top_builddir)/Modules/gammaf12.mod \
+  $(top_builddir)/Modules/gammaf13.mod \
+  $(top_builddir)/Modules/gammaf2.mod \
+  $(top_builddir)/Modules/gammaf3.mod \
+  $(top_builddir)/Modules/gammaf4.mod \
+  $(top_builddir)/Modules/gammaf5.mod \
+  $(top_builddir)/Modules/gammaf6.mod \
+  $(top_builddir)/Modules/gammaf7.mod \
+  $(top_builddir)/Modules/gammaf8.mod \
+  $(top_builddir)/Modules/gammaf9.mod \
+  $(top_builddir)/Modules/gammafunctions.mod \
+  $(top_builddir)/Modules/globalcharacters.mod \
+  $(top_builddir)/Modules/globalobjects.mod \
+  $(top_builddir)/Modules/globalscalars.mod \
+  $(top_builddir)/Modules/indexing.mod \
+  $(top_builddir)/Modules/inout.mod \
+  $(top_builddir)/Modules/invexp.mod \
+  $(top_builddir)/Modules/linalg.mod \
+  $(top_builddir)/Modules/macros.mod \
+  $(top_builddir)/Modules/matfunk.mod \
+  $(top_builddir)/Modules/mcmurchie.mod \
+  $(top_builddir)/Modules/mechanics.mod \
+  $(top_builddir)/Modules/memman.mod \
+  $(top_builddir)/Modules/mondologger.mod \
+  $(top_builddir)/Modules/mondompi.mod \
+  $(top_builddir)/Modules/mpiinclude.mod \
+  $(top_builddir)/Modules/opt_trav_band.mod \
+  $(top_builddir)/Modules/order.mod \
+  $(top_builddir)/Modules/parse.mod \
+  $(top_builddir)/Modules/parsingconstants.mod \
+  $(top_builddir)/Modules/prettyprint.mod \
+  $(top_builddir)/Modules/processcontrol.mod \
+  $(top_builddir)/Modules/setxyz.mod \
+  $(top_builddir)/Modules/slatec.mod \
+  $(top_builddir)/Modules/specfun.mod \
+  $(top_builddir)/Modules/specfunmesh.mod \
+  $(top_builddir)/Modules/thresholding.mod \
+  $(top_builddir)/Modules/utilities.mod
 
 LIBRARY_DEPENDENCY_FILES_LIBS = \
   $(LDADD_INTERNAL_LAPACK) \
   $(LDADD_INTERNAL_HDF5) \
-  $(LDADD_MONDOMODS)
+  $(LDADD_MODULES)
 
 $(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h
 	@echo "checking MondoLocalVersion.h"

@@ -77,7 +77,7 @@ CONTAINS  !
          ZzAC2,ZzBC2,Px,Py,Pz,Gauss,CA,CB,CC,  & 
          Kx,Ky,Kz,KAx,KAy,KAz,KBx,KBy,KBz,     &
          Kappa,KappaA,KappaB, tmp
-    ! Static work arrays; dimensions defined in MondoMods/GlobalScalars
+    ! Static work arrays; dimensions defined in Modules/GlobalScalars
     REAL(DOUBLE),DIMENSION(0:HGEll,1:HGLen) :: Omega1
     REAL(DOUBLE),DIMENSION(0:HGEll,0:HGEll+ECPEll) :: Keew1
     REAL(DOUBLE),DIMENSION(0:2*PrjEll,0:BFEll+PrjEll,1:HGLen) :: OmegaA,OmegaB
@@ -244,7 +244,7 @@ CONTAINS  !
          ZzAC2,ZzBC2,Px,Py,Pz,Gauss,CA,CB,CC,  & 
          Kx,Ky,Kz,KAx,KAy,KAz,KBx,KBy,KBz,     &
          Kappa,KappaA,KappaB, tmp
-    ! Static work arrays; dimensions defined in MondoMods/GlobalScalars
+    ! Static work arrays; dimensions defined in Modules/GlobalScalars
     REAL(DOUBLE),DIMENSION(0:HGEll,1:HGLen) :: Omega1
     REAL(DOUBLE),DIMENSION(0:HGEll,0:HGEll+ECPEll) :: Keew1
     REAL(DOUBLE),DIMENSION(0:2*PrjEll,0:BFEll+PrjEll,1:HGLen) :: OmegaA,OmegaB

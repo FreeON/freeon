@@ -149,8 +149,6 @@ libINT_la_SOURCES = \
   IntB6060603.f90 \
   IntB6060606.f90
 
-libINT_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
-
 EXTRA_DIST = \
   ERIInclude.Inc \
   ERIInterfaceB.Inc \

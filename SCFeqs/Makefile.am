@@ -57,12 +57,12 @@ SOURCES_DEPCHECK = \
   $(P2Use_SOURCES) \
   $(DIIS_SOURCES)
 
-LDADD = $(LDADD_MONDOMODS) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
 tags :
-	ctags --Fortran-kinds=+i+L *.f90 ../MondoMods/*.{c,f,f90}
+	ctags --Fortran-kinds=+i+L *.f90 ../Modules/*.{c,f,f90}
 
 # Dependencies.
 IRInv.o          : DenMatMethods.o

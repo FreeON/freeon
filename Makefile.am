@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-SUBDIRS = MondoMods LinearAlgebraLibrary FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
+SUBDIRS = Modules LinearAlgebraLibrary FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
 
 EXTRA_DIST = localversion FreeON.bibtex
 
@@ -68,7 +68,7 @@ TESTS = /bin/true
 
 # dependency checks.
 depcheck :
-	$(MAKE) -C MondoMods depcheck-lib
+	$(MAKE) -C Modules depcheck-lib
 	$(MAKE) -C FreeON  depcheck-bin
 	$(MAKE) -C SCFeqs  depcheck-bin
 	$(MAKE) -C OneE  depcheck-bin
@@ -93,6 +93,6 @@ $(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h
 
 # In case we have ctags installed, make the necessary tags files.
 tags :
-	$(MAKE) -C MondoMods tags
+	$(MAKE) -C Modules tags
 	$(MAKE) -C FreeON tags
 	$(MAKE) -C SCFeqs tags

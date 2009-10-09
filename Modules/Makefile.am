@@ -13,12 +13,12 @@ DIST_SUBDIRS = lapack hdf5-1.8.3
 SUBDIRS      = $(INTERNAL_HDF5_DIRS) $(INTERNAL_LAPACK_DIRS)
 
 if USE_DYNAMIC_LINKING
-lib_LTLIBRARIES = libMondoMods.la
+lib_LTLIBRARIES = libfreeonmodules.la
 else
-noinst_LTLIBRARIES = libMondoMods.la
+noinst_LTLIBRARIES = libfreeonmodules.la
 endif
 
-libMondoMods_la_SOURCES = \
+libfreeonmodules_la_SOURCES = \
   AInv.f90 \
   Anneal.f90 \
   AtomPairs.f90 \
@@ -172,7 +172,7 @@ EXTRA_INCLUDES = \
   -I$(srcdir)/MMA/Functionals  \
   -I$(srcdir)/MMA/PAC
 
-SOURCES_DEPCHECK = $(libMondoMods_la_SOURCES)
+SOURCES_DEPCHECK = $(libfreeonmodules_la_SOURCES)
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags

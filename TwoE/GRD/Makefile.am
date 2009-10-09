@@ -75,8 +75,6 @@ libGRD_la_SOURCES = \
   dIntB6060603.f90 \
   dIntB6060606.f90
 
-libGRD_la_DEPENDENCIES = $(MondoMods_DEPENDENCY_FILES)
-
 EXTRA_DIST = \
   dERIInterfaceB.Inc
 

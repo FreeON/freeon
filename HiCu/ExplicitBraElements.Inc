@@ -8342,5 +8342,5 @@
              ENDIF
           ENDDO
        CASE(8:)
-          CALL Halt("Increase HGEll in MondoMods/GlobalScalars.F90 and remake")
+          CALL Halt("Increase HGEll in Modules/GlobalScalars.F90 and remake")
        END SELECT
