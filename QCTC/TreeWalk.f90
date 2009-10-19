@@ -70,7 +70,7 @@ MODULE TreeWalk
   END TYPE PolePointer
 
 
-  INTEGER,PARAMETER                     :: NumNodes=1000
+  INTEGER,PARAMETER                     :: NumNodes=5000
   TYPE(PolePointer),DIMENSION(NumNodes) :: Near,Far
 !  REAL(DOUBLE),DIMENSION(2*(1+MaxPoleEll*(MaxPoleEll+3)/2)*NumNodes) :: Wrk
   REAL(DOUBLE),DIMENSION(2000) :: O,W,V
