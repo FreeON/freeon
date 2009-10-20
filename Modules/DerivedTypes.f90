@@ -2,6 +2,9 @@
 !    DERIVED TYPES AND COMPOSED OBJECTS
 !    Author:  Matt Challacombe
 !-----------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE DerivedTypes
    USE GlobalScalars
    USE GlobalCharacters
@@ -154,6 +157,8 @@ MODULE DerivedTypes
 !  OBJECTS DERIVED THROUGH COMPOSITION: BASIS SETS, MATRICES, ETC.
 !
 !==================================================================================
+
+#ifdef PARALLEL
 !------------------------------------------------------------
 !  DISTRIBUTED BLOCK COMPRESSED SPARSE ROW MATRIX
 !
@@ -174,6 +179,8 @@ MODULE DerivedTypes
       TYPE(INT_VECT) :: GRwPt  !-- Global row index
       TYPE(INT_VECT) :: GClPt  !-- Global col index
    END TYPE
+#endif
+
 !------------------------------------------------------------
 !  BLOCK COMPRESSED SPARSE ROW MATRIX
 !

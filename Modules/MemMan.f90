@@ -1,3 +1,5 @@
+#include "MondoConfig.h"
+
 MODULE MemMan
   USE DerivedTypes
   USE GlobalScalars

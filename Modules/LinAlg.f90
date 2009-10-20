@@ -26,6 +26,9 @@
 !  MODULE FOR SPARSE BLOCKED LINEAR ALGEBRA
 !  Author:  Matt Challacombe
 !-------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE COMMON_DEBUG
   USE DerivedTypes
   IMPLICIT NONE

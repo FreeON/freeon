@@ -24,12 +24,18 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 MODULE ProcessControl
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
   USE ParsingConstants
   USE MondoLogger
+
+#ifdef PARALLEL
+  USE MPI
+#endif
 
   IMPLICIT NONE
 
@@ -109,10 +115,10 @@ CONTAINS
   END SUBROUTINE Halt
 
 #ifdef PARALLEL
-  SUBROUTINE HaltMPI(InMsg,IErr)
-    USE MPIInclude
+  SUBROUTINE HaltMPI(InMsg,ErrorCode)
     CHARACTER(LEN=*), INTENT(IN)        :: InMsg
-    INTEGER, OPTIONAL,INTENT(IN)        :: IErr
+    INTEGER, OPTIONAL,INTENT(IN)        :: ErrorCode
+    INTEGER                             :: IErr
     CHARACTER(LEN=MPI_MAX_ERROR_STRING) :: ErrMsg
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)    :: LogMssg
     CHARACTER(LEN=INTERNAL_INT_LEN)     :: ChId
@@ -121,28 +127,27 @@ CONTAINS
     ChId=ADJUSTL(ChId)
     LogMssg='GOING, GOING,... GONE DOWN: MyID = '//TRIM(ChId) &
          //Rtrn//'Message that killed me: '//TRIM(InMsg)
-    IF(PRESENT(IErr))THEN
-      CALL MPI_ERROR_STRING(IErr,ErrMsg,LenMsg)
+    IF(PRESENT(ErrorCode))THEN
+      CALL MPI_Error_string(ErrorCode,ErrMsg,LenMsg,IErr)
       LogMssg=ADJUSTL(TRIM(LogMssg))//Rtrn &
            //'MPI ERROR = <'//TRIM(ErrMsg(1:LenMsg))//'>'
       ! CALL LogInTurn(LogMssg)
-      CALL MondoLogPlain(LogMssg,.TRUE.)
-      CALL MPI_ABORT(MPI_COMM_WORLD,IErr)
+      CALL MondoLogPlain(LogMssg)
+      CALL MPI_Abort(MPI_COMM_WORLD,ErrorCode,IErr)
     ELSE
       ! CALL LogInTurn(LogMssg)
-      CALL MondoLogPlain(LogMssg,.TRUE.)
-      CALL MPI_ABORT(MPI_COMM_WORLD,0)
+      CALL MondoLogPlain(LogMssg)
+      CALL MPI_Abort(MPI_COMM_WORLD,ErrorCode,IErr)
     ENDIF
   END SUBROUTINE HaltMPI
 
   SUBROUTINE LogInTurn(Mssg,IErr)
-    USE MPIInclude
-    CHARACTER(LEN=*), INTENT(IN) :: Mssg
-    INTEGER, OPTIONAL,INTENT(IN) :: IErr
-    INTEGER                      :: I
+    CHARACTER(LEN=*),  INTENT(IN)  :: Mssg
+    INTEGER, OPTIONAL, INTENT(OUT) :: IErr
+    INTEGER                        :: I
     DO I=0,NPrc-1
       CALL MPI_BARRIER(MPI_COMM_WORLD,IErr)
-      IF(MyId==I) CALL MondoLogPlain(Mssg,.TRUE.)
+      IF(MyId==I) CALL MondoLogPlain(Mssg)
       CALL MPI_BARRIER(MPI_COMM_WORLD,IErr)
     ENDDO
   END SUBROUTINE LogInTurn

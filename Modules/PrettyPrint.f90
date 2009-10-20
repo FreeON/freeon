@@ -1,6 +1,9 @@
 !    GENERIC PRETTY PRINTING FOR MONDOSCF TYPES
 !    Author: Matt Challacombe
 !---------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE PrettyPrint
    USE DerivedTypes
    USE GlobalCharacters

@@ -24,6 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 MODULE Macros
   USE DerivedTypes
   USE GlobalScalars
