@@ -94,10 +94,6 @@ AC_PROG_CC([${C_COMPILERS}])
 AC_PROG_FC([${FC_COMPILERS}])
 AC_PROG_F77([${F77_COMPILERS}])
 
-#AC_PROG_CC([gcc icc pgc])
-#AC_PROG_FC([gfortran ifort pgf90])
-#AC_PROG_F77([gfortran ifort pgf90])
-
 if test -z "${CC}"; then
   AC_MSG_FAILURE([no C compiler found: set the CC variable])
 fi
@@ -111,26 +107,53 @@ if test -z "${F77}"; then
 fi
 
 # Identify compiler.
-case ${CC} in
-  gcc*) CC_COMPILERNAME="GCC" ;;
-  icc*) CC_COMPILERNAME="Intel" ;;
-  pgc*) CC_COMPILERNAME="PGI" ;;
-  *)    CC_COMPILERNAME="unknown" ;;
-esac
+AC_ARG_WITH([cc-compilername],
+  [AS_HELP_STRING([--with-cc-compilername={GCC, Intel, PGI}], [Gives the
+  configure script a hint as to what kind of compiler the CC compiler is.
+  Normally this is autodetected, but can sometimes fail.])],
+  [if test "${withval}" = "GCC" -o "${withval}" = "Intel" -o "${withval}" = "PGI"; then
+     CC_COMPILERNAME="${withval}"
+   else
+     AC_MSG_FAILURE([unknown CC compiler: ${withval}])
+   fi],
+  [case ${CC} in
+     gcc*) CC_COMPILERNAME="GCC" ;;
+     icc*) CC_COMPILERNAME="Intel" ;;
+     pgc*) CC_COMPILERNAME="PGI" ;;
+     *)    CC_COMPILERNAME="unknown" ;;
+   esac])
 
-case ${F77} in
-  gfortran*) F77_COMPILERNAME="GCC" ;;
-  ifort*)    F77_COMPILERNAME="Intel" ;;
-  pgf*)      F77_COMPILERNAME="PGI" ;;
-  *)         F77_COMPILERNAME="unknown" ;;
-esac
+AC_ARG_WITH([f77-compilername],
+  [AS_HELP_STRING([--with-f77-compilername={GCC, Intel, PGI}], [Gives the
+   configure script a hint as to what kind of compiler the F77 compiler is.
+   Normally this is autodetected, but can sometimes fail.])],
+  [if test "${withval}" = "GCC" -o "${withval}" = "Intel" -o "${withval}" = "PGI"; then
+     F77_COMPILERNAME="${withval}"
+   else
+     AC_MSG_FAILURE([unknown F77 compiler: ${withval}])
+   fi],
+  [case ${F77} in
+     gfortran*) F77_COMPILERNAME="GCC" ;;
+     ifort*)    F77_COMPILERNAME="Intel" ;;
+     pgf*)      F77_COMPILERNAME="PGI" ;;
+     *)         F77_COMPILERNAME="unknown" ;;
+   esac])
 
-case ${FC} in
-  gfortran*) FC_COMPILERNAME="GCC" ;;
-  ifort*)    FC_COMPILERNAME="Intel" ;;
-  pgf*)      FC_COMPILERNAME="PGI" ;;
-  *)         FC_COMPILERNAME="unknown" ;;
-esac
+AC_ARG_WITH([fc-compilername],
+  [AS_HELP_STRING([--with-fc-compilername={GCC, Intel, PGI}], [Gives the
+   configure script a hint as to what kind of compiler the FC compiler is.
+   Normally this is autodetected, but can sometimes fail.])],
+  [if test "${withval}" = "GCC" -o "${withval}" = "Intel" -o "${withval}" = "PGI"; then
+     FC_COMPILERNAME="${withval}"
+   else
+     AC_MSG_FAILURE([unknown FC compiler: ${withval}])
+   fi],
+  [case ${FC} in
+     gfortran*) FC_COMPILERNAME="GCC" ;;
+     ifort*)    FC_COMPILERNAME="Intel" ;;
+     pgf*)      FC_COMPILERNAME="PGI" ;;
+     *)         FC_COMPILERNAME="unknown" ;;
+   esac])
 
 AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
 
