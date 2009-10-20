@@ -33,7 +33,7 @@ MODULE ProcessControl
   USE ParsingConstants
   USE MondoLogger
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   USE MPI
 #endif
 
@@ -95,7 +95,7 @@ CONTAINS
     CHARACTER(LEN=*)           :: Strng
     CHARACTER(LEN=*),PARAMETER :: Motto='Frango ut patefaciam -- I break in order to reveal'
     CALL MondoLogPlain(Strng)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(InParallel)THEN
       WRITE(*,*)'Node that brought me down = ',MyId
       CALL Trap()
@@ -114,7 +114,7 @@ CONTAINS
 #endif
   END SUBROUTINE Halt
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   SUBROUTINE HaltMPI(InMsg,ErrorCode)
     CHARACTER(LEN=*), INTENT(IN)        :: InMsg
     INTEGER, OPTIONAL,INTENT(IN)        :: ErrorCode

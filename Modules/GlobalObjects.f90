@@ -46,7 +46,7 @@ MODULE GlobalObjects
   !  Universal BCSR indices
   !
   TYPE(INT_VECT), SAVE :: BSiz,OffS
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   !-------------------------------------------------
   !  Universal || domains
   !

@@ -65,22 +65,45 @@ user_FCFLAGS=${FCFLAGS}
 AC_CANONICAL_BUILD
 
 # Check whether to build for parallel (MPI).
-AC_MSG_CHECKING([whether to build MPI version])
+AC_MSG_CHECKING([whether to build fully parallel MPI version])
 AC_ARG_ENABLE([MPI],
   [AS_HELP_STRING([--enable-MPI],
-  [Enable MPI, i.e. build a parallel version.])],
+  [Enable MPI, i.e. build fully parallel version.])],
   [use_MPI="${enableval}"],
   [use_MPI="no"])
 
 if test "${use_MPI}" = "yes"; then
-  AC_MSG_RESULT([yes, building parallel version with MPI])
-  AC_DEFINE([PARALLEL], [1], [Build parallel version])
+  AC_MSG_RESULT([yes, building fully parallel version with MPI])
+  AC_DEFINE([PARALLEL], [1], [Build fully parallel version])
+  AC_DEFINE([MPI2], [1], [Use MPI2 API])
 else
-  AC_MSG_RESULT([no, building serial version])
+  AC_MSG_RESULT([no])
+fi
+
+# Check what parts to parallelize.
+AC_MSG_CHECKING([whether to build MPI version, parallelized across clones only])
+AC_ARG_ENABLE([parallel-clones],
+  [AS_HELP_STRING([--enable-parallel-clones],
+  [Enables MPI parallelism only across clones. This is useful for NEB
+   calculations.])],
+  [use_parallel_clones="${enableval}"],
+  [use_parallel_clones="no"])
+
+if test "${use_parallel_clones}" = "yes"; then
+  AC_MSG_RESULT([yes, parallelizing only across clones with MPI])
+  AC_DEFINE([PARALLEL_CLONES], [1], [Build parallel version only across clones])
+  AC_DEFINE([MPI2], [1], [Use MPI2 API])
+else
+  AC_MSG_RESULT([no])
+fi
+
+# Sanity check on parallelism.
+if test "${use_MPI}" = "yes" -a "${use_parallel_clones}" = "yes"; then
+  AC_MSG_FAILURE([can not build with both MPI and parallel-clones enabled])
 fi
 
 # Find compilers.
-if test "${use_MPI}" = "yes"; then
+if test "${use_MPI}" = "yes" -o "${use_parallel_clones}" = "yes"; then
   C_COMPILERS="mpicc"
   FC_COMPILERS="mpif90"
   F77_COMPILERS="mpif90"
