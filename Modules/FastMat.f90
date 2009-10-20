@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE FastMatrices
    USE DerivedTypes
    USE GlobalScalars

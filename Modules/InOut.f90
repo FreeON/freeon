@@ -39,11 +39,12 @@ MODULE InOut
   USE Parse
   USE MondoLogger
   USE Utilities
+  USE SetXYZ
 
 #ifdef PARALLEL
+  USE MPI
   USE MondoMPI
 #endif
-  USE SetXYZ
 
   IMPLICIT NONE
 

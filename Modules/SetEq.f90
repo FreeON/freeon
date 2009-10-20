@@ -1,3 +1,5 @@
+#include "MondoConfig.h"
+
 MODULE SetXYZ
    USE DerivedTypes
    USE GlobalScalars

@@ -51,7 +51,6 @@ libfreeonmodules_la_SOURCES = \
   InitDS.f \
   LinAlg.f90 \
   LinAlg77.f \
-  MPIInclude.f90 \
   Macros.f90 \
   MatFunk.f90 \
   McMurch.f90 \
@@ -203,7 +202,8 @@ MemMan.lo : \
   GlobalCharacters.lo \
   GlobalObjects.lo \
   ProcessControl.lo \
-  MondoLogger.lo
+  MondoLogger.lo \
+  $(top_builddir)/MondoConfig.h
 
 Parse.lo : \
   DerivedTypes.lo \
@@ -214,10 +214,14 @@ Parse.lo : \
   MemMan.lo \
   MondoLogger.lo
 
-Clock.lo : DerivedTypes.lo \
-  MondoMPI.lo
+Clock.lo : \
+  DerivedTypes.lo \
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
-GlobalObjects.lo : DerivedTypes.lo
+GlobalObjects.lo : \
+  DerivedTypes.lo \
+  $(top_builddir)/MondoConfig.h
 
 BasisSetParameters.lo : GlobalCharacters.lo
 
@@ -226,16 +230,17 @@ MondoMPI.lo : \
   GlobalScalars.lo \
   GlobalObjects.lo \
   ProcessControl.lo \
-  MPIInclude.lo \
   MemMan.lo \
-  Parse.lo
+  Parse.lo \
+  $(top_builddir)/MondoConfig.h
 
 SetEq.lo : \
   DerivedTypes.lo \
   GlobalScalars.lo \
   GlobalObjects.lo \
   MemMan.lo \
-  MondoMPI.lo
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
 Order.lo : \
   DerivedTypes.lo \
@@ -262,7 +267,8 @@ PrettyPrint.lo : \
   SetEq.lo \
   InOut.lo \
   MondoLogger.lo \
-  MondoMPI.lo
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
 LinAlg.lo : \
   GlobalCharacters.lo \
@@ -277,7 +283,8 @@ LinAlg.lo : \
   Order.lo \
   Clock.lo \
   Thresholding.lo \
-  MondoMPI.lo
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
 GlobalCharacters.lo : GlobalScalars.lo
 
@@ -288,7 +295,8 @@ McMurch.lo : \
 
 DerivedTypes.lo : \
   GlobalScalars.lo \
-  GlobalCharacters.lo
+  GlobalCharacters.lo \
+  $(top_builddir)/MondoConfig.h
 
 MatFunk.lo : \
   DerivedTypes.lo \
@@ -360,7 +368,8 @@ FastMat.lo : \
   Order.lo \
   LinAlg.lo \
   Thresholding.lo \
-  MondoMPI.lo
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
 CholFact.lo : \
   DerivedTypes.lo \
@@ -385,7 +394,8 @@ Macros.lo : \
   Functionals.lo \
   AtomPairs.lo \
   Mechanics.lo \
-  MondoMPI.lo
+  MondoMPI.lo \
+  $(top_builddir)/MondoConfig.h
 
 PBC.lo : \
   DerivedTypes.lo \
@@ -434,7 +444,8 @@ ProcessControl.lo : \
   GlobalScalars.lo \
   GlobalCharacters.lo \
   ParsingConstants.lo \
-  MondoLogger.lo
+  MondoLogger.lo \
+  $(top_builddir)/MondoConfig.h
 
 MondoLogger.lo : \
   GlobalObjects.lo \

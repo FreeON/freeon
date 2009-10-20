@@ -23,14 +23,20 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE MondoMPI
    USE DerivedTypes
    USE GlobalScalars
    USE GlobalObjects
    USE ProcessControl
-   USE MPIInclude
    USE MemMan
    USE Parse
+
+#ifdef PARALLEL
+   USE MPI
+#endif
 
    IMPLICIT NONE
 
