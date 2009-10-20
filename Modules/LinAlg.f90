@@ -875,29 +875,29 @@ CONTAINS
         IF(UTotal<Q+U(From)%NNon0-1) &
              CALL Halt(' Stupid error 1 in MultiplyMM_DBCSR')
 
-        !               RecvReqst%I(N)=PostRecv_77(NAtoms,MyId,From,Tag,MONDO_COMM,            &
-        !                                         A%NAtms,A%NBlks,B%NSMat,BNBlks,              &
-        !                                         U(From)%NAtms,U(From)%NBlks,U(From)%NNon0,   &
-        !                                         A%RowPt%I(1:A%NAtms+1),A%ColPt%I(1:A%NBlks), &
-        !                                         B%GRwPt%I(1:NAtoms+1),B%GClPt%I(1:BNBlks),   &
-        !                                         U(From)%RowPt%I(1:U(From)%NAtms+1),          &
-        !                                         U(From)%ColPt%I(1:U(From)%NBlks),            &
-        !                                         U(From)%BlkPt%I(1:U(From)%NBlks),            &
-        !                                         UMTrix(Q:Q+U(From)%NNon0-1),                 &
-        !                                         Flag%I(1:NAtoms),BSiz%I(1:NAtoms),           &
-        !                                         Beg%I(From),End%I(From),                     &
-        !                                         OffSt%I(MyId),OffSt%I(From))
+        RecvReqst%I(N)=PostRecv_77(NAtoms,MyId,From,Tag,MONDO_COMM,            &
+                                  A%NAtms,A%NBlks,B%NSMat,BNBlks,              &
+                                  U(From)%NAtms,U(From)%NBlks,U(From)%NNon0,   &
+                                  A%RowPt%I(1:A%NAtms+1),A%ColPt%I(1:A%NBlks), &
+                                  B%GRwPt%I(1:NAtoms+1),B%GClPt%I(1:BNBlks),   &
+                                  U(From)%RowPt%I(1:U(From)%NAtms+1),          &
+                                  U(From)%ColPt%I(1:U(From)%NBlks),            &
+                                  U(From)%BlkPt%I(1:U(From)%NBlks),            &
+                                  UMTrix(Q:Q+U(From)%NNon0-1),                 &
+                                  Flag%I(1:NAtoms),BSiz%I(1:NAtoms),           &
+                                  Beg%I(From),End%I(From),                     &
+                                  OffSt%I(MyId),OffSt%I(From))
 
-        RecvReqst%I(N)=PostRecv77(NAtoms,MyId,From,Tag,MONDO_COMM,             &
-             A%NAtms,A%NBlks,B%NSMat,BNBlks,              &
-             U(From)%NAtms,U(From)%NBlks,U(From)%NNon0,   &
-             A%RowPt%I(1),A%ColPt%I(1),                   &
-             B%GRwPt%I(1),B%GClPt%I(1),                   &
-             U(From)%RowPt%I(1),U(From)%ColPt%I(1),       &
-             U(From)%BlkPt%I(1),UMTrix(Q),                &
-             Flag%I(1),BSiz%I(1),                         &
-             Beg%I(From),End%I(From),                     &
-             OffSt%I(MyId),OffSt%I(From))
+        !RecvReqst%I(N)=PostRecv77(NAtoms,MyId,From,Tag,MONDO_COMM,             &
+        !     A%NAtms,A%NBlks,B%NSMat,BNBlks,              &
+        !     U(From)%NAtms,U(From)%NBlks,U(From)%NNon0,   &
+        !     A%RowPt%I(1),A%ColPt%I(1),                   &
+        !     B%GRwPt%I(1),B%GClPt%I(1),                   &
+        !     U(From)%RowPt%I(1),U(From)%ColPt%I(1),       &
+        !     U(From)%BlkPt%I(1),UMTrix(Q),                &
+        !     Flag%I(1),BSiz%I(1),                         &
+        !     Beg%I(From),End%I(From),                     &
+        !     OffSt%I(MyId),OffSt%I(From))
 
       ELSE
         RecvReqst%I(N)=MPI_REQUEST_NULL
@@ -919,23 +919,23 @@ CONTAINS
         Tag=MyId*MaxProc+To
         ANBlks=A%GRwPt%I(NAtoms+1)-1
 
-        !               SendReqst%I(N)=PostSend_77(                                       &
-        !                              NAtoms,ANBlks,B%NSMat,B%NAtms,B%NBlks,             &
-        !                              B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,    &
-        !                              A%GrwPt%I(1:NAtoms+1),A%GClPt%I(1:ANBlks),         &
-        !                              B%RowPt%I(1:B%NAtms+1),B%ColPt%I(1:B%NBlks),       &
-        !                              B%BlkPt%I(1:B%NBlks),BMTrix(1:B%NNon0),            &
-        !                              VBlks(Q:Q+V(To)-1),VDisp(Q:Q+V(To)-1),             &
-        !                              Flag%I(1:NAtoms),BSiz%I(1:NAtoms),OffSt%I(MyId),   &
-        !                              Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        )
+        SendReqst%I(N)=PostSend_77(                                       &
+                       NAtoms,ANBlks,B%NSMat,B%NAtms,B%NBlks,             &
+                       B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,    &
+                       A%GrwPt%I(1:NAtoms+1),A%GClPt%I(1:ANBlks),         &
+                       B%RowPt%I(1:B%NAtms+1),B%ColPt%I(1:B%NBlks),       &
+                       B%BlkPt%I(1:B%NBlks),BMTrix(1:B%NNon0),            &
+                       VBlks(Q:Q+V(To)-1),VDisp(Q:Q+V(To)-1),             &
+                       Flag%I(1:NAtoms),BSiz%I(1:NAtoms),OffSt%I(MyId),   &
+                       Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        )
 
-        SendReqst%I(N)=PostSend77(                                            &
-             NAtoms,ANBlks,B%NSMat,B%NAtms,B%NBlks,                 &
-             B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,        &
-             A%GrwPt%I(1),A%GClPt%I(1),B%RowPt%I(1),B%ColPt%I(1),   &
-             B%BlkPt%I(1),BMTrix(1),VBlks(Q),VDisp(Q),              &
-             Flag%I(1),BSiz%I(1),OffSt%I(MyId),                     &
-             Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        )
+        !SendReqst%I(N)=PostSend77(                                            &
+        !     NAtoms,ANBlks,B%NSMat,B%NAtms,B%NBlks,                 &
+        !     B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,        &
+        !     A%GrwPt%I(1),A%GClPt%I(1),B%RowPt%I(1),B%ColPt%I(1),   &
+        !     B%BlkPt%I(1),BMTrix(1),VBlks(Q),VDisp(Q),              &
+        !     Flag%I(1),BSiz%I(1),OffSt%I(MyId),                     &
+        !     Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        )
 
         Q=Q+V(To)
       ELSE
