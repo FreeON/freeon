@@ -46,7 +46,7 @@ CONTAINS
     CHARACTER(LEN=2*DCL) :: CmndLine
     LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
     INTEGER              :: beginClump, endClump
-#if PARALLEL && MPI2
+#if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
     INTEGER              :: SPAWN,ALL
 #else
     INTERFACE
@@ -74,7 +74,7 @@ CONTAINS
 
     DO iCLUMP = beginClump, endClump
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
       CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
 #else
@@ -91,7 +91,7 @@ CONTAINS
       ! Log this run
       CALL MondoLog(DEBUG_MAXIMUM, "Invoke", TRIM(CmndLine))
 
-#if MPI2
+#if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
                           ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
@@ -128,7 +128,7 @@ CONTAINS
   ! CREATE A CHARACTER ARRAY OF NON-BLANK STRINGS THAT WILL
   ! BECOME THE ARGV ARRAY PASSED TO EXECVP BY SPAWN IF NOT MPI-2
   !===============================================================
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   SUBROUTINE SetArgV(Ex,N,S,M,cCLUMP,NArg,ArgV)
 #else
   SUBROUTINE SetArgV(Ex,N,S,M,NArg,ArgV)

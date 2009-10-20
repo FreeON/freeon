@@ -34,13 +34,13 @@ MODULE MondoMPI
    USE MemMan
    USE Parse
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
    USE MPI
 #endif
 
    IMPLICIT NONE
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
 ! NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE AUXILIARY
 ! INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN BY THE FULLER NAME,
 ! EG. INT_VECTOR, WHICH SPECIFIES THE ARRAY ONLY.
@@ -135,13 +135,6 @@ MODULE MondoMPI
          CALL MPI_COMM_SIZE(MONDO_COMM,MSize,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION MSize
-
-
-
-
-
-
-
 
 !===============================================================================
 !     BCAST WRAPPERS

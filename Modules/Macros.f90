@@ -39,7 +39,8 @@ MODULE Macros
   USE Functionals
   USE AtomPairs
   USE Mechanics
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  USE MPI
   USE MondoMPI
 #endif
 #ifdef NAG
@@ -62,7 +63,7 @@ CONTAINS
     TYPE(INT_VECT)                       :: SpaceTimeSplit
 
     REAL(DOUBLE)                         :: ETag
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc,iTAG
     CHARACTER(LEN=DCL)                   :: MONDO_HOST
@@ -94,7 +95,7 @@ CONTAINS
     CALL LoadTopLevelGlobals(Args)
     ! Parse this programs debug level
     CALL Init(PrintFlags,Prog)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ! Get the space-time parallel topology
     CALL New(SpaceTimeSplit,3)
     CALL Get(SpaceTimeSplit,'SpaceTime')
@@ -139,7 +140,7 @@ CONTAINS
     CALL Elapsed_Time(PerfMon,'Init')
     ! Print time stamp
     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       IF(MyId==ROOT) THEN
         CALL TimeStamp('Entering '//TRIM(Prog),Enter_O=.TRUE.)
       ENDIF
@@ -150,7 +151,7 @@ CONTAINS
     !
     !   CALL ShutDown(Prog)
   END SUBROUTINE StartUp
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
     INTEGER               :: IErr,MyClone,CART_COMM
     TYPE(INT_VECT)        :: SpaceTime
@@ -210,7 +211,7 @@ CONTAINS
     !
     ! Close the clone directories
     CALL CloseHDFGroup(H5GroupID)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ! Close the global HDF file, possibly for multiple space-time root nodes
     CALL CloseHDF(HDFFileID)
     ! Revert back to global communicator, rank etc ...
@@ -225,7 +226,7 @@ CONTAINS
       CALL Delete(BSiz)
       CALL Delete(OffS)
     ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(InParallel)THEN
       CALL Delete(Beg)
       CALL Delete(End)
@@ -264,7 +265,7 @@ CONTAINS
     ! ... and close the HDF file ...
     CALL CloseHDF(HDFFileID)
     ! ... shutdown MPI and print a time stamp
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(PrintFlags%Key>DEBUG_MEDIUM.AND.MyId==ROOT)  &
          CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
     ! Shutdown MPI
@@ -320,7 +321,7 @@ CONTAINS
     CALL Get(MaxAtms,'maxatms',Tag_O=CurBase)
     CALL Get(MaxBlks,'maxblks',Tag_O=CurBase)
     CALL Get(MaxNon0,'maxnon0',Tag_O=CurBase)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(InParallel)THEN
       CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
       CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
@@ -357,7 +358,7 @@ CONTAINS
       DO I=1,NAtoms
         MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I))
       ENDDO
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       IF(InParallel)THEN
         CALL New(OffSt,NPrc-1,0)
         CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
@@ -422,7 +423,7 @@ CONTAINS
   !-------------------------------------------------------------------------------
   SUBROUTINE Init_TIME(A)
     TYPE(TIME),INTENT(OUT) :: A
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(InParallel)  &
          CALL AlignNodes()
 #endif
@@ -436,7 +437,7 @@ CONTAINS
   SUBROUTINE Init_DEBG(A,Prog)
     TYPE(DEBG), INTENT(OUT)      :: A
     CHARACTER(LEN=*), INTENT(IN) :: Prog
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       CALL OpenASCII(InpFile,Inp)
@@ -493,7 +494,7 @@ CONTAINS
       ELSE
         A%Fmt=DEBUG_DBLSTYLE
       ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL BCast(A)
 #endif

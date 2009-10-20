@@ -65,7 +65,7 @@ MODULE LinAlg
 #ifdef PARALLEL
     MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_DBCSR,           &
          MultiplyM_BCSR_SCLR, MultiplyM_DBCSR_SCLR, &
-         !                      MultiplyM_BCSR_VECT, MultiplyM_DBCSR_VECT
+         !MultiplyM_BCSR_VECT, MultiplyM_DBCSR_VECT
          MultiplyM_BCSR_VECT
 #else
     MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_BCSR_SCLR,       &
