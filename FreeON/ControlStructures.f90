@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE ControlStructures
   USE GlobalScalars
   USE DerivedTypes
@@ -164,7 +167,7 @@ MODULE ControlStructures
   END TYPE Periodics
 
   TYPE Parallel
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     CHARACTER(LEN=DCL)                     :: Invoking
     CHARACTER(LEN=DCL)                     :: ProcFlag
     CHARACTER(LEN=DCL)                     :: MachFlag

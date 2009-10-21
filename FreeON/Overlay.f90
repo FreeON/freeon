@@ -24,6 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 MODULE Overlay
   USE InOut
   USE PunchHDF
@@ -89,7 +91,7 @@ CONTAINS
       ENDDO
 
       ! Log this run
-      CALL MondoLog(DEBUG_MAXIMUM, "Invoke", TRIM(CmndLine))
+      CALL MondoLog(DEBUG_MAXIMUM, "Invoke", TRIM(CmndLine), "Clump "//TRIM(IntToChar(iCLUMP)))
 
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &

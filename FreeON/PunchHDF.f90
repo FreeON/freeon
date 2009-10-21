@@ -24,6 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 MODULE PunchHDF
   USE InOut
   USE MemMan
@@ -62,7 +64,7 @@ CONTAINS
     TYPE(INT_VECT)       :: ST
 
     HDF_CurrentID=OpenHDF(N%HFile)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     CALL New(ST,3)
     ST%I=(/NSpace,Clump(1),Clump(2)/)
     CALL Put(ST,'SpaceTime')
@@ -111,7 +113,7 @@ CONTAINS
       MaxBloks=MAX(MaxBloks,B%MxBlk(iBAS))
       MaxNon0s=MAX(MaxNon0s,B%MxN0s(iBAS))
     ENDDO
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     !If parallel and we have clones, we need to put the D matrices in the HDF.
     IF(G%Clones.GT.1) CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
 #endif
@@ -182,7 +184,7 @@ CONTAINS
       DoubleRnk2%D=BIG_DBL
       CALL Put(DoubleRnk2,'MCCarts0')
       CALL Delete(DoubleRnk2)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       CALL Put(0,'LineLocExist')
       CALL New(ETDirArr,P%NSpace-1)
       CALL New(ETRootArr,P%NSpace-1)
@@ -210,13 +212,13 @@ CONTAINS
       CALL Put(DoubleVect,'PFFTensorC')
       CALL Put(DoubleVect,'PFFTensorS')
       CALL Delete(DoubleVect)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       !If parallel and we have clones, we need to put the D matrices in the HDF.
       IF(G%Clones.GT.1) CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
 #endif
       CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     !If parallel and we have clones, we need to put the D matrices in the HDF.
     IF(G%Clones.GT.1) CALL Delete(DM)
 #endif
@@ -354,7 +356,7 @@ CONTAINS
     CALL Put(B%MxN0s(cBAS),'maxnon0',chBAS)
     CALL Put(O%Models(cBAS),'ModelChemistry',chBAS)
     CALL Put(O%NSMat(cBAS),'NSMat',chBAS)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     CALL Put(M%MxAtsNode(cBAS),'maxatmsnode',Tag_O=chBAS)
     CALL Put(M%MxBlkNode(cBAS),'maxblksnode',Tag_O=chBAS)
     CALL Put(M%MxN0sNode(cBAS),'maxnon0node',Tag_O=chBAS)
@@ -368,7 +370,7 @@ CONTAINS
       CALL Put(B%OffS(iCLONE,cBAS),'atoff',Tag_O=chBAS)
       CALL Put(B%DExpt(iCLONE,cBAS),'dexpt',Tag_O=chBAS)
       CALL Put(B%Lndex(iCLONE,cBAS),'lndex',Tag_O=chBAS)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
       CALL Put(M%Beg(iCLONE,cBAS),'beg',Tag_O=chBAS)
       CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
       CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)

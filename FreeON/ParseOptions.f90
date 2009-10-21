@@ -811,7 +811,7 @@ CONTAINS
        GuessDCL='Koopmans'
     ENDIF
     RQIGuess=ADJUSTL(GuessDCL)
-    WRITE(*,*)'<',TRIM(RQIGuess),'>'
+    CALL MondoLog(DEBUG_NONE, "ParseRQI", "Guess = "//TRIM(RQIGuess))
 
   END SUBROUTINE ParseRQI
   !===============================================================================================

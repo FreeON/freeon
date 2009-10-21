@@ -46,7 +46,7 @@ PROGRAM FreeON
 
   CALL Init(PerfMon)
   CALL Init(MemStats)
-#if defined(PARALLEL) && defined(MPI2)
+#if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
   CALL InitMPI()
   InParallel=.FALSE.
   IF(MyID==0)THEN
@@ -85,7 +85,7 @@ PROGRAM FreeON
     !--------------------------------------------------------
     CALL TimeStamp('Successful FreeON run',.FALSE.)
     !--------------------------------------------------------
-#if defined(PARALLEL) && defined(MPI2)
+#if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
   ENDIF
   CALL AlignNodes("FreeON")
   CALL FiniMPI()
