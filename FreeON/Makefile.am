@@ -185,6 +185,7 @@ ConflictDetect.o : \
   ControlStructures.o
 
 Overlay.o : \
+  $(top_builddir)/MondoConfig.h \
   $(top_builddir)/Modules/inout.mod \
   PunchHDF.o \
   ControlStructures.o \
@@ -375,6 +376,7 @@ ParseGeomOpt.o : \
   $(top_builddir)/Modules/mondologger.mod
 
 PunchHDF.o : \
+  $(top_builddir)/MondoConfig.h \
   $(top_builddir)/Modules/inout.mod \
   $(top_builddir)/Modules/memman.mod \
   $(top_builddir)/Modules/pbc.mod \
@@ -408,3 +410,9 @@ RQI.o : \
   OptionKeys.o \
   Response.o \
   $(top_builddir)/Modules/mondologger.mod
+
+ControlStructures.o : \
+  $(top_builddir)/MondoConfig.h
+
+Numerics.o : \
+  $(top_builddir)/MondoConfig.h

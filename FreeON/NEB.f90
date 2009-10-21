@@ -70,6 +70,14 @@ CONTAINS
     REAL(DOUBLE)                                :: ImageFraction
     INTEGER                                     :: iCLONE,j
 
+#define NEB_HARDCODED_PATH
+
+#if defined(NEB_HARDCODED_PATH)
+    ! Hardcoded NEB path. Only used if preprocessor macro NEB_HARDCODED_PATH is
+    ! defined. Remember to correctly adjust the dimensions of the following
+    ! array. The indices are DIMENSION(i, j, k), where i is always 3, j is the
+    ! number of atoms, and k is the number of clones, i.e. whatever the Clones=N
+    ! line in the input says.
     REAL(DOUBLE), DIMENSION(3, 6, 4), PARAMETER :: HardcodedClone = RESHAPE( (/ &
 
       0.7630867265635859,    -0.9368739742568123,     3.2208383278845165, &
@@ -101,6 +109,9 @@ CONTAINS
       1.5166100000000000,     0.0000000000000000,     0.0000000000000000  &
 
     /), (/ 3, 6, 4 /) )
+
+#endif
+
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
 #ifdef NEB_DEBUG
@@ -147,15 +158,17 @@ CONTAINS
        ! Fix constrain.
        G%Clone(iCLONE)%CConstrain%I = G%Clone(0)%CConstrain%I
 
+#if defined(NEB_HARDCODED_PATH)
+       ! Hardcoded path.
+       CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
+       DO j = 1, G%Clone(0)%NAtms
+         G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
+       ENDDO
+#else
        ! Linear interpolation of path.
        CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
        G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
-
-       ! Hardcoded path.
-       !CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
-       !DO j = 1, G%Clone(0)%NAtms
-       !  G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
-       !ENDDO
+#endif
 
        ! Set everything else to 0 in this clone.
        G%Clone(iCLONE)%Velocity%D = Zero

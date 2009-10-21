@@ -36,6 +36,10 @@ MODULE ParseCommands
   USE GlobalCharacters
   USE Utilities
 
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  USE MPI
+#endif
+
   IMPLICIT NONE
 
 CONTAINS
@@ -100,6 +104,7 @@ CONTAINS
     N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
 
     ! Come up with random scratch directory based on MONDO_SCRATCH.
+
     N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-"//TRIM(N%SCF_NAME)//"-XXXXXX"
     CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
     N%M_SCRATCH=TRIM(N%M_SCRATCH)//'/'
