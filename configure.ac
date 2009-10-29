@@ -145,10 +145,10 @@ if test -n "${CC_COMPILERNAME}"; then
   fi
 else
   case ${CC} in
-    gcc*) CC_COMPILERNAME="GCC" ;;
-    icc*) CC_COMPILERNAME="Intel" ;;
-    pgc*) CC_COMPILERNAME="PGI" ;;
-    *)    CC_COMPILERNAME="unknown" ;;
+    *gcc*) CC_COMPILERNAME="GCC" ;;
+    *icc*) CC_COMPILERNAME="Intel" ;;
+    *pgc*) CC_COMPILERNAME="PGI" ;;
+    *)     CC_COMPILERNAME="unknown" ;;
   esac
 fi
 
@@ -167,10 +167,10 @@ if test -n "${F77_COMPILERNAME}"; then
   fi
 else
   case ${F77} in
-    gfortran*) F77_COMPILERNAME="GCC" ;;
-    ifort*)    F77_COMPILERNAME="Intel" ;;
-    pgf*)      F77_COMPILERNAME="PGI" ;;
-    *)         F77_COMPILERNAME="unknown" ;;
+    *gfortran*) F77_COMPILERNAME="GCC" ;;
+    *ifort*)    F77_COMPILERNAME="Intel" ;;
+    *pgf*)      F77_COMPILERNAME="PGI" ;;
+    *)          F77_COMPILERNAME="unknown" ;;
   esac
 fi
 
@@ -189,10 +189,10 @@ if test -n "${FC_COMPILERNAME}"; then
   fi
 else
   case ${FC} in
-    gfortran*) FC_COMPILERNAME="GCC" ;;
-    ifort*)    FC_COMPILERNAME="Intel" ;;
-    pgf*)      FC_COMPILERNAME="PGI" ;;
-    *)         FC_COMPILERNAME="unknown" ;;
+    *gfortran*) FC_COMPILERNAME="GCC" ;;
+    *ifort*)    FC_COMPILERNAME="Intel" ;;
+    *pgf*)      FC_COMPILERNAME="PGI" ;;
+    *)          FC_COMPILERNAME="unknown" ;;
   esac
 fi
 
