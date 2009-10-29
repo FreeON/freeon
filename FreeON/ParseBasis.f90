@@ -545,6 +545,7 @@ CONTAINS
     CALL Align(BASIS_SETS,Inp)
     BACKSPACE(Inp)
     READ(Inp,DEFAULT_CHR_FMT)Line
+    CALL MondoLog(DEBUG_MAXIMUM, "ParseBasisNames", "parsing "//TRIM(Line))
     CALL LineToChars(Line,Chars)
     B%NBSets=SIZE(Chars%C)-1
     DO I=2,SIZE(Chars%C)

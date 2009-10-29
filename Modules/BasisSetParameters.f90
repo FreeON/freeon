@@ -31,7 +31,7 @@ MODULE BasisSetParameters
   INTEGER, PARAMETER :: MaxPrmtv=20
   INTEGER, PARAMETER :: MaxASymt= 4
   INTEGER, PARAMETER :: MaxLTyps=10
-  INTEGER, PARAMETER :: NSupSets=44
+  INTEGER, PARAMETER :: NSupSets=45
 
   ! Element 105-107  are ghost function with charge = 0.
 
@@ -66,7 +66,7 @@ MODULE BasisSetParameters
        257.0D0,       258.0D0,       259.0D0,       260.0D0,       261.0D0,       0.0D0,         &
        0.0D0,         0.0D0 /)
 
-  CHARACTER(LEN=BASESET_CHR_LEN), DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/           &
+  CHARACTER(LEN=BASESET_CHR_LEN), DIMENSION(2,NSupSets) :: CSets = RESHAPE( (/           &
        ! ALL ELECTRON BASIS SETS
        'sto-2g          ' , 'STO-2G          ',   &  ! 1
        'sto-3g          ' , 'STO-3G          ',   &  ! 2
@@ -103,19 +103,20 @@ MODULE BasisSetParameters
        'sto-3g-split    ' , 'STO-3G-SPLIT    ',   &  ! 31
        'sto-6g-split    ' , 'STO-6G-SPLIT    ',   &  ! 32
        '3-21g-split     ' , '3-21G-SPLIT     ',   &  ! 33
-       '6-31g-split     ' , '6-31G-SPLIT     ',   &  ! 34
-       '6-31g*-split    ' , '6-31Gs-SPLIT    ',   &  ! 35
-       '6-31g**-split   ' , '6-31Gss-SPLIT   ',   &  ! 36
-       '6-311g-split    ' , '6-311G-SPLIT    ',   &  ! 37
-       '6-311g**-split  ' , '6-311Gss-SPLIT  ',   &  ! 38
+       '3-21g*-split    ' , '3-21Gs-SPLIT    ',   &  ! 34
+       '6-31g-split     ' , '6-31G-SPLIT     ',   &  ! 35
+       '6-31g*-split    ' , '6-31Gs-SPLIT    ',   &  ! 36
+       '6-31g**-split   ' , '6-31Gss-SPLIT   ',   &  ! 37
+       '6-311g-split    ' , '6-311G-SPLIT    ',   &  ! 38
+       '6-311g**-split  ' , '6-311Gss-SPLIT  ',   &  ! 39
        !               USER DEFINED BASIS SETS
-       'user1           ' , 'User1           ',   &  ! 39
-       'user2           ' , 'User2           ',   &  ! 40
-       'user3           ' , 'User3           ',   &  ! 41
-       'user4           ' , 'User4           ',   &  ! 42
-       'user5           ' , 'User5           ',   &  ! 43
+       'user1           ' , 'User1           ',   &  ! 40
+       'user2           ' , 'User2           ',   &  ! 41
+       'user3           ' , 'User3           ',   &  ! 42
+       'user4           ' , 'User4           ',   &  ! 43
+       'user5           ' , 'User5           ',   &  ! 44
        !               Crystal Basis Set
-       'crystal98       ' , 'Crystal98       '    &  ! 44
+       'crystal98       ' , 'Crystal98       '    &  ! 45
        /), (/2,NSupSets/) )
   CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
        (/'s    ','p    ','d    ','f    ','sp   ', &
