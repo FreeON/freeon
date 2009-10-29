@@ -70,8 +70,6 @@ CONTAINS
     REAL(DOUBLE)                                :: ImageFraction
     INTEGER                                     :: iCLONE,j
 
-#define NEB_HARDCODED_PATH
-
 #if defined(NEB_HARDCODED_PATH)
     ! Hardcoded NEB path. Only used if preprocessor macro NEB_HARDCODED_PATH is
     ! defined. Remember to correctly adjust the dimensions of the following

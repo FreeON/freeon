@@ -1052,6 +1052,18 @@ if test "${use_NEB_debug}" = "yes"; then
   AC_DEFINE(NEB_DEBUG, [1], [Print out additional debugging information in NEB])
 fi
 
+AC_MSG_CHECKING([whether to use the hardcoded path in NEB.f90])
+AC_ARG_ENABLE([NEB-hardcoded-path],
+  [AS_HELP_STRING([--enable-NEB-hardcoded-path],
+  [Use the hardcoded NEB path in NEB.f90 instead of linear interpolating a
+   path.])],
+  [use_NEB_hardcoded_path="${enableval}"],
+  [use_NEB_hardcoded_path="no"])
+AC_MSG_RESULT([${use_NEB_hardcoded_path}])
+if test "${use_NEB_hardcoded_path}" = "yes"; then
+  AC_DEFINE(NEB_HARDCODED_PATH, [1], [Use hardcoded path in NEB.f90 instead of linear interpolation])
+fi
+
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
 AC_ARG_WITH([MONDO_SCRATCH],
