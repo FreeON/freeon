@@ -35,6 +35,9 @@ MODULE GeometryKeys
   CHARACTER(LEN=*), PARAMETER :: REACTANTS_BEGIN   ='<BeginReactants>'
   CHARACTER(LEN=*), PARAMETER :: REACTANTS_END     ='<EndReactants>'
 
+  CHARACTER(LEN=*), PARAMETER :: CLONE_BEGIN       = '<BeginClone'
+  CHARACTER(LEN=*), PARAMETER :: CLONE_END         = '<EndClone'
+
   ! Geometry
   CHARACTER(LEN=*), PARAMETER :: GEOMETRY          ='Geometry'
   CHARACTER(LEN=*), PARAMETER :: IN_AU             ='InAU'

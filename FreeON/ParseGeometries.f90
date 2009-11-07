@@ -149,19 +149,24 @@ CONTAINS
           ! Set the energies of the reactant and the product.
           G%Clone(0)%ETotal = O%NEBReactantEnergy
           G%Clone(G%Clones+1)%ETotal = O%NEBProductEnergy
+
+          ! Read in possible clone geometries.
+          DO iCLONE = 1, G%Clones
+            CALL ParseCoordinates(CLONE_BEGIN//TRIM("_"//TRIM(IntToChar(iCLONE))//">"), &
+                                  CLONE_END//TRIM("_"//TRIM(IntToChar(iCLONE))//">"), &
+                                  G%Clone(iCLONE), O%Coordinates, iCLONE)
+          ENDDO
+
         ENDIF
         !CALL PPrint(G%Clone(0),FileName_O=N%GFile,Unit_O=Geo, &
         !     PrintGeom_O=O%GeomPrint,Clone_O=0,CrdInAng_O=.TRUE.)
         !CALL PPrint(G%Clone(G%Clones+1),FileName_O=N%GFile,Unit_O=Geo, &
         !     PrintGeom_O=O%GeomPrint,Clone_O=G%Clones+1,CrdInAng_O=.TRUE.)
         ! Purify R and P images ...
+        CALL MondoLog(DEBUG_NONE, "Parse", "going into NEBPurify")
         CALL NEBPurify(G,Init_O=.TRUE.)
         ! ... then interpolate ...
-        DO iCLONE=1,G%Clones
-          G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
-          G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
-          CALL New(G%Clone(iCLONE))
-        ENDDO
+        CALL MondoLog(DEBUG_NONE, "Parse", "going into NEBInit")
         CALL NEBInit(G)
         ! .. and purify the NEB images ...
         CALL NEBPurify(G)
@@ -244,7 +249,7 @@ CONTAINS
   !------------------------------------------------------------------------!
   !
   !------------------------------------------------------------------------!
-  SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G,Coordinates)
+  SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G,Coordinates,iCLONE_O)
     CHARACTER(LEN=*)          :: BeginDelimiter,EndDelimiter
     TYPE(CRDS)                :: G
     TYPE(CHR_VECT)            :: C
@@ -252,8 +257,19 @@ CONTAINS
     INTEGER                   :: J,N,Coordinates,L
     CHARACTER(LEN=3)          :: At,AtTmp
     CHARACTER(LEN=DCL)        :: Line,LineLowCase
+    INTEGER, OPTIONAL         :: iCLONE_O
 
     CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "parsing between "//TRIM(BeginDelimiter)//" and "//TRIM(EndDelimiter))
+
+    IF(PRESENT(iCLONE_O)) THEN
+      IF(.NOT.FindKey(BeginDelimiter, Inp)) THEN
+        ! This clone's geometry is not given in the input file.
+        CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "no geometry for clone "//TRIM(IntToChar(iCLONE_O)))
+        RETURN
+      ELSE
+        CALL MondoLog(DEBUG_NONE, "ParseCoordinates", "loading geometry for clone "//TRIM(IntToChar(iCLONE_O)))
+      ENDIF
+    ENDIF
 
     ! Determine the number of atoms in this block
     N=0

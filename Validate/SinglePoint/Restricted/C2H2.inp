@@ -1,0 +1,29 @@
+@ NWChem: -77.325646 hartree
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Guess=Superpos
+OutPut=XYZ
+DebugAll=(MaxDebug)
+
+#Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+
+SCFMethod=(RH)
+BasisSets=(6-31G*)
+ModelChem=(B3LYP)
+Accuracy=(VeryTight)
+SCFConvergence=(DIIS)
+
+Geometry=InAngstrom
+
+<EndOptions>
+
+<BeginGeometry>
+C 0.0 0.0 0.6025
+C 0.0 0.0 -0.6025
+H 0.0 0.0 1.6691
+H 0.0 0.0 -1.6691
+<EndGeometry>

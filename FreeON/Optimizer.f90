@@ -446,7 +446,7 @@ CONTAINS
         RMSGrad = MAX(RMSGrad, C%Geos%Clone(iCLONE)%GradRMS)
       ENDDO
 
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxGrad = "//TRIM(DblToChar(maxGrad*au2eV/AUToAngstroms))//" eV/A")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxForce = "//TRIM(DblToChar(-maxGrad*au2eV/AUToAngstroms))//" eV/A")
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSGrad = "//TRIM(DblToChar(RMSGrad*au2eV/AUToAngstroms))//" eV/A")
 
       IF(RMSGrad < GTol(C%Opts%AccuracyLevels(iBAS)) .AND. &
