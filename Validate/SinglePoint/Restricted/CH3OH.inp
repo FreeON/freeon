@@ -1,0 +1,29 @@
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Guess=Superpos
+OutPut=XYZ
+DebugAll=(MaxDebug)
+
+#Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+
+SCFMethod=(RH)
+BasisSets=(6-31G*)
+ModelChem=(B3LYP)
+Accuracy=(VeryTight)
+SCFConvergence=(DIIS)
+
+Geometry=InAngstrom
+
+<EndOptions>
+
+<BeginGeometry>
+C 	-0.0469 	0.6608 	0.0000
+O 	-0.0469 	-0.7577 	0.0000
+H 	-1.0944 	0.9749 	0.0000
+H 	0.4371 	1.0864 	0.8933
+H 	0.4371 	1.0864 	-0.8933
+H 	0.8762 	-1.0514 	0.0000
+<EndGeometry>

@@ -68,7 +68,7 @@ CONTAINS
     TYPE(Geometries)                            :: G
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms)  :: ReactionVector
     REAL(DOUBLE)                                :: ImageFraction
-    INTEGER                                     :: iCLONE,j
+    INTEGER                                     :: iCLONE,j, RPBeginClone, RPEndClone
 
 #if defined(NEB_HARDCODED_PATH)
     ! Hardcoded NEB path. Only used if preprocessor macro NEB_HARDCODED_PATH is
@@ -110,33 +110,26 @@ CONTAINS
 
 #endif
 
-    !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
-#ifdef NEB_DEBUG
+#if defined(NEB_DEBUG)
     CALL MondoLog(DEBUG_NONE, "NEBInit", "starting...")
-#endif
 
-    ! Calculate reaction path vector.
-    ReactionVector=G%Clone(G%Clones+1)%Carts%D-G%Clone(0)%Carts%D
-
-#ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector (in A)")
-    DO j=1, G%Clone(0)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "RV["//TRIM(IntToChar(j))//"] = [ "// &
-        TRIM(DblToChar(ReactionVector(1,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(ReactionVector(2,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(ReactionVector(3,j)*AUToAngstroms))//" ]")
-    ENDDO
-#endif
-
-#ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone "//TRIM(IntToChar(0)))
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone 0 (in A)")
     DO j=1, G%Clone(0)%NAtms
       CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(0)%AtNam%C(j))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)*AUToAngstroms))//" "// &
         TRIM(IntToChar(G%Clone(0)%CConstrain%I(j))))
+    ENDDO
+
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(G%Clones+1))//" (in A)")
+    DO j=1, G%Clone(G%Clones+1)%NAtms
+      CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(G%Clones+1)%AtNam%C(j))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(1,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(2,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(3,j)*AUToAngstroms))//" "// &
+        TRIM(IntToChar(G%Clone(G%Clones+1)%CConstrain%I(j))))
     ENDDO
 #endif
 
@@ -148,55 +141,135 @@ CONTAINS
       ENDIF
     ENDDO
 
-    ! Initialize reaction path.
-    DO iCLONE=1,G%Clones
-       ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
-       CALL SetEq(G%Clone(iCLONE),G%Clone(0))
-
-       ! Fix constrain.
-       G%Clone(iCLONE)%CConstrain%I = G%Clone(0)%CConstrain%I
-
 #if defined(NEB_HARDCODED_PATH)
-       ! Hardcoded path.
-       CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
-       DO j = 1, G%Clone(0)%NAtms
-         G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
-       ENDDO
+    DO iCLONE = 1, G%Clones
+      IF(G%Clone(iCLONE)%NAtms == 0) THEN
+        ! Allocate clone.
+        G%Clone(iCLONE)%NAtms = G%Clone(0)%NAtms
+        G%Clone(iCLONE)%NKind = G%Clone(0)%NKind
+        CALL New(G%Clone(iCLONE))
+      ENDIF
+
+      ! Initialize this clone with the reactant as the template.
+      CALL SetEq(G%Clone(iCLONE), G%Clone(0))
+
+      ! Hardcoded path.
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
+      DO j = 1, G%Clone(0)%NAtms
+        G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
+      ENDDO
+
+      ! Set everything else to 0 in this clone.
+      G%Clone(iCLONE)%Velocity%D = Zero
+      G%Clone(iCLONE)%Fext%D = Zero
+      G%Clone(iCLONE)%Gradients%D = Zero
+
+#if defined(NEB_DEBUG)
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE))//" (in A)")
+      DO j=1, G%Clone(iCLONE)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms))//" "// &
+          TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
+      ENDDO
+#endif
+
+    ENDDO
 #else
-       ! Linear interpolation of path.
-       CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
-       G%Clone(iCLONE)%Carts%D=G%Clone(0)%Carts%D+ImageFraction*ReactionVector
+    ! Calculate reaction path vector. We might have alrady read some clone
+    ! geometries from input. We will interpolate along the reaction path vector
+    ! between clones given in input.
+    RPBeginClone = 0
+    RPEndClone = 1
+
+    DO WHILE(RPEndClone < G%Clones+1)
+
+      DO iCLONE = RPBeginClone+1, G%Clones+1
+        IF(G%Clone(iCLONE)%NAtms > 0) THEN
+          ! This clone is already allocated. Construct reaction path.
+          RPEndClone = iCLONE
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "interpolating between clones "//TRIM(IntToChar(RPBeginClone))//" and "//TRIM(IntToChar(RPEndClone)))
+
+#if defined(NEB_DEBUG)
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPBeginClone))//" (in A)")
+          DO j=1, G%Clone(RPBeginClone)%NAtms
+            CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(RPBeginClone)%AtNam%C(j))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(1,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(2,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(3,j)*AUToAngstroms))//" "// &
+              TRIM(IntToChar(G%Clone(RPBeginClone)%CConstrain%I(j))))
+          ENDDO
+
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPEndClone))//" (in A)")
+          DO j=1, G%Clone(RPEndClone)%NAtms
+            CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(RPEndClone)%AtNam%C(j))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(1,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(2,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(3,j)*AUToAngstroms))//" "// &
+              TRIM(IntToChar(G%Clone(RPEndClone)%CConstrain%I(j))))
+          ENDDO
 #endif
 
-       ! Set everything else to 0 in this clone.
-       G%Clone(iCLONE)%Velocity%D = Zero
-       G%Clone(iCLONE)%Fext%D = Zero
-       G%Clone(iCLONE)%Gradients%D = Zero
+          EXIT
+        ENDIF
+      ENDDO
+
+      ReactionVector = G%Clone(RPEndClone)%Carts%D-G%Clone(RPBeginClone)%Carts%D
 
 #ifdef NEB_DEBUG
-       CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE)))
-       DO j=1, G%Clone(iCLONE)%NAtms
-         CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
-           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
-           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-           TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" "// &
-           TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
-       ENDDO
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector (in A)")
+      DO j=1, G%Clone(RPBeginClone)%NAtms
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "RV["//TRIM(IntToChar(j))//"] = [ "// &
+          TRIM(DblToChar(ReactionVector(1,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(ReactionVector(2,j)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(ReactionVector(3,j)*AUToAngstroms))//" ]")
+      ENDDO
 #endif
-    ENDDO
 
-    iCLONE=G%Clones+1
+      ! Initialize reaction path.
+      DO iCLONE = RPBeginClone+1, RPEndClone-1
+        ImageFraction = DBLE(iCLONE-RPBeginClone)/DBLE(RPEndClone-RPBeginClone)
+
+        ! Allocate clone.
+        G%Clone(iCLONE)%NAtms = G%Clone(0)%NAtms
+        G%Clone(iCLONE)%NKind = G%Clone(0)%NKind
+        CALL New(G%Clone(iCLONE))
+
+        ! Initialize this clone with the reactant as the template.
+        CALL SetEq(G%Clone(iCLONE), G%Clone(0))
+
+        ! Fix constrains.
+        G%Clone(iCLONE)%CConstrain%I = G%Clone(0)%CConstrain%I
+
+        ! Linear interpolation of path.
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
+        G%Clone(iCLONE)%Carts%D = G%Clone(RPBeginClone)%Carts%D + ImageFraction*ReactionVector
+
+        ! Set everything else to 0 in this clone.
+        G%Clone(iCLONE)%Velocity%D = Zero
+        G%Clone(iCLONE)%Fext%D = Zero
+        G%Clone(iCLONE)%Gradients%D = Zero
+
 #ifdef NEB_DEBUG
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(iCLONE)))
-    DO j=1, G%Clone(iCLONE)%NAtms
-      CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-        TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" "// &
-        TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE))//" (in A)")
+        DO j=1, G%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms))//" "// &
+            TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
+        ENDDO
+#endif
+
+      ENDDO
+
+      RPBeginClone = RPEndClone
+      RPEndClone = RPBeginClone+1
     ENDDO
+#endif
+
     CALL MondoLog(DEBUG_NONE, "NEBInit", "done NEBInit")
-#endif
   END SUBROUTINE NEBInit
 
   SUBROUTINE NEBPurify(G,Init_O)
@@ -236,10 +309,10 @@ CONTAINS
        eCLONE=G%Clones+1
     ENDIF
 
-    IF(.NOT. Init) THEN
+    !IF(.NOT. Init) THEN
       CALL MondoLog(DEBUG_NONE, "NEB", "not purifying")
       RETURN
-    ENDIF
+    !ENDIF
 
 #ifdef NEB_DEBUG
     CALL MondoLog(DEBUG_NONE, "NEB", "bCLONE = "//TRIM(IntToChar(bCLONE)))
