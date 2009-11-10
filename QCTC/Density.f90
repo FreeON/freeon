@@ -369,7 +369,7 @@ CONTAINS
     ENDDO
     NULLIFY(HGLink%Next)
   END SUBROUTINE AddNukes
-  !
+
   SUBROUTINE RhoEcon(RhoHead,NLink)
     TYPE(HGLL),POINTER                :: RhoHead,HGLink,HGClone
     INTEGER                           :: NLink,ILink
@@ -385,12 +385,11 @@ CONTAINS
     IF(NLink < 1) THEN
       CALL MondoLog(DEBUG_NONE, "RhoEcon", "called with NLink = "//TRIM(IntToChar(NLink)))
       CALL Halt("illegal value")
-      !RETURN
     ENDIF
 
     ILink=0
     HGLink=>RhoHead%Next
-    !
+
     MaxX=-1D20
     MinX=1D20
     MaxY=-1D20
@@ -429,9 +428,6 @@ CONTAINS
     !
     J=1
     DO WHILE(J.LE.NLink)
-       !
-
-!	WRITE(*,*)J,ListArray1(J),ASSOCIATED(LinkArray1(ListArray1(J))%L)
 
        IF(.NOT.ASSOCIATED(LinkArray1(ListArray1(J))%L))THEN
           J=J+1
@@ -513,7 +509,6 @@ CONTAINS
                 ENDIF
              ENDDO
 
-             !
              IF(KLstM1==KLstP1)GOTO 101
              !
              LinkArray1(KLstM1)%L%Next=>LinkArray1(KLstP1)%L
@@ -540,7 +535,7 @@ CONTAINS
     WRITE(*,*)' L-1  = ',LinkArray1(KLstM1)%L%LNum
     WRITE(*,*)' L+1  = ',LinkArray1(KLstP1)%L%LNum
     STOP ' Bad logic in RhoEcon '
-    !
+
   END SUBROUTINE RhoEcon
 
   SUBROUTINE RhoPop(GM,BS,CS,NoWrap,SpinM,Psv,Pair,HGLink,NLink)

@@ -58,8 +58,14 @@ PROGRAM FockNGrueven
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
-  CALL New(F)
-  CALL New(Tmp1)
+
+  CALL Initialize(F)
+  CALL Initialize(V)
+  CALL Initialize(T)
+  CALL Initialize(J)
+  CALL Initialize(K)
+  CALL Initialize(X)
+  CALL Initialize(Tmp1)
 
   IF(SCFActn=='StartResponse')THEN
      RespOrder=LEN(TRIM(Args%C%C(3)))
@@ -140,12 +146,11 @@ PROGRAM FockNGrueven
      CALL Get(T,TrixFile('U',Args))                        ! T=U_{ECP}
      CALL Add(T,J,F)
   ENDIF
-  !
+
   IF(AllocQ(T%Alloc)) CALL Delete(T)
   IF(AllocQ(J%Alloc)) CALL Delete(J)
-  !
+
   IF(SCFActn/='GuessEqCore'.AND.SCFActn.NE.'StartResponse')THEN
-     CALL New(K)
      IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
         ! Add in Hartree-Fock exact exchange
         IF(SCFActn=='FockPrimeBuild') THEN
