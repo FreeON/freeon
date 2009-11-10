@@ -70,46 +70,6 @@ CONTAINS
     REAL(DOUBLE)                                :: ImageFraction
     INTEGER                                     :: iCLONE,j, RPBeginClone, RPEndClone
 
-#if defined(NEB_HARDCODED_PATH)
-    ! Hardcoded NEB path. Only used if preprocessor macro NEB_HARDCODED_PATH is
-    ! defined. Remember to correctly adjust the dimensions of the following
-    ! array. The indices are DIMENSION(i, j, k), where i is always 3, j is the
-    ! number of atoms, and k is the number of clones, i.e. whatever the Clones=N
-    ! line in the input says.
-    REAL(DOUBLE), DIMENSION(3, 6, 4), PARAMETER :: HardcodedClone = RESHAPE( (/ &
-
-      0.7630867265635859,    -0.9368739742568123,     3.2208383278845165, &
-      0.7608021328554067,    -0.6204187703684825,     2.2755297459303629, &
-      0.7529541852208842,    -0.0532596915331501,     3.6802531639439620, &
-      0.7582999999999999,     0.0000000000000000,     0.6444600000000000, &
-      0.0000000000000000,     0.0000000000000000,     0.0000000000000000, &
-      1.5166100000000000,     0.0000000000000000,     0.0000000000000000, &
-
-      0.8034578572871995,    -0.3731572570176999,     3.6348149036852102, &
-      0.7477929940392244,     0.6218317102230634,     3.6260701757908858, &
-      0.7358596141194851,    -0.5142558664624560,     4.6193455762112103, &
-      0.7582999999999999,     0.0000000000000000,     0.6444600000000000, &
-      0.0000000000000000,     0.0000000000000000,     0.0000000000000000, &
-      1.5166100000000000,     0.0000000000000000,     0.0000000000000000, &
-
-      0.7813634918290561,     0.3752709380129718,     3.6335385073801971, &
-      0.7511890047588491,     0.5152615026840449,     4.6200870133878489, &
-      0.7500382891124888,    -0.6208006380287114,     3.6267071891485458, &
-      0.7582999999999999,     0.0000000000000000,     0.6444600000000000, &
-      0.0000000000000000,     0.0000000000000000,     0.0000000000000000, &
-      1.5166100000000000,     0.0000000000000000,     0.0000000000000000, &
-
-      0.7576465672925153,     0.9379874175822611,     3.2204373739127234, &
-      0.7606243349350542,     0.0545428926876801,     3.6802806897884879, &
-      0.7576277541923343,     0.6210709108740269,     2.2752801027802927, &
-      0.7582999999999999,     0.0000000000000000,     0.6444600000000000, &
-      0.0000000000000000,     0.0000000000000000,     0.0000000000000000, &
-      1.5166100000000000,     0.0000000000000000,     0.0000000000000000  &
-
-    /), (/ 3, 6, 4 /) )
-
-#endif
-
     !Initialize each clone to initial state then interpolate Cartesian coordinates
 #if defined(NEB_DEBUG)
     CALL MondoLog(DEBUG_NONE, "NEBInit", "starting...")
@@ -141,42 +101,6 @@ CONTAINS
       ENDIF
     ENDDO
 
-#if defined(NEB_HARDCODED_PATH)
-    DO iCLONE = 1, G%Clones
-      IF(G%Clone(iCLONE)%NAtms == 0) THEN
-        ! Allocate clone.
-        G%Clone(iCLONE)%NAtms = G%Clone(0)%NAtms
-        G%Clone(iCLONE)%NKind = G%Clone(0)%NKind
-        CALL New(G%Clone(iCLONE))
-      ENDIF
-
-      ! Initialize this clone with the reactant as the template.
-      CALL SetEq(G%Clone(iCLONE), G%Clone(0))
-
-      ! Hardcoded path.
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "hardcoded configuration for clone "//TRIM(IntToChar(iCLONE)))
-      DO j = 1, G%Clone(0)%NAtms
-        G%Clone(iCLONE)%Carts%D(:, j) = HardcodedClone(:, j, iCLONE)
-      ENDDO
-
-      ! Set everything else to 0 in this clone.
-      G%Clone(iCLONE)%Velocity%D = Zero
-      G%Clone(iCLONE)%Fext%D = Zero
-      G%Clone(iCLONE)%Gradients%D = Zero
-
-#if defined(NEB_DEBUG)
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE))//" (in A)")
-      DO j=1, G%Clone(iCLONE)%NAtms
-        CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms))//" "// &
-          TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
-      ENDDO
-#endif
-
-    ENDDO
-#else
     ! Calculate reaction path vector. We might have alrady read some clone
     ! geometries from input. We will interpolate along the reaction path vector
     ! between clones given in input.
@@ -267,7 +191,6 @@ CONTAINS
       RPBeginClone = RPEndClone
       RPEndClone = RPBeginClone+1
     ENDDO
-#endif
 
     CALL MondoLog(DEBUG_NONE, "NEBInit", "done NEBInit")
   END SUBROUTINE NEBInit
