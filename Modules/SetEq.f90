@@ -122,24 +122,34 @@ MODULE SetXYZ
 !     Copy a BCSR matrix
 !======================================================================
       SUBROUTINE Set_BCSR_EQ_BCSR(B,A)
+        INTEGER :: I
          TYPE(BCSR), INTENT(INOUT) :: A
          TYPE(BCSR), INTENT(INOUT) :: B
+
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
-            IF(AllocQ(B%Alloc).AND. &
-                 & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
-               CALL Delete(B)
-               CALL New(B,NSMat_O=A%NSMat)
-            ELSE
-               IF(.NOT.AllocQ(B%Alloc))CALL New(B,NSMat_O=A%NSMat)
+            IF(AllocQ(B%Alloc)) THEN
+              CALL Delete(B)
             ENDIF
-            B%NSMat=A%NSMat; B%NAtms=A%NAtms; B%NBlks=A%NBlks; B%NNon0=A%NNon0
-            B%RowPt%I(1:A%NAtms+1)=A%RowPt%I(1:A%NAtms+1)
-            B%ColPt%I(1:A%NBlks)  =A%ColPt%I(1:A%NBlks)
+            CALL New(B,NSMat_O=A%NSMat)
+
+            B%NSMat = A%NSMat
+            B%NAtms = A%NAtms
+            B%NBlks = A%NBlks
+            B%NNon0 = A%NNon0
+
             !B%BlkPt%I(1:A%NBlks*A%NSMat)=A%BlkPt%I(1:A%NBlks*A%NSMat)
-            B%BlkPt%I(1:A%NBlks)  =A%BlkPt%I(1:A%NBlks)
-            B%MTrix%D(1:A%NNon0)  =A%MTrix%D(1:A%NNon0)
+            DO I = 1, A%NAtms+1
+              B%RowPt%I(I) = A%RowPt%I(I)
+            ENDDO
+            DO I = 1, A%NBlks
+              B%ColPt%I(I) = A%ColPt%I(I)
+              B%BlkPt%I(I) = A%BlkPt%I(I)
+            ENDDO
+            DO I = 1, A%NNon0
+              B%MTrix%D(I) = A%MTrix%D(I)
+            ENDDO
 #ifdef PARALLEL
          ENDIF
 #endif
@@ -152,8 +162,7 @@ MODULE SetXYZ
          TYPE(DBCSR), INTENT(INOUT) :: A
          TYPE(DBCSR), INTENT(INOUT) :: B
          LOGICAL                    :: LimitsQ
-         IF(AllocQ(B%Alloc).AND. &
-              & (B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0) )THEN
+         IF(AllocQ(B%Alloc).AND.(B%NSMat.NE.A%NSMat.OR.B%NAtms<A%NAtms.OR.B%NBlks<A%NBlks.OR.B%NNon0<A%NNon0)) THEN
             CALL Delete(B)
             CALL New(B,NSMat_O=A%NSMat)
          ELSE
@@ -185,8 +194,7 @@ MODULE SetXYZ
          INTERFACE
             SUBROUTINE BCSR_TO_DENS(NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0,BSiz,OffS, &
                                     A,MTrix,RowPt,ColPt,BlkPt)
-              INTEGER                            ,INTENT(IN)  :: NRow,NCol,NBasF,NSMat,NAtoms, &
-                                                                   NBlks,NNon0
+              INTEGER, INTENT(IN)                             :: NRow,NCol,NBasF,NSMat,NAtoms,NBlks,NNon0
               INTEGER, PARAMETER                              :: DOUBLE=KIND(0.D0)
               REAL(DOUBLE),DIMENSION(NRow,NCol),  INTENT(OUT) :: A
               REAL(DOUBLE),DIMENSION(NNon0),      INTENT(IN)  :: MTrix
@@ -334,6 +342,7 @@ MODULE SetXYZ
         TYPE(DBL_RNK2), INTENT(INOUT) :: A
         REAL(DOUBLE),DIMENSION(M,N) :: B
         INTEGER :: I,J
+
         DO J=1,N
            DO I=1,M
               B(I,J)=A%D(OI+I,OJ+J)
@@ -354,7 +363,7 @@ MODULE SetXYZ
             ENDDO
          ENDDO
       END SUBROUTINE BlockToBlock
-!
+
       SUBROUTINE BlockToBlock2(M,N,A,B)
          IMPLICIT NONE
          INTEGER,                     INTENT(IN)    :: M,N

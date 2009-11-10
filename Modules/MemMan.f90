@@ -6,6 +6,7 @@ MODULE MemMan
   USE GlobalCharacters
   USE GlobalObjects
   USE ProcessControl
+  USE MondoLogger
 
   IMPLICIT NONE
 
@@ -103,11 +104,13 @@ CONTAINS
 
   SUBROUTINE SetBig_INT_VECT(A)
     TYPE(INT_VECT) :: A
+
     A%I=BIG_INT
   END SUBROUTINE SetBig_INT_VECT
 
   SUBROUTINE SetBig_DBL_VECT(A)
     TYPE(DBL_VECT) :: A
+
     A%D=BIG_DBL
   END SUBROUTINE SetBig_DBL_VECT
 
@@ -116,6 +119,7 @@ CONTAINS
     INTEGER                        :: Ints
     INTEGER                        :: M,N
     INTEGER,OPTIONAL,INTENT(IN)    :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     Ints=N-M+1
@@ -127,7 +131,17 @@ CONTAINS
 
   SUBROUTINE Initialize_INT_VECT(A)
     TYPE(INT_VECT), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%I)) THEN
+      NULLIFY(A%I)
+    ENDIF
+#else
+    IF(ALLOCATED(A%I)) THEN
+      DEALLOCATE(A%I)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_INT_VECT
 
   SUBROUTINE New_INT_RNK2(A,N,M_O)
@@ -135,6 +149,7 @@ CONTAINS
     INTEGER                                  :: Ints
     INTEGER,DIMENSION(2)                     :: M,N
     INTEGER,OPTIONAL,DIMENSION(2),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%I(M(1):N(1), M(2):N(2)),STAT=MemStatus)
@@ -145,7 +160,17 @@ CONTAINS
 
   SUBROUTINE Initialize_INT_RNK2(A)
     TYPE(INT_RNK2), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%I)) THEN
+      NULLIFY(A%I)
+    ENDIF
+#else
+    IF(ALLOCATED(A%I)) THEN
+      DEALLOCATE(A%I)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_INT_RNK2
 
   SUBROUTINE New_INT_RNK3(A,N,M_O)
@@ -153,6 +178,7 @@ CONTAINS
     INTEGER                                  :: Ints
     INTEGER,DIMENSION(3)                     :: M,N
     INTEGER,OPTIONAL,DIMENSION(3),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%I(M(1):N(1),M(2):N(2),M(3):N(3)),STAT=MemStatus)
@@ -164,15 +190,25 @@ CONTAINS
 
   SUBROUTINE Initialize_INT_RNK3(A)
     TYPE(INT_RNK3), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%I)) THEN
+      NULLIFY(A%I)
+    ENDIF
+#else
+    IF(ALLOCATED(A%I)) THEN
+      DEALLOCATE(A%I)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_INT_RNK3
 
   SUBROUTINE New_INT_RNK4(A,N,M_O)
-    TYPE(INT_RNK4),  INTENT(INOUT)  :: A
-    INTEGER                         :: Ints
-    INTEGER,DIMENSION(4)            :: M,N
-    INTEGER,OPTIONAL, &
-         DIMENSION(4),INTENT(IN) :: M_O
+    TYPE(INT_RNK4),  INTENT(INOUT)              :: A
+    INTEGER                                     :: Ints
+    INTEGER,DIMENSION(4)                        :: M,N
+    INTEGER,OPTIONAL, & DIMENSION(4),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%I(M(1):N(1),M(2):N(2), &
@@ -185,7 +221,17 @@ CONTAINS
 
   SUBROUTINE Initialize_INT_RNK4(A)
     TYPE(INT_RNK4), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%I)) THEN
+      NULLIFY(A%I)
+    ENDIF
+#else
+    IF(ALLOCATED(A%I)) THEN
+      DEALLOCATE(A%I)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_INT_RNK4
 
   SUBROUTINE New_DBL_VECT(A,N,M_O)
@@ -193,6 +239,7 @@ CONTAINS
     INTEGER                        :: Dbls
     INTEGER                        :: M,N
     INTEGER,OPTIONAL,INTENT(IN)    :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M:N),STAT=MemStatus)
@@ -204,7 +251,17 @@ CONTAINS
 
   SUBROUTINE Initialize_DBL_VECT(A)
     TYPE(DBL_VECT), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%D)) THEN
+      NULLIFY(A%D)
+    ENDIF
+#else
+    IF(ALLOCATED(A%D)) THEN
+      DEALLOCATE(A%D)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_DBL_VECT
 
   SUBROUTINE New_DBL_RNK2(A,N,M_O)
@@ -223,15 +280,25 @@ CONTAINS
 
   SUBROUTINE Initialize_DBL_RNK2(A)
     TYPE(DBL_RNK2), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%D)) THEN
+      NULLIFY(A%D)
+    ENDIF
+#else
+    IF(ALLOCATED(A%D)) THEN
+      DEALLOCATE(A%D)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_DBL_RNK2
 
   SUBROUTINE New_DBL_RNK3(A,N,M_O)
-    TYPE(DBL_RNK3),  INTENT(INOUT)  :: A
-    INTEGER                         :: Dbls
-    INTEGER,DIMENSION(3)            :: M,N
-    INTEGER,OPTIONAL, &
-         DIMENSION(3),INTENT(IN) :: M_O
+    TYPE(DBL_RNK3),  INTENT(INOUT)            :: A
+    INTEGER                                   :: Dbls
+    INTEGER,DIMENSION(3)                      :: M,N
+    INTEGER,OPTIONAL, DIMENSION(3),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1),M(2):N(2),M(3):N(3)),STAT=MemStatus)
@@ -243,15 +310,25 @@ CONTAINS
 
   SUBROUTINE Initialize_DBL_RNK3(A)
     TYPE(DBL_RNK3), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%D)) THEN
+      NULLIFY(A%D)
+    ENDIF
+#else
+    IF(ALLOCATED(A%D)) THEN
+      DEALLOCATE(A%D)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_DBL_RNK3
 
   SUBROUTINE New_DBL_RNK4(A,N,M_O)
-    TYPE(DBL_RNK4),  INTENT(INOUT)  :: A
-    INTEGER                         :: Dbls
-    INTEGER,DIMENSION(4)            :: M,N
-    INTEGER,OPTIONAL, &
-         DIMENSION(4),INTENT(IN) :: M_O
+    TYPE(DBL_RNK4),  INTENT(INOUT)            :: A
+    INTEGER                                   :: Dbls
+    INTEGER,DIMENSION(4)                      :: M,N
+    INTEGER,OPTIONAL, DIMENSION(4),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1),M(2):N(2), &
@@ -264,15 +341,25 @@ CONTAINS
 
   SUBROUTINE Initialize_DBL_RNK4(A)
     TYPE(DBL_RNK4), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%D)) THEN
+      NULLIFY(A%D)
+    ENDIF
+#else
+    IF(ALLOCATED(A%D)) THEN
+      DEALLOCATE(A%D)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_DBL_RNK4
 
   SUBROUTINE New_DBL_RNK6(A,N,M_O)
-    TYPE(DBL_RNK6),  INTENT(INOUT)  :: A
-    INTEGER                         :: Dbls
-    INTEGER,DIMENSION(6)            :: M,N
-    INTEGER,OPTIONAL, &
-         DIMENSION(6),INTENT(IN) :: M_O
+    TYPE(DBL_RNK6),  INTENT(INOUT)            :: A
+    INTEGER                                   :: Dbls
+    INTEGER,DIMENSION(6)                      :: M,N
+    INTEGER,OPTIONAL, DIMENSION(6),INTENT(IN) :: M_O
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%D(M(1):N(1),M(2):N(2), &
@@ -287,7 +374,17 @@ CONTAINS
 
   SUBROUTINE Initialize_DBL_RNK6(A)
     TYPE(DBL_RNK6), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%D)) THEN
+      NULLIFY(A%D)
+    ENDIF
+#else
+    IF(ALLOCATED(A%D)) THEN
+      DEALLOCATE(A%D)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_DBL_RNK6
 
   SUBROUTINE New_CHR10_VECT(A,N,M_O)
@@ -295,6 +392,7 @@ CONTAINS
     INTEGER,         INTENT(IN)  :: N
     INTEGER,OPTIONAL,INTENT(IN)  :: M_O
     INTEGER                      :: M
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%C(M:N),STAT=MemStatus)
@@ -304,7 +402,17 @@ CONTAINS
 
   SUBROUTINE Initialize_CHR10_VECT(A)
     TYPE(CHR10_VECT), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%C)) THEN
+      NULLIFY(A%C)
+    ENDIF
+#else
+    IF(ALLOCATED(A%C)) THEN
+      DEALLOCATE(A%C)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_CHR10_VECT
 
   SUBROUTINE New_CHR_VECT(A,N,M_O)
@@ -312,6 +420,7 @@ CONTAINS
     INTEGER,         INTENT(IN)  :: N
     INTEGER,OPTIONAL,INTENT(IN)  :: M_O
     INTEGER                      :: M
+
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O
     ALLOCATE(A%C(M:N),STAT=MemStatus)
@@ -321,12 +430,23 @@ CONTAINS
 
   SUBROUTINE Initialize_CHR_VECT(A)
     TYPE(CHR_VECT), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%C)) THEN
+      NULLIFY(A%C)
+    ENDIF
+#else
+    IF(ALLOCATED(A%C)) THEN
+      DEALLOCATE(A%C)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_CHR_VECT
 
   SUBROUTINE New_LOG_VECT(A,N)
     TYPE(LOG_VECT),  INTENT(OUT) :: A
     INTEGER,         INTENT(IN)  :: N
+
     CALL AllocChk(A%Alloc)
     ALLOCATE(A%L(1:N),STAT=MemStatus)
     A%L=.FALSE.
@@ -336,16 +456,23 @@ CONTAINS
 
   SUBROUTINE Initialize_LOG_VECT(A)
     TYPE(LOG_VECT), INTENT(INOUT) :: A
+
     A%Alloc = ALLOCATED_FALSE
+#if defined (POINTERS_IN_DERIVED_TYPES)
+    IF(ASSOCIATED(A%L)) THEN
+      NULLIFY(A%L)
+    ENDIF
+#else
+    IF(ALLOCATED(A%L)) THEN
+      DEALLOCATE(A%L)
+    ENDIF
+#endif
   END SUBROUTINE Initialize_LOG_VECT
 
-  !
-  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  !
   SUBROUTINE New_INTC(A,N)
     TYPE(INTC),      INTENT(OUT) :: A
     INTEGER,         INTENT(IN)  :: N
-    !
+
     IF(AllocQ(A%Alloc)) CALL Delete(A)
     A%N=N
     IF(N==0)RETURN
@@ -375,6 +502,7 @@ CONTAINS
 
   SUBROUTINE Initialize_INTC(A)
     TYPE(INTC), INTENT(INOUT) :: A
+
     CALL Initialize(A%Def)
     CALL Initialize(A%Atoms)
     CALL Initialize(A%Cells)
@@ -391,6 +519,7 @@ CONTAINS
   SUBROUTINE New_BMATR(A,N)
     TYPE(BMATR) :: A
     INTEGER     :: N
+
     CALL AllocChk(A%Alloc)
     CALL New(A%IB,(/N,4/))
     CALL New(A%B,(/N,12/))
@@ -401,6 +530,7 @@ CONTAINS
 
   SUBROUTINE Initialize_BMATR(A)
     TYPE(BMATR), INTENT(INOUT) :: A
+
     CALL Initialize(A%IB)
     CALL Initialize(A%B)
     CALL Initialize(A%BLI)
@@ -411,6 +541,7 @@ CONTAINS
   SUBROUTINE New_ANGLEDATA(A,N)
     TYPE(ANGLEDATA) :: A
     INTEGER         :: N
+
     A%N=N
     CALL New(A%IJK,(/3,N/))
     CALL New(A%Type,N)
@@ -419,6 +550,7 @@ CONTAINS
 
   SUBROUTINE Initialize_ANGLEDATA(A)
     TYPE(ANGLEDATA), INTENT(INOUT) :: A
+
     CALL Initialize(A%IJK)
     CALL Initialize(A%Type)
     A%Alloc = ALLOCATED_FALSE
@@ -426,6 +558,7 @@ CONTAINS
 
   SUBROUTINE Delete_ANGLEDATA(A)
     TYPE(ANGLEDATA) :: A
+
     CALL Delete(A%IJK)
     CALL Delete(A%Type)
     A%Alloc=ALLOCATED_FALSE
@@ -434,6 +567,7 @@ CONTAINS
   SUBROUTINE New_OUTPDATA(A,N)
     TYPE(OUTPDATA) :: A
     INTEGER         :: N
+
     A%N=N
     CALL New(A%IJKL,(/4,N/))
     CALL New(A%Type,N)
@@ -442,6 +576,7 @@ CONTAINS
 
   SUBROUTINE Initialize_OUTPDATA(A)
     TYPE(OUTPDATA), INTENT(INOUT) :: A
+
     CALL Initialize(A%IJKL)
     CALL Initialize(A%Type)
     A%Alloc = ALLOCATED_FALSE
@@ -449,14 +584,16 @@ CONTAINS
 
   SUBROUTINE Delete_OUTPDATA(A)
     TYPE(OUTPDATA) :: A
+
     CALL Delete(A%IJKL)
     CALL Delete(A%Type)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_OUTPDATA
 
   SUBROUTINE New_IntCBox(A,NBox,NX,NY,NZ,NatmsLoc)
-    INTEGER        :: NBox,NatmsLoc,NX,NY,NZ
-    TYPE(IntCBox)  :: A
+    INTEGER       :: NBox,NatmsLoc,NX,NY,NZ
+    TYPE(IntCBox) :: A
+
     A%N=NBox
     A%NX=NX
     A%NY=NY
@@ -469,6 +606,7 @@ CONTAINS
 
   SUBROUTINE Initialize_IntCBox(A)
     TYPE(IntCBox), INTENT(INOUT) :: A
+
     CALL Initialize(A%I)
     CALL Initialize(A%J)
     A%Alloc = ALLOCATED_FALSE
@@ -476,6 +614,7 @@ CONTAINS
 
   SUBROUTINE Delete_IntCBox(A)
     TYPE(IntCBox) :: A
+
     CALL Delete(A%I)
     CALL Delete(A%J)
     A%Alloc=ALLOCATED_FALSE
@@ -484,7 +623,7 @@ CONTAINS
   SUBROUTINE New_ATOMBONDS(A,NatmsLoc,MaxBonds)
     TYPE(ATOMBONDS) :: A
     INTEGER         :: NatmsLoc,MaxBonds
-    !
+
     IF(AllocQ(A%Alloc)) CALL Delete(A)
     IF(NatmsLoc==0) RETURN
     A%N1=NatmsLoc
@@ -504,6 +643,7 @@ CONTAINS
 
   SUBROUTINE Initialize_ATOMBONDS(A)
     TYPE(ATOMBONDS), INTENT(INOUT) :: A
+
     CALL Initialize(A%Count)
     CALL Initialize(A%Bonds)
     CALL Initialize(A%Atoms)
@@ -512,7 +652,7 @@ CONTAINS
 
   SUBROUTINE Delete_ATOMBONDS(A)
     TYPE(ATOMBONDS) :: A
-    !
+
     IF(A%N1==0) RETURN
     A%N1=0
     A%N2=0
@@ -526,7 +666,7 @@ CONTAINS
     TYPE(Sp1x1)       :: A
     INTEGER           :: NRow,NZ
     LOGICAL,OPTIONAL  :: Symb_O
-    !
+
     CALL New(A%IA,NRow+1)
     CALL New(A%JA,NZ)
     IF(PRESENT(Symb_O)) THEN
@@ -541,6 +681,7 @@ CONTAINS
 
   SUBROUTINE Initialize_Sp1x1(A)
     TYPE(Sp1x1), INTENT(INOUT) :: A
+
     CALL Initialize(A%IA)
     CALL Initialize(A%JA)
     CALL Initialize(A%AN)
@@ -549,6 +690,7 @@ CONTAINS
 
   SUBROUTINE Delete_Sp1x1(A)
     TYPE(Sp1x1) :: A
+
     CALL Delete(A%IA)
     CALL Delete(A%JA)
     IF(AllocQ(A%AN%Alloc)) CALL Delete(A%AN)
@@ -558,6 +700,7 @@ CONTAINS
   SUBROUTINE New_BONDDATA(A,NBond)
     TYPE(BONDDATA) :: A
     INTEGER NBond,NatmsLoc
+
     IF(AllocQ(A%Alloc)) CALL Delete(A)
     A%N=NBond
     IF(NBond==0) RETURN
@@ -572,6 +715,7 @@ CONTAINS
 
   SUBROUTINE Initialize_BONDDATA(A)
     TYPE(BONDDATA), INTENT(INOUT) :: A
+
     CALL Initialize(A%IJ)
     CALL Initialize(A%Length)
     CALL Initialize(A%Type)
@@ -583,6 +727,7 @@ CONTAINS
 
   SUBROUTINE Delete_BONDDATA(A)
     TYPE(BONDDATA) :: A
+
     IF(A%N==0) THEN
        A%Alloc=ALLOCATED_FALSE
        RETURN
@@ -600,6 +745,7 @@ CONTAINS
   SUBROUTINE New_Chol(A,NCart,ChNon0)
     INTEGER NCart,ChNon0
     TYPE(Cholesky) :: A
+
     CALL New(A%GcScale,NCart)
     CALL New(A%Perm,NCart)
     CALL New(A%IPerm,NCart)
@@ -612,6 +758,7 @@ CONTAINS
 
   SUBROUTINE Initialize_Chol(A)
     TYPE(Cholesky), INTENT(INOUT) :: A
+
     CALL Initialize(A%GcScale)
     CALL Initialize(A%Perm)
     CALL Initialize(A%IPerm)
@@ -624,6 +771,7 @@ CONTAINS
 
   SUBROUTINE Delete_Chol(A)
     TYPE(Cholesky) :: A
+
     CALL Delete(A%GcScale)
     CALL Delete(A%Perm)
     CALL Delete(A%IPerm)
@@ -636,6 +784,7 @@ CONTAINS
 
   SUBROUTINE New_PBCInfo(A)
     TYPE(PBCInfo),INTENT(INOUT)       :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%AutoW     ,3)
     CALL New(A%SuperCell ,3)
@@ -649,6 +798,7 @@ CONTAINS
 
   SUBROUTINE Initialize_PBCInfo(A)
     TYPE(PBCInfo), INTENT(INOUT) :: A
+
     CALL Initialize(A%AutoW)
     CALL Initialize(A%SuperCell)
     CALL Initialize(A%CellCenter)
@@ -661,6 +811,7 @@ CONTAINS
 
   SUBROUTINE New_CRDS(A)
     TYPE(CRDS),INTENT(INOUT)       :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%ETotalPerSCF, 256, 0)
     CALL New(A%BndBox,(/3,2/))
@@ -690,6 +841,7 @@ CONTAINS
 
   SUBROUTINE Initialize_CRDS(A)
     TYPE(CRDS), INTENT(INOUT) :: A
+
     CALL Initialize(A%ETotalPerSCF)
     CALL Initialize(A%BndBox)
     CALL Initialize(A%PBC)
@@ -718,6 +870,7 @@ CONTAINS
     LOGICAL,OPTIONAL                     :: OnAll_O
     INTEGER,OPTIONAL                     :: NSMat_O
     LOGICAL                              :: OnAll
+
     IF(PRESENT(OnAll_O))THEN
        OnAll=OnAll_O
     ELSE
@@ -754,6 +907,7 @@ CONTAINS
 
   SUBROUTINE Initialize_BCSR(A)
     TYPE(BCSR), INTENT(INOUT) :: A
+
     CALL Initialize(A%RowPt)
     CALL Initialize(A%ColPt)
     CALL Initialize(A%BlkPt)
@@ -768,10 +922,10 @@ CONTAINS
     INTEGER,OPTIONAL,DIMENSION(3)  :: N_O
     INTEGER,OPTIONAL               :: Node_O,NSMat_O
     LOGICAL,OPTIONAL               :: NoGlobals_O
-    !------------------------------------------------------
-    !        Check for a previous allocation
+
+    ! Check for a previous allocation
     CALL AllocChk(A%Alloc)
-    !        Set scalars
+    ! Set scalars
     IF(PRESENT(Node_O))THEN
        A%Node=Node_O
     ELSE
@@ -808,6 +962,7 @@ CONTAINS
 
   SUBROUTINE Initialize_DBCSR(A)
     TYPE(DBCSR), INTENT(INOUT) :: A
+
     CALL Intialize(A%RowPt)
     CALL Intialize(A%ColPt)
     CALL Intialize(A%BlkPt)
@@ -817,10 +972,9 @@ CONTAINS
     A%Alloc = ALLOCATED_FALSE
   END SUBROUTINE Initialize_DBCSR
 
-  !----------------------------------------------------------------------------
-  !
   SUBROUTINE New_MPI_INDX(A)
     TYPE(MPI_INDX),INTENT(INOUT) :: A
+
     CALL AllocChk(A%Alloc)
     A%Alloc=ALLOCATED_TRUE
     A%Type=0
@@ -830,6 +984,7 @@ CONTAINS
 
   SUBROUTINE Initialize_MPI_INDX(A)
     TYPE(MPI_INDX), INTENT(INOUT) :: A
+
     CALL Initialize(A%Disp)
     CALL Initialize(A%Blks)
     A%Alloc = ALLOCATED_FALSE
@@ -841,7 +996,8 @@ CONTAINS
   !     Allocate a basis set
   !
   SUBROUTINE New_BSET(A)
-    TYPE(BSET),INTENT(INOUT)       :: A
+    TYPE(BSET),INTENT(INOUT) :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%Kinds,A%NKind)
     CALL New(A%AtNam,A%NKind)
@@ -873,6 +1029,7 @@ CONTAINS
 
   SUBROUTINE Initialize_BSET(A)
     TYPE(BSET), INTENT(INOUT) :: A
+
     CALL Initialize(A%Kinds)
     CALL Initialize(A%AtNam)
     CALL Initialize(A%NCFnc)
@@ -903,7 +1060,8 @@ CONTAINS
   !     Allocate ONX distribution buffers
   !
   SUBROUTINE New_DBuf(A)
-    TYPE(DBuf),INTENT(INOUT)       :: A
+    TYPE(DBuf),INTENT(INOUT) :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%TCode,A%MAXT)
     CALL New(A%CCode,A%MAXK)
@@ -919,6 +1077,7 @@ CONTAINS
 
   SUBROUTINE Initialize_DBuf(A)
     TYPE(DBuf), INTENT(INOUT) :: A
+
     CALL Initialize(A%TCode)
     CALL Initialize(A%CCode)
     CALL Initialize(A%TCPop)
@@ -934,7 +1093,8 @@ CONTAINS
   !     Allocate ONX integral buffers
   !
   SUBROUTINE New_IBuf(A)
-    TYPE(IBuf),INTENT(INOUT)       :: A
+    TYPE(IBuf),INTENT(INOUT) :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%W1,A%MAXI)
     CALL New(A%W2,A%MAXI)
@@ -960,8 +1120,9 @@ CONTAINS
   !     Allocate ONX integral drivers
   !
   SUBROUTINE New_IDrv(A)
-    TYPE(IDrv),INTENT(INOUT)       :: A
-    INTEGER                        :: LngTmp
+    TYPE(IDrv),INTENT(INOUT) :: A
+    INTEGER                  :: LngTmp
+
     CALL AllocChk(A%Alloc)
     LngTmp=A%LngLoc/3
     CALL New(A%VLOC,A%LngVRR)
@@ -972,6 +1133,7 @@ CONTAINS
 
   SUBROUTINE Initialize_IDrv(A)
     TYPE(IDrv), INTENT(INOUT) :: A
+
     CALL Initialize(A%VLOC)
     CALL Initialize(A%CDrv)
     CALL Initialize(A%SLOC)
@@ -983,6 +1145,7 @@ CONTAINS
   !
   SUBROUTINE New_DSL(A)
     TYPE(DSL),INTENT(INOUT)       :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%SLDis,A%MAXSL)
     CALL New(A%SLPrm,A%MAXSL)
@@ -992,6 +1155,7 @@ CONTAINS
 
   SUBROUTINE Initialize_DSL(A)
     TYPE(DSL), INTENT(INOUT) :: A
+
     CALL Initialize(A%SLDis)
     CALL Initialize(A%SLPrm)
     CALL Initialize(A%SLKey)
@@ -1002,7 +1166,8 @@ CONTAINS
   !     Allocate ONX gradient driver space
   !
   SUBROUTINE New_GradD(A)
-    TYPE(GradD),INTENT(INOUT)       :: A
+    TYPE(GradD),INTENT(INOUT) :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%GDrv1,(/4,2250/))
     CALL New(A%GDrv2,(/5,10/))
@@ -1014,6 +1179,7 @@ CONTAINS
 
   SUBROUTINE Initialize_GradD(A)
     TYPE(GradD), INTENT(INOUT) :: A
+
     CALL Initialize(A%GDrv1)
     CALL Initialize(A%GDrv2)
     CALL Initialize(A%GDrv3)
@@ -1025,6 +1191,7 @@ CONTAINS
   SUBROUTINE New_ARGMT(A,N_O)
     TYPE(ARGMT)                    :: A
     INTEGER,OPTIONAL,DIMENSION(2)  :: N_O
+
     CALL AllocChk(A%Alloc)
     IF(PRESENT(N_O))THEN
        A%NC=N_O(1)
@@ -1037,6 +1204,7 @@ CONTAINS
 
   SUBROUTINE Initialize_ARGMT(A)
     TYPE(ARGMT), INTENT(INOUT) :: A
+
     CALL Initialize(A%I)
     CALL Initialize(A%C)
     A%Alloc = ALLOCATED_FALSE
@@ -1045,6 +1213,7 @@ CONTAINS
   SUBROUTINE Delete_INT_VECT(A)
     TYPE(INT_VECT),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+
     Ints=SIZE(A%I)
     DEALLOCATE(A%I,STAT=MemStatus)
     CALL DecMem(MemStatus,Ints,0)
@@ -1054,6 +1223,7 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK2(A)
     TYPE(INT_RNK2),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+
     Ints=SIZE(A%I)
     DEALLOCATE(A%I,STAT=MemStatus)
     CALL DecMem(MemStatus,Ints,0)
@@ -1063,6 +1233,7 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK3(A)
     TYPE(INT_RNK3),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+
     Ints=SIZE(A%I)
     DEALLOCATE(A%I,STAT=MemStatus)
     CALL DecMem(MemStatus,Ints,0)
@@ -1072,6 +1243,7 @@ CONTAINS
   SUBROUTINE Delete_INT_RNK4(A)
     TYPE(INT_RNK4),INTENT(INOUT) :: A
     INTEGER                      :: Ints
+
     Ints=SIZE(A%I)
     DEALLOCATE(A%I,STAT=MemStatus)
     CALL DecMem(MemStatus,Ints,0)
@@ -1081,6 +1253,7 @@ CONTAINS
   SUBROUTINE Delete_DBL_VECT(A)
     TYPE(DBL_VECT),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+
     Dbls=SIZE(A%D)
     DEALLOCATE(A%D,STAT=MemStatus)
     CALL DecMem(MemStatus,0,Dbls)
@@ -1090,6 +1263,7 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK2(A)
     TYPE(DBL_RNK2),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+
     Dbls=SIZE(A%D)
     DEALLOCATE(A%D,STAT=MemStatus)
     CALL DecMem(MemStatus,0,Dbls)
@@ -1099,6 +1273,7 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK3(A)
     TYPE(DBL_RNK3),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+
     Dbls=SIZE(A%D)
     DEALLOCATE(A%D,STAT=MemStatus)
     CALL DecMem(MemStatus,0,Dbls)
@@ -1108,6 +1283,7 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK4(A)
     TYPE(DBL_RNK4),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+
     Dbls=SIZE(A%D)
     DEALLOCATE(A%D,STAT=MemStatus)
     CALL DecMem(MemStatus,0,Dbls)
@@ -1117,6 +1293,7 @@ CONTAINS
   SUBROUTINE Delete_DBL_RNK6(A)
     TYPE(DBL_RNK6),INTENT(INOUT) :: A
     INTEGER                      :: Dbls
+
     Dbls=SIZE(A%D)
     DEALLOCATE(A%D,STAT=MemStatus)
     CALL DecMem(MemStatus,0,Dbls)
@@ -1125,7 +1302,8 @@ CONTAINS
 
   SUBROUTINE Delete_CHR10_VECT(A)
     TYPE(CHR10_VECT) :: A
-    INTEGER        :: MemStatus
+    INTEGER          :: MemStatus
+
     DEALLOCATE(A%C,STAT=MemStatus)
     CALL DecMem(MemStatus,0,0)
     A%Alloc=ALLOCATED_FALSE
@@ -1134,6 +1312,7 @@ CONTAINS
   SUBROUTINE Delete_CHR_VECT(A)
     TYPE(CHR_VECT) :: A
     INTEGER        :: MemStatus
+
     DEALLOCATE(A%C,STAT=MemStatus)
     CALL DecMem(MemStatus,SIZE(A%C)*DEFAULT_CHR_LEN,0)
     A%Alloc=ALLOCATED_FALSE
@@ -1142,13 +1321,15 @@ CONTAINS
   SUBROUTINE Delete_LOG_VECT(A)
     TYPE(LOG_VECT) :: A
     INTEGER        :: MemStatus
+
     DEALLOCATE(A%L,STAT=MemStatus)
     CALL DecMem(MemStatus,0,0)
     A%Alloc=ALLOCATED_FALSE
   END SUBROUTINE Delete_LOG_VECT
 
   SUBROUTINE Delete_INTC(A)
-    TYPE(INTC)     :: A
+    TYPE(INTC) :: A
+
     IF(AllocQ(A%Alloc)) A%Alloc=ALLOCATED_FALSE
     IF(A%N==0) RETURN
     A%N=0
@@ -1167,7 +1348,8 @@ CONTAINS
   END SUBROUTINE Delete_INTC
 
   SUBROUTINE Delete_BMATR(A)
-    TYPE(BMATR)    :: A
+    TYPE(BMATR) :: A
+
     CALL Delete(A%IB)
     CALL Delete(A%B)
     CALL Delete(A%BL)
@@ -1176,7 +1358,8 @@ CONTAINS
   END SUBROUTINE Delete_BMATR
 
   SUBROUTINE Delete_PBCInfo(A)
-    TYPE(PBCInfo),INTENT(INOUT)       :: A
+    TYPE(PBCInfo),INTENT(INOUT) :: A
+
     CALL Delete(A%AutoW)
     CALL Delete(A%SuperCell)
     CALL Delete(A%CellCenter)
@@ -1188,7 +1371,8 @@ CONTAINS
   END SUBROUTINE Delete_PBCInfo
 
   SUBROUTINE Delete_CRDS(A)
-    TYPE(CRDS),INTENT(INOUT)       :: A
+    TYPE(CRDS),INTENT(INOUT) :: A
+
     CALL Delete(A%BndBox)
     CALL Delete(A%AtNum)
     CALL Delete(A%AtTyp)
@@ -1215,6 +1399,7 @@ CONTAINS
     TYPE(BCSR),INTENT(INOUT) :: A
     LOGICAL,OPTIONAL         :: OnAll_O
     LOGICAL                  :: OnAll
+
     IF(PRESENT(OnAll_O))THEN
        OnAll=OnAll_O
     ELSE
@@ -1239,12 +1424,13 @@ CONTAINS
 
   SUBROUTINE Delete_DBCSR(A)
     TYPE(DBCSR),INTENT(INOUT) :: A
-    !        Delete local variables
+
+    ! Delete local variables
     IF(AllocQ(A%RowPt%Alloc))CALL Delete(A%RowPt)
     IF(AllocQ(A%ColPt%Alloc))CALL Delete(A%ColPt)
     IF(AllocQ(A%BlkPt%Alloc))CALL Delete(A%BlkPt)
     IF(AllocQ(A%MTrix%Alloc))CALL Delete(A%MTrix)
-    !        Delete global variables
+    ! Delete global variables
     IF(AllocQ(A%GRwPt%Alloc))CALL Delete(A%GRwPt)
     IF(AllocQ(A%GClPt%Alloc))CALL Delete(A%GClPt)
     A%NAtms=0
@@ -1257,6 +1443,7 @@ CONTAINS
   SUBROUTINE Delete_MPI_INDX(A)
     TYPE(MPI_INDX),INTENT(INOUT) :: A
     INTEGER                      :: IErr
+
     CALL Delete(A%Blks)
     CALL Delete(A%Disp)
     A%Alloc=ALLOCATED_FALSE
@@ -1264,7 +1451,8 @@ CONTAINS
 #endif
 
   SUBROUTINE Delete_BSET(A)
-    TYPE(BSET),INTENT(INOUT)       :: A
+    TYPE(BSET),INTENT(INOUT) :: A
+
     A%NAtms=0; A%NBasF=0; A%NKind=0
     A%NCtrt=0; A%NPrim=0; A%NASym=0
     A%LMNLen=0
@@ -1297,7 +1485,8 @@ CONTAINS
   END SUBROUTINE Delete_BSET
 
   SUBROUTINE Delete_DBuf(A)
-    TYPE(DBuf),INTENT(INOUT)       :: A
+    TYPE(DBuf),INTENT(INOUT) :: A
+
     CALL Delete(A%TCode)
     CALL Delete(A%CCode)
     CALL Delete(A%TCPop)
@@ -1310,7 +1499,8 @@ CONTAINS
   END SUBROUTINE Delete_DBuf
 
   SUBROUTINE Delete_IBuf(A)
-    TYPE(IBuf),INTENT(INOUT)       :: A
+    TYPE(IBuf),INTENT(INOUT) :: A
+
     CALL Delete(A%W1)
     CALL Delete(A%W2)
     CALL Delete(A%CB)
@@ -1321,7 +1511,8 @@ CONTAINS
   END SUBROUTINE Delete_IBuf
 
   SUBROUTINE Delete_IDrv(A)
-    TYPE(IDrv),INTENT(INOUT)       :: A
+    TYPE(IDrv),INTENT(INOUT) :: A
+
     CALL Delete(A%VLOC)
     CALL Delete(A%CDrv)
     CALL Delete(A%SLOC)
@@ -1329,7 +1520,8 @@ CONTAINS
   END SUBROUTINE Delete_IDrv
 
   SUBROUTINE Delete_DSL(A)
-    TYPE(DSL),INTENT(INOUT)       :: A
+    TYPE(DSL),INTENT(INOUT) :: A
+
     CALL Delete(A%SLDis)
     CALL Delete(A%SLPrm)
     CALL Delete(A%SLKey)
@@ -1337,7 +1529,8 @@ CONTAINS
   END SUBROUTINE Delete_DSL
 
   SUBROUTINE Delete_GradD(A)
-    TYPE(GradD),INTENT(INOUT)       :: A
+    TYPE(GradD),INTENT(INOUT) :: A
+
     CALL Delete(A%GDrv1)
     CALL Delete(A%GDrv2)
     CALL Delete(A%GDrv3)
@@ -1347,7 +1540,8 @@ CONTAINS
   END SUBROUTINE Delete_GradD
 
   SUBROUTINE Delete_ARGMT(A)
-    TYPE(ARGMT),INTENT(INOUT)      :: A
+    TYPE(ARGMT),INTENT(INOUT) :: A
+
     A%NI=0; A%NC=0
     CALL Delete(A%I)
     CALL Delete(A%C)
@@ -1358,7 +1552,8 @@ CONTAINS
   ! Allocate the Multipoles
   !========================================================================================
   SUBROUTINE New_CMPoles(A)
-    TYPE(CMPoles)                  :: A
+    TYPE(CMPoles) :: A
+
     CALL AllocChk(A%Alloc)
     CALL New(A%DPole,3)
     CALL New(A%QPole,6)
@@ -1370,6 +1565,7 @@ CONTAINS
 
   SUBROUTINE Initialize_CMPoles(A)
     TYPE(CMPoles), INTENT(INOUT) :: A
+
     CALL Initialize(A%DPole)
     CALL Initialize(A%QPole)
     A%Alloc = ALLOCATED_FALSE
@@ -1379,21 +1575,20 @@ CONTAINS
   ! Delete the Multipoles
   !========================================================================================
   SUBROUTINE Delete_CMPoles(A)
-    TYPE(CMPoles)                  :: A
-    !
+    TYPE(CMPoles) :: A
+
     CALL Delete(A%DPole)
     CALL Delete(A%QPole)
     A%Alloc=ALLOCATED_FALSE
-    !
   END SUBROUTINE Delete_CMPoles
 
   !========================================================================================
   ! Allocate the Density
   !========================================================================================
   SUBROUTINE New_HGRho(A,N_O)
-    TYPE(HGRho)                     :: A
-    INTEGER,OPTIONAL,DIMENSION(4)   :: N_O
-    !
+    TYPE(HGRho)                   :: A
+    INTEGER,OPTIONAL,DIMENSION(4) :: N_O
+
     IF(AllocQ(A%Alloc)) THEN
        IF(PRESENT(N_O)) THEN
           IF(N_O(1) /= A%NExpt) THEN
@@ -1448,11 +1643,11 @@ CONTAINS
        CALL New(A%Qz  ,A%NDist)
        CALL New(A%Co  ,A%NCoef*A%NSDen)!<<< SPIN
     ENDIF
-    !
   END SUBROUTINE New_HGRho
 
   SUBROUTINE Initialize_HGRho(A)
     TYPE(HGRho), INTENT(INOUT) :: A
+
     CALL Initialize(A%NQ)
     CALL Initialize(A%Lndx)
     CALL Initialize(A%OffQ)
@@ -1469,8 +1664,8 @@ CONTAINS
   ! Delete the density
   !========================================================================================
   SUBROUTINE Delete_HGRho(A)
-    TYPE(HGRho)            :: A
-    !
+    TYPE(HGRho) :: A
+
     IF(AllocQ(A%Alloc)) THEN
        CALL Delete(A%NQ)
        CALL Delete(A%Lndx)
@@ -1482,12 +1677,12 @@ CONTAINS
        CALL Delete(A%Qz)
        CALL Delete(A%Co)
     ENDIF
-    !
   END SUBROUTINE Delete_HGRho
 
   FUNCTION AllocQ(Alloc)
     INTEGER :: Alloc
     LOGICAL :: AllocQ
+
     AllocQ=.FALSE.
     IF(Alloc==ALLOCATED_TRUE)THEN
        AllocQ=.TRUE.
@@ -1500,6 +1695,7 @@ CONTAINS
 #ifdef PARALLEL
     CHARACTER(LEN=INTERNAL_INT_LEN) :: ChMyId
 #endif
+
     IF(AllocQ(Alloc))THEN
 #ifdef PARALLEL
        WRITE(ChMyId,INTERNAL_INT_FMT)MyId
@@ -1514,6 +1710,7 @@ CONTAINS
 
   SUBROUTINE InitMEMS(A_O)
     TYPE(MEMS), INTENT(INOUT), OPTIONAL :: A_O
+
     IF(PRESENT(A_O))THEN
        A_O%Allocs=0
        A_O%DeAllocs=0
@@ -1534,23 +1731,26 @@ CONTAINS
     INTEGER                              :: MemInBytes
     CHARACTER(LEN=*), OPTIONAL           :: Proc_O
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
-    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab
+    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChStats
+
     MemInBytes=ToBytes(Ints,Dbls)
     IF(MemStatus/=SUCCEED)THEN
-       WRITE(*,*)' Bombed in IncMem, MemStatus = ',Stats
-       WRITE(ChMem,INTERNAL_INT_FMT)MemInBytes
-       WRITE(ChTab,INTERNAL_DBL_FMT)BToMB(MemStats%MemTab)
+       WRITE(ChStats,INTERNAL_INT_FMT) Stats
+       WRITE(ChMem,INTERNAL_INT_FMT) MemInBytes
+       WRITE(ChTab,INTERNAL_DBL_FMT) BToMB(MemStats%MemTab)
+       CALL MondoLog(DEBUG_NONE, "IncMem", "Bombed in IncMem, MemStatus = "//ChStats)
        IF(PRESENT(Proc_O))THEN
           Mssg='>>>ALLOCATE error at '//TRIM(Proc_O)//' : '&
-               //' Attempting to allocate '//ChMem           &
-               //' bytes.'//Rtrn//'    To here, '//ChTab     &
+               //' Attempting to allocate '//ChMem &
+               //' bytes.'//Rtrn//'    To here, '//ChTab &
                //' MB were in use.'
        ELSE
-          Mssg='>>>ALLOCATE error: '                       &
-               //' Attempting to allocate '//ChMem           &
-               //' bytes.'//Rtrn//'    To here, '//ChTab     &
+          Mssg='>>>ALLOCATE error: ' &
+               //' Attempting to allocate '//ChMem &
+               //' bytes.'//Rtrn//'    To here, '//ChTab &
                //' MB were in use.'
        ENDIF
+       CALL MondoLog(DEBUG_NONE, "IncMem", Mssg)
        CALL Halt(Mssg)
     ENDIF
     MemStats%Allocs=MemStats%Allocs+1
@@ -1563,6 +1763,7 @@ CONTAINS
     INTEGER :: Bytes
     REAL(DOUBLE) :: BToMB
     REAL(DOUBLE),PARAMETER :: Ten24Inv2=1.0D0/(1024.D0)**2
+
     BToMB=DBLE(Bytes)*Ten24Inv2
   END FUNCTION BToMB
 
@@ -1571,6 +1772,7 @@ CONTAINS
     INTEGER                              :: MemInBytes
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
     CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChMyId
+
     MemInBytes=ToBytes(Ints,Dbls)
     IF(MemStatus/=SUCCEED)THEN
        WRITE(ChMem,INTERNAL_INT_FMT)MemInBytes
@@ -1596,17 +1798,20 @@ CONTAINS
   FUNCTION ToBytes(NInt,NDbl)
     INTEGER,INTENT(IN) :: NInt,NDbl
     INTEGER            :: ToBytes
+
     ToBytes=NInt*BytesPerInt()+NDbl*BytesPerDbl()
   END FUNCTION ToBytes
 
   FUNCTION ToMB(NInt,NDbl)
     INTEGER,INTENT(IN) :: NInt,NDbl
     REAL(DOUBLE)       :: ToMB
+
     ToMB=NInt*IntToMB+NDbl*DblToMB
   END FUNCTION ToMB
 
   FUNCTION BytesPerInt()
     INTEGER :: BytesPerInt
+
     IF(KIND(BytesPerInt)==INT4)THEN
        BytesPerInt=4
     ELSEIF(KIND(BytesPerInt)==INT8)THEN
@@ -1618,7 +1823,8 @@ CONTAINS
 
   FUNCTION BytesPerDbl()
     INTEGER :: BytesPerDbl
-    BytesPerDbl=8
+
+    BytesPerDbl = 8
   END FUNCTION BytesPerDbl
 
   !--------------------------------------------------------------------------
@@ -1631,7 +1837,6 @@ CONTAINS
     CS%NCells = NCells
     CALL New(CS%CellCarts,(/3,CS%NCells/))
     CS%Alloc=ALLOCATED_TRUE
-
   END SUBROUTINE New_CellSet
 
   SUBROUTINE Initialize_CellSet(A)
@@ -1653,13 +1858,12 @@ CONTAINS
        CS%NCells = 0
        CALL Delete(CS%CellCarts)
     ENDIF
-
   END SUBROUTINE Delete_CellSet
 
   SUBROUTINE New_PBCFit(A,MaxMem)
     TYPE(PBCFits) :: A
     INTEGER       :: MaxMem
-    !
+
     A%MaxMem=MaxMem
     A%ActMem=0
     CALL New(A%AWeights,A%MaxMem)
@@ -1670,6 +1874,7 @@ CONTAINS
 
   SUBROUTINE Initialize_PBCFit(A)
     TYPE(PBCFits), INTENT(INOUT) :: A
+
     CALL Initialize(A%AWeights)
     CALL Initialize(A%PBCValues)
     CALL Initialize(A%PBCGrads)
@@ -1678,7 +1883,7 @@ CONTAINS
 
   SUBROUTINE Delete_PBCFit(A)
     TYPE(PBCFits) :: A
-    !
+
     A%MaxMem=0
     A%ActMem=0
     CALL Delete(A%AWeights)
