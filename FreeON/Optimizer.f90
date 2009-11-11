@@ -197,7 +197,8 @@ CONTAINS
     REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: oldConfiguration, oldGradient
     REAL(DOUBLE), DIMENSION(:,:,:), ALLOCATABLE :: direction
     REAL(DOUBLE)                                :: norm, beta, stepsize, stepRMSd, fPrime, f
-    REAL(DOUBLE)                                :: maxGrad, RMSGrad
+    REAL(DOUBLE)                                :: maxGrad, RMSGrad, maxMove
+    INTEGER                                     :: maxMoveClone, maxMoveAtom
 
     ! Set default behavior.
     IF(PRESENT(Global_O)) THEN
@@ -358,26 +359,50 @@ CONTAINS
 
         ! Calculate the RMSd stepsize of stepsize*direction.
         stepRMSd = Zero
+        maxMove = Zero
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             stepRMSd = stepRMSd + direction(1, iAtom, iCLONE)**2 + direction(2, iAtom, iCLONE)**2 + direction(3, iAtom, iCLONE)**2
+            IF(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                               + direction(2, iAtom, iCLONE)**2 &
+                               + direction(3, iAtom, iCLONE)**2)) > maxMove) THEN
+              maxMove = ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                                        + direction(2, iAtom, iCLONE)**2 &
+                                        + direction(3, iAtom, iCLONE)**2))
+              maxMoveClone = iCLONE
+              maxMoveAtom = iAtom
+            ENDIF
           ENDDO
         ENDDO
         stepRMSD = SQRT(stepRMSd/(C%Geos%Clones*C%Geos%Clone(1)%NAtms))
 
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)))
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max step of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
+                                  //TRIM(IntToChar(maxMoveClone))//" on atom " &
+                                  //TRIM(IntToChar(maxMoveAtom)))
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A")
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(stepsize*direction) "//TRIM(FltToChar(stepRMSd*stepsize*AUToAngstroms))//" A")
-        IF(ABS(stepsize*stepRMSd) > C%Opts%ConjugateGradientMaxMove) THEN
-          stepsize = C%Opts%ConjugateGradientMaxMove/stepRMSd*SIGN(1.0D0, stepsize)
+
+        IF(maxMove > C%Opts%ConjugateGradientMaxMove) THEN
+          stepsize = stepsize*C%Opts%ConjugateGradientMaxMove/maxMove
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize)))
         ENDIF
 
         DO iCLONE = 1, C%Geos%Clones
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
             C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
             C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
+              TRIM(FltToChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(FltToChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(FltToChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
+              TRIM(FltToChar(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                                             + direction(2, iAtom, iCLONE)**2 &
+                                             + direction(3, iAtom, iCLONE)**2))*AUToAngstroms))//" A", &
+              "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
       ELSE
@@ -397,26 +422,49 @@ CONTAINS
 
           ! Calculate the RMSd stepsize of stepsize*direction.
           stepRMSd = Zero
+          maxMove = Zero
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             stepRMSd = stepRMSd + direction(1, iAtom, iCLONE)**2 + direction(2, iAtom, iCLONE)**2 + direction(3, iAtom, iCLONE)**2
+            IF(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                               + direction(2, iAtom, iCLONE)**2 &
+                               + direction(3, iAtom, iCLONE)**2)) > maxMove) THEN
+              maxMove = ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                                        + direction(2, iAtom, iCLONE)**2 &
+                                        + direction(3, iAtom, iCLONE)**2))
+              maxMoveAtom = iAtom
+            ENDIF
           ENDDO
           stepRMSD = SQRT(stepRMSd/(C%Geos%Clone(iCLONE)%NAtms))
 
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)), &
             "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max step of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
+                                    //TRIM(IntToChar(maxMoveClone))//" on atom " &
+                                    //TRIM(IntToChar(maxMoveAtom)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A", &
             "Clone "//TRIM(IntToChar(iCLONE)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(stepsize*direction) "//TRIM(FltToChar(stepRMSd*stepsize*AUToAngstroms))//" A", &
             "Clone "//TRIM(IntToChar(iCLONE)))
-          IF(ABS(stepsize*stepRMSd) > C%Opts%ConjugateGradientMaxMove) THEN
-            stepsize = C%Opts%ConjugateGradientMaxMove/stepRMSd*SIGN(1.0D0, stepsize)
-            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize)), "Clone "//TRIM(IntToChar(iCLONE)))
+
+          IF(maxMove > C%Opts%ConjugateGradientMaxMove) THEN
+            stepsize = stepsize*C%Opts%ConjugateGradientMaxMove/maxMove
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(stepsize)))
           ENDIF
 
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
             C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
             C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
+              TRIM(FltToChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(FltToChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(FltToChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
+              TRIM(FltToChar(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
+                                             + direction(2, iAtom, iCLONE)**2 &
+                                             + direction(3, iAtom, iCLONE)**2))*AUToAngstroms))//" A", &
+              "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
       ENDIF
@@ -446,7 +494,7 @@ CONTAINS
         RMSGrad = MAX(RMSGrad, C%Geos%Clone(iCLONE)%GradRMS)
       ENDDO
 
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxForce = "//TRIM(DblToChar(-maxGrad*au2eV/AUToAngstroms))//" eV/A")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxForce = "//TRIM(DblToChar(maxGrad*au2eV/AUToAngstroms))//" eV/A")
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSGrad = "//TRIM(DblToChar(RMSGrad*au2eV/AUToAngstroms))//" eV/A")
 
       IF(RMSGrad < GTol(C%Opts%AccuracyLevels(iBAS)) .AND. &

@@ -113,7 +113,12 @@ CONTAINS
         IF(G%Clone(iCLONE)%NAtms > 0) THEN
           ! This clone is already allocated. Construct reaction path.
           RPEndClone = iCLONE
-          CALL MondoLog(DEBUG_NONE, "NEBInit", "interpolating between clones "//TRIM(IntToChar(RPBeginClone))//" and "//TRIM(IntToChar(RPEndClone)))
+          IF(RPEndClone > RPBeginClone+1) THEN
+            CALL MondoLog(DEBUG_NONE, "NEBInit", "interpolating between clones "//TRIM(IntToChar(RPBeginClone))//" and "//TRIM(IntToChar(RPEndClone)))
+          ELSE
+            CALL MondoLog(DEBUG_NONE, "NEBInit", "adjacent clones "//TRIM(IntToChar(RPBeginClone))//" and " &
+              //TRIM(IntToChar(RPEndClone))//" given in input file, no need for interpolation")
+          ENDIF
 
 #if defined(NEB_DEBUG)
           CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPBeginClone))//" (in A)")

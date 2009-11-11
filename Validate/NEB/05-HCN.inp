@@ -4,7 +4,10 @@ Charge=0
 Multiplicity=1
 
 Clones=5
-Grad=(TSSearch,PrimInt,NoGDIIS,NoBackTr,BiSect)
+Grad=(TSSearch,Cartesian,Global-CG)
+
+NEBReactantEnergy=-.2513083568263040D+04
+NEBProductEnergy=-.2512692522154103D+04
 
 OutPut=xyz
 DebugAll=(MinDebug,CheckSums)
@@ -15,18 +18,23 @@ BasisSets=(3-21G-SPLIT)
 ModelChem=(HF)
 Accuracy=(verytight)
 SCFConvergence=(DIIS)
-MaxSCF=20
 
 <EndOptions>
 
 <BeginReactants>
- C    -5.7827744597088779     0.5380266808035669     0.0000000000000000
- H    -6.8329790427488550     0.5441100131935768     0.0000000000000000
- N    -4.6456464975422582     0.5315033060028567     0.0000000000000000
+C         -0.00000        0.00000        1.13715
+H          0.00000        0.00000        2.18737
+N          0.00000        0.00000        0.00000
 <EndReactants>
 
+<BeginClone_3>
+C          0.00000       -0.79644        1.11562
+H          0.00000        0.00000        2.18737
+N          0.00000        0.73346        1.14007
+<EndClone_3>
+
 <BeginProducts>
- C    -5.5605698566129105    19.7728767846963933    -0.3412949843293040
- H    -5.4665195279802283    21.8079316092553199     0.3230448380996940
- N    -5.5096706154068578    20.8742316060482800     0.0182401462296098
+C          0.00000        0.00000        0.00000
+H          0.00000       -0.00000        2.14281
+N         -0.00000       -0.00000        1.15967
 <EndProducts>

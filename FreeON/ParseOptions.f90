@@ -713,7 +713,7 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepAlpha = "//TRIM(DblToChar(NEBSteepAlpha*AUToAngstroms*AUToAngstroms/au2eV))//" A^2/eV")
 
     IF(.NOT. OptDblQ(Inp, NEB_STEEP_MAX_MOVE, NEBSteepMaxMove)) THEN
-      NEBSteepMaxMove = 1.0D-1
+      NEBSteepMaxMove = 2.0D-1
     ENDIF
     NEBSteepMaxMove = NEBSteepMaxMove*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseNEB", "using NEBSteepMaxMove = "//TRIM(DblToChar(NEBSteepMaxMove*AUToAngstroms))//" A")
@@ -775,7 +775,7 @@ CONTAINS
     REAL(DOUBLE) :: ConjugateGradientMaxMove, ConjugateGradientdR
 
     IF(.NOT. OptDblQ(Inp, CG_MAX_MOVE, ConjugateGradientMaxMove)) THEN
-      ConjugateGradientMaxMove = 1.0D0
+      ConjugateGradientMaxMove = 0.2D0
     ENDIF
     ConjugateGradientMaxMove = ConjugateGradientMaxMove*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientMaxMove = "//TRIM(DblToChar(ConjugateGradientMaxMove*AUToAngstroms))//" A")
