@@ -204,10 +204,10 @@ CONTAINS
   END SUBROUTINE Initialize_INT_RNK3
 
   SUBROUTINE New_INT_RNK4(A,N,M_O)
-    TYPE(INT_RNK4),  INTENT(INOUT)              :: A
-    INTEGER                                     :: Ints
-    INTEGER,DIMENSION(4)                        :: M,N
-    INTEGER,OPTIONAL, & DIMENSION(4),INTENT(IN) :: M_O
+    TYPE(INT_RNK4),  INTENT(INOUT)            :: A
+    INTEGER                                   :: Ints
+    INTEGER,DIMENSION(4)                      :: M,N
+    INTEGER,OPTIONAL, DIMENSION(4),INTENT(IN) :: M_O
 
     CALL AllocChk(A%Alloc)
     M=1; IF(PRESENT(M_O))M=M_O

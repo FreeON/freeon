@@ -1,5 +1,7 @@
 include $(srcdir)/../../validate.inc
 
+TESTS = C.sh
+
 EXTRA_DIST = \
   C.inp \
   C2H6.inp \
