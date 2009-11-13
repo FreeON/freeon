@@ -73,7 +73,7 @@ PROGRAM MakeRho
   INTEGER                         :: NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
   INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
   REAL(DOUBLE)                    :: DistThresh,RSumE,RSumE2,RSumN,dNel,RelRhoErr,PcntCharge
-  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,Prog1,Prog2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
 
 #ifdef PARALLEL
@@ -367,19 +367,18 @@ PROGRAM MakeRho
   CALL ConvertToOldRho(Rho,RhoA)
   ! Do Some Outputing
   IF(SCFActn=='InkFok')THEN
-    Mssg1=ProcessName(Prog,'InkFok')
-    Mssg2=Mssg1
+    Prog1='InkFok'
+    Prog2=Prog1
   ELSE
-    Mssg1=ProcessName(Prog,'Pruned Rho')
-    Mssg2=ProcessName(Prog,'Moments')
+    Prog1='Pruned Rho'
+    Prog2='Moments'
   ENDIF
   dNel     = Two*(RSumE+RSumN)+TotCh
   RelRhoErr= ABS(dNel)/DBLE(NEl)
   PcntDist=FLOOR(1.D2*DBLE(NDist_new)/DBLE(NDist_old))
-  Mssg1=TRIM(Mssg1)//' dNel = '//TRIM(DblToShrtChar(dNel))//', kept '  &
+  Mssg1='dNel = '//TRIM(DblToShrtChar(dNel))//', kept '  &
        //TRIM(IntToChar(PcntDist))//'% of distributions.'
-  Mssg2=TRIM(Mssg2)                                      &
-       //' <r> = ('//TRIM(DblToShrtChar(MP%DPole%D(1))) &
+  Mssg2='<r> = ('//TRIM(DblToShrtChar(MP%DPole%D(1))) &
        //', '//TRIM(DblToShrtChar(MP%DPole%D(2)))       &
        //', '//TRIM(DblToShrtChar(MP%DPole%D(3)))       &
        //'), <r^2> = '//TRIM(DblToShrtChar(             &
@@ -389,8 +388,8 @@ PROGRAM MakeRho
 #ifdef PARALLEL
     IF(MyID == ROOT) THEN
 #endif
-      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg1))
-      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg2))
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg1, Prog1)
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg2, Prog1)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -398,7 +397,7 @@ PROGRAM MakeRho
 #ifdef PARALLEL
     IF(MyID == ROOT) THEN
 #endif
-      CALL MondoLog(DEBUG_MAXIMUM, "MakeRho", TRIM(Mssg1))
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg1, Prog1)
 #ifdef PARALLEL
     ENDIF
 #endif
