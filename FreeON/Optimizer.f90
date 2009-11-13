@@ -334,7 +334,7 @@ CONTAINS
       ENDDO
 
       ! Calculate the gradient for the trial step.
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating trial step force")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating trial step force (dR = "//TRIM(FltToChar(C%Opts%ConjugateGradientdR*AUToAngstroms))//" A)")
       CALL GeomArchive(iBAS, iGEO+1, C%Nams, C%Opts, C%Sets, C%Geos)
       CALL SCF(iBAS, iGEO+1, C)
       CALL Force(iBAS, iGEO+1, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
@@ -345,17 +345,21 @@ CONTAINS
         f = Zero
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE))*direction(1, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE))*direction(2, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))*direction(3, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            f = f - oldGradient(1, iAtom, iCLONE)*direction(1, iAtom, iCLONE)
-            f = f - oldGradient(2, iAtom, iCLONE)*direction(2, iAtom, iCLONE)
-            f = f - oldGradient(3, iAtom, iCLONE)*direction(3, iAtom, iCLONE)
+            fPrime = fPrime + oldGradient(1, iATOM, iCLONE)**2 &
+                            + oldGradient(2, iATOM, iCLONE)**2 &
+                            + oldGradient(3, iATOM, iCLONE)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)**2
+            f = f + oldGradient(1, iATOM, iCLONE)**2 &
+                  + oldGradient(2, iATOM, iCLONE)**2 &
+                  + oldGradient(3, iATOM, iCLONE)**2
           ENDDO
         ENDDO
+        fPrime = fPrime/C%Opts%ConjugateGradientdR
 
         ! Calculate steplength.
-        stepsize = f/fPrime
+        stepsize = -f/fPrime
 
         ! Calculate the RMSd stepsize of stepsize*direction.
         stepRMSd = Zero
@@ -376,8 +380,8 @@ CONTAINS
         ENDDO
         stepRMSD = SQRT(stepRMSd/(C%Geos%Clones*C%Geos%Clone(1)%NAtms))
 
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)))
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max step of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(DblToShrtChar(stepsize)))
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max move of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
                                   //TRIM(IntToChar(maxMoveClone))//" on atom " &
                                   //TRIM(IntToChar(maxMoveAtom)))
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A")
@@ -396,9 +400,9 @@ CONTAINS
             C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
 
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
-              TRIM(FltToChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(FltToChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(FltToChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
+              TRIM(DblToShrtChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToShrtChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToShrtChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
               TRIM(FltToChar(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
                                              + direction(2, iAtom, iCLONE)**2 &
                                              + direction(3, iAtom, iCLONE)**2))*AUToAngstroms))//" A", &
@@ -410,15 +414,19 @@ CONTAINS
           fPrime = Zero
           f = Zero
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE))*direction(1, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE))*direction(2, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            fPrime = fPrime - (C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))*direction(3, iAtom, iCLONE)/C%Opts%ConjugateGradientdR
-            f = f - oldGradient(1, iAtom, iCLONE)*direction(1, iAtom, iCLONE)
-            f = f - oldGradient(2, iAtom, iCLONE)*direction(2, iAtom, iCLONE)
-            f = f - oldGradient(3, iAtom, iCLONE)*direction(3, iAtom, iCLONE)
+            fPrime = fPrime + oldGradient(1, iATOM, iCLONE)**2 &
+                            + oldGradient(2, iATOM, iCLONE)**2 &
+                            + oldGradient(3, iATOM, iCLONE)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)**2 &
+                            - C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)**2
+            f = f + oldGradient(1, iATOM, iCLONE)**2 &
+                  + oldGradient(2, iATOM, iCLONE)**2 &
+                  + oldGradient(3, iATOM, iCLONE)**2
           ENDDO
+          fPrime = fPrime/C%Opts%ConjugateGradientdR
 
-          stepsize = f/fPrime
+          stepsize = -f/fPrime
 
           ! Calculate the RMSd stepsize of stepsize*direction.
           stepRMSd = Zero
@@ -431,14 +439,15 @@ CONTAINS
               maxMove = ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
                                         + direction(2, iAtom, iCLONE)**2 &
                                         + direction(3, iAtom, iCLONE)**2))
+              maxMoveClone = iCLONE
               maxMoveAtom = iAtom
             ENDIF
           ENDDO
           stepRMSD = SQRT(stepRMSd/(C%Geos%Clone(iCLONE)%NAtms))
 
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(FltToChar(stepsize)), &
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize "//TRIM(DblToShrtChar(stepsize)), &
             "Clone "//TRIM(IntToChar(iCLONE)))
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max step of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max move of "//TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
                                     //TRIM(IntToChar(maxMoveClone))//" on atom " &
                                     //TRIM(IntToChar(maxMoveAtom)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A", &
@@ -458,9 +467,9 @@ CONTAINS
             C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
 
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
-              TRIM(FltToChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(FltToChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(FltToChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
+              TRIM(DblToShrtChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToShrtChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToShrtChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
               TRIM(FltToChar(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
                                              + direction(2, iAtom, iCLONE)**2 &
                                              + direction(3, iAtom, iCLONE)**2))*AUToAngstroms))//" A", &

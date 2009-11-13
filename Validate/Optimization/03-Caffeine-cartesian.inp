@@ -12,7 +12,7 @@ Multiplicity=1
 #DebugAll=(MaxDebug,CheckSums,MatDebug)
 DebugAll=(MinDebug)
 
-Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
+Grad=(Optimize,Cartesian,CG)
 
 Guess=SuperPos
 #Guess=Restart
