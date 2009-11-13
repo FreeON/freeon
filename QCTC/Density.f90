@@ -299,9 +299,7 @@ CONTAINS
 !!$    STOP
 
 
-    Mssg=ProcessName(Prog,'Density Build')
-    Mssg=TRIM(Mssg)                                       &
-         //' <q> = '//TRIM(DblToShrtChar(P%MPole))        &
+    Mssg='<q> = '//TRIM(DblToShrtChar(P%MPole))        &
          //', <r> = ('//TRIM(DblToShrtChar(P%DPole%D(1))) &
          //', '//TRIM(DblToShrtChar(P%DPole%D(2)))        &
          //', '//TRIM(DblToShrtChar(P%DPole%D(3)))        &
@@ -309,7 +307,7 @@ CONTAINS
          P%QPole%D(1)+P%QPole%D(2)+P%QPole%D(3)))
 
 
-    CALL MondoLog(DEBUG_MAXIMUM,Prog,TRIM(Mssg))
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg, "DensityBuild")
 
 
   END SUBROUTINE Collate
