@@ -206,7 +206,7 @@ PROGRAM SCFStatus
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
   !
   IF(SCFActn=='BasisSetSwitch')THEN
-     SCFMessage=' Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
+     SCFMessage='Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
   ELSE
      SCFMessage='<SCF> = '//TRIM(DblToChar(Etot))//' Hartree, '//TRIM(DblToChar(Etot*au2eV))//' eV, dD = '//TRIM(DblToShrtChar(DMax))
   ENDIF
