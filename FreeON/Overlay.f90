@@ -36,29 +36,53 @@ MODULE Overlay
 
 CONTAINS
 
-  SUBROUTINE Invoke(Ex,N,S,M, TSSearchEndpoints_O)
+  ! Invoke the executable Ex first using the absolute M_EXEC path, and if that
+  ! fails without any path, relying on the PATH environment variable and the
+  ! shell.
+  SUBROUTINE Invoke(Ex, N, S, M, TSSearchEndpoints_O)
     CHARACTER(LEN=*)     :: Ex
     TYPE(FileNames)      :: N
     TYPE(State)          :: S
     TYPE(Parallel)       :: M
+    LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
+
+    IF(InvokeBackend(TRIM(N%M_EXEC)//"/"//Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
+      IF(InvokeBackend(Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
+        CALL MondoLog(DEBUG_NONE, "Invoke", "failed to spawn process")
+        CALL Halt("Fatal")
+      ENDIF
+    ENDIF
+
+  END SUBROUTINE Invoke
+
+  FUNCTION InvokeBackend(Ex, N, S, M, TSSearchEndpoints_O)
+    INTEGER              :: InvokeBackend
+    CHARACTER(LEN=*)     :: Ex
+    TYPE(FileNames)      :: N
+    TYPE(State)          :: S
+    TYPE(Parallel)       :: M
+    LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
+
     INTEGER              :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
     LOGICAL              :: ProgramFailed
     TYPE(CHR_VECT),SAVE  :: ArgV
     TYPE(INT_VECT),SAVE  :: IChr
     CHARACTER(LEN=2*DCL) :: CmndLine
-    LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
     INTEGER              :: beginClump, endClump
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
     INTEGER              :: SPAWN,ALL
 #else
     INTERFACE
-      FUNCTION Spawn(NC,MaxLen,IChr)
+      FUNCTION Spawn(NC, MaxLen, IChr)
         INTEGER                         :: NC,MaxLen
         INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
         INTEGER                         :: Spawn
       END FUNCTION Spawn
     END INTERFACE
 #endif
+
+    ! Set default return value (failure).
+    InvokeBackend = -1
 
     IF(PRESENT(TSSearchEndpoints_O) .AND. TSSearchEndpoints_O) THEN
       ! Calculate the clones and the endpoint energies.
@@ -97,7 +121,9 @@ CONTAINS
       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
                           ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-        CALL MondoHalt(MPIS_ERROR,' Could not spawn <'//TRIM(CmndLine)//'>')
+        CALL MondoLog(DEBUG_NONE, "Invoke", "Could not spawn <"//TRIM(CmndLine)//">", "errorcode = "//TRIM(IntToChar(MPIS_ERROR)))
+        CALL Delete(ArgV)
+        RETURN
       ENDIF
 
       ! Merge the spawned and current local communicators
@@ -112,19 +138,31 @@ CONTAINS
       IErr=Spawn(NArg,MaxLen,IChr%I)
       CALL Delete(IChr)
 
+      CALL MondoLog(DEBUG_NONE, "Invoke", "back with IErr = "//TRIM(IntToChar(IErr)))
+
       ! Bring this run down if not successful
-      IF(IErr/=SUCCEED) CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
+      IF(IErr /= SUCCEED) THEN
+        CALL MondoLog(DEBUG_NONE, "Invoke", "<"//TRIM(CmndLine)//">", "errorcode = "//TRIM(IntToChar(IErr)))
+        CALL Delete(ArgV)
+        RETURN
+      ENDIF
 
       ! Double check success if a MONDO Exec ...
       HDF_CurrentID=OpenHDF(N%HFile)
       CALL Get(ProgramFailed,'ProgramFailed')
       CALL CloseHDF(HDF_CurrentID)
-      IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
+      IF(ProgramFailed) THEN
+        CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
+      ENDIF
 #endif
       CALL Delete(ArgV)
+
+      ! Return success.
+      InvokeBackend = 0
+      RETURN
     ENDDO
 
-  END SUBROUTINE Invoke
+  END FUNCTION InvokeBackend
 
   !===============================================================
   ! CREATE A CHARACTER ARRAY OF NON-BLANK STRINGS THAT WILL
@@ -148,7 +186,7 @@ CONTAINS
 #ifdef MPI2
     NArg=9+SNC
     CALL New(ArgT,NArg)
-    ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(1)=Ex
     ArgT%C(2)=N%SCF_NAME
     NewDex = 2
     DO K=1,SNC
@@ -170,7 +208,7 @@ CONTAINS
     ArgT%C(3)=IntToChar(M%Clump%I(3,cCLUMP))
     ArgT%C(4)=M%MachFlag
     ArgT%C(5)=M%MachFile
-    ArgT%C(6)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(6)=Ex
     ArgT%C(7)=N%SCF_NAME
     NewDex = 7
     DO K=1,SNC
@@ -187,7 +225,7 @@ CONTAINS
 #else
     NArg=9+SNC
     CALL New(ArgT,NArg)
-    ArgT%C(1)=TRIM(N%M_EXEC)//'/'//Ex
+    ArgT%C(1)=Ex
     ArgT%C(2)=N%SCF_NAME
     NewDex = 2
     DO K=1,SNC
