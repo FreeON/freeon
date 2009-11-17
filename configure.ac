@@ -29,6 +29,8 @@ disemination in future releases.
 
 AM_INIT_AUTOMAKE
 
+AC_CONFIG_MACRO_DIR([m4])
+
 if test -f ${srcdir}/localversion; then
   . ${srcdir}/localversion
 else
