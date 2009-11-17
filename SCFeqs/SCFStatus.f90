@@ -62,10 +62,12 @@ PROGRAM SCFStatus
   !  Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 
-  !  Allocate some matrices
-  CALL New(P)
-  CALL New(Tmp1)
-  CALL New(Tmp2)
+  ! Reset derived types.
+  CALL Initialize(P)
+  CALL Initialize(Tmp1)
+  CALL Initialize(Tmp2)
+  CALL Initialize(Tmp3)
+
   !---------------------------------------------
   !  Get the density matrix
   IF(SCFActn=='BasisSetSwitch' .OR. SCFActn=="RestartBasisSwitch") THEN
@@ -233,6 +235,9 @@ CONTAINS
     TYPE(DBL_RNK2) :: D1,D2
     INTEGER        :: I
     REAL(DOUBLE)   :: Sx,Sy,Sz
+
+    CALL Initialize(Tmp2)
+
     GetS2=0D0
     CALL Multiply(P,S,Tmp1)
     CALL SetEq(Tmp2,Tmp1)

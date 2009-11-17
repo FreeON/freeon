@@ -166,8 +166,8 @@ MODULE LinAlg
   END INTERFACE
 
   !  Global stuff for matrix algebra
+  TYPE(INT_VECT) :: GlobalRowPtA,GlobalRowPtB
 
-  TYPE(INT_VECT) :: Flag,GlobalRowPtA,GlobalRowPtB
   !===============================================================================
 CONTAINS
   !  MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY
@@ -177,17 +177,22 @@ CONTAINS
   !===============================================================================
   !     F90 wrapper for F77 BCSR numeric matrix multiply: C=C+Beta*A.B
   !===============================================================================
-  SUBROUTINE SymbolikMM_DBCSR(A,B,C,UpDate)
+  SUBROUTINE SymbolikMM_DBCSR(A,B,C,Flag,UpDate)
     IMPLICIT NONE
-    INTEGER                    :: CNNon0_Old
-    TYPE(DBCSR), INTENT(IN)    :: A,B
-    LOGICAL,     INTENT(IN)    :: UpDate
-    TYPE(DBCSR), INTENT(INOUT) :: C
-    TYPE(INT_VECT)             :: DRowPt,DColPt,DBlkPt
-    INTEGER                    :: Status,DNAtms,DNBlks
-    INTEGER, EXTERNAL          :: SymbolikMM_GENERIC77
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: SzCpt,SzMat
-    !-------------------------------------------------------------------------------
+    TYPE(DBCSR), INTENT(IN)         :: A,B
+    LOGICAL,     INTENT(IN)         :: UpDate
+    TYPE(DBCSR), INTENT(INOUT)      :: C
+    TYPE(INT_VECT), INTENT(INOUT)   :: Flag
+    INTEGER                         :: CNNon0_Old
+    TYPE(INT_VECT)                  :: DRowPt,DColPt,DBlkPt
+    INTEGER                         :: Status,DNAtms,DNBlks
+    INTEGER, EXTERNAL               :: SymbolikMM_GENERIC77
+    CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SzCpt,SzMat
+
+    CALL Initialize(DRowPt)
+    CALL Initialize(DColPt)
+    CALL Initialize(DBlkPt)
+
     IF(UpDate)THEN
       DNAtms=C%NAtms
       DNBlks=C%NBlks
@@ -205,7 +210,7 @@ CONTAINS
     CALL Load(A,GlobalRowPtA)
     CALL Load(B,GlobalRowPtB)
     C%NAtms=A%NAtms
-    Status=SymbolikMM_GENERIC_77(C%NSMat,                                      & !<<<SPIN
+    Status=SymbolikMM_GENERIC_77(C%NSMat,               & !<<<SPIN
          NAtoms,A%NAtms,A%NBlks,NAtoms,                 &
          B%NAtms,B%NBlks,NAtoms,                        &
          DNAtms,DNBlks,SIZE(C%ColPt%I),SIZE(C%MTrix%D), &
@@ -236,16 +241,21 @@ CONTAINS
   !===============================================================================
   !     BCSR wrapper for generic BCSR symbolic matrix multiply: C=Beta*C+A.B
   !===============================================================================
-  SUBROUTINE SymbolikMM_BCSR(A,B,C,UpDate)
+  SUBROUTINE SymbolikMM_BCSR(A,B,C,Flag,UpDate)
     IMPLICIT NONE
-    INTEGER                    :: CNNon0_Old
-    TYPE(BCSR),  INTENT(IN)    :: A,B
-    LOGICAL,     INTENT(IN)    :: UpDate
-    TYPE(BCSR),  INTENT(INOUT) :: C
-    TYPE(INT_VECT)             :: DRowPt,DColPt,DBlkPt
-    INTEGER, EXTERNAL          :: SymbolikMM_GENERIC77
-    INTEGER                    :: Status,DNAtms,DNBlks
-    !-------------------------------------------------------------------------------
+    TYPE(BCSR),  INTENT(IN)       :: A,B
+    LOGICAL,     INTENT(IN)       :: UpDate
+    TYPE(BCSR),  INTENT(INOUT)    :: C
+    TYPE(INT_VECT), INTENT(INOUT) :: Flag
+    INTEGER                       :: CNNon0_Old
+    TYPE(INT_VECT)                :: DRowPt,DColPt,DBlkPt
+    INTEGER, EXTERNAL             :: SymbolikMM_GENERIC77
+    INTEGER                       :: Status,DNAtms,DNBlks
+
+    CALL Initialize(DRowPt)
+    CALL Initialize(DColPt)
+    CALL Initialize(DBlkPt)
+
     IF(UpDate)THEN
       DNAtms=C%NAtms
       DNBlks=C%NBlks
@@ -261,7 +271,7 @@ CONTAINS
       CALL New(DBlkPt,1)
     ENDIF
 
-    Status=SymbolikMM_GENERIC_77(C%NSMat,                                      & !<<<SPIN
+    Status=SymbolikMM_GENERIC_77(C%NSMat,               & !<<<SPIN
          NAtoms,A%NAtms,A%NBlks,A%NAtms,                &
          B%NAtms,B%NBlks,B%NAtms,                       &
          DNAtms,DNBlks,SIZE(C%ColPt%I),SIZE(C%MTrix%D), &
@@ -271,17 +281,21 @@ CONTAINS
          C%RowPt%I,C%ColPt%I,C%BlkPt%I,                 &
          DRowPt%I,  DColPt%I, DBlkPt%I,                 &
          BSiz%I,Flag%I)
-    IF(Status==FAIL) &
-         CALL Halt(' Dimensions in SymbolikMM_BCSR')
+    IF(Status==FAIL) THEN
+      CALL Halt('Dimensions in SymbolikMM_BCSR')
+    ENDIF
+
     CALL Delete(DRowPt)
     CALL Delete(DColPt)
     CALL Delete(DBlkPt)
+
     IF(UpDate)THEN
       C%MTrix%D(CNNon0_Old+1:C%NNon0)=Zero
     ELSE
       C%MTrix%D(1:C%NNon0)=Zero
     ENDIF
   END SUBROUTINE SymbolikMM_BCSR
+
   !C=========================================================================
   !C     Generic F77 style (D,B)CSR symbolic matrix multiply: C=C+Beta*A.B
   !C=========================================================================
@@ -385,15 +399,16 @@ CONTAINS
   !===============================================================================
   !     Wrapper for generic F77 style DBCSR numeric matrix multiply: C=C+A.B
   !===============================================================================
-  SUBROUTINE NumerikMM_DBCSR(A,B,BMTrix,C,ASMat,BSMat,CSMat,Perf_O) !<<<SPIN
+  SUBROUTINE NumerikMM_DBCSR(A,B,BMTrix,C,ASMat,BSMat,CSMat,Flag,Perf_O) !<<<SPIN
     IMPLICIT NONE
     TYPE(DBCSR),              INTENT(IN)    :: A,B
     REAL(DOUBLE),DIMENSION(:),INTENT(IN)    :: BMTrix
     TYPE(DBCSR),              INTENT(INOUT) :: C
-    INTEGER                  ,INTENT(IN)    :: ASMat,BSMat,CSMat !<<<SPIN
+    INTEGER, INTENT(IN)                     :: ASMat,BSMat,CSMat !<<<SPIN
+    TYPE(INT_VECT), INTENT(INOUT)           :: Flag
     TYPE(TIME),OPTIONAL,      INTENT(INOUT) :: Perf_O
     REAL(DOUBLE)                            :: FlOp
-    !-------------------------------------------------------------------------------
+
     FlOp=Zero
     CALL Load(A,GlobalRowPtA)
     CALL Load(B,GlobalRowPtB)
@@ -409,17 +424,19 @@ CONTAINS
     CALL Clear(B,GlobalRowPtB)
   END SUBROUTINE NumerikMM_DBCSR
 #endif
+
   !===============================================================================
   !     Wrapper for generic F77 style BCSR numeric matrix multiply: C=C+A.B
   !===============================================================================
-  SUBROUTINE NumerikMM_BCSR(A,B,C,ASMat,BSMat,CSMat,Perf_O) !<<<SPIN
+  SUBROUTINE NumerikMM_BCSR(A,B,C,ASMat,BSMat,CSMat,Flag,Perf_O) !<<<SPIN
     IMPLICIT NONE
     TYPE(BCSR),         INTENT(IN)    :: A,B
     TYPE(BCSR),         INTENT(INOUT) :: C
-    INTEGER            ,INTENT(IN)    :: ASMat,BSMat,CSMat !<<<SPIN
+    INTEGER, INTENT(IN)               :: ASMat,BSMat,CSMat !<<<SPIN
+    TYPE(INT_VECT), INTENT(INOUT)     :: Flag
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     REAL(DOUBLE)                      :: FlOp
-    !-------------------------------------------------------------------------------
+
     FlOp=Zero
     CALL NumerikMM_GENERIC(ASMat,BSMat,CSMat,A%NAtms,0,             & !<<<SPIN
          A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, &
@@ -429,20 +446,21 @@ CONTAINS
     PerfMon%FLOP=PerfMon%FLOP+FlOp
     IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
   END SUBROUTINE NumerikMM_BCSR
+
   !===============================================================================
   !     Generic F77 style (D,B)CSR numeric matrix multiply: C=C+A.B
   !===============================================================================
-  SUBROUTINE NumerikMM_GENERIC(ASMat,BSMat,CSMat,           & !<<<SPIN
-       ANAtms,AOffSt,               &
-       ARowPt,AColPt,ABlkPt,AMTrix, &
-       BRowPt,BColPt,BBlkPt,BMTrix, &
-       CRowPt,CColPt,CBlkPt,CMTrix, &
+  SUBROUTINE NumerikMM_GENERIC(ASMat,BSMat,CSMat, & !<<<SPIN
+       ANAtms,AOffSt,                             &
+       ARowPt,AColPt,ABlkPt,AMTrix,               &
+       BRowPt,BColPt,BBlkPt,BMTrix,               &
+       CRowPt,CColPt,CBlkPt,CMTrix,               &
        BSiz,Flag,FlOp)
 
     IMPLICIT NONE
     INTEGER,                  INTENT(IN)    :: ASMat,BSMat,CSMat,ANAtms,AOffSt !<<<SPIN
     INTEGER,     DIMENSION(:),INTENT(IN)    :: ARowPt,AColPt,ABlkPt, &
-         BRowPt,BColPt,BBlkPt,BSiz
+                                               BRowPt,BColPt,BBlkPt,BSiz
     REAL(DOUBLE),DIMENSION(:),INTENT(IN)    :: AMTrix,BMTrix
     INTEGER,     DIMENSION(:),INTENT(IN)    :: CRowPt,CColPt,CBlkPt
     REAL(DOUBLE),DIMENSION(:),INTENT(INOUT) :: CMTrix
@@ -450,9 +468,9 @@ CONTAINS
     REAL(DOUBLE),             INTENT(INOUT) :: FlOp
     REAL(DOUBLE) :: Op
     INTEGER      :: K,JP,KP,P,Q,R,IL,IG,JG,KG, &
-         MA,MB,NB,MNA,IStrtA,IStopA, &
-         IStrtB,IStopB,IStrtC,IStopC
-    !-------------------------------------------------------------------------------
+                    MA,MB,NB,MNA,IStrtA,IStopA, &
+                    IStrtB,IStopB,IStrtC,IStopC
+
     Op=Zero
     DO IL=1,ANAtms
       IG=IL+AOffSt
@@ -489,6 +507,7 @@ CONTAINS
     ENDDO
     FlOp=FlOp+Two*Op
   END SUBROUTINE NumerikMM_GENERIC
+
   !===============================================================================
   !     Double GEneral Matrix Multiply: C_MxN=C_MxN+Beta*(A_MxK).(B_KxN)
   !===============================================================================
@@ -500,7 +519,8 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(:) ,INTENT(OUT) :: C
     REAL(DOUBLE)                           :: BB
     INTEGER                                :: I,J,J1,L,IMJ, &
-         K_J_Off,M_J_Off,M_L_Off
+                                              K_J_Off,M_J_Off,M_L_Off
+
     DO J=1,N
       J1=J-1
       K_J_Off=J1*K
@@ -515,6 +535,7 @@ CONTAINS
       ENDDO
     ENDDO
   END SUBROUTINE DGEMM_NN2
+
   !===============================================================================
   !     Matrix multiply for BCSR matrices
   !===============================================================================
@@ -525,31 +546,43 @@ CONTAINS
     TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O
     LOGICAL                             :: UpDate
     INTEGER                             :: NSMat,N1,N2
-    type(dbl_rnk2)::AD,BD,CD,DD
-    !-------------------------------------------------------------------------------
+    TYPE(DBL_RNK2)                      :: AD,BD,CD,DD
+    TYPE(INT_VECT)                      :: Flag
+
+    CALL Initialize(AD)
+    CALL Initialize(BD)
+    CALL Initialize(CD)
+    CALL Initialize(DD)
+    CALL Initialize(Flag)
+
     NSMat=MAX(A%NSMat,B%NSMat)
     IF(PRESENT(Beta_O))THEN
       IF(Beta_O/=Zero)THEN
 
-        !              Check allocation
-        IF(.NOT.AllocQ(C%Alloc)) &
-             CALL Halt(' Asking for update of non-allocated' &
-             //' BCSR matrix in MultiplyM_BCSR')
+        ! Check allocation
+        IF(.NOT.AllocQ(C%Alloc)) THEN
+          CALL Halt('Asking for update of non-allocated BCSR matrix in MultiplyM_BCSR')
+        ENDIF
 
-        !              If Beta /=1 then rescale
+        ! If Beta /=1 then rescale
         IF(Beta_O/=One)THEN
           C%MTrix%D(1:C%NNon0)=Beta_O*C%MTrix%D(1:C%NNon0)
           PerfMon%FLOP=PerfMon%FLOP+DBLE(C%NNon0)
-          IF(PRESENT(Perf_O)) &
-               Perf_O%FLOP=Perf_O%FLOP+DBLE(C%NNon0)
+          IF(PRESENT(Perf_O)) THEN
+            Perf_O%FLOP=Perf_O%FLOP+DBLE(C%NNon0)
+          ENDIF
         ENDIF
         UpDate=.TRUE.
       ELSE
-        IF(.NOT.AllocQ(C%Alloc))CALL New(C,NSMat_O=NSMat)
+        IF(.NOT.AllocQ(C%Alloc)) THEN
+          CALL New(C,NSMat_O=NSMat)
+        ENDIF
         UpDate=.FALSE.
       ENDIF
     ELSE
-      IF(.NOT.AllocQ(C%Alloc))CALL New(C,NSMat_O=NSMat)
+      IF(.NOT.AllocQ(C%Alloc)) THEN
+        CALL New(C,NSMat_O=NSMat)
+      ENDIF
       UpDate=.FALSE.
     ENDIF
 
@@ -558,47 +591,49 @@ CONTAINS
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
+
 #ifndef CHECK_UNRESTRICTED
-    !>>>>>>>>>>>>
+
     CALL New(Flag,NAtoms)
     CALL SetEq(Flag,0)
-    CALL SymbolikMM(A,B,C,UpDate)
-    IF(    A%NSMat.EQ.1.AND.B%NSMat.EQ.1)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
+    CALL SymbolikMM(A,B,C,Flag,UpDate)
+    IF(A%NSMat.EQ.1.AND.B%NSMat.EQ.1)THEN
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,1,2,2,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,1,2,2,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.1)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,2,1,2,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,2,1,2,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.2)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,2,2,2,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,2,2,2,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,1,2,2,Perf_O)
-      CALL NumerikMM(A,B,C,1,3,3,Perf_O)
-      CALL NumerikMM(A,B,C,1,4,4,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,1,2,2,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,1,3,3,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,1,4,4,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,2,1,2,Perf_O)
-      CALL NumerikMM(A,B,C,3,1,3,Perf_O)
-      CALL NumerikMM(A,B,C,4,1,4,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,2,1,2,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,3,1,3,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,4,1,4,Flag,Perf_O)
     ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
-      CALL NumerikMM(A,B,C,1,1,1,Perf_O)
-      CALL NumerikMM(A,B,C,2,3,1,Perf_O)
-      CALL NumerikMM(A,B,C,1,2,2,Perf_O)
-      CALL NumerikMM(A,B,C,2,4,2,Perf_O)
-      CALL NumerikMM(A,B,C,3,1,3,Perf_O)
-      CALL NumerikMM(A,B,C,4,3,3,Perf_O)
-      CALL NumerikMM(A,B,C,3,2,4,Perf_O)
-      CALL NumerikMM(A,B,C,4,4,4,Perf_O)
+      CALL NumerikMM(A,B,C,1,1,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,2,3,1,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,1,2,2,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,2,4,2,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,3,1,3,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,4,3,3,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,3,2,4,Flag,Perf_O)
+      CALL NumerikMM(A,B,C,4,4,4,Flag,Perf_O)
     ELSE
       CALL Halt('MultiplyM_BCSR: Error with NSMat!')
     ENDIF
     CALL Delete(Flag)
+
 #else
-    !<<<<<<<<<<<<
+
     IF(NSMat.GT.1)THEN
       CALL New(Flag,NAtoms)
       CALL SetEq(Flag,0)
@@ -610,7 +645,7 @@ CONTAINS
       call seteq(BD,B)
       call seteq(CD,C)
       if(.NOT.UpDate)CD%D=0d0
-      IF(    A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
+      IF(A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
         CD%d(1:N1,   1:N1)=matmul(AD%d,BD%d(1:N1,   1:N1))+CD%d(1:N1,   1:N1)
         CD%d(1:N1,N1+1:N2)=matmul(AD%d,BD%d(1:N1,N1+1:N2))+CD%d(1:N1,N1+1:N2)
         !Check BCSR!
@@ -710,11 +745,11 @@ CONTAINS
       CALL NumerikMM( A,B,C,1,1,1,Perf_O)
       CALL Delete(Flag)
     ENDIF
-    !<<<<<<<<<<<<
+
 #endif
   END SUBROUTINE MultiplyM_BCSR
-#ifdef PARALLEL
 
+#ifdef PARALLEL
   !===============================================================================
   !     Matrix multiply for DBCSR matrices: C=Beta*C+A.B
   !===============================================================================
@@ -746,7 +781,10 @@ CONTAINS
     LOGICAL,OPTIONAL, INTENT(IN)          :: Stop_O,NoGlobal_O
     REAL(DOUBLE)                          :: FlOp
     CHARACTER(LEN=15)                     :: Prog='MultiplyM_DBCSR'
-    !        ---------------------------------
+    TYPE(INT_VECT)                        :: Flag
+
+    CALL Initialize(Flag)
+
     CALL AlignNodes()
     !         CALL Elapsed_TIME(Time0,'Init')
     !         CALL Elapsed_TIME(Time1,'Init')
@@ -1163,6 +1201,7 @@ CONTAINS
     !         CALL Elapsed_TIME(Time0,Mssg_O='Total',     Proc_O=Prog)
 
   END SUBROUTINE  MultiplyM_DBCSR
+
   !===============================================================================
   !     Determine structure of the recieve buffer DBCSR matrix U
   !===============================================================================
@@ -1659,15 +1698,16 @@ CONTAINS
   !===============================================================================
   !     Wrapper for generic F77 style BCSR numeric matrix add
   !===============================================================================
-  SUBROUTINE NumerikADD_BCSR(A,B,C,ASMat,BSMat,CSMat,Perf_O) !<<<SPIN
+  SUBROUTINE NumerikADD_BCSR(A,B,C,ASMat,BSMat,CSMat,Flag,Perf_O) !<<<SPIN
     IMPLICIT NONE
     TYPE(BCSR),         INTENT(IN)    :: A,B
     TYPE(BCSR),         INTENT(INOUT) :: C
-    INTEGER            ,INTENT(IN)    :: ASMat,BSMat,CSMat !<<<SPIN
+    INTEGER, INTENT(IN)               :: ASMat,BSMat,CSMat !<<<SPIN
+    TYPE(INT_VECT), INTENT(INOUT)     :: Flag
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     INTEGER                           :: Status
     REAL(DOUBLE)                      :: FlOp
-    !-------------------------------------------------------------------------------
+
     CALL SetEq(Flag,0)
     FlOp=Zero
     Status=Add_GENERIC(ASMat,BSMat,CSMat,C%NSMat,               &
@@ -1682,6 +1722,7 @@ CONTAINS
     PerfMon%FLOP=PerfMon%FLOP+FlOp
     IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
   END SUBROUTINE NumerikADD_BCSR
+
   !===============================================================================
   !     BCSR wrapper for generic matrix addition
   !===============================================================================
@@ -1692,18 +1733,27 @@ CONTAINS
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     INTEGER                           :: Status
     REAL(DOUBLE)                      :: FlOp
-    integer :: NSMat,N1,N2
-    type(dbl_rnk2)::AD,BD,CD,dd
-    !-------------------------------------------------------------------------------
+    INTEGER                           :: NSMat,N1,N2
+    TYPE(DBL_RNK2)                    :: AD,BD,CD,DD
+    TYPE(INT_VECT)                    :: Flag
+
+    CALL Initialize(AD)
+    CALL Initialize(BD)
+    CALL Initialize(CD)
+    CALL Initialize(DD)
+    CALL Initialize(Flag)
+
     NSMat=MAX(A%NSMat,B%NSMat)
-    IF(.NOT.AllocQ(C%Alloc)   ) CALL New(C,NSMat_O=NSMat)
-    !
+    IF(.NOT.AllocQ(C%Alloc)) THEN
+      CALL New(C,NSMat_O=NSMat)
+    ENDIF
+
     IF(NSMat.NE.C%NSMat) THEN
       CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "NSMat.NE.C%NSMat! Deallocate-reallocate")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
-    !
+
     !>>>>>>>>>>>>>>>>>>
 #ifndef CHECK_UNRESTRICTED
     CALL New(Flag,NAtoms)
@@ -1711,28 +1761,28 @@ CONTAINS
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-      IF(    A%NSMat.EQ.1.AND.B%NSMat.EQ.1)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
+      IF(A%NSMat.EQ.1.AND.B%NSMat.EQ.1)THEN
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.2)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,1,2,2,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,1,2,2,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.1)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,2,1,2,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,2,1,2,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.2.AND.B%NSMat.EQ.2)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,2,2,2,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,2,2,2,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,1,4,4,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,1,4,4,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,4,1,4,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,4,1,4,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Perf_O)
-        CALL NumerikADD(A,B,C,2,2,2,Perf_O)
-        CALL NumerikADD(A,B,C,3,3,3,Perf_O)
-        CALL NumerikADD(A,B,C,4,4,4,Perf_O)
+        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,2,2,2,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,3,3,3,Flag,Perf_O)
+        CALL NumerikADD(A,B,C,4,4,4,Flag,Perf_O)
       ELSE
         CALL Halt('Add_BCSR: Error with NSMat!')
       ENDIF
@@ -1741,7 +1791,6 @@ CONTAINS
 #endif
     CALL Delete(Flag)
 #else
-    !<<<<<<<<<<<<<<<<<<
     CALL New(Flag,NAtoms)
     CALL SetEq(Flag,0)
 #ifdef PARALLEL
@@ -1846,6 +1895,7 @@ CONTAINS
     CALL Delete(Flag)
 #endif
   END SUBROUTINE Add_BCSR
+
   !===============================================================================
   !     Generic F77 style (D)BCSR matrix addition
   !===============================================================================
@@ -1871,7 +1921,7 @@ CONTAINS
     REAL(DOUBLE)                            :: Op
     INTEGER                                 :: JP,P,Q,Q1,R,S,IL,KL,IG,JG,M,MN,MN1,  &
          IStrtA,IStopA,IStrtB,IStopB
-    !-------------------------------------------------------------------------------
+
     Q=1
     R=1
     Op=Zero
@@ -2439,7 +2489,7 @@ CONTAINS
     TYPE(DBCSR),        INTENT(INOUT)    :: A,B
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     REAL(DOUBLE)                      :: Tmp,FlOp
-    !-------------------------------------------------------------------------------
+
     FlOp=Zero
     CALL New(Flag,NAtoms)
     CALL SetEq(Flag,0)
@@ -2462,7 +2512,10 @@ CONTAINS
     TYPE(BCSR),         INTENT(IN)    :: A,B
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     REAL(DOUBLE)                      :: FlOp
-    !-------------------------------------------------------------------------------
+    TYPE(INT_VECT)                    :: Flag
+
+    CALL Initialize(Flag)
+
     !write(*,*) 'Dot_BCSR: ',A%NSMat,B%NSMat
     IF(A%NSMat.NE.B%NSMat)CALL Halt('Dot_BCSR: A%NSMat.NE.B%NSMat!')
 #ifdef PARALLEL
@@ -2483,6 +2536,7 @@ CONTAINS
     ENDIF
 #endif
   END FUNCTION Dot_BCSR
+
   !===============================================================================
   !     Generic F77 style (D,B)CSR inner product of two matrices
   !     MatrixDot = (A,B)
@@ -2502,7 +2556,7 @@ CONTAINS
     REAL(DOUBLE), EXTERNAL                  :: DBL_Dot
     INTEGER                                 :: I,IG,J,L,JP,P,Q,MA,MN, &
          IStrtA,IStopA,IStrtB,IStopB
-    !-------------------------------------------------------------------------------
+
     Op=Zero
     Dot_GENERIC=Zero
     DO I=1,ANAtms
