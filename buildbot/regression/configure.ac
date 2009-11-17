@@ -3,7 +3,11 @@ AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 
-AC_DEFINE_UNQUOTED([EXEPATH], ["${bindir}"], [The installation path])
+if test "${prefix}" = "NONE"; then
+  AC_DEFINE_UNQUOTED([EXEPATH], ["${ac_default_prefix}/bin"], [The installation path])
+else
+  AC_DEFINE_UNQUOTED([EXEPATH], ["${prefix}/bin"], [The installation path])
+fi
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
