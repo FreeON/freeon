@@ -33,12 +33,14 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
-int spawn_(int* nc, int* maxlen, int* ichr)
+int
+spawn_ (int *nc, int *maxlen, int *ichr)
 {
   int i, j, k, status;
   char** argv;
-  pid_t pid,wpid;
+  pid_t pid, wpid;
 
   int ZERO_ERROR=0;
   int EXIT_ERROR=-120384;
@@ -68,56 +70,52 @@ int spawn_(int* nc, int* maxlen, int* ichr)
   /* Fork process. */
   pid = fork();
 
-  if(pid==0)
+  if(pid == 0)
   {
     /* This is the child process. */
-    execvp(argv[0], argv);
-    printf("Unable to EXECVP \"%s\".\n", argv[0]);
-    for(i = 0; i < *nc; i++)
-    {
-      printf("argv[%i] = \"%s\"\n", i, argv[i]);
-    }
-    _exit(EXIT_FAILURE);
+    status = execvp(argv[0], argv);
+    printf("error with execvp: %s\n", strerror(errno));
+    exit(status);
   }
 
-  else if(pid<0)
+  else if(pid < 0)
   {
     /* Error on fork(). */
-    printf("Unable to FORK \"%s\".\n",argv[0]);
+    printf("unable to fork() \"%s\".\n",argv[0]);
     for(i = 0; i < *nc; i++)
     {
       printf("argv[%i] = \"%s\"\n", i, argv[i]);
     }
-    ierr=FORK_ERROR;
+    ierr = FORK_ERROR;
+  }
+
+  /* This is the parent process. */
+  printf("waiting for child to finish\n");
+  wpid = waitpid(pid, &status, 0);
+  printf("child has returned\n");
+
+  if (WEXITSTATUS(status) == 0)
+  {
+    ierr = 0;
   }
 
   else
   {
-    /* This is the parent process. */
-    wpid = waitpid(pid, &status, 0);
-    if(wpid==pid)
-    {
-      ierr=ZERO_ERROR;
-    }
-
-#ifdef HAVE_WSTOPSIG
-    if(WSTOPSIG(status)!=0) ierr=SGNL_ERROR;
-#endif
-
-#ifdef HAVE_WCOREDUMP
-    if(WCOREDUMP(status)!=0) ierr=DUMP_ERROR;
-#endif
-
-#ifdef HAVE_WEXITSTATUS
-    if(WEXITSTATUS(status)!=0) ierr=EXIT_ERROR;
-#endif
+    if(WSTOPSIG(status)!=0) ierr = SGNL_ERROR;
+    else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
+    else ierr = EXIT_ERROR;
   }
 
   /* Free memory. */
   for (i = 0; i < *nc+1; ++i) { free(argv[i]); }
   free(argv);
 
-  return(ierr);
+  printf("returning from spawn\n");
+  return ierr;
 }
 
-int spawn(int* nc,int* maxlen,int* ichr){return spawn_(nc,maxlen,ichr); }
+int
+spawn (int *nc, int *maxlen, int *ichr)
+{
+  return spawn_(nc, maxlen, ichr);
+}

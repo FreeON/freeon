@@ -562,65 +562,7 @@ AC_LANG(C)
 
 # Check for some standard headers.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/types.h \
-  math.h sys/wait.h)
-
-if test "${ac_cv_header_sys_wait_h}" = "yes"; then
-
-  AC_MSG_CHECKING([for WSTOPSIG macro])
-  AC_LINK_IFELSE([
-#include <sys/wait.h>
-
-int
-main ()
-{
-  int status = 0;
-
-  if (WSTOPSIG(status) == 0) { return 0; }
-  else { return -1; }
-}],
-  [AC_DEFINE(HAVE_WSTOPSIG, 1, [If WIFSTOPPED is true of status, this macro
-   returns the signal number of the signal that caused the child process to
-   stop.])
-  AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
-  AC_MSG_CHECKING([for WCOREDUMP macro])
-  AC_LINK_IFELSE([
-#include <sys/wait.h>
-
-int
-main ()
-{
-  int status = 0;
-
-  if (WCOREDUMP(status) == 0) { return 0; }
-  else { return -1; }
-}],
-  [AC_DEFINE(HAVE_WCOREDUMP, 1, [This macro returns a nonzero value if the child
-   process terminated and produced a core dump.])
-  AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
-  AC_MSG_CHECKING([for WEXITSTATUS macro])
-  AC_LINK_IFELSE([
-#include <sys/wait.h>
-
-int
-main ()
-{
-  int status = 0;
-
-  if (WEXITSTATUS(status) == 0) { return 0; }
-  else { return -1; }
-}],
-  [AC_DEFINE(HAVE_WEXITSTATUS, 1, [If WIFEXITED is true of status, this macro
-   returns the low-order 8 bits of the exit status value from the child
-   process.])
-  AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
-fi
+AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/types.h math.h sys/wait.h)
 
 AC_MSG_CHECKING([for random number generator seed])
 AC_ARG_ENABLE([random-seed],
