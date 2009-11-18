@@ -1,28 +1,10 @@
-# This is an example reference file.
-#
-# Comments are everything after a '#' character anywhere in the line. The syntax
-# of a test is simply
-#
-# tag = value (error)
-#
-# The tag is a regular expression and has to be enclosed in double quotations.
-# The regular expression has to be include exactly one group, i.e. stuff inside
-# a pair of (), which tells the script how to find the value to be matched.
-#
-# For example, the following:
-#
-# "^Rho_tot = (.*)" = 1 (1e-10)
-#
-# will search for the occurence of the string Rho_tot at the beginning of the
-# line and the value after an '=' character. The value expected is "1" with an
-# error of 1e-10.
-
-"<SCF> = (.*) Hartree" = -.1240331162456089D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3714141386376276D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3774410987172503D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3782870228185378D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3784589603211143D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3784627978527835D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3784627997318657D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3784627997562474D+02 (1e-10)
-"<SCF> = (.*) Hartree" = -.3784627997562725D+02 (1e-10)
+# Test with -O0.
+"SCF : \[0,1,1\].*<SCF> = (.*) Hartree" = -.1240331162456090D+02 (1e-10)
+"SCF : \[1,1,1\].*<SCF> = (.*) Hartree" = -.3714141386376276D+02 (1e-10)
+"SCF : \[2,1,1\].*<SCF> = (.*) Hartree" = -.3774410983817521D+02 (1e-10)
+"SCF : \[3,1,1\].*<SCF> = (.*) Hartree" = -.3782870226846187D+02 (1e-10)
+"SCF : \[4,1,1\].*<SCF> = (.*) Hartree" = -.3784589602013045D+02 (1e-10)
+"SCF : \[5,1,1\].*<SCF> = (.*) Hartree" = -.3784627978524917D+02 (1e-10)
+"SCF : \[6,1,1\].*<SCF> = (.*) Hartree" = -.3784627997766349D+02 (1e-10)
+"SCF : \[7,1,1\].*<SCF> = (.*) Hartree" = -.3784627993758487D+02 (1e-10)
+"SCF : \[8,1,1\].*<SCF> = (.*) Hartree" = -.3784627993758724D+02 (1e-10)

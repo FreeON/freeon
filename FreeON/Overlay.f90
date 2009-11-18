@@ -138,7 +138,9 @@ CONTAINS
       IErr=Spawn(NArg,MaxLen,IChr%I)
       CALL Delete(IChr)
 
-      CALL MondoLog(DEBUG_NONE, "Invoke", "back with IErr = "//TRIM(IntToChar(IErr)))
+      IF(IErr /= 0) THEN
+        CALL MondoLog(DEBUG_NONE, "Invoke", "back with IErr = "//TRIM(IntToChar(IErr)))
+      ENDIF
 
       ! Bring this run down if not successful
       IF(IErr /= SUCCEED) THEN

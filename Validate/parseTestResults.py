@@ -53,14 +53,14 @@ parser.add_option("--verbose", "-v",
 ( options, arguments ) = parser.parse_args()
 
 # Set up logging.
-log = logging.getLogger("main")
+log = logging.getLogger("regressionTest")
 log.setLevel(logging.DEBUG)
 
 # Set console logger.
 logHandler = logging.StreamHandler()
 logFormatter = logging.Formatter("[%(name)s] %(message)s")
 logHandler.setFormatter(logFormatter)
-logHandler.setLevel(logging.ERROR)
+logHandler.setLevel(logging.INFO)
 
 if options.verbose:
   logHandler.setLevel(logging.DEBUG)
@@ -130,20 +130,26 @@ for line in lines:
 
 log.debug("checking tags: " + str(reference))
 
-number_errors = 0
-number_unmatched = 0
+numberErrors = 0
+numberUnmatched = 0
+numberMatched = 0
+successfullyTerminated = False
 
 linenumber = 0
 for line in output:
   linenumber += 1
   line = line.rstrip()
 
+  check = re.compile("Successful FreeON run").search(line)
+  if check:
+    successfullyTerminated = True
+
   for tag in reference.keys():
     check = re.compile(tag).search(line)
     if check:
       if reference[tag]["index"] >= len(reference[tag]["values"]):
         log.error("unmatched key on line " + str(linenumber) + ": " + line)
-        number_unmatched += 1
+        numberUnmatched += 1
         continue
 
       # Convert number from f90 format.
@@ -153,7 +159,7 @@ for line in output:
       ref_value = reference[tag]["values"][reference[tag]["index"]]["value"]
       ref_error = reference[tag]["values"][reference[tag]["index"]]["error"]
       if abs(value-ref_value) > ref_error:
-        number_errors += 1
+        numberErrors += 1
         log.error("line " + str(linenumber) + ", " + line + \
             " <--> wrong value " + str(value) + ", " + \
             "expected " + str(ref_value) + ", " + \
@@ -166,11 +172,19 @@ for line in output:
             tag + ": " + line + " <--> value verified")
 
       reference[tag]["index"] += 1
+      numberMatched += 1
 
-log.info("found " + str(number_errors) + " errors and " + str(number_unmatched) + " unmatched tags")
+log.info("found " + str(numberErrors) + " errors and " \
+    + str(numberUnmatched) + " unmatched tags and " \
+    + str(numberMatched) + " matched tags")
+
+if successfullyTerminated:
+  log.info("FreeON successfully terminated")
+else:
+  log.info("FreeON did not successfully terminate")
 
 # Exit with a proper exit code.
-if number_errors == 0:
+if numberErrors == 0:
   sys.exit(0)
 else:
   sys.exit(1)

@@ -90,9 +90,7 @@ spawn_ (int *nc, int *maxlen, int *ichr)
   }
 
   /* This is the parent process. */
-  printf("waiting for child to finish\n");
   wpid = waitpid(pid, &status, 0);
-  printf("child has returned\n");
 
   if (WEXITSTATUS(status) == 0)
   {
@@ -110,7 +108,6 @@ spawn_ (int *nc, int *maxlen, int *ichr)
   for (i = 0; i < *nc+1; ++i) { free(argv[i]); }
   free(argv);
 
-  printf("returning from spawn\n");
   return ierr;
 }
 

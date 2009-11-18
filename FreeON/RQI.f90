@@ -573,7 +573,7 @@ CONTAINS
        WRITE(*,*)TRIM(Xk)
        WRITE(*,*)'NNon0 = ',sXk%NNon0
        IF(Kount>8) &
-            CALL Halt(' Logical error in RQI: OrthoPrune ')
+            CALL Halt('Logical error in RQI: OrthoPrune ')
        GOTO 111
     ENDIF
     !
