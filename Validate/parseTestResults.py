@@ -101,8 +101,29 @@ reference = {}
 fd = open(options.reference)
 lines = fd.readlines()
 
-linenumber = 0
+# numberErrors:
+#   A matched tag, i.e. a line that matches the regular expression given, is
+#   checked against the value and error given in the reference file. If the
+#   value is not within the error, numberErrors is incremented by one.
+numberErrors = 0
+
+# numberUnmatched:
+#   If the regular expression matches a tag, but all lines corresponding to
+#   this tag have already been found in the output, then numberUnmatched is
+#   incremented by one.
+numberUnmatched = 0
+
+# numberMatched:
+#   If the regular expression matches a tag, numberMatched is incremented by
+#   one, regardless whether the value was within the error or not.
+numberMatched = 0
+
+# numberMissing:
+#   A line in the reference file that can not be matched with the output
+#   causes numberMissing to be > 0.
 numberMissing = 0
+
+linenumber = 0
 for line in lines:
   line = line.strip()
   linenumber += 1
@@ -132,9 +153,6 @@ for line in lines:
 
 log.debug("checking tags: " + str(reference))
 
-numberErrors = 0
-numberUnmatched = 0
-numberMatched = 0
 successfullyTerminated = False
 scratchDirectory = None
 
@@ -167,13 +185,11 @@ for line in output:
       ref_error = reference[tag]["values"][reference[tag]["index"]]["error"]
       if abs(value-ref_value) > ref_error:
         numberErrors += 1
-        log.error("line " + str(linenumber) + ", " + line + \
-            " <--> wrong value " + str(value) + ", " + \
-            "expected " + str(ref_value) + ", " + \
-            "difference = " + str(abs(value-ref_value)) + ", " + \
-            "tag \"" + tag + "\", " + \
-            "index " + str(reference[tag]["index"]) + ", " + \
-            " +- " + str(ref_error))
+        log.error("line " + str(linenumber) + ", " + line)
+        log.error("--> wrong value " + str(value))
+        log.error("--> expected " + str(ref_value) + " +- " + str(ref_error))
+        log.error("--> observed difference = " + str(abs(value-ref_value)))
+        log.error("--> tag \"" + tag + "\", " + "index " + str(reference[tag]["index"]))
       else:
         log.debug("line " + str(linenumber) + ", found tag " + \
             tag + ": " + line + " <--> value verified")
