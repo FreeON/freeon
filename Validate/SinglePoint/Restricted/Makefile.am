@@ -14,10 +14,6 @@ TESTS = \
   N2 \
   O2
 
-TESTS_ENVIRONMENT = \
-  MONDO_HOME=$(top_srcdir) \
-	PATH=$(top_builddir)/FreeON:$(top_builddir)/SCFeqs:$(top_builddir)/OneE:$(top_builddir)/QCTC:$(top_builddir)/HiCu:$(top_builddir)/ONX:${PATH}
-
 EXTRA_DIST = \
   $(TESTS) \
   C2H2.inp \

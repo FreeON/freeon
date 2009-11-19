@@ -1,0 +1,3 @@
+#!/bin/sh
+
+FreeON ${srcdir}/12-BPA.inp | ${srcdir}/../parseTestResults.py --reference ${srcdir}/12-BPA.reference
