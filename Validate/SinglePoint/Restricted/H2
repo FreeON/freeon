@@ -1,3 +1,3 @@
 #!/bin/bash
 
-FreeON H2.inp | ${srcdir}/../../parseTestResults.py --reference H2.reference
+FreeON ${srcdir}/H2.inp | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/H2.reference > H2.output
