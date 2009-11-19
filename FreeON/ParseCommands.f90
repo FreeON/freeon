@@ -51,9 +51,9 @@ CONTAINS
     TYPE(FileNames)     :: N
     TYPE(ARGMT)         :: Args
     CHARACTER(LEN=DCL)  :: PROCESS_ID
-    INTEGER             :: DotDex
+    INTEGER             :: i, indexBegin, indexEnd
     LOGICAL             :: Exists
-    INTEGER,EXTERNAL    :: GetPID
+    INTEGER, EXTERNAL   :: GetPID
 
     ! Get command line arguments
     CALL Get(Args)
@@ -92,19 +92,30 @@ CONTAINS
     N%M_PWD=TRIM(N%M_PWD)//'/'
     N%M_HOME=TRIM(N%M_HOME)//'/'
 
-    ! Here is the scf name, tagged with the PID
-    PROCESS_ID=IntToChar(GetPID())
-    DotDex=INDEX(Args%C%C(1),'.')
-    IF(DotDex==0) THEN
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: no "." in input file name = <'//TRIM(N%IFile)//'>', "LoadCommand")
-      STOP "Termination of FreeON"
+    ! Here is the scf name, tagged with the PID.
+    PROCESS_ID = IntToChar(GetPID())
+
+    CALL MondoLog(DEBUG_NONE, "FreeON", "input file "//TRIM(Args%C%C(1)), "LoadCommand")
+
+    ! For the SCF name, we remove everything up to the last "/" in case the
+    ! input file is a path.  If the filename contains a ".", we remove the last
+    ! suffix. Other "." are not touched. Then we append the PID to the name.
+    indexBegin = 1
+    indexEnd = LEN(TRIM(Args%C%C(1)))
+    N%SCF_NAME = TRIM(Args%C%C(1))
+
+    IF(INDEX(N%SCF_NAME, "/", .TRUE.) > 0) THEN
+      indexBegin = INDEX(Args%C%C(1), "/", .TRUE.)+1
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "FreeON", "running intut file "//TRIM(Args%C%C(1)))
-    N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
+    IF(INDEX(N%SCF_NAME, ".", .TRUE.) > 0) THEN
+      indexEnd = INDEX(Args%C%C(1), ".", .TRUE.)-1
+    ENDIF
+
+    N%SCF_NAME = TRIM(N%SCF_NAME(indexBegin:indexEnd))//'_'//TRIM(PROCESS_ID)
+    CALL MondoLog(DEBUG_NONE, "FreeON", "SCF name "//TRIM(N%SCF_NAME), "LoadCommand")
 
     ! Come up with random scratch directory based on MONDO_SCRATCH.
-
     N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-"//TRIM(N%SCF_NAME)//"-XXXXXX"
     CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
     N%M_SCRATCH=TRIM(N%M_SCRATCH)//'/'
@@ -125,23 +136,9 @@ CONTAINS
     ! Check to see that the input file exists
     INQUIRE(FILE=N%IFile,EXIST=Exists)
     IF(.NOT.Exists) THEN
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: Input file "'//TRIM(N%IFile)//'" does not exist!', "LoadCommand")
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'Parse error: input file "'//TRIM(N%IFile)//'" does not exist!', "LoadCommand")
       STOP "Termination of FreeON"
     ENDIF
-
-    ! Determine if input file has a '.' in it.  If so, create SCF name from string up to the '.'
-    DotDex=INDEX(Args%C%C(1),'.')
-    IF(DotDex==0)THEN
-      N%SCF_NAME=TRIM(Args%C%C(1))//'_'//TRIM(PROCESS_ID)
-    ELSE
-      N%SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
-    ENDIF
-
-    ! Out file with full path (demand an output file)
-    ! Check to see that the output file does not exist (no overwrites allowed)
-    !    INQUIRE(FILE=N%OFile,EXIST=Exists)
-    !    IF(Exists) &
-    !       CALL MondoHalt(PRSE_ERROR,' Ouput file: '//TRIM(N%OFile)//' already exists! ')
 
     ! Create user defined or implicit file names
     IF(Args%NC==1)THEN

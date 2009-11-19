@@ -1,3 +1,3 @@
 #!/bin/bash
 
-FreeON CH3OH.inp | ${srcdir}/../../parseTestResults.py --reference CH3OH.reference
+FreeON ${srcdir}/CH3OH.inp | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/CH3OH.reference > CH3OH.output

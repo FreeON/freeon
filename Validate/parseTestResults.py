@@ -102,6 +102,7 @@ fd = open(options.reference)
 lines = fd.readlines()
 
 linenumber = 0
+numberMissing = 0
 for line in lines:
   line = line.strip()
   linenumber += 1
@@ -127,6 +128,7 @@ for line in lines:
       reference[check.group(1)]["values"].append(new_tag)
     else:
       reference[check.group(1)] = { "index": 0, "values": [ new_tag ] }
+    numberMissing += 1
 
 log.debug("checking tags: " + str(reference))
 
@@ -134,6 +136,7 @@ numberErrors = 0
 numberUnmatched = 0
 numberMatched = 0
 successfullyTerminated = False
+scratchDirectory = None
 
 linenumber = 0
 for line in output:
@@ -143,6 +146,10 @@ for line in output:
   check = re.compile("Successful FreeON run").search(line)
   if check:
     successfullyTerminated = True
+
+  check = re.compile("scratch directory at (.*)").search(line)
+  if check:
+    scratchDirectory = check.group(1)
 
   for tag in reference.keys():
     check = re.compile(tag).search(line)
@@ -173,10 +180,18 @@ for line in output:
 
       reference[tag]["index"] += 1
       numberMatched += 1
+      numberMissing -= 1
 
-log.info("found " + str(numberErrors) + " errors and " \
-    + str(numberUnmatched) + " unmatched tags and " \
-    + str(numberMatched) + " matched tags")
+if options.output:
+  log.info("output file: " + options.output)
+
+log.info("reference file: " + options.reference)
+log.info("scratch directory: " + scratchDirectory)
+
+log.info("found " + str(numberErrors) + " value errors, " \
+    + str(numberMatched) + " matched entries, " \
+    + str(numberUnmatched) + " unmatched entries, " \
+    + str(numberMissing) + " entries that were missing from the output")
 
 if successfullyTerminated:
   log.info("FreeON successfully terminated")
@@ -184,7 +199,7 @@ else:
   log.info("FreeON did not successfully terminate")
 
 # Exit with a proper exit code.
-if numberErrors == 0:
+if numberErrors == 0 and numberMissing == 0 and numberUnmatched == 0:
   sys.exit(0)
 else:
   sys.exit(1)

@@ -17,7 +17,7 @@ include_HEADERS = config.h MondoConfig.h MondoLocalVersion.h
 
 #CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
 
-DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
+#DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
 # Phony targets.
 .PHONY : validate tags

@@ -26,6 +26,10 @@ EXTRA_DIST = \
   C2H4.reference \
   C2H6.inp \
   C2H6.reference \
+  CH3NH2.inp \
+  CH3NH2.reference \
+  CH3OH.inp \
+  CH3OH.reference \
   CH4.inp \
   CH4.reference \
   C.inp \
