@@ -30,6 +30,7 @@
 
 import logging
 import optparse
+import os
 import re
 import sys
 
@@ -71,7 +72,7 @@ log.addHandler(logHandler)
 logHandler = logging.FileHandler("regressionTest.log")
 logFormatter = logging.Formatter("%(asctime)s [%(name)s %(levelname)s] %(message)s", "%y-%m-%d %H:%M:%S")
 logHandler.setFormatter(logFormatter)
-logHandler.setLevel(logging.INFO)
+logHandler.setLevel(logging.DEBUG)
 
 log.addHandler(logHandler)
 
@@ -203,6 +204,7 @@ if options.output:
 
 log.info("reference file: " + options.reference)
 log.info("scratch directory: " + scratchDirectory)
+log.info("log file: " + os.path.join(os.getcwd(), "regressionTest.log"))
 
 log.info("found " + str(numberErrors) + " value errors, " \
     + str(numberMatched) + " matched entries, " \

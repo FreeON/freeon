@@ -1,6 +1,10 @@
 include $(srcdir)/../validate.inc
 
-VALIDATE_INPUTS = \
+TESTS = \
+  12-BPA
+
+EXTRA_DIST = \
+  $(TESTS) \
   01-Benzene.inp \
   02-BNSheet.inp \
   03-Caffeine.inp \
@@ -13,4 +17,5 @@ VALIDATE_INPUTS = \
   10-Malonaldahyde.inp \
   11-CO2.inp \
   12-BPA.inp \
+  12-BPA.reference \
   13-PhyticAcid.inp
