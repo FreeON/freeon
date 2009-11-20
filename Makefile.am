@@ -13,7 +13,7 @@ DISTCLEANFILES = config.h MondoConfig.h MondoLocalVersion.h
 
 include_HEADERS = config.h MondoConfig.h MondoLocalVersion.h
 
-#CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
+CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
 
 #DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
