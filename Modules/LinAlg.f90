@@ -1746,16 +1746,16 @@ CONTAINS
 
     NSMat=MAX(A%NSMat,B%NSMat)
     IF(.NOT.AllocQ(C%Alloc)) THEN
-      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C not allocated, allocating")
+      !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C not allocated, allocating")
       CALL New(C,NSMat_O=NSMat)
     ELSE
-      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C already allocated, reallocating")
+      !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C already allocated, reallocating")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
 
     IF(NSMat.NE.C%NSMat) THEN
-      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "NSMat.NE.C%NSMat! Deallocate-reallocate")
+      !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "NSMat.NE.C%NSMat! Deallocate-reallocate")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
