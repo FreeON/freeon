@@ -49,7 +49,7 @@ CONTAINS
     IF(InvokeBackend(TRIM(N%M_EXEC)//"/"//Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
       IF(InvokeBackend(Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
         CALL MondoLog(DEBUG_NONE, "Invoke", "failed to spawn process")
-        CALL Halt("Fatal")
+        CALL Halt("This is fatal")
       ENDIF
     ENDIF
 
