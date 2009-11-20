@@ -465,7 +465,7 @@ else
   # Set the optimization flags.
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
-      GCC)   CFLAGS="-O0 -g -Wall -pipe" ;;
+      GCC)   CFLAGS="-O0 -g3 -ggdb3 -Wall -pipe" ;;
       Intel) CFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
@@ -477,7 +477,7 @@ else
 
   if test -z "${user_FFLAGS}"; then
     case ${F77_COMPILERNAME} in
-      GCC)   FFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
+      GCC)   FFLAGS="-O0 -g3 -ggdb3 -fbounds-check -Wall -pipe" ;;
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
@@ -489,7 +489,7 @@ else
 
   if test -z "${user_FCFLAGS}"; then
     case ${FC_COMPILERNAME} in
-      GCC)   FCFLAGS="-O0 -g -fbounds-check -Wall -pipe" ;;
+      GCC)   FCFLAGS="-O0 -g3 -ggdb3 -fbounds-check -Wall -pipe" ;;
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
