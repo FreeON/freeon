@@ -1146,4 +1146,13 @@ AC_MSG_NOTICE([*** End Summary ***])
 # Pass the optimization flags to the hdf configure script.
 #ac_configure_args="${ac_configure_args} ${optimization_flags}"
 
+# Move CFLAGS to CONFIGURE_CFLAGS so we can possibly override them in the makefiles.
+AC_SUBST([CONFIGURE_CFLAGS], [${CFLAGS}])
+AC_SUBST([CONFIGURE_FFLAGS], [${FFLAGS}])
+AC_SUBST([CONFIGURE_FCFLAGS], [${FCFLAGS}])
+
+CFLAGS=
+FFLAGS=
+FCFLAGS=
+
 AC_OUTPUT
