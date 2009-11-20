@@ -27,7 +27,7 @@ to return derivative works to the MondoSCF group for review, and possible
 disemination in future releases.
 ])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip])
 
 AC_CONFIG_MACRO_DIR([m4])
 
