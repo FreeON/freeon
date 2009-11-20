@@ -80,13 +80,13 @@ PROGRAM SCFStatus
   !---------------------------------------------
   ! Rescaling factor for R/U/G theory.
   SFac=1D0
-  IF(P%NSMat.GT.1)SFac=0.5D0 !<<< SPIN
+  IF(P%NSMat.GT.1) SFac=0.5D0 !<<< SPIN
   !---------------------------------------------
   !  COMPUTE SOME EXPECTATION VALUES
   !
   !  S**2
   CALL Get(Tmp1,TrixFile('S',Args))
-  S2=GetS2(P,Tmp1,Tmp2)
+  S2 = GetS2(P,Tmp1,Tmp2)
 
   !  KinE=<T>=Tr{P.T}
   CALL Get(Tmp1,TrixFile('T',Args))

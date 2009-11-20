@@ -220,4 +220,4 @@ else:
 if numberErrors == 0 and numberMissing == 0 and numberUnmatched == 0:
   sys.exit(0)
 else:
-  sys.exit(1)
+  sys.exit(99)

@@ -1209,8 +1209,7 @@ CONTAINS
     INTEGER                       :: RecvStruct
     INTEGER,       INTENT(INOUT)  :: From
     TYPE(DBCSR),   INTENT(INOUT)  :: A,B,U
-    INTEGER                       :: S,T,JP,KP,IL,IG,JH,JL,JG,KG, &
-         MA,MB,MN_A,MN_B
+    INTEGER                       :: S,T,JP,KP,IL,IG,JH,JL,JG,KG,MA,MB,MN_A,MN_B
     REAL(DOUBLE)                  :: FlOp
     !-------------------------------------------------------------------------------
     !        Check for a quick return
@@ -1732,8 +1731,10 @@ CONTAINS
     TYPE(BCSR),         INTENT(INOUT) :: C
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     INTEGER                           :: Status
+#ifdef CHECK_UNRESTRICTED
     REAL(DOUBLE)                      :: FlOp
-    INTEGER                           :: NSMat,N1,N2
+#endif
+    INTEGER                           :: NSMat,N2
     TYPE(DBL_RNK2)                    :: AD,BD,CD,DD
     TYPE(INT_VECT)                    :: Flag
 
@@ -1745,6 +1746,11 @@ CONTAINS
 
     NSMat=MAX(A%NSMat,B%NSMat)
     IF(.NOT.AllocQ(C%Alloc)) THEN
+      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C not allocated, allocating")
+      CALL New(C,NSMat_O=NSMat)
+    ELSE
+      CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C already allocated, reallocating")
+      CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
     ENDIF
 
@@ -1754,7 +1760,6 @@ CONTAINS
       CALL New(C,NSMat_O=NSMat)
     ENDIF
 
-    !>>>>>>>>>>>>>>>>>>
 #ifndef CHECK_UNRESTRICTED
     CALL New(Flag,NAtoms)
     CALL SetEq(Flag,0)
@@ -2892,8 +2897,7 @@ CONTAINS
     REAL(DOUBLE),             INTENT(INOUT) :: FlOp
     REAL(DOUBLE),EXTERNAL                 :: DBL_Dot
     REAL(DOUBLE)                          :: Op
-    INTEGER                               :: IL,IG,J,JP,K,P,Q,MA,NA,MN,MN1, &
-         IStrtA,IStopA,iMvAtm,iMvBlk,iS
+    INTEGER                               :: IL,IG,J,JP,K,P,Q,MA,NA,MN,IStrtA,IStopA,iMvAtm,iMvBlk,iS
     !-------------------------------------------------------------------------------
     iMvAtm=0;iMvBlk=0;K=0;Q=0;
     Op=Zero
@@ -3051,7 +3055,7 @@ CONTAINS
     TYPE(BCSR)           :: A
     TYPE(BCSR), OPTIONAL :: B
     TYPE(INT_VECT)       :: RowPt,ColPt,BlkPt
-    LOGICAL :: SymbolicOnly
+
     IF(PRESENT(B))THEN
       IF(.NOT.AllocQ(B%Alloc))  &
            CALL New(B,NSMat_O=A%NSMat)
@@ -3748,7 +3752,6 @@ CONTAINS
       !          CALL SYSTEM(' gnuplot < PlotFile_2 ')
       !          CALL SYSTEM(' rm -f PlotFile_1 PlotFile_2 ')
     ENDIF
-1   FORMAT(2(1x,I16))
 2   FORMAT('set term  postscript eps  "Times-Roman" 18')
 3   FORMAT('set output "',A,'"')
 4   FORMAT('set xrange [0 :',I12,']')
@@ -3756,8 +3759,6 @@ CONTAINS
 6   FORMAT('set size 0.8, 1.0 ')
 7   FORMAT('set noxtics ')
 8   FORMAT('set noytics ')
-9   FORMAT('plot [0 : ',I12,' ] ',I12,' notitle ,',A1)
-10  FORMAT('                    ',I12,' notitle ,',A1)
 11  FORMAT("     'PlotFile_1' using 1:2 with points 4 ")
 12  FORMAT("plot 'PlotFile_1' using 1:2 with points 4 ")
 13  FORMAT("plot 'PlotFile_1' using 1:2 with points 4 ")
@@ -3920,13 +3921,10 @@ CONTAINS
     CALL Delete(Distance)
     CALL Delete(Magnitude)
 
-1   FORMAT(2(1x,I16))
 2   FORMAT('set term  postscript eps  "Times-Roman" 18')
     !   2   FORMAT('set term  jpeg transparent')
 3   FORMAT('set output "',A,'"')
 6   FORMAT('set size square ')
-9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
-10  FORMAT('                    ',I12,', \\')
   END SUBROUTINE PlotDecay
 
   SUBROUTINE Plot_BCSR(A,Name)
@@ -3960,8 +3958,6 @@ CONTAINS
 6   FORMAT('set size square ')
 7   FORMAT('set noxtics ')
 8   FORMAT('set noytics ')
-9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
-10  FORMAT('                    ',I12,', \\')
   END SUBROUTINE Plot_BCSR
 
   SUBROUTINE MStats(A,FileName)
