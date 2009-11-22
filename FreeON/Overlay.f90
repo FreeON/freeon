@@ -154,11 +154,11 @@ CONTAINS
       ENDIF
 #endif
       CALL Delete(ArgV)
-
-      ! Return success.
-      InvokeBackend = 0
-      RETURN
     ENDDO
+
+    ! Return success.
+    InvokeBackend = 0
+    RETURN
 
   END FUNCTION InvokeBackend
 
