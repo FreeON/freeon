@@ -1020,7 +1020,7 @@ CONTAINS
     IF(HasHF(O%Models(cBas)))THEN
        CALL Invoke('GONX',N,S,M)
     ENDIF
-    !
+
     ! Open the HDF and monkey with forces
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
@@ -1042,7 +1042,8 @@ CONTAINS
              ENDDO
           ENDDO
        ENDIF
-!      Zero forces on constrained atoms
+
+       ! Zero forces on constrained atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
              !IF(O%Coordinates /= GRAD_INTS_OPT) THEN
@@ -1050,7 +1051,8 @@ CONTAINS
              !ENDIF
           ENDIF
        ENDDO
-!      Add additional External Forces to Atoms
+
+       ! Add additional External Forces to Atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==3)THEN
              G%Clone(iCLONE)%Gradients%D(1:3,iATS)=G%Clone(iCLONE)%Gradients%D(1:3,iATS)-G%Clone(iCLONE)%Fext%D(1:3,iATS)

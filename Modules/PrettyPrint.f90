@@ -1765,7 +1765,7 @@ MODULE PrettyPrint
     INTEGER                          :: OutU
     INTEGER                          :: NC
     REAL(DOUBLE)                     :: RMax,R2
-!
+
     IF(.NOT. AllocQ(CS%Alloc)) THEN
        CALL Halt(' Cells are  not allocated in PPrint_CellSet')
     ENDIF
