@@ -130,7 +130,7 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
        ENDDO
-       ExitQ=SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
+       ExitQ = SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
           ! Overwrite the most recent GFile (doing transition state)
           !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
@@ -150,7 +150,7 @@ CONTAINS
              !C%Geos%Clone%Confg=gtmp
           ENDDO
 
-          CALL MergePrintClones(C%Geos,C%Nams,C%Opts,Gradients_O="Gradients")
+          CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
        ELSE
           ! No transitions states, just good old downhill
           IF(C%Opts%GeomPrint=='XSF') THEN
@@ -293,7 +293,8 @@ CONTAINS
         CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
       ELSE
         DO iCLONE=1,C%Geos%Clones
-          CALL PPrint(C%Geos%Clone(iCLONE), TRIM(C%Nams%GFile), Geo, C%Opts%GeomPrint)
+          CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = TRIM(C%Nams%GFile), &
+                      Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Gradients_O = "Gradients")
         ENDDO
       ENDIF
 
@@ -513,6 +514,7 @@ CONTAINS
       CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
       ! Print out the energy.
+      CALL MondoLog(DEBUG_NONE, "ConjgateGradient", "barrier energy profile")
       DO iCLONE = 1, C%Geos%Clones
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
           TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" hartree = "// &
