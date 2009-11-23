@@ -258,7 +258,7 @@ CONTAINS
     TYPE(BSET)         :: B
     LOGICAL            :: DoTDA
     REAL(DOUBLE)       :: Ek_P,Ek_Q,Ek,ErrAbs,EkOld0,EkOld1,ErrRel,Delta,BetaP,BetaQ, &
-         XkPcntP,XkPcntQ,XkPcnt,PkPcnt,LXkPcnt,LPkPcnt,MaxGP,MaxGQ,KTau,XTau,GTau,SqrRel,MinRel
+         XkPcntP,XkPcntQ,XkPcnt,PkPcnt,LXkPcnt,LPkPcnt,MaxG,MaxGP,MaxGQ,KTau,XTau,GTau,SqrRel,MinRel
     TYPE(BCSR)         :: sX
     TYPE(DBL_RNK2)     :: dX
     CHARACTER(LEN=DCL) :: Iteration,Statistics1,Statistics2,Statistics3
@@ -293,9 +293,9 @@ CONTAINS
     EkOld1=1D2
     XkPcnt=Zero
     PkPcnt=Zero
-    XTau=1D-4
-    KTau=1D-5
-    GTau=1D-4
+    XTau=1D-5
+    KTau=1D-6
+    GTau=1D-5
     !
     CALL LOn2AO(Nam,MPI,S,QN,RQIStat,QN%Xk,QN%LXk)
     CALL SNihilate(QN,QN%LXk,DoTDA)
@@ -307,6 +307,7 @@ CONTAINS
     DO K=0,O%MaxRQI-1
        ! - - - - - - - - - - - - - - - - - - - - -
        CALL GradGrad(QN,Ek_P,Ek_Q,MaxGP,MaxGQ)
+       MaxG=MAX(MaxGP,MAXGQ)
        CALL Recomb(QN,QN%Gk)
        CALL SNihilate(QN,QN%Gk,DoTDA)
        CALL SplitPQ(QN,QN%Gk,Switch_O=.TRUE.,PQThreshold_O=GTau)
@@ -322,7 +323,10 @@ CONTAINS
        ENDIF
        !
        ErrRel=ErrAbs/Ek
-       IF(ErrRel<5D-4.AND.K>15)EXIT
+       IF( (ErrRel<Zero                       & ! Variational criteria violated
+            .OR.( ErrRel<5D-4.AND.MaxG<1D-3 ) & ! Accuracy criteria met
+            ).AND.K>20                        & ! but only if we are in assymptotic region
+         )EXIT
        !
        MinRel=MIN(MinRel,SQRT(ABS(ErrRel)))
 
@@ -330,7 +334,7 @@ CONTAINS
        GTau=MIN(GTau,1D-1*MAX(MaxGP,MaxGQ))
        !
        CALL Elapsed_TIME(TimeTOTAL,Init_O='Accum')
-       CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,QN%Current%TwoE,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,.FALSE.)
+       CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,XTau,QN%Current%TwoE,MaxG,XkPcnt,PkPcnt,EConverge,Nam,.FALSE.)
        XkPcnt=Zero
        PkPcnt=Zero
        !
@@ -380,7 +384,9 @@ CONTAINS
     ENDDO
     !
     EConverge(K)=E_RPA
-    CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,QN%Current%TwoE,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,.TRUE.)
+    CALL QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,XTau,QN%Current%TwoE,MaxG,XkPcnt,PkPcnt,EConverge,Nam,.TRUE.)
+
+
     CALL Get(sX,QN%Xk%Ortho)
     CALL SetEq(dX,sX)
 
@@ -403,10 +409,10 @@ CONTAINS
   END SUBROUTINE xQUIRQI
 
 
-  SUBROUTINE QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,ETau,XTau,GTau,XkPcnt,PkPcnt,EConverge,Nam,FinalTally_O)
+  SUBROUTINE QUIRQIPrint(QN,K,Ek,Ek_P,Ek_Q,ErrRel,TauTrix,TauTwoE,MaxG,XkPcnt,PkPcnt,EConverge,Nam,FinalTally_O)
     TYPE(QUIRQIKontrol):: QN
     INTEGER :: I,K
-    REAL(DOUBLE)       :: Ek_P,Ek_Q,Ek,ErrAbs,EkOld,ErrRel,XTau,GTau,ETau, &
+    REAL(DOUBLE)       :: Ek_P,Ek_Q,Ek,ErrAbs,EkOld,ErrRel,TauTrix,TauTwoE,MaxG, &
          XkPcntP,XkPcntQ,PkPcntP,PkPcntQ,XkPcnt,PkPcnt,MaxGP,MaxGQ,thresh
     CHARACTER(LEN=DCL) :: Iteration,Statistics1,Statistics2,Statistics3
     REAL(DOUBLE),DIMENSION(:) :: EConverge
@@ -425,13 +431,11 @@ CONTAINS
          //", tQ = "//TRIM(DblToMedmChar(TimeQCTC%Wall)) &
          //", tM = "//TRIM(DblToMedmChar(TimeBCSR%Wall))
     !       CALL MondoLog(DEBUG_NONE, "QUIRQI",Statistics2)
-    Statistics3=" Ev = "//TRIM(DblToChar(Ek*27.21139613182D0))   &
+    Statistics3=" Ev = "//TRIM(DblToMedmChar(Ek*27.21139613182D0))   &
          //", ErrRel = "//TRIM(DblToShrtChar(ErrRel)) &
-         //", TrueEr = "//TRIM(DblToShrtChar(         &
-         ABS(E_RPA -Ek*27.21139613182D0)/E_RPA))  &
-         //", ETau = "//TRIM(DblToShrtChar(ETau)) &
-         //", XTau = "//TRIM(DblToShrtChar(XTau)) &
-         //", GTau = "//TRIM(DblToShrtChar(GTau)) &
+         //", MaxGrd = "//TRIM(DblToShrtChar(MaxG))   &
+         //", TauTrix = "//TRIM(DblToShrtChar(TauTrix)) &
+         //", TauTwoE = "//TRIM(DblToShrtChar(TauTwoE)) &
          //", %X = "//TRIM(DblToShrtChar(XkPcnt)) &
          //", %P = "//TRIM(DblToShrtChar(PkPcnt))
 
@@ -439,11 +443,9 @@ CONTAINS
 
     SCF_NAME=Nam%SCF_NAME
     !       SCF_NAME='p20_X_FULL_RPA_PRMOD'
-
-
-    CALL OpenASCII( TRIM(Nam%M_PWD)//'/'//TRIM(SCF_NAME)//'_XkPcnt_'//TRIM(DblToShrtChar(QN%Threshold)),77)
-    WRITE(77,*)K,XkPcnt
-    CLOSE(Unit=77)
+!    CALL OpenASCII( TRIM(Nam%M_PWD)//'/'//TRIM(SCF_NAME)//'_XkPcnt_'//TRIM(DblToShrtChar(QN%Threshold)),77)
+!    WRITE(77,*)K,XkPcnt
+!    CLOSE(Unit=77)
 
 
 
@@ -573,7 +575,7 @@ CONTAINS
        WRITE(*,*)TRIM(Xk)
        WRITE(*,*)'NNon0 = ',sXk%NNon0
        IF(Kount>8) &
-            CALL Halt('Logical error in RQI: OrthoPrune ')
+            CALL Halt(' Logical error in RQI: OrthoPrune ')
        GOTO 111
     ENDIF
     !
