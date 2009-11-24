@@ -74,7 +74,7 @@ PROGRAM MakePFFT
              IF(GM%PBC%AutoW%I(I)==1 .AND. GM%PBC%AutoW%I(J)==1) THEN
                 WRITE(*,*) 'I,J = ',I,J
                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) + DDelta
-                GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+                GM%PBC%InvBoxSh%D      = InverseMatrix3x3(GM%PBC%BoxShape%D)
                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
 !
                 DO K=1,CS_IN%NCells
@@ -86,7 +86,7 @@ PROGRAM MakePFFT
                 dTenS%D(:,I,J) = TenS%D(:)
                 !
                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J) - DDelta
-                GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+                GM%PBC%InvBoxSh%D      = InverseMatrix3x3(GM%PBC%BoxShape%D)
                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
                 DO K=1,CS_IN%NCells
                    CSS%CellCarts%D(:,K) = FracToAtom(GM,CS_IN%CellCarts%D(:,K))
@@ -97,7 +97,7 @@ PROGRAM MakePFFT
                 dTenS%D(:,I,J) = (TenS%D(:)-dTenS%D(:,I,J))/(Two*DDelta)
 
                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J)
-                GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
+                GM%PBC%InvBoxSh%D      = InverseMatrix3x3(GM%PBC%BoxShape%D)
                 GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
              ENDIF
           ENDDO
