@@ -95,10 +95,10 @@ PROGRAM MakePFFT
                 CALL CalculatePFFT(MaxEll,GM,Args,CSS,TenC,TenS)
                 dTenC%D(:,I,J) = (TenC%D(:)-dTenC%D(:,I,J))/(Two*DDelta)
                 dTenS%D(:,I,J) = (TenS%D(:)-dTenS%D(:,I,J))/(Two*DDelta)
-                
+
                 GM%PBC%BoxShape%D(I,J) = BoxShape%D(I,J)
                 GM%PBC%InvBoxSh%D      = InverseMatrix(GM%PBC%BoxShape%D)
-                GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))                
+                GM%PBC%CellVolume      = ABS(CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I))
              ENDIF
           ENDDO
        ENDDO
