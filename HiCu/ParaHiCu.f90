@@ -24,6 +24,9 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 ! Parallel HiCu  --- author: Chee K. Gan (2002 June 25)
+
+#include "MondoConfig.h"
+
 MODULE ParallelHiCu
 #ifdef PARALLEL 
   USE DerivedTypes
@@ -97,10 +100,10 @@ CONTAINS
     CALL AlignNodes()
   END SUBROUTINE ParaInitRho
 
-  !===============================================================================
   RECURSIVE FUNCTION CountRhoLeafNode(RhoTreeNode) RESULT(LeafNode) 
     TYPE(RhoNode), POINTER :: RhoTreeNode
-    INTEGER :: LeafNode
+    INTEGER                :: LeafNode
+
     LeafNode = 0
     IF(RhoTreeNode%Leaf) THEN
        LeafNode = 1
@@ -109,13 +112,12 @@ CONTAINS
                   CountRhoLeafNode(RhoTreeNode%Descend%Travrse)
     ENDIF
   END FUNCTION CountRhoLeafNode
-  !===============================================================================
+
   SUBROUTINE GetBBox()
-    INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J,Ind,LineLocExist
-    REAL(DOUBLE)::x2,LinDim
+    INTEGER        :: Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J,Ind,LineLocExist
+    REAL(DOUBLE)   :: x2,LinDim
     TYPE(INT_VECT) :: ETDirArr
     TYPE(DBL_VECT) :: ETRootArr
-
 
     NVol = NPrc
     CALL New(LCoor,(/3,NVol/))
@@ -195,7 +197,7 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE GetBBox
-  !===============================================================================
+
   SUBROUTINE GetNewLocalRhoBoundingBox()
     INTEGER :: I,KQ,J
     TYPE(BBox) :: NodeBox
@@ -220,7 +222,7 @@ CONTAINS
     CALL AlignNodes()
 
   END SUBROUTINE GetNewLocalRhoBoundingBox
-  !===============================================================================
+
   SUBROUTINE GetLocalBoundingBox()
     INTEGER :: NDist,I,KQ,J
     TYPE(BBox) :: NodeBox
@@ -247,7 +249,6 @@ CONTAINS
     CALL AlignNodes()
   END SUBROUTINE GetLocalBoundingBox
 
-  !===============================================================================
   SUBROUTINE SendBBox()
     INTEGER::I,IErr,NumDbl
     REAL(DOUBLE)::DblArr(3)
@@ -259,7 +260,6 @@ CONTAINS
 
   END SUBROUTINE SendBBox
 
-  !===============================================================================
   SUBROUTINE DistDist()
     IMPLICIT NONE
     INTEGER :: NC,Tot,FloatDblIndex,ActIntRecvAmt,ActDblRecvAmt,&
@@ -314,7 +314,6 @@ call mpi_barrier(mondo_comm,ierr)
     NSDen = Rho%NSDen      ! <<< SPIN
 
     write(*,*) 'DistDist NSDen',NSDen,' NCoef',NCoef,'NDist',NDist,MyID
-
 
     DO I = 1, NDist
        KQ = QDex(I)
@@ -684,7 +683,6 @@ call mpi_barrier(mondo_comm,ierr)
     !    ENDIF
   END SUBROUTINE DistDist
 
-  !===============================================================================
   SUBROUTINE ParaRhoToTree()
     INTEGER :: I
 
@@ -737,7 +735,6 @@ call mpi_barrier(mondo_comm,ierr)
     ENDIF
   END SUBROUTINE ParaSplitRho
 
-  !===============================================================================
   ! Orthogonal Recusive Bisection   
   SUBROUTINE ParaSplitRhoBox(Node,Left,Right)
     TYPE(RhoNode), POINTER :: Node,Left,Right
@@ -833,14 +830,12 @@ call mpi_barrier(mondo_comm,ierr)
     Node%Co(1:LMNLen*NSDen)=NewCo(KC:KC+LMNLen*NSDen-1)  !<<< SPIN
   END SUBROUTINE ParaFillRhoLeaf
 
-  !===============================================================================
   SUBROUTINE ParaInitRhoRoot()
     RhoRoot%Bdex = 1
     RhoRoot%Edex = NumOfDist
     RhoRoot%NQ = NumOfDist
   END SUBROUTINE ParaInitRhoRoot
 
-  !===============================================================================
   SUBROUTINE ParaGridGen()
     TYPE(BBox) :: WBox
     REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
@@ -870,7 +865,6 @@ if(myid==0)write(*,*)'ParaGridGen: TotRho=',TotRho,' TotExc=',TotExc,MyID
 
   END SUBROUTINE ParaGridGen
 
-  !===============================================================================
   SUBROUTINE WorkBBox(Kxc)
     TYPE(BBox) :: WBox
     REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
@@ -915,7 +909,7 @@ if(myid==0)write(*,*)'WorkBBox: TotRho=',TotRho,' TotExc=',TotExc,MyID
     CALL Delete(TmHiCuArr)
 
   END SUBROUTINE WorkBBox
-  !===============================================================================
+
   SUBROUTINE RepartitionVol()
 
     LOGICAL::Busy
@@ -1207,7 +1201,6 @@ if(myid==0)write(*,*)'WorkBBox: TotRho=',TotRho,' TotExc=',TotExc,MyID
     !ENDIF
   END SUBROUTINE RepartitionVol
 
-  !===============================================================================
   FUNCTION CalLeavesTm(BoxPoint)
     REAL(DOUBLE)::BoxPoint(6),CalLeavesTm,LE(3),UE(3)
     INTEGER::I

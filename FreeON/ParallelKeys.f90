@@ -24,7 +24,7 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 MODULE ParallelKeys
-  CHARACTER(LEN=*),  PARAMETER :: MPI_INVOCATION       = 'MPIInvoke'
+  CHARACTER(LEN=*), PARAMETER :: MPI_INVOCATION       = 'MPIInvoke'
   CHARACTER(LEN=*), PARAMETER :: MPI_PROCESSOR_FLAG   = 'MPIProcFlag'
   CHARACTER(LEN=*), PARAMETER :: MPI_PROCESSOR_NUMBER = 'MPIProcessors'
   CHARACTER(LEN=*), PARAMETER :: MPI_SPATIAL_PROC     = 'MPISpatialProc'

@@ -48,8 +48,8 @@ PROGRAM FreeON
   CALL Init(MemStats)
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
   CALL InitMPI()
-  InParallel=.FALSE.
-  IF(MyID==0)THEN
+  InParallel = .FALSE.
+  IF(MyID == 0) THEN
 #endif
     ! Load the input file.
     CALL ParseTheInput(C)
