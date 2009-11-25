@@ -106,6 +106,9 @@ CONTAINS
     ! Write information on host, platform, etc
     CALL MondoLogPlain("")
     CALL MondoLogPlain("running on "//TRIM(hostname))
+#if defined (PARALLEL_CLONES)
+    CALL MondoLogPlain("parallel clones, running on "//TRIM(IntToChar(NPrc))//" nodes")
+#endif
     CALL MondoLogPlain("")
     CALL MondoLogPlain("*** Build Information ***")
     CALL MondoLogPlain("")

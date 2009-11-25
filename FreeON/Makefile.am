@@ -59,7 +59,7 @@ FreeON_LINK = $(FCLINK)
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
 tags :
-	ctags --Fortran-kinds=+i+L *.{c,f90} ../Modules/*.{c,f,f90}
+	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.{c,f90} ../Modules/*.{c,f,f90}
 
 # Dependencies.
 ParseCommands.o : \

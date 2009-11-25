@@ -48,7 +48,6 @@ CONTAINS
   !===============================================================
   SUBROUTINE ParseTheInput(C)
     TYPE(Controls) :: C
-    INTEGER        :: iCLONE
 
     ! Parse command line and load env and file names
     CALL LoadCommands(C%Nams)
