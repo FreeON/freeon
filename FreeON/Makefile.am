@@ -158,7 +158,8 @@ ParseParallel.o : \
   $(top_builddir)/Modules/inout.mod \
   ParallelKeys.o \
   ControlStructures.o \
-  $(top_builddir)/Modules/mondologger.mod
+  $(top_builddir)/Modules/mondologger.mod \
+  $(top_builddir)/MondoConfig.h
 
 ParseBasis.o : \
   $(top_builddir)/Modules/order.mod \

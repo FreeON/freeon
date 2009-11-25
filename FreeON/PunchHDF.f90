@@ -183,7 +183,7 @@ CONTAINS
       DoubleRnk2%D=BIG_DBL
       CALL Put(DoubleRnk2,'MCCarts0')
       CALL Delete(DoubleRnk2)
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+#if defined(PARALLEL)
       CALL Put(0,'LineLocExist')
       CALL New(ETDirArr,P%NSpace-1)
       CALL New(ETRootArr,P%NSpace-1)

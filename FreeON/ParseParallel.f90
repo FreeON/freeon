@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE ParseParallel
   USE InOut
 #ifdef NAG
@@ -31,6 +34,9 @@ MODULE ParseParallel
   USE ParallelKeys
   USE ControlStructures
   USE MondoLogger
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  USE MondoMPI
+#endif
 
   IMPLICIT NONE
 
@@ -45,7 +51,7 @@ CONTAINS
     INTEGER            :: I,J,ITmp
     CHARACTER(LEN=DCL) :: MFile,NodeFile
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     CALL OpenASCII(N%IFile,Inp)
 #if !defined(MPI2)
     ! We are doing MPI-1, where mpirun is spawned underneath MondoSCF
@@ -60,7 +66,7 @@ CONTAINS
     ! Obtain the total number of processors to employ (hard uper limit)
     IF(.NOT.OptIntQ(Inp,MPI_PROCESSOR_NUMBER,M%NProc))THEN
        M%NProc=2
-       CALL Warn(' Parallel code defaulting to 2 processors ')
+       CALL Warn('Parallel code defaulting to 2 processors ')
     ENDIF
     ! Obtain the flag for the machine file; -machinefile, etc
     IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FLAG,M%MachFlag))M%MachFlag=" "
@@ -86,16 +92,19 @@ CONTAINS
     ! We are doing MPI-2, where MondoSCF must be invoked with mpirun.
     ! Note that this does not work (so far anyway) on True64 with LSF, since
     ! COMPAQ MPI is just MPICH.
-    M%NProc=MSize()
+    M%NProc = MSize()
+    CALL MondoLog(DEBUG_NONE, "ParseParallel", "NProc = "//TRIM(IntToChar(M%NProc)))
 #endif
     ! Parse for the number of processors in the spatial dimension
     IF(.NOT.OptIntQ(Inp,MPI_SPATIAL_PROC,M%NSpace))THEN
        M%NSpace=M%NProc
-       CALL Warn(' # of spatial proc not specified, defaulting to NSpace=NProc='//TRIM(IntToChar(M%NSpace)))
+       CALL Warn('# of spatial proc not specified, defaulting to NSpace = NProc = '//TRIM(IntToChar(M%NSpace)))
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
+
     ! Set up parallelism in space and time
     CALL SpaceTimeSetUp(M%NProc,M%NSpace,G%Clones,M%Clumps,M%Clump)
+
     ! Space for parallel sparse matrix indecies
     ALLOCATE(M%Beg(1:G%Clones,1:B%NBSets))
     ALLOCATE(M%End(1:G%Clones,1:B%NBSets))
@@ -137,6 +146,9 @@ CONTAINS
     CALL New(Clump, (/3,Clumps/))
 
     CALL MondoLog(DEBUG_NONE, "SpaceTimeSetUp", "creating "//TRIM(IntToChar(Clumps))//" clumps")
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    CALL MondoLog(DEBUG_NONE, "SpaceTimeSetup", "on "//TRIM(IntToChar(NProc))//" nodes")
+#endif
 
     DO iCLUMP=1,Clumps
        ! Number of clones in a clump
@@ -146,12 +158,14 @@ CONTAINS
        ! Number of proc to use per clump
        Clump%I(3,iCLUMP)=NSpace*ClonesPerClump
     ENDDO
+
     IF(LeftOvers>0)THEN
        ! And here we add in the leftovers
        Clump%I(1,Clumps)=LeftOvers
        Clump%I(2,Clumps)=Clumps*ClonesPerClump+1
        Clump%I(3,Clumps)=LeftOvers*NSpace
     ENDIF
+
 #ifdef FULL_ON_FRONT_END_DEBUG
     WRITE(*,*)' Clumps         = ',Clumps
     WRITE(*,*)' ClonesPerClump = ',ClonesPerClump
@@ -160,7 +174,9 @@ CONTAINS
        WRITE(*,*)'CLUMP(',iCLUMP,')= ',Clump%I(:,iCLUMP)
     ENDDO
 #endif
+
   END SUBROUTINE SpaceTimeSetUp
+
   !============================================================================
   ! GREEDY LOOK AHEAD DOMAIN DECOMPOSITION TO PARTITION DBCSR MATRICES
   !============================================================================

@@ -28,6 +28,9 @@
 ! FOR EFFICIENT RANGE QUERRIES OF THE DENSITY AND GRID
 ! Author: Matt Challacombe
 !-------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM HaiKu
   USE DerivedTypes
   USE GlobalScalars
@@ -50,6 +53,7 @@ PROGRAM HaiKu
   USE ParallelHiCu
   USE FastMatrices
 #endif
+
   IMPLICIT NONE
   TYPE(ARGMT)                    :: Args
 #ifdef PARALLEL

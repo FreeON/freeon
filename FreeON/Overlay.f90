@@ -46,6 +46,7 @@ CONTAINS
     TYPE(Parallel)       :: M
     LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
 
+    CALL MondoLog(DEBUG_NONE, "Invoke", "invoking "//TRIM(Ex))
     IF(InvokeBackend(TRIM(N%M_EXEC)//"/"//Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
       IF(InvokeBackend(Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
         CALL MondoLog(DEBUG_NONE, "Invoke", "failed to spawn process")
@@ -70,7 +71,7 @@ CONTAINS
     CHARACTER(LEN=2*DCL) :: CmndLine
     INTEGER              :: beginClump, endClump
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
-    INTEGER              :: SPAWN,ALL
+    INTEGER              :: SPAWN, ALL
 #else
     INTERFACE
       FUNCTION Spawn(NC, MaxLen, IChr)
@@ -108,6 +109,7 @@ CONTAINS
       CALL SetArgV(Ex,N,S,M,NArg,ArgV)
 #endif
 
+      CALL MondoLog(DEBUG_NONE, "Invoke", "here")
       ! This is the command line we are going to execute
       CmndLine=TRIM(ArgV%C(1))
       DO I=2,NArg
@@ -118,8 +120,10 @@ CONTAINS
       CALL MondoLog(DEBUG_MAXIMUM, "Invoke", TRIM(CmndLine), "Clump "//TRIM(IntToChar(iCLUMP)))
 
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
+      CALL MondoLog(DEBUG_NONE, "Invoke", "here 2")
       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
                           ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
+      CALL MondoLog(DEBUG_NONE, "Invoke", "here 3")
       IF(IErr/=MPI_SUCCESS) THEN
         CALL MondoLog(DEBUG_NONE, "Invoke", "Could not spawn <"//TRIM(CmndLine)//">", "errorcode = "//TRIM(IntToChar(MPIS_ERROR)))
         CALL Delete(ArgV)

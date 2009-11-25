@@ -61,4 +61,8 @@ HiCu.o : \
   Thresholds.o \
 	RhoTree.o \
 	CubeTree.o \
-  KxcGen.o
+  KxcGen.o \
+  $(top_builddir)/MondoConfig.h
+
+ParaHiCu.o : \
+  $(top_builddir)/MondoConfig.h
