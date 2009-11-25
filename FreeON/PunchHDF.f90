@@ -97,9 +97,8 @@ CONTAINS
     TYPE(DBL_RNK2)     :: DblMat
     TYPE(CMPoles)      :: MP
 
-    CALL MondoLog(DEBUG_MAXIMUM, "InitClones", "initializing hdf file")
+    CALL MondoLog(DEBUG_MAXIMUM, "InitClones", "initializing clones")
 
-    !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
     HDF_CurrentID=HDFFileID
@@ -421,8 +420,7 @@ CONTAINS
     ENDIF
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE StateArchive
-  !-----------------------------------------------------------------
-  !
+
   SUBROUTINE InitGlobal(C)
     TYPE(Controls) :: C
 
