@@ -74,7 +74,14 @@ getmemoryusage_wrapper (int * size)
   else { *size = -1; }
 }
 
-void getmemoryusage_wrapper_ (int * size)
+void
+getmemoryusage_wrapper_ (int * size)
+{
+  getmemoryusage_wrapper(size);
+}
+
+void
+getmemoryusage_wrapper__ (int * size)
 {
   getmemoryusage_wrapper(size);
 }

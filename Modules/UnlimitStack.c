@@ -30,7 +30,8 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-void unlimitstack ()
+void
+unlimitstack ()
 {
   int result;
   struct rlimit rlim;
@@ -47,7 +48,14 @@ void unlimitstack ()
   }
 }
 
-void unlimitstack_ ()
+void
+unlimitstack_ ()
+{
+  unlimitstack();
+}
+
+void
+unlimitstack__ ()
 {
   unlimitstack();
 }

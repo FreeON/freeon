@@ -35,7 +35,8 @@
 #include <errno.h>
 #include <string.h>
 
-void getpwdwrapper (char *pwd, int *max_length)
+void
+getpwdwrapper (char *pwd, int *max_length)
 {
   int i;
   char *buffer = (char*) malloc(sizeof(char)*((*max_length)+1));
@@ -61,7 +62,14 @@ void getpwdwrapper (char *pwd, int *max_length)
   free(buffer);
 }
 
-void getpwdwrapper_ (char *pwd, int *max_length)
+void
+getpwdwrapper_ (char *pwd, int *max_length)
+{
+  getpwdwrapper(pwd, max_length);
+}
+
+void
+getpwdwrapper__ (char *pwd, int *max_length)
 {
   getpwdwrapper(pwd, max_length);
 }

@@ -95,3 +95,9 @@ temporarydirectory_ (char *path, int *max_length)
 {
   temporarydirectory(path, max_length);
 }
+
+void
+temporarydirectory__ (char *path, int *max_length)
+{
+  temporarydirectory(path, max_length);
+}

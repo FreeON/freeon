@@ -273,9 +273,9 @@ void hdf5opendata__(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 void hdf5extenddata_(int* DataId, int* DataSpc, int* N)
 {
-  hid_t did,dspc,stat;
+  hid_t did,dspc;
   hsize_t siz[1];
-  int   STATUS;
+
   siz[0]=*N;
   did=*DataId;
   dspc=*DataSpc;

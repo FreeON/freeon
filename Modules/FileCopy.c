@@ -38,7 +38,8 @@
  * Author: Nicolas Bock <nbock@lanl.gov>
  */
 
-void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
+void
+filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
 {
   char *buffer = NULL;
   char *fileA  = NULL;
@@ -106,7 +107,7 @@ void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
       bytes_written = fwrite((void*) buffer, 1, bytes_read, fdB);
       if (bytes_written != bytes_read)
       {
-        printf("[filecopy] I read %u bytes, but wrote %u bytes\n", bytes_read, bytes_written);
+        printf("[filecopy] I read %u bytes, but wrote %u bytes\n", (unsigned int) bytes_read, (unsigned int) bytes_written);
         if (ferror(fdB))
         {
           printf("[filecopy]   %s\n", strerror(errno));
@@ -130,7 +131,14 @@ void filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
   fclose(fdB);
 }
 
-void filecopywrapper_ (int *lenA, char *fileA, int *lenB, char *fileB)
+void
+filecopywrapper_ (int *lenA, char *fileA, int *lenB, char *fileB)
+{
+  filecopywrapper(lenA, fileA, lenB, fileB);
+}
+
+void
+filecopywrapper__ (int *lenA, char *fileA, int *lenB, char *fileB)
 {
   filecopywrapper(lenA, fileA, lenB, fileB);
 }

@@ -28,7 +28,8 @@
 #include <time.h>
 #include "config.h"
 
-double random_(void)
+double
+random_wrapper ()
 {
   static int first_time = 1;
   static unsigned int seed = 0;
@@ -51,4 +52,14 @@ double random_(void)
   return rand()/(double) RAND_MAX;
 }
 
+double
+random_ ()
+{
+  return random_wrapper();
+}
 
+double
+random__ ()
+{
+  return random_wrapper();
+}
