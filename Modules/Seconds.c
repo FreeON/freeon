@@ -30,7 +30,8 @@
 #include <time.h>
 #include <sys/times.h>
 #include <unistd.h>
-double cpu_seconds_(void)
+double
+cpu_seconds_(void)
 {
  double CPS=1.0/CLOCKS_PER_SEC;
  double CLOCKS=clock();
@@ -39,7 +40,8 @@ double cpu_seconds_(void)
 double cpu_seconds(void){return cpu_seconds_();}
 double cpu_seconds__(void){return cpu_seconds_();}
 
-double wall_seconds_(void)
+double
+wall_seconds_(void)
 {
  struct tms tbuff;
  double CTK=1.0/sysconf(_SC_CLK_TCK);

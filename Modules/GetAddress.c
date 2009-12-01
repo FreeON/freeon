@@ -31,8 +31,20 @@
  */
 
 unsigned int
-getaddress_ (void * x)
+getaddress (void *x)
 {
   //printf ("Address of object is 0x%x\n", x);
   return (unsigned long int) x;
+}
+
+unsigned int
+getadress_ (void *x)
+{
+  return getadress(x);
+}
+
+unsigned int
+getadress__ (void *x)
+{
+  return getadress(x);
 }

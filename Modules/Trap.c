@@ -30,5 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+void trap__(void){abort();}
 void trap_(void){abort();}
 void trap(void){trap_();}

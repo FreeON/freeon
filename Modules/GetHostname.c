@@ -57,3 +57,9 @@ gethostnamewrapper_ (char* hostname, int* maximum_length)
 {
   gethostnamewrapper(hostname, maximum_length);
 }
+
+void
+gethostnamewrapper__ (char* hostname, int* maximum_length)
+{
+  gethostnamewrapper(hostname, maximum_length);
+}

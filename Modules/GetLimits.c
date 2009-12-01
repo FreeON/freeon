@@ -66,3 +66,9 @@ getstacksizelimit_ (int * current_limit, int * max_limit)
 {
   getstacksizelimit (current_limit, max_limit);
 }
+
+void
+getstacksizelimit__ (int * current_limit, int * max_limit)
+{
+  getstacksizelimit (current_limit, max_limit);
+}
