@@ -176,7 +176,7 @@ SOURCES_DEPCHECK = $(libfreeonmodules_la_SOURCES)
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
 tags :
-	ctags --Fortran-kinds=+i+L *.{c,f,f90}
+	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.{c,f,f90}
 
 # Dependencies.
 InOut.lo : \
