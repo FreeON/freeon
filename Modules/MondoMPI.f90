@@ -103,9 +103,9 @@ MODULE MondoMPI
 !        Load global MPI variables
          MyID=MRank()
          NPrc=MSize()
-         IF(MyID == 0) THEN
-           CALL MondoLog(DEBUG_NONE, "FreeON", "MPI parallel version, running on "//TRIM(IntToChar(NPrc))//" nodes")
-         ENDIF
+         !IF(MyID == 0) THEN
+         !  CALL MondoLog(DEBUG_NONE, "FreeON", "MPI parallel version, running on "//TRIM(IntToChar(NPrc))//" nodes")
+         !ENDIF
          InParallel=.TRUE.
       END SUBROUTINE InitMPI
 
