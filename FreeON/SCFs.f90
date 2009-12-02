@@ -89,22 +89,18 @@ CONTAINS
     CALL New(C%Stat%Action,1)
 
     ! Determine if there was a geomety or Basis Set Change
-    CALL MondoLog(DEBUG_NONE, "SCF", "here")
     CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat,C%Geos)
 
     ! Compute one-electron matrices
-    CALL MondoLog(DEBUG_NONE, "SCF", "here 2")
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
 
     ! Allocate space for convergence statistics
-    CALL MondoLog(DEBUG_NONE, "SCF", "here 3")
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
 
     DO iSCF = 0, MaxSCFs
       ! Do an SCF cycle
-      CALL MondoLog(DEBUG_NONE, "SCF", "cycle "//TRIM(IntToChar(iSCF)))
       IF(SCFCycle(iSCF,cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%Geos,C%Dyns,C%MPIs,ETot,DMax,DIIS)) THEN
         ! Free memory
         CALL Delete(ETot)
@@ -936,12 +932,10 @@ CONTAINS
     IF(.NOT. S%SameLatt)           DoPFFT=.TRUE.
     IF(.NOT. S%SameBasis)          DoPFFT=.TRUE.
 
-    CALL MondoLog(DEBUG_NONE, "OneEMats", "here")
     IF(DoPFFT) THEN
       CALL Invoke('MakePFFT',N,S,M)
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "OneEMats", "here 2")
     IF((O%Guess==GUESS_EQ_RESTART .AND.(.NOT.S%SameGeom)) &
          .OR.O%Guess==GUESS_EQ_NEWGEOM)THEN
       ! Make previous geometrys S matrix

@@ -24,7 +24,7 @@ PROGRAM MakePFFT
   REAL(DOUBLE)                   :: DDelta,Rad,AtoAU,SUM
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),PARAMETER     :: Prog='MakePFFT'
-  !--------------------------------------------------------------------------------
+
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   ! Get the geometry

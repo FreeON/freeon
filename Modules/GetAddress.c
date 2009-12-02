@@ -38,13 +38,13 @@ getaddress (void *x)
 }
 
 unsigned int
-getadress_ (void *x)
+getaddress_ (void *x)
 {
-  return getadress(x);
+  return getaddress(x);
 }
 
 unsigned int
-getadress__ (void *x)
+getaddress__ (void *x)
 {
-  return getadress(x);
+  return getaddress(x);
 }

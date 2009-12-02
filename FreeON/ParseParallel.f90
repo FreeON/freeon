@@ -59,14 +59,13 @@ CONTAINS
 
     ! Obtain MPI invocation: mpirun, mpiexe, prun, etc.
     IF(.NOT.OptCharQ(Inp,MPI_INVOCATION,M%Invoking))  &
-         CALL MondoHalt(PRSE_ERROR,' MPI invocation not found. Check for option ' &
-         //TRIM(MPI_INVOCATION))
+         CALL MondoHalt(PRSE_ERROR,'MPI invocation not found. Check for option'//TRIM(MPI_INVOCATION))
     ! Obtain flag for the number of processors; -n, -np, -proc etc
     IF(.NOT.OptCharQ(Inp,MPI_PROCESSOR_FLAG,M%ProcFlag))M%ProcFlag="-np"
     ! Obtain the total number of processors to employ (hard uper limit)
     IF(.NOT.OptIntQ(Inp,MPI_PROCESSOR_NUMBER,M%NProc))THEN
        M%NProc=2
-       CALL Warn('Parallel code defaulting to 2 processors ')
+       CALL Warn('Parallel code defaulting to 2 processors')
     ENDIF
     ! Obtain the flag for the machine file; -machinefile, etc
     IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FLAG,M%MachFlag))M%MachFlag=" "
@@ -97,8 +96,8 @@ CONTAINS
 #endif
     ! Parse for the number of processors in the spatial dimension
     IF(.NOT.OptIntQ(Inp,MPI_SPATIAL_PROC,M%NSpace))THEN
-       M%NSpace=M%NProc
-       CALL Warn('# of spatial proc not specified, defaulting to NSpace = NProc = '//TRIM(IntToChar(M%NSpace)))
+       M%NSpace = 1
+       CALL Warn('# of spatial proc not specified, defaulting to NSpace = '//TRIM(IntToChar(M%NSpace)))
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
 
@@ -133,7 +132,7 @@ CONTAINS
   SUBROUTINE SpaceTimeSetUp(NProc,NSPace,Clones,Clumps,Clump)
     TYPE(INT_RNK2) :: Clump
     INTEGER        :: ClonesPerClump,LeftOvers,NProc,NSpace,Clones,Clumps,iCLUMP
-    !--------------------------------------------------------------------------!
+
     ! Number of clones in a group (clump)
     ClonesPerClump=NProc/NSpace
     ! Number of groups
@@ -162,7 +161,7 @@ CONTAINS
     IF(LeftOvers>0)THEN
        ! And here we add in the leftovers
        Clump%I(1,Clumps)=LeftOvers
-       Clump%I(2,Clumps)=Clumps*ClonesPerClump+1
+       Clump%I(2,Clumps)=(Clumps-1)*ClonesPerClump+1
        Clump%I(3,Clumps)=LeftOvers*NSpace
     ENDIF
 

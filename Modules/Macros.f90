@@ -53,7 +53,7 @@ MODULE Macros
     MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS
   END INTERFACE
   INTEGER HDFFileID,H5GroupID
-  !-------------------------------------------------------------------------------
+
 CONTAINS
   SUBROUTINE StartUp(Args,Prog,Serial_O)
     TYPE(ARGMT),INTENT(OUT)              :: Args
@@ -61,15 +61,16 @@ CONTAINS
     LOGICAL,OPTIONAL                     :: Serial_O
     INTEGER                              :: I
     TYPE(INT_VECT)                       :: SpaceTimeSplit
-
     REAL(DOUBLE)                         :: ETag
+
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc,iTAG
     CHARACTER(LEN=DCL)                   :: MONDO_HOST
-    !-------------------------------------------------------------------------------
+
     CALL InitMPI()
 #endif
+
     ! Get arguments
     CALL Get(Args)
 
@@ -151,6 +152,7 @@ CONTAINS
     !
     !   CALL ShutDown(Prog)
   END SUBROUTINE StartUp
+
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
   FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
     INTEGER               :: IErr,MyClone,CART_COMM
@@ -159,7 +161,7 @@ CONTAINS
     CHARACTER(LEN=10)     :: Sub='SpaceNTime'
     LOGICAl               :: AllButRootMustDie
     INTEGER,DIMENSION(2)  :: Local
-    !-----------------------------------------------------------------------!
+
     ! Determine parallel status
     IF(PRESENT(Serial_O))THEN
       IF(Serial_O)THEN
@@ -170,6 +172,7 @@ CONTAINS
     ELSE
       InParallel=.FALSE.
     ENDIF
+
     ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
     IF(InParallel)THEN
       CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),  &
@@ -179,6 +182,7 @@ CONTAINS
            (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
     ENDIF
     CALL ErrChk(IErr,Sub)
+
     IF(CART_COMM/=MPI_COMM_NULL)THEN
       ! Find out which row (group) this PE belongs to
       CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local,IErr)
@@ -187,20 +191,23 @@ CONTAINS
       ! This is a dead node
       CALL ShutDown('DeaddNode')
     ENDIF
-    ! Offset the actuall clone
+
+    ! Offset the actual clone
     MyClone=SpaceTime%I(3)+Local(2)
     !CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
-    !
+
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
-    ! parallel in the spatial domain and using MONDO_COMM as their
-    ! default communicator
+    ! parallel in the spatial domain and using MONDO_COMM as their default
+    ! communicator
     CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
     CALL ErrChk(IErr,Sub)
+
     ! Reload local rank and PE number for the new MONDO_COMM
     MyID=MRank()
     NPrc=MSize()
   END FUNCTION CartCommSplit
 #endif
+
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
 
@@ -333,13 +340,14 @@ CONTAINS
     CALL Get(NClones,'clones')
 
   END SUBROUTINE LoadTopLevelGlobals
+
   !==============================================================
   ! LOAD GLOBAL VARIABLES FROM EACH CLONE/GROUP OF THE HDF FILE
   !==============================================================
   SUBROUTINE LoadGroupGlobals(Args)
     TYPE(ARGMT) :: Args
     INTEGER :: I,ChkNPrc
-    !-----------------------------------------------------------!
+
 #ifdef MMech
     IF(HasQM())THEN
 #endif
@@ -364,7 +372,7 @@ CONTAINS
         CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
         !             CALL Get(ChkNPrc,'chknprc')
         !             IF(NPrc/=ChkNPrc) &
-        !                  CALL Halt(' In StartUp() --- Inconsistency: NPrc = '  &
+        !                  CALL Halt('In StartUp() --- Inconsistency: NPrc = '  &
         !                  //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
         !                  //TRIM(IntToChar(ChkNPrc)))
         CALL New(Beg,NPrc-1,0)
