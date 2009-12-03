@@ -262,7 +262,8 @@ PROGRAM P2Use
     ! Open the old group
     HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
     ! Get the old AO-dM
-    CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Halt(' Bad logic in P2Use.  HDF Checkpoined DM is disabled for now. ')
+!!!    CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Get(S,TrixFile('S',Args))
     CALL Multiply(P,S,Tmp1)
     TError0 = ABS(SFac*Trace(Tmp1)-DBLE(NEl))/DBLE(NEl)
@@ -294,7 +295,11 @@ PROGRAM P2Use
     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
     HDF_CurrentID=H5GroupID
     ! Put the DM into the hdf
-    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
+
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
+
     ! Clean Up
     CALL Delete(P)
     !CALL Delete(S)
@@ -330,7 +335,8 @@ PROGRAM P2Use
     CALL BCast(NBasF)
 #endif
     ! Get the old AO-DM
-    CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Halt(' Bad logic in P2Use.  HDF Checkpoined DM is disabled for now. ')
+!!    CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
     ! IO for the non-orthogonal P
     CALL Put(P,TrixFile('D',Args,0))
     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
@@ -408,7 +414,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -556,7 +564,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -697,7 +707,10 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -850,7 +863,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -1013,7 +1028,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -1179,7 +1196,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -1351,7 +1370,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -1534,7 +1555,9 @@ PROGRAM P2Use
     CALL Filter(Tmp1,P)
 
     ! Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
 
@@ -1615,7 +1638,9 @@ PROGRAM P2Use
     ENDIF
     CALL Filter(Tmp1,P)
     !    Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
     !    Clean Up
@@ -1708,7 +1733,9 @@ PROGRAM P2Use
     ENDIF
     CALL Filter(Tmp1,P)
     !    Put to Disk
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,0))
     CALL PChkSum(Tmp1,'P[0]',Prog)
     !    Clean Up
@@ -1775,7 +1802,8 @@ PROGRAM P2Use
       ! Open the old group
       HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
       ! Get the old AO-DM
-      CALL Get(P0,'CurrentDM',CheckPoint_O=.TRUE.)
+      CALL Halt(' Bad logic in P2Use.  HDF Checkpoined DM is disabled for now. ')
+!!!      CALL Get(P0,'CurrentDM',CheckPoint_O=.TRUE.)
       ! Close Old group
       CALL CloseHDFGroup(HDF_CurrentID)
       CALL CloseHDF(OldFileID)
@@ -1987,7 +2015,9 @@ PROGRAM P2Use
     ! Save back to be sure.
     CALL PChkSum(P,'P[0]',Prog)
     CALL Put(P,TrixFile('D',Args,0))
-    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
+!!!    DM archiveal has been put on hold, pending better
+!!!    way of dealing with HDF in parallel.
+!!!    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
 
     ! Clean Up
     CALL Delete(P)
