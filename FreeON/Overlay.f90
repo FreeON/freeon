@@ -128,8 +128,13 @@ CONTAINS
 
       ! Merge the spawned and current local communicators
       CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
+
       ! Wait for the kiddies to be done
       CALL MPI_BARRIER(ALL,IErr)
+
+      ! Free the communicator.
+      CALL MPI_COMM_FREE(SPAWN, IErr)
+      CALL MPI_COMM_FREE(ALL, IErr)
 #else
       ! Create ASCII integer array to beat F9x/C incompatibility
       CALL CVToIV(NArg,ArgV,MaxLen,IChr)
