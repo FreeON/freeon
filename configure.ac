@@ -146,12 +146,24 @@ if test -n "${CC_COMPILERNAME}"; then
     AC_MSG_FAILURE([unknown CC compiler: ${CC_COMPILERNAME}])
   fi
 else
-  case ${CC} in
-    *gcc*) CC_COMPILERNAME="GCC" ;;
-    *icc*) CC_COMPILERNAME="Intel" ;;
-    *pgc*) CC_COMPILERNAME="PGI" ;;
-    *)     CC_COMPILERNAME="unknown" ;;
-  esac
+  # Try to find out what compiler this is.
+  CC_RESULT=`${CC} --version | head -n1 | awk '{print $1}'`
+  if test "`echo ${CC_RESULT} | sed -e 's/^.*gcc.*/gcc/'`" = "gcc"; then
+    AC_MSG_NOTICE([CC:  identified GNU gcc compiler])
+    CC_COMPILERNAME="GCC"
+  elif test "${CC_RESULT}" = "icc"; then
+    AC_MSG_NOTICE([CC:  identified Intel icc compiler])
+    CC_COMPILERNAME="Intel"
+  else
+    # Fall back to looking at the compiler executable name.
+    AC_MSG_NOTICE([CC: could not automatically detect compiler (${CC_RESULT})])
+    case ${CC} in
+      *gcc*) CC_COMPILERNAME="GCC" ;;
+      *icc*) CC_COMPILERNAME="Intel" ;;
+      *pgc*) CC_COMPILERNAME="PGI" ;;
+      *)     CC_COMPILERNAME="unknown" ;;
+    esac
+  fi
 fi
 
 AC_ARG_VAR([F77_COMPILERNAME], [Gives the configure script a hint as to what
@@ -168,12 +180,24 @@ if test -n "${F77_COMPILERNAME}"; then
     AC_MSG_FAILURE([unknown F77 compiler: ${F77_COMPILERNAME}])
   fi
 else
-  case ${F77} in
-    *gfortran*) F77_COMPILERNAME="GCC" ;;
-    *ifort*)    F77_COMPILERNAME="Intel" ;;
-    *pgf*)      F77_COMPILERNAME="PGI" ;;
-    *)          F77_COMPILERNAME="unknown" ;;
-  esac
+  # Try to find out what compiler this is.
+  F77_RESULT=`${F77} --version | head -n1 | awk '{print $1}'`
+  if test "${F77_RESULT}" = "GNU"; then
+    AC_MSG_NOTICE([F77: identified GNU gcc compiler])
+    F77_COMPILERNAME="GCC"
+  elif test "${F77_RESULT}" = "ifort"; then
+    AC_MSG_NOTICE([F77: identified Intel ifort compiler])
+    F77_COMPILERNAME="Intel"
+  else
+    # Fall back to looking at the compiler executable name.
+    AC_MSG_NOTICE([F77: could not automatically detect compiler (${F77_RESULT})])
+    case ${F77} in
+      *gfortran*) F77_COMPILERNAME="GCC" ;;
+      *ifort*)    F77_COMPILERNAME="Intel" ;;
+      *pgf*)      F77_COMPILERNAME="PGI" ;;
+      *)          F77_COMPILERNAME="unknown" ;;
+    esac
+  fi
 fi
 
 AC_ARG_VAR([FC_COMPILERNAME], [Gives the configure script a hint as to what
@@ -190,12 +214,24 @@ if test -n "${FC_COMPILERNAME}"; then
     AC_MSG_FAILURE([unknown FC compiler: ${FC_COMPILERNAME}])
   fi
 else
-  case ${FC} in
-    *gfortran*) FC_COMPILERNAME="GCC" ;;
-    *ifort*)    FC_COMPILERNAME="Intel" ;;
-    *pgf*)      FC_COMPILERNAME="PGI" ;;
-    *)          FC_COMPILERNAME="unknown" ;;
-  esac
+  # Try to find out what compiler this is.
+  FC_RESULT=`${FC} --version | head -n1 | awk '{print $1}'`
+  if test "${FC_RESULT}" = "GNU"; then
+    AC_MSG_NOTICE([FC:  identified GNU gcc compiler])
+    FC_COMPILERNAME="GCC"
+  elif test "${FC_RESULT}" = "ifort"; then
+    AC_MSG_NOTICE([FC:  identified Intel ifort compiler])
+    FC_COMPILERNAME="Intel"
+  else
+    # Fall back to looking at the compiler executable name.
+    AC_MSG_NOTICE([FC: could not automatically detect compiler (${FC_RESULT})])
+    case ${FC} in
+      *gfortran*) FC_COMPILERNAME="GCC" ;;
+      *ifort*)    FC_COMPILERNAME="Intel" ;;
+      *pgf*)      FC_COMPILERNAME="PGI" ;;
+      *)          FC_COMPILERNAME="unknown" ;;
+    esac
+  fi
 fi
 
 AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
@@ -224,8 +260,8 @@ AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], 
 AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
 
 AC_MSG_NOTICE([C compiler version:   ${cc_compiler_version_string}])
-AC_MSG_NOTICE([f77 compiler version: ${f77_compiler_version_string}])
-AC_MSG_NOTICE([f90 compiler version: ${fc_compiler_version_string}])
+AC_MSG_NOTICE([F77 compiler version: ${f77_compiler_version_string}])
+AC_MSG_NOTICE([FC compiler version:  ${fc_compiler_version_string}])
 
 # Put the C-compiler into standard C mode.
 AC_PROG_CC_STDC
