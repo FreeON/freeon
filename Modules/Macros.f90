@@ -199,10 +199,12 @@ CONTAINS
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
     ! parallel in the spatial domain and using MONDO_COMM as their default
     ! communicator
-    CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
-    CALL ErrChk(IErr,Sub)
+    !CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
+    !CALL ErrChk(IErr,Sub)
 
     ! Reload local rank and PE number for the new MONDO_COMM
+    !CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
+    !  //" after MyID = "//TRIM(IntToChar(MRank()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
     MyID=MRank()
     NPrc=MSize()
   END FUNCTION CartCommSplit
@@ -224,6 +226,8 @@ CONTAINS
     ! Revert back to global communicator, rank etc ...
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()
+    !CALL MondoLog(DEBUG_NONE, "ShutDown", "setting MyID = "//TRIM(IntToChar(MyID)) &
+    !  //", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
     ! and reopen the upper level HDF directory for just the world root node
     HDFFileID=OpenHDF(H5File)
 #endif
