@@ -141,12 +141,9 @@ MODULE FastMatrices
       CALL New(CN,0,0)
     ENDIF
 
-    CALL MPI_Gather(NAtms,1,MPI_INTEGER,CA%I(0),1,MPI_INTEGER,0,&
-           MONDO_COMM,IErr)
-    CALL MPI_Gather(B%NBlks,1,MPI_INTEGER,CB%I(0),1,MPI_INTEGER,0,&
-           MONDO_COMM,IErr)
-    CALL MPI_Gather(B%NNon0,1,MPI_INTEGER,CN%I(0),1,MPI_INTEGER,0,&
-           MONDO_COMM,IErr)
+    CALL MPI_Gather(NAtms,1,MPI_INTEGER,CA%I(0),1,MPI_INTEGER,0,MONDO_COMM,IErr)
+    CALL MPI_Gather(B%NBlks,1,MPI_INTEGER,CB%I(0),1,MPI_INTEGER,0,MONDO_COMM,IErr)
+    CALL MPI_Gather(B%NNon0,1,MPI_INTEGER,CN%I(0),1,MPI_INTEGER,0,MONDO_COMM,IErr)
 
     IF(MyID == 0) THEN
       GBNBlks = 0
@@ -171,23 +168,15 @@ MODULE FastMatrices
     ENDIF
 
     IF(MyID == 0) THEN
-      CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,&
-             C%MTrix%D,CN%I(0),DispN%I(0),MPI_DOUBLE_PRECISION,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,C%MTrix%D,CN%I(0),DispN%I(0),MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
     ELSE
-      CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,&
-             1.0D0,1,1,MPI_DOUBLE_PRECISION,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,1.0D0,1,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
     ENDIF
 
     IF(MyID == 0) THEN
-      CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,&
-             C%ColPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,C%ColPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,0,MONDO_COMM,IErr)
     ELSE
-      CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,&
-             1,1,1,MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,1,1,1,MPI_INTEGER,0,MONDO_COMM,IErr)
     ENDIF
 
 
@@ -199,9 +188,7 @@ MODULE FastMatrices
     B%BlkPt%I(LocalNBlks) = B%NNon0-B%BlkPt%I(LocalNBlks)+1
 
     IF(MyID == 0) THEN
-      CALL MPI_GatherV(B%BlkPt%I(1),LocalNBlks,MPI_INTEGER,&
-             C%BlkPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%BlkPt%I(1),LocalNBlks,MPI_INTEGER,C%BlkPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,0,MONDO_COMM,IErr)
       PrevBlkSize = C%BlkPt%I(1)
       C%BlkPt%I(1) = 1
       DO I = 2, GBNBlks
@@ -211,18 +198,14 @@ MODULE FastMatrices
         C%BlkPt%I(I) = NewPt
       ENDDO
     ELSE
-      CALL MPI_GatherV(B%BlkPt%I(1),B%NBlks,MPI_INTEGER,&
-             1,1,1,MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%BlkPt%I(1),B%NBlks,MPI_INTEGER,1,1,1,MPI_INTEGER,0,MONDO_COMM,IErr)
     ENDIF
 
     DO I = 1, NAtms
       B%RowPt%I(I) = B%RowPt%I(I+1)-B%RowPt%I(I)
     ENDDO
     IF(MyID == 0) THEN
-      CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,&
-             C%RowPt%I(1),CA%I(0),DispA%I(0),MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,C%RowPt%I(1),CA%I(0),DispA%I(0),MPI_INTEGER,0,MONDO_COMM,IErr)
       PrevColSize = C%RowPt%I(1)
       C%RowPt%I(1) = 1
       DO I = 2, NAtoms+1
@@ -231,9 +214,7 @@ MODULE FastMatrices
         C%RowPt%I(I) = NewPt
       ENDDO
     ELSE
-      CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,&
-             1,1,1,MPI_INTEGER,&
-             0,MONDO_COMM,IErr)
+      CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,1,1,1,MPI_INTEGER,0,MONDO_COMM,IErr)
     ENDIF
 
     CALL Delete(CA)
@@ -511,12 +492,10 @@ MODULE FastMatrices
     CALL AlignNodes()
     AllToAllBegTm = MondoTimer()
 
-    CALL MPI_ALLTOALL( LocalDims%I(1,0),3,MPI_INTEGER, &
-         RemoteDims%I(1,0),3,MPI_INTEGER,MONDO_COMM,IErr)
+    CALL MPI_ALLTOALL( LocalDims%I(1,0),3,MPI_INTEGER,RemoteDims%I(1,0),3,MPI_INTEGER,MONDO_COMM,IErr)
     AllToAllEndTm = MondoTimer()
     AllToAllTotTm = AllToAllEndTm - AllToAllBegTm
-    CALL MPI_Allgather(AllToAllTotTm,1,MPI_DOUBLE_PRECISION,DimTmArr(0),1,&
-      MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    CALL MPI_Allgather(AllToAllTotTm,1,MPI_DOUBLE_PRECISION,DimTmArr(0),1,MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
     CALL ErrChk(IErr,Sub)
 
     CALL New(SendToQ,NPrc-1,0)
@@ -635,8 +614,7 @@ MODULE FastMatrices
                SendBuffer(Col:Blk-1),SendBuffer(Blk:MTx-1),SendBuffer(Mtx:E))
           CALL Delete_FastMat1(A,(/Beg%I(To),End%I(To)/))
           NumDblSent = NumDblSent + Num
-          CALL MPI_Send(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To,Tag,&
-                 MONDO_COMM,IErr)
+          CALL MPI_Send(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,IErr)
           CALL ErrChk(IErr,Sub)
         ENDIF
 
@@ -646,8 +624,7 @@ MODULE FastMatrices
           E = RcvEnd%I(From)
           Num = E-B+1
           Tag = RecvFr
-          CALL MPI_Recv(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,From,&
-                 Tag,MONDO_COMM,Status,IErr)
+          CALL MPI_Recv(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,Status,IErr)
           CALL MPI_Get_Count(Status,MPI_DOUBLE_PRECISION,ActDblRecvAmt,IErr)
           IF(Num /= ActDblRecvAmt) THEN
             WRITE(*,*) 'Receive later : MyID = ',MyID, ' Num = ',Num, ',ActDblRecvAmt = ',ActDblRecvAmt
@@ -675,8 +652,7 @@ MODULE FastMatrices
           E = RcvEnd%I(From)
           Num = E-B+1
           Tag = RecvFr
-          CALL MPI_Recv(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,From,&
-                  Tag,MONDO_COMM,Status,IErr)
+          CALL MPI_Recv(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,Status,IErr)
           CALL MPI_Get_Count(Status,MPI_DOUBLE_PRECISION,ActDblRecvAmt,IErr)
           IF(Num /= ActDblRecvAmt) THEN
             WRITE(*,*) 'Receive first: MyID = ',MyID, ' Num = ',Num, ',ActDblRecvAmt = ',ActDblRecvAmt
@@ -715,16 +691,14 @@ MODULE FastMatrices
                SendBuffer(Col:Blk-1),SendBuffer(Blk:MTx-1),SendBuffer(Mtx:E))
           CALL Delete_FastMat1(A,(/Beg%I(To),End%I(To)/))
           NumDblSent = NumDblSent + Num
-          CALL MPI_Send(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To,&
-                 Tag,MONDO_COMM,IErr)
+          CALL MPI_Send(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,IErr)
           CALL ErrChk(IErr,Sub)
         ENDIF
       ENDIF
 
     ENDDO
 
-    CALL MPI_Gather(NumDblSent,1,MPI_INTEGER,IntArr(0),1,MPI_INTEGER,0,&
-           MONDO_COMM,IErr)
+    CALL MPI_Gather(NumDblSent,1,MPI_INTEGER,IntArr(0),1,MPI_INTEGER,0,MONDO_COMM,IErr)
     IF(MyID == 0) THEN
       DblSentMax = -1
       TotDblSent = 0

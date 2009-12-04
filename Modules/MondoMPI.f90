@@ -96,12 +96,14 @@ MODULE MondoMPI
       SUBROUTINE InitMPI()
          INTEGER :: IErr
          CHARACTER(LEN=*),PARAMETER :: Sub='InitMPI'
-!-------------------------------------------------------------------------------
+
          CALL MPI_INIT(IErr)
          CALL ErrChk(IErr,Sub)
          MONDO_COMM=MPI_COMM_WORLD
-!        Load global MPI variables
+         ! Load global MPI variables
          MyID=MRank()
+         !CALL MondoLog(DEBUG_NONE, "InitMPI", "setting MyID = "//TRIM(IntToChar(MyID)) &
+         !  //", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
          NPrc=MSize()
          !IF(MyID == 0) THEN
          !  CALL MondoLog(DEBUG_NONE, "FreeON", "MPI parallel version, running on "//TRIM(IntToChar(NPrc))//" nodes")
@@ -355,8 +357,7 @@ MODULE MondoMPI
          ELSE
             Op=MPI_SUM
          ENDIF
-         CALL MPI_ALLREDUCE(D,AllReduce_INT_SCLR,1, &
-              MPI_INTEGER,Op,MONDO_COMM,IErr)
+         CALL MPI_ALLREDUCE(D,AllReduce_INT_SCLR,1,MPI_INTEGER,Op,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION AllReduce_INT_SCLR
 
@@ -371,8 +372,7 @@ MODULE MondoMPI
          ELSE
             Op=MPI_SUM
          ENDIF
-         CALL MPI_ALLREDUCE(D,AllReduce_DBL_SCLR,1, &
-              MPI_DOUBLE_PRECISION,Op,MONDO_COMM,IErr)
+         CALL MPI_ALLREDUCE(D,AllReduce_DBL_SCLR,1,MPI_DOUBLE_PRECISION,Op,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION AllReduce_DBL_SCLR
 !-------------------------------------------------- DOUBLES
@@ -389,8 +389,7 @@ MODULE MondoMPI
          ELSE
             Op=MPI_SUM
          ENDIF
-         CALL MPI_REDUCE(D,Reduce_DBL_SCLR,1,MPI_DOUBLE_PRECISION, &
-                         Op,ROOT,MONDO_COMM,IErr)
+         CALL MPI_REDUCE(D,Reduce_DBL_SCLR,1,MPI_DOUBLE_PRECISION,Op,ROOT,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION Reduce_DBL_SCLR
 !-------------------------------------------------- INTEGERS
@@ -400,8 +399,7 @@ MODULE MondoMPI
          INTEGER                      :: I,Reduce_INT_SCLR
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Reduce_INT_SCLR'
-         CALL MPI_REDUCE(I,Reduce_INT_SCLR,1,MPI_INTEGER, &
-                         MPI_SUM,ROOT,MONDO_COMM,IErr)
+         CALL MPI_REDUCE(I,Reduce_INT_SCLR,1,MPI_INTEGER,MPI_SUM,ROOT,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION Reduce_INT_SCLR
 
@@ -416,13 +414,11 @@ MODULE MondoMPI
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Gather_INT_SCLR'
          IF(MyId==ROOT)THEN
-            CALL MPI_GATHER(  A,1,MPI_INTEGER, &
-                            B%I,1,MPI_INTEGER, &
-                            ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHER(A,1,MPI_INTEGER,B%I,1,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          ELSE
-            CALL MPI_GATHER(  A,1,MPI_INTEGER, &        ! Non-root nodes may not have
-                              1,1,MPI_INTEGER, &        ! B allocated, need to protect
-                            ROOT,MONDO_COMM,IErr)   ! against refrencing a pointer
+           ! Non-root nodes may not have B allocated, need to protect against
+           ! refrencing a pointer
+           CALL MPI_GATHER(A,1,MPI_INTEGER,1,1,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_INT_SCLR
@@ -434,13 +430,9 @@ MODULE MondoMPI
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Gather_INT_VECT'
          IF(MyId==ROOT)THEN
-            CALL MPI_GATHERV(Send%I,NSnd,         MPI_INTEGER, &
-                             Recv%I,NRcv%I,Disp%I,MPI_INTEGER, &
-                             ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHERV(Send%I,NSnd,MPI_INTEGER, Recv%I,NRcv%I,Disp%I,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          ELSE
-            CALL MPI_GATHERV(Send%I,NSnd,         MPI_INTEGER, &
-                                  1,   1,       1,MPI_INTEGER, &
-                             ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHERV(Send%I,NSnd,MPI_INTEGER,1,1,1,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_INT_VECT
@@ -451,13 +443,9 @@ MODULE MondoMPI
          INTEGER                      :: IErr
          CHARACTER(LEN=*),PARAMETER  :: Sub='Gather_DBL_SCLR'
          IF(MyId==ROOT)THEN
-            CALL MPI_GATHER(  A,1,MPI_DOUBLE_PRECISION, &
-                            B%D,1,MPI_DOUBLE_PRECISION, &
-                            ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHER(A,1,MPI_DOUBLE_PRECISION,B%D,1,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          ELSE
-            CALL MPI_GATHER(    A,1,MPI_DOUBLE_PRECISION, &
-                            1.0D0,1,MPI_DOUBLE_PRECISION, &
-                            ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHER(A,1,MPI_DOUBLE_PRECISION,1.0D0,1,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_DBL_SCLR
@@ -470,13 +458,9 @@ MODULE MondoMPI
          INTEGER                      :: IErr
          CHARACTER(LEN=*),PARAMETER  :: Sub='Gather_DBL_VECT'
          IF(MyId==ROOT)THEN
-            CALL MPI_GATHERV(Send%D,NSnd,         MPI_DOUBLE_PRECISION, &
-                             Recv%D,NRcv%I,Disp%I,MPI_DOUBLE_PRECISION, &
-                             ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHERV(Send%D,NSnd,MPI_DOUBLE_PRECISION,Recv%D,NRcv%I,Disp%I,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          ELSE
-            CALL MPI_GATHERV(Send%D,NSnd,         MPI_DOUBLE_PRECISION, &
-                              1.0D0,   1,       1,MPI_DOUBLE_PRECISION, &
-                             ROOT,MONDO_COMM,IErr)
+            CALL MPI_GATHERV(Send%D,NSnd,MPI_DOUBLE_PRECISION,1.0D0,1,1,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_DBL_VECT
@@ -492,8 +476,7 @@ MODULE MondoMPI
          INTEGER,     INTENT(IN)      :: To,Tag
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Send_DBL_SCLR'
-         CALL MPI_SEND(Snd,1,MPI_DOUBLE_PRECISION,To,Tag, &
-                       MONDO_COMM,IErr)
+         CALL MPI_SEND(Snd,1,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_DBL_SCLR
 !-------------------------------------------------------------------------------
@@ -508,8 +491,7 @@ MODULE MondoMPI
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
 !         WRITE(*,11)M,N,L
 !        11 format('m = ',i4,' n = ',i4,' l = ',i4)
-         CALL MPI_SEND(Snd%D(M:N),L,MPI_DOUBLE_PRECISION,To,Tag, &
-                       MONDO_COMM,IErr)
+         CALL MPI_SEND(Snd%D(M:N),L,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_DBL_VECT
 !-------------------------------------------------------------------------------
@@ -519,8 +501,7 @@ MODULE MondoMPI
          INTEGER, INTENT(IN)          :: Snd,To,Tag
          INTEGER                      :: IErr
          CHARACTER(LEN=*), PARAMETER :: Sub='Send_INT_SCLR'
-         CALL MPI_SEND(Snd,1,MPI_INTEGER,To,Tag, &
-                       MONDO_COMM,IErr)
+         CALL MPI_SEND(Snd,1,MPI_INTEGER,To,Tag,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_SCLR
 !-------------------------------------------------------------------------------
@@ -538,8 +519,7 @@ MODULE MondoMPI
 !         WRITE(*,*)' To = ',To,' Tag = ',Tag
 !         WRITE(*,*)' SIZE SND = ',SIZE(Snd%I)
 !         WRITE(*,*)' Snd = ',Snd%I(M:N)
-         CALL MPI_SEND(Snd%I(M:N),L,MPI_INTEGER,To,Tag, &
-                       MONDO_COMM,IErr)
+         CALL MPI_SEND(Snd%I(M:N),L,MPI_INTEGER,To,Tag,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_VECT
 !-------------------------------------------------------------------------------
@@ -552,8 +532,7 @@ MODULE MondoMPI
          INTEGER,OPTIONAL,INTENT(IN)     :: M_O
          CHARACTER(LEN=*),PARAMETER     :: Sub='Send_INT_VECTOR'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
-         CALL MPI_SEND(Snd(M:N),L,MPI_INTEGER,To,Tag, &
-                       MONDO_COMM,IErr)
+         CALL MPI_SEND(Snd(M:N),L,MPI_INTEGER,To,Tag,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_VECTOR
 !-------------------------------------------------------------------------------
@@ -565,8 +544,7 @@ MODULE MondoMPI
          INTEGER                             :: IErr
          INTEGER, DIMENSION(MPI_STATUS_SIZE) :: Status
          CHARACTER(LEN=*),PARAMETER         :: Sub='Recv_DBL_SCLR'
-         CALL MPI_RECV(Rec,1,MPI_DOUBLE_PRECISION,From,Tag, &
-                       MONDO_COMM,Status,IErr)
+         CALL MPI_RECV(Rec,1,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_DBL_SCLR
 !-------------------------------------------------------------------------------
@@ -580,8 +558,7 @@ MODULE MondoMPI
          INTEGER, OPTIONAL, INTENT(IN)       :: M_O
          CHARACTER(LEN=*),PARAMETER         :: Sub='Recv_DBL_VECT'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
-         CALL MPI_RECV(Rec%D(M:N),L,MPI_DOUBLE_PRECISION,From,Tag, &
-                       MONDO_COMM,Status,IErr)
+         CALL MPI_RECV(Rec%D(M:N),L,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_DBL_VECT
 
@@ -594,8 +571,7 @@ MODULE MondoMPI
          INTEGER                             :: IErr
          INTEGER, DIMENSION(MPI_STATUS_SIZE) :: Status
          CHARACTER(LEN=*),PARAMETER         :: Sub='Recv_INT_SCLR'
-         CALL MPI_RECV(Rec,1,MPI_INTEGER,From,Tag, &
-                       MONDO_COMM,Status,IErr)
+         CALL MPI_RECV(Rec,1,MPI_INTEGER,From,Tag,MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_INT_SCLR
 !-------------------------------------------------------------------------------
@@ -613,8 +589,7 @@ MODULE MondoMPI
 !         WRITE(*,*)' M = ',M,' N = ',N,' L = ',L
 !         WRITE(*,*)' From = ',From,' Tag = ',Tag
 !         WRITE(*,*)' SIZE RCV = ',SIZE(Rec%I)
-         CALL MPI_RECV(Rec%I(M:N),L,MPI_INTEGER,From,Tag, &
-                       MONDO_COMM,Status,IErr)
+         CALL MPI_RECV(Rec%I(M:N),L,MPI_INTEGER,From,Tag,MONDO_COMM,Status,IErr)
 !         WRITE(*,*)' SIZE REC = ',SIZE(Rec%I)
 !         WRITE(*,*)' Rec = ',Rec%I(M:N)
 !         WRITE(*,*)' IErr = ',IErr
@@ -631,8 +606,7 @@ MODULE MondoMPI
          INTEGER, OPTIONAL, INTENT(IN)       :: M_O
          CHARACTER(LEN=*),PARAMETER         :: Sub='Recv_INT_VECTOR'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
-         CALL MPI_RECV(Rec(M:N),L,MPI_INTEGER,From,Tag, &
-                       MONDO_COMM,Status,IErr)
+         CALL MPI_RECV(Rec(M:N),L,MPI_INTEGER,From,Tag,MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_INT_VECTOR
 !===============================================================================
@@ -647,8 +621,7 @@ MODULE MondoMPI
          INTEGER,     INTENT(IN)     :: To,Tag
          INTEGER                     :: ISend_DBL_SCLR,IErr
          CHARACTER(LEN=*),PARAMETER :: Sub='ISend_DBL_SCLR'
-         CALL MPI_ISEND(Snd,1,MPI_DOUBLE_PRECISION,To,Tag, &
-                        MONDO_COMM,ISend_DBL_SCLR,IErr)
+         CALL MPI_ISEND(Snd,1,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,ISend_DBL_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_DBL_SCLR
 !-------------------------------------------------------------------------------
@@ -661,8 +634,7 @@ MODULE MondoMPI
          INTEGER,OPTIONAL,INTENT(IN)  :: M_O
          CHARACTER(LEN=*),PARAMETER  :: Sub='ISend_DBL_VECT'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
-         CALL MPI_ISEND(Snd%D(M:N),L,MPI_DOUBLE_PRECISION,To,Tag, &
-                        MONDO_COMM,ISend_DBL_VECT,IErr)
+         CALL MPI_ISEND(Snd%D(M:N),L,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,ISend_DBL_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_DBL_VECT
 !-------------------------------------------------------------------------------
@@ -675,8 +647,7 @@ MODULE MondoMPI
          CHARACTER(LEN=*),PARAMETER :: Sub='ISend_INT_SCLR'
 !         WRITE(*,*)' isend isend isend isend isend isend isend isend isend isend '
 !         WRITE(*,*)'MyId = ',MyId,' To = ',To,' Tag = ',Tag
-         CALL MPI_ISEND(Snd,1,MPI_INTEGER,To,Tag, &
-                        MONDO_COMM,ISend_INT_SCLR,IErr)
+         CALL MPI_ISEND(Snd,1,MPI_INTEGER,To,Tag,MONDO_COMM,ISend_INT_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_INT_SCLR
 !-------------------------------------------------------------------------------
@@ -696,8 +667,7 @@ MODULE MondoMPI
 !         WRITE(*,*)' SIZE SND = ',SIZE(Snd%I)
 !         WRITE(*,*)' Snd = ',Snd%I(M:N)
 !endif
-         CALL MPI_ISEND(Snd%I(M:N),L,MPI_INTEGER,To,Tag, &
-                        MONDO_COMM,ISend_INT_VECT,IErr)
+         CALL MPI_ISEND(Snd%I(M:N),L,MPI_INTEGER,To,Tag,MONDO_COMM,ISend_INT_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_INT_VECT
 !-------------------------------------------------------------------------------
@@ -708,8 +678,7 @@ MODULE MondoMPI
          INTEGER,INTENT(IN)         :: From,Tag
          INTEGER                    :: IRecv_DBL_SCLR,IErr
          CHARACTER(LEN=*),PARAMETER:: Sub='IRecv_DBL_SCLR'
-         CALL MPI_IRECV(Rec,1,MPI_DOUBLE_PRECISION,From,Tag, &
-                        MONDO_COMM,IRecv_DBL_SCLR,IErr)
+         CALL MPI_IRECV(Rec,1,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,IRecv_DBL_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_DBL_SCLR
 !-------------------------------------------------------------------------------
@@ -722,8 +691,7 @@ MODULE MondoMPI
          INTEGER,INTENT(IN),OPTIONAL   :: M_O
          CHARACTER(LEN=*),PARAMETER   :: Sub='IRecv_DBL_VECT'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
-         CALL MPI_IRECV(Rec%D(M:N),L,MPI_DOUBLE_PRECISION,From,Tag, &
-                        MONDO_COMM,IRecv_DBL_VECT,IErr)
+         CALL MPI_IRECV(Rec%D(M:N),L,MPI_DOUBLE_PRECISION,From,Tag,MONDO_COMM,IRecv_DBL_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_DBL_VECT
 !-------------------------------------------------------------------------------
@@ -736,8 +704,7 @@ MODULE MondoMPI
          CHARACTER(LEN=*),PARAMETER  :: Sub='IRecv_INT_SCLR'
 !         WRITE(*,*)' irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv '
 !         WRITE(*,*)' MyId = ',MyId,' From = ',From,' Tag = ',Tag
-         CALL MPI_IRECV(Rec,1,MPI_INTEGER,From,Tag, &
-                        MONDO_COMM,IRecv_INT_SCLR,IErr)
+         CALL MPI_IRECV(Rec,1,MPI_INTEGER,From,Tag,MONDO_COMM,IRecv_INT_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_INT_SCLR
 !-------------------------------------------------------------------------------
@@ -756,8 +723,7 @@ MODULE MondoMPI
 !         WRITE(*,*)' MyId = ',MyId,' From = ',From,' Tag = ',Tag
 !         WRITE(*,*)' SIZE RCV = ',SIZE(Rec%I)
 !endif
-         CALL MPI_IRECV(Rec%I(M:N),L,MPI_INTEGER,From,Tag, &
-                        MONDO_COMM,IRecv_INT_VECT,IErr)
+         CALL MPI_IRECV(Rec%I(M:N),L,MPI_INTEGER,From,Tag,MONDO_COMM,IRecv_INT_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_INT_VECT
 !

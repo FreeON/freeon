@@ -169,7 +169,8 @@ CONTAINS
 
         ! Sleep a little.
         !CALL MondoLog(DEBUG_NONE, "Invoke", "sleeping")
-        CALL SLEEP(2)
+        CALL FreeONSleep(2)
+        !CALL MondoLog(DEBUG_NONE, "Invoke", "done sleeping")
       ENDDO
 
       ! All children are done.
