@@ -142,15 +142,15 @@ CONTAINS
     ! Print time stamp
     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-      IF(MyId==ROOT) THEN
+      IF(MyId == ROOT) THEN
         CALL TimeStamp('Entering '//TRIM(Prog),Enter_O=.TRUE.)
       ENDIF
 #else
       CALL TimeStamp('Entering '//TRIM(Prog))
 #endif
     ENDIF
-    !
-    !   CALL ShutDown(Prog)
+
+    ! CALL ShutDown(Prog)
   END SUBROUTINE StartUp
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
@@ -272,17 +272,18 @@ CONTAINS
     ! ... and close the HDF file ...
     CALL CloseHDF(HDFFileID)
     ! ... shutdown MPI and print a time stamp
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    IF(PrintFlags%Key > DEBUG_MEDIUM.AND.MyId==ROOT) THEN
-      CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
-    ENDIF
-    ! Shutdown MPI
-    CALL FiniMPI()
-#else
     IF(PrintFlags%Key>DEBUG_MEDIUM) THEN
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+      IF(MyId == ROOT) THEN
+        CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+      ENDIF
+
+      ! Shutdown MPI
+      CALL FiniMPI()
+#else
       CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
-    ENDIF
 #endif
+    ENDIF
     STOP
   END SUBROUTINE ShutDown
 

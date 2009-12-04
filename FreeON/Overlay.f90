@@ -70,8 +70,13 @@ CONTAINS
     TYPE(INT_VECT),SAVE  :: IChr
     CHARACTER(LEN=2*DCL) :: CmndLine
     INTEGER              :: beginClump, endClump
+
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
-    INTEGER              :: SPAWN, ALL
+    INTEGER                              :: SPAWN, INTRA_SPAWN, buffer_index
+    CHARACTER, ALLOCATABLE, DIMENSION(:) :: message_buffer
+    INTEGER, ALLOCATABLE, DIMENSION(:)   :: message_request
+    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: message_status
+    LOGICAL, ALLOCATABLE, DIMENSION(:)   :: message_flag
 #else
     INTERFACE
       FUNCTION Spawn(NC, MaxLen, IChr)
@@ -127,14 +132,58 @@ CONTAINS
       ENDIF
 
       ! Merge the spawned and current local communicators
-      CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
+      CALL MPI_INTERCOMM_MERGE(SPAWN, .TRUE., INTRA_SPAWN, IErr)
 
-      ! Wait for the kiddies to be done
-      CALL MPI_BARRIER(ALL,IErr)
+      ! Wait for the kiddies to be done. We do that by waiting for them to send
+      ! us a nice message instead of waiting at a barrier. This is to avoid
+      ! spending CPU time in the front-end polling the barrier. Waiting for
+      ! messages, we can do non-blocking receives and control the polling
+      ! frequency ourselves.
+      !
+      ! First set up the receive buffers.
+      ALLOCATE(message_buffer(M%Clump%I(3, iCLUMP)))
+      ALLOCATE(message_request(M%Clump%I(3, iCLUMP)))
+      ALLOCATE(message_flag(M%Clump%I(3, iCLUMP)))
+      ALLOCATE(message_status(M%Clump%I(3, iCLUMP), MPI_STATUS_SIZE))
+
+      DO I = 1, M%Clump%I(3, iCLUMP)
+        !CALL MondoLog(DEBUG_NONE, "Invoke", "setting up receive buffers")
+        CALL MPI_IRECV(message_buffer(I), 1, MPI_CHARACTER, MPI_ANY_SOURCE, 0, SPAWN, message_request(I), IErr)
+        message_flag(I) = .FALSE.
+      ENDDO
+
+      ! Loop over children to check whether they are done and have sent a
+      ! message.
+      buffer_index = 0
+      DO WHILE(buffer_index < M%Clump%I(3, iCLUMP))
+        DO I = 1, M%Clump%I(3, iCLUMP)
+          IF(.NOT. message_flag(I)) THEN
+            !CALL MondoLog(DEBUG_NONE, "Invoke", "testing child "//TRIM(IntToChar(I)))
+            CALL MPI_TEST(message_request(I), message_flag(I), message_status(I,:), IErr)
+            IF(message_flag(I)) THEN
+              !CALL MondoLog(DEBUG_NONE, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
+              buffer_index = buffer_index+1
+            ENDIF
+          ENDIF
+        ENDDO
+
+        ! Sleep a little.
+        !CALL MondoLog(DEBUG_NONE, "Invoke", "sleeping")
+        CALL SLEEP(2)
+      ENDDO
+
+      ! All children are done.
+      !CALL MondoLog(DEBUG_NONE, "Invoke", "all children are done")
 
       ! Free the communicator.
       CALL MPI_COMM_FREE(SPAWN, IErr)
-      CALL MPI_COMM_FREE(ALL, IErr)
+      CALL MPI_COMM_FREE(INTRA_SPAWN, IErr)
+
+      ! Free the buffers.
+      DEALLOCATE(message_buffer)
+      DEALLOCATE(message_request)
+      DEALLOCATE(message_flag)
+      DEALLOCATE(message_status)
 #else
       ! Create ASCII integer array to beat F9x/C incompatibility
       CALL CVToIV(NArg,ArgV,MaxLen,IChr)

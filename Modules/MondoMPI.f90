@@ -113,14 +113,23 @@ MODULE MondoMPI
         INTEGER                    :: IErr
         CHARACTER(LEN=*),PARAMETER :: Sub='FiniMPI'
 #ifdef MPI2
-        INTEGER                    :: PARENT, ALL
-!
+        INTEGER   :: PARENT, INTRA_PARENT
+        CHARACTER :: message_buffer
+
         ! Get the parent communicator
-        CALL MPI_COMM_GET_PARENT(PARENT,IErr)
+        CALL MPI_COMM_GET_PARENT(PARENT, IErr)
+
         ! Merge the parent and current local communicators
-        CALL MPI_INTERCOMM_MERGE(PARENT,.TRUE.,ALL,IErr)
-        ! Sychronize parent and child
-        CALL MPI_BARRIER(ALL,IErr)
+        CALL MPI_INTERCOMM_MERGE(PARENT, .TRUE., INTRA_PARENT, IErr)
+
+        ! Sychronize parent and child. We do that by sending a message to the
+        ! parent.
+        !CALL MondoLog(DEBUG_NONE, "FiniMPI", "sending message to rank 0")
+        CALL MPI_SEND(message_buffer, 1, MPI_CHARACTER, 0, 0, PARENT, IErr)
+
+        ! Free the communicator.
+        CALL MPI_COMM_FREE(PARENT, IErr)
+        CALL MPI_COMM_FREE(INTRA_PARENT, IErr)
 #endif
         CALL MPI_FINALIZE(IErr)
       END SUBROUTINE FiniMPI
