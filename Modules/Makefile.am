@@ -36,6 +36,7 @@ libfreeonmodules_la_SOURCES = \
   DerivedTypes.f90 \
   FastMat.f90 \
   FileCopy.c \
+  FreeONSleep.c \
   Functionals.f90 \
   GetAddress.c \
   GetHostname.c \
@@ -455,4 +456,5 @@ MondoLogger.lo : \
 Utilities.lo : \
   MondoLogger.lo \
   ParsingConstants.lo \
-  Parse.lo
+  Parse.lo \
+  FreeONSleep.lo

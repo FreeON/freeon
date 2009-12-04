@@ -62,6 +62,10 @@ MODULE Utilities
       INTEGER, INTENT(IN)             :: length
     END SUBROUTINE TemporaryDirectory
 
+    SUBROUTINE FreeONSleep (time)
+      INTEGER, INTENT(IN) :: time
+    END SUBROUTINE FreeONSleep
+
   END INTERFACE
 
 CONTAINS
