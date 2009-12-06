@@ -33,6 +33,7 @@ MODULE MondoMPI
    USE ProcessControl
    USE MemMan
    USE Parse
+   USE MondoLogger
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
    USE MPI
@@ -122,16 +123,16 @@ MODULE MondoMPI
         CALL MPI_COMM_GET_PARENT(PARENT, IErr)
 
         ! Merge the parent and current local communicators
-        CALL MPI_INTERCOMM_MERGE(PARENT, .TRUE., INTRA_PARENT, IErr)
+        !CALL MPI_INTERCOMM_MERGE(PARENT, .TRUE., INTRA_PARENT, IErr)
 
         ! Sychronize parent and child. We do that by sending a message to the
         ! parent.
-        !CALL MondoLog(DEBUG_NONE, "FiniMPI", "sending message to rank 0")
-        CALL MPI_SEND(message_buffer, 1, MPI_CHARACTER, 0, 0, PARENT, IErr)
+        CALL MondoLog(DEBUG_NONE, "FiniMPI", "sending message to rank 0", "rank "//TRIM(IntToChar(MyID)))
+        CALL MPI_SEND(message_buffer, 1, MPI_CHARACTER, 0, BARRIER_TAG, PARENT, IErr)
 
         ! Free the communicator.
         CALL MPI_COMM_FREE(PARENT, IErr)
-        CALL MPI_COMM_FREE(INTRA_PARENT, IErr)
+        !CALL MPI_COMM_FREE(INTRA_PARENT, IErr)
 #endif
         CALL MPI_FINALIZE(IErr)
       END SUBROUTINE FiniMPI
@@ -809,11 +810,12 @@ MODULE MondoMPI
          CHARACTER(LEN=*),OPTIONAL      :: String_O
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
          CHARACTER(LEN=*),PARAMETER :: Sub='AlignNodes'
+
+         CALL MondoLog(DEBUG_NONE, "AlignNodes", "waiting at barrier, MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
          CALL MPI_BARRIER(MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
          IF(PRESENT(String_O))THEN
-            String="Node#"//TRIM(IntToChar(MyId))//' :: '//TRIM(String_O)
-            WRITE(*,*)TRIM(String)
+           CALL MondoLog(DEBUG_NONE, "FreeON", String_O, "Node # "//TRIM(IntToChar(MyId)))
          ENDIF
       END SUBROUTINE AlignNodes
 

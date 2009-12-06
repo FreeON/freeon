@@ -132,7 +132,7 @@ CONTAINS
       ENDIF
 
       ! Merge the spawned and current local communicators
-      CALL MPI_INTERCOMM_MERGE(SPAWN, .TRUE., INTRA_SPAWN, IErr)
+      !CALL MPI_INTERCOMM_MERGE(SPAWN, .TRUE., INTRA_SPAWN, IErr)
 
       ! Wait for the kiddies to be done. We do that by waiting for them to send
       ! us a nice message instead of waiting at a barrier. This is to avoid
@@ -148,7 +148,7 @@ CONTAINS
 
       DO I = 1, M%Clump%I(3, iCLUMP)
         !CALL MondoLog(DEBUG_NONE, "Invoke", "setting up receive buffers")
-        CALL MPI_IRECV(message_buffer(I), 1, MPI_CHARACTER, MPI_ANY_SOURCE, 0, SPAWN, message_request(I), IErr)
+        CALL MPI_IRECV(message_buffer(I), 1, MPI_CHARACTER, MPI_ANY_SOURCE, BARRIER_TAG, SPAWN, message_request(I), IErr)
         message_flag(I) = .FALSE.
       ENDDO
 
@@ -161,7 +161,7 @@ CONTAINS
             !CALL MondoLog(DEBUG_NONE, "Invoke", "testing child "//TRIM(IntToChar(I)))
             CALL MPI_TEST(message_request(I), message_flag(I), message_status(I,:), IErr)
             IF(message_flag(I)) THEN
-              !CALL MondoLog(DEBUG_NONE, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
+              CALL MondoLog(DEBUG_NONE, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
               buffer_index = buffer_index+1
             ENDIF
           ENDIF
@@ -178,7 +178,7 @@ CONTAINS
 
       ! Free the communicator.
       CALL MPI_COMM_FREE(SPAWN, IErr)
-      CALL MPI_COMM_FREE(INTRA_SPAWN, IErr)
+      !CALL MPI_COMM_FREE(INTRA_SPAWN, IErr)
 
       ! Free the buffers.
       DEALLOCATE(message_buffer)

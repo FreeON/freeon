@@ -233,6 +233,7 @@ MondoMPI.lo : \
   ProcessControl.lo \
   MemMan.lo \
   Parse.lo \
+  MondoLogger.lo \
   $(top_builddir)/MondoConfig.h
 
 SetEq.lo : \

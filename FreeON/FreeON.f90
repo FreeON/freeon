@@ -42,15 +42,22 @@ PROGRAM FreeON
 
   IMPLICIT NONE
 
-  TYPE(Controls) :: C
+  TYPE(Controls)                        :: C
+  CHARACTER                             :: shutdownBuffer
+  INTEGER, DIMENSION(:), ALLOCATABLE    :: shutdownRequest, IErr
+  INTEGER, DIMENSION(:, :), ALLOCATABLE :: shutdownStatus
+  INTEGER                               :: I
+  LOGICAL                               :: allDone, done
 
   CALL Init(PerfMon)
   CALL Init(MemStats)
+
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
   CALL InitMPI()
   InParallel = .FALSE.
   IF(MyID == 0) THEN
 #endif
+
     ! Load the input file.
     CALL ParseTheInput(C)
 
@@ -87,8 +94,53 @@ PROGRAM FreeON
     !--------------------------------------------------------
 #if (defined(PARALLEL) || defined(PARALLEL_CLONES)) && defined(MPI2)
   ENDIF
-  CALL AlignNodes("FreeON")
-  CALL FiniMPI()
-#endif
-END PROGRAM FreeON
 
+  ! Allocate memory for shutdown negotiations.
+  ALLOCATE(shutdownRequest(C%MPIs%NProc))
+  ALLOCATE(shutdownStatus(C%MPIs%NProc, MPI_STATUS_SIZE))
+  ALLOCATE(IErr(C%MPIs%NProc))
+
+  !CALL AlignNodes("FreeON")
+  IF(MyID == 0) THEN
+    ! Set up non-blocking send to all other ranks.
+    DO I = 1, C%MPIs%NProc
+      CALL MondoLog(DEBUG_NONE, "FreeON", "sending shutdown message to rank "//TRIM(IntToChar(I)))
+      CALL MPI_Isend(shutdownBuffer, 1, MPI_CHARACTER, I, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(I), IErr(I))
+    ENDDO
+
+    allDone = .FALSE.
+    DO WHILE(.NOT. allDone)
+      ! Check for the other ranks.
+      allDone = .TRUE.
+      DO I = 1, C%MPIs%NProc
+        CALL MPI_Test(shutdownRequest(I), done, shutdownStatus(I,:), IErr(I))
+        IF(.NOT. done) THEN
+          allDone = .FALSE.
+          EXIT
+        ENDIF
+      ENDDO
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, "FreeON", "all done")
+  ELSE
+    ! Set up non-blocking receive from rank 0 front-end.
+    CALL MondoLog(DEBUG_NONE, "FreeON", "waiting for shutdown message from rank 0")
+    CALL MPI_Irecv(shutdownBuffer, 1, MPI_CHARACTER, 0, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(0), IErr(0))
+
+    done = .FALSE.
+    DO WHILE(.NOT. done)
+      CALL FreeONSleep(2)
+      CALL MPI_Test(shutdownRequest(0), done, shutdownStatus(0,:), IErr(0))
+    ENDDO
+    CALL MondoLog(DEBUG_NONE, "FreeON", "received shutdown message from rank 0")
+  ENDIF
+
+  ! Free memory.
+  DEALLOCATE(shutdownRequest)
+  DEALLOCATE(shutdownStatus)
+  DEALLOCATE(IErr)
+
+  ! Shut down MPI.
+  CALL MPI_FINALIZE(IErr(0))
+#endif
+
+END PROGRAM FreeON
