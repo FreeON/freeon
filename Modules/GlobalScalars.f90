@@ -290,10 +290,12 @@ MODULE GlobalScalars
   !
   !  MPI Scalars, default values
   !
-  INTEGER, SAVE           :: MyID=ROOT
-  INTEGER, SAVE           :: NPrc
-  LOGICAL, SAVE           :: InParallel=.FALSE.
-  INTEGER, PARAMETER      :: MaxProc=1024
+  INTEGER, SAVE      :: MyID=ROOT
+  INTEGER, SAVE      :: NPrc
+  LOGICAL, SAVE      :: InParallel=.FALSE.
+  INTEGER, PARAMETER :: MaxProc=1024
+  INTEGER, PARAMETER :: BARRIER_TAG = 1207
+  INTEGER, PARAMETER :: FRONTEND_TAG = 4409
   !
   !  Send in the clones...
   !
