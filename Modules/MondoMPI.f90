@@ -34,6 +34,7 @@ MODULE MondoMPI
    USE MemMan
    USE Parse
    USE MondoLogger
+   USE Utilities
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
    USE MPI
@@ -127,7 +128,7 @@ MODULE MondoMPI
 
         ! Sychronize parent and child. We do that by sending a message to the
         ! parent.
-        CALL MondoLog(DEBUG_NONE, "FiniMPI", "sending message to rank 0", "rank "//TRIM(IntToChar(MyID)))
+        CALL MondoLog(DEBUG_MAXIMUM, "FiniMPI", "sending message to rank 0", "rank "//TRIM(IntToChar(MyID)))
         CALL MPI_SEND(message_buffer, 1, MPI_CHARACTER, 0, BARRIER_TAG, PARENT, IErr)
 
         ! Free the communicator.
@@ -819,7 +820,6 @@ MODULE MondoMPI
          ENDIF
       END SUBROUTINE AlignNodes
 
-
 !     NODE ALLINGMENT FOR MPI_COMM_WORLD
 
       SUBROUTINE AlignClones(String_O)
@@ -857,7 +857,6 @@ MODULE MondoMPI
          ENDIF
       END SUBROUTINE
 
-
       SUBROUTINE InTurn(Mssg)
          CHARACTER(LEN=*) :: Mssg
          INTEGER          :: I,IErr
@@ -872,7 +871,6 @@ MODULE MondoMPI
             CALL ErrChk(IErr,Sub)
          ENDDO
       END SUBROUTINE InTurn
-
 
       SUBROUTINE PSpew_INT_VECT(Name,A)
          CHARACTER(LEN=*) :: Name
@@ -895,6 +893,69 @@ MODULE MondoMPI
          ENDDO
       55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(D9.3,', '))
       ENDSUBROUTINE PSpew_DBL_VECT
+
+      SUBROUTINE AlignFrontends()
+        CHARACTER                             :: shutdownBuffer
+        INTEGER, DIMENSION(:), ALLOCATABLE    :: shutdownRequest, IErr
+        INTEGER, DIMENSION(:, :), ALLOCATABLE :: shutdownStatus
+        INTEGER                               :: I
+        LOGICAL                               :: allDone, done
+
+        ! Allocate memory for shutdown negotiations.
+        ALLOCATE(shutdownRequest(NPrc))
+        ALLOCATE(shutdownStatus(NPrc, MPI_STATUS_SIZE))
+        ALLOCATE(IErr(NPrc))
+
+        IF(MyID == 0) THEN
+          ! Set up non-blocking send to all other ranks.
+          DO I = 1, NPrc
+            CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "sending shutdown message to frontend rank "//TRIM(IntToChar(I)))
+            CALL MPI_Isend(shutdownBuffer, 1, MPI_CHARACTER, I, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(I), IErr(I))
+          ENDDO
+
+          allDone = .FALSE.
+          DO WHILE(.NOT. allDone)
+            ! Check for the other ranks.
+            allDone = .TRUE.
+            DO I = 1, NPrc
+              CALL MPI_Test(shutdownRequest(I), done, shutdownStatus(I,:), IErr(I))
+              IF(.NOT. done) THEN
+                allDone = .FALSE.
+                EXIT
+              ENDIF
+            ENDDO
+          ENDDO
+          CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "all frontends are done")
+        ELSE
+          ! Wait a bit so the log message ends up in the out file.
+          CALL FreeONSleep(2)
+
+          ! The log messages currently only end up in the out file if the
+          ! logLevel is DEBUG_NONE because only the rank 0 frontend calls
+          ! ParsePrintFlags(). We would have to communicate the PrintFlags to
+          ! rank > 0 frontends to get MondoLog() to print messages here.
+
+          ! Set up non-blocking receive from rank 0 front-end.
+          CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "waiting for shutdown message from Frontend rank 0", "Frontend rank "//TRIM(IntToChar(MyID)))
+          CALL MPI_Irecv(shutdownBuffer, 1, MPI_CHARACTER, 0, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(0), IErr(0))
+
+          done = .FALSE.
+          DO WHILE(.NOT. done)
+            CALL FreeONSleep(2)
+            CALL MPI_Test(shutdownRequest(0), done, shutdownStatus(0,:), IErr(0))
+          ENDDO
+          CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "received shutdown message from rank 0", "Frontend rank "//TRIM(IntToChar(MyID)))
+        ENDIF
+
+        ! Free memory.
+        DEALLOCATE(shutdownRequest)
+        DEALLOCATE(shutdownStatus)
+        DEALLOCATE(IErr)
+
+        ! Shut down MPI.
+        CALL MPI_FINALIZE(IErr(0))
+      END SUBROUTINE AlignFrontends
+
 #endif
 
 END MODULE
