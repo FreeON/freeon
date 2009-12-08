@@ -1,5 +1,11 @@
 <BeginTitle>
 
+Reactant energy:
+SCF : [13,1,1]               :: <SCF> = -.2656437482864332D+03 Hartree, -.7228537264563613D+04 eV, dD = 0.89D-04, DIIS = 0.12D-05
+
+Product energy:
+SCF : [13,1,1]               :: <SCF> = -.2656437482935356D+03 Hartree, -.7228537264756881D+04 eV, dD = 0.89D-04, DIIS = 0.12D-05
+
 E_Products=-265.64376 904
 E_Reactants-265.64376 262
 
@@ -19,6 +25,9 @@ Grad=(TSSearch,PrimInt,NoGDIIS,NoBackTr,BiSect)
 MaxSTRE=0.03
 MaxANGLE=0.6
 
+NEBReactantEnergy=-.7228537264563613D+04
+NEBProductEnergy=-.7228537264756881D+04
+
 OutPut=xyz
 DebugAll=(MinDebug,CheckSums)
 
@@ -26,13 +35,9 @@ Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(6-31G**-SPLIT)
 ModelChem=(HF)
-Accuracy =(Tight)
+Accuracy=(Tight)
 SCFConvergence=(DIIS)
 
-MPIInvoke="mpirun"
-MPIProcessors=6
-MPIProcFlag="-np"
-MPISpatialProc=2
 <EndOptions>
 
 <BeginReactants>
