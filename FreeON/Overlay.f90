@@ -46,7 +46,7 @@ CONTAINS
     TYPE(Parallel)       :: M
     LOGICAL, OPTIONAL    :: TSSearchEndpoints_O
 
-    CALL MondoLog(DEBUG_NONE, "Invoke", "invoking "//TRIM(Ex))
+    CALL MondoLog(DEBUG_MAXIMUM, "Invoke", "invoking "//TRIM(Ex))
     IF(InvokeBackend(TRIM(N%M_EXEC)//"/"//Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
       IF(InvokeBackend(Ex, N, S, M, TSSearchEndpoints_O) /= 0) THEN
         CALL MondoLog(DEBUG_NONE, "Invoke", "failed to spawn process")
