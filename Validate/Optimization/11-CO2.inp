@@ -3,13 +3,6 @@ Solid CO_2  C O  Unit Cell, 83K [J Phys Soc Japan, 53(3) 1176-1184 (1984)]
 
 Output=PDB
 
-MPIInvoke="mpirun"
-MPIProcessors=4
-MPIProcFlag="-np"
-MPISpatialProc=4
-MPIMachineFlag="--nper"
-MPIMachineFile="2"
-
 Charge=0
 Multiplicity=1
 
