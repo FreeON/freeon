@@ -100,7 +100,9 @@ spawn_ (int *nc, int *maxlen, int *ichr)
   else
   {
     if(WSTOPSIG(status)!=0) ierr = SGNL_ERROR;
+#ifdef WCOREDUMP
     else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
+#endif
     else ierr = EXIT_ERROR;
   }
 
