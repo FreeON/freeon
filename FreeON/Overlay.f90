@@ -161,7 +161,7 @@ CONTAINS
             !CALL MondoLog(DEBUG_NONE, "Invoke", "testing child "//TRIM(IntToChar(I)))
             CALL MPI_TEST(message_request(I), message_flag(I), message_status(I,:), IErr)
             IF(message_flag(I)) THEN
-              CALL MondoLog(DEBUG_NONE, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
+              CALL MondoLog(DEBUG_MAXIMUM, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
               buffer_index = buffer_index+1
             ENDIF
           ENDIF
