@@ -1,0 +1,4 @@
+#!/bin/bash
+
+RESULT=`(time ./sleeper) 2>&1 | grep real | awk '{print $2}'`
+echo "slept for ${RESULT}, should be somewhere close to 1.5s"
