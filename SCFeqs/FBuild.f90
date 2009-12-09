@@ -77,14 +77,8 @@ PROGRAM FockNGrueven
         !
         ! Transform also the dipole matrix for TC2.
         XFile=TrixFile('X',Args)
-#ifdef PARALLEL
-        IF(MyId==ROOT)THEN
-#endif
-           INQUIRE(FILE=XFile,EXIST=Present)
-#ifdef PARALLEL
-        ENDIF
-        CALL BCast(Present)
-#endif
+        INQUIRE(FILE=XFile,EXIST=Present)
+
         IF(Present)THEN
            CALL Get(X,XFile)                ! X =S^{-1/2}
            CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
@@ -209,14 +203,7 @@ PROGRAM FockNGrueven
   ENDIF
 ! Now transform to an orthogonal representation
   XFile=TrixFile('X',Args)
-#ifdef PARALLEL
-  IF(MyId==ROOT)THEN
-#endif
-     INQUIRE(FILE=XFile,EXIST=Present)
-#ifdef PARALLEL
-  ENDIF
-  CALL BCast(Present)
-#endif
+  INQUIRE(FILE=XFile,EXIST=Present)
   IF(Present)THEN
      CALL Get(X,XFile)                ! X =S^{-1/2}
      CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
