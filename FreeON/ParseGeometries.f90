@@ -356,6 +356,9 @@ CONTAINS
         G%Velocity%D(1,N)=CharToDbl(C%C(5))
         G%Velocity%D(2,N)=CharToDbl(C%C(6))
         G%Velocity%D(3,N)=CharToDbl(C%C(7))
+        G%Fext%D(1:3,N) = Zero
+
+        ! Parse last column.
         SELECT CASE (TRIM(C%C(8)))
         CASE('u')
           G%CConstrain%I(N)=0
@@ -363,10 +366,8 @@ CONTAINS
           G%CConstrain%I(N)=1
         CASE('r')
           G%CConstrain%I(N)=2
-!
-!       Add an external force to an atom
-!
         CASE('fext')
+          ! Add an external force to an atom
           G%CConstrain%I(N)=3
           G%Fext%D(1:3,N)=G%Velocity%D(1:3,N)
           G%Velocity%D(1:3,N)=Zero
