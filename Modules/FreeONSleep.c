@@ -21,34 +21,6 @@ freeonsleep_single (float *sleeptime)
     printf("[FreeONSleep] could not sleep, dying out of sleep deprevation: %s\n", strerror(errno));
     exit(1);
   }
-
-//#ifdef HAVE_USLEEP
-//  useconds_t microseconds = (useconds_t) floor((*sleeptime-seconds)*1e6);
-//#endif
-
-//if (sleep(seconds) != 0)
-//{
-//  printf("[FreeONSleep] could not sleep, dying out of sleep deprevation.\n");
-//  exit(1);
-//}
-
-//#ifdef HAVE_USLEEP
-//  if (usleep(microseconds) != 0)
-//  {
-//    printf("[FreeONSleep] could not microsleep, dying out of sleep deprevation.\n");
-//    exit(1);
-//  }
-//#else
-//  if (seconds == 0)
-//  {
-//    /* Sleep a little bit more. */
-//    if (sleep(1) != 0)
-//    {
-//      printf("[FreeONSleep] could not sleep, dying out of sleep deprevation.\n");
-//      exit(1);
-//    }
-//  }
-//#endif
 }
 
 void
