@@ -662,6 +662,22 @@ AC_LANG(C)
 AC_CHECK_LIB([m], [round], [],
   [AC_MSG_FAILURE([we need the round() function])])
 
+#AC_MSG_CHECKING([for usleep()])
+#AC_COMPILE_IFELSE([
+##include <unistd.h>
+#
+#int
+#main ()
+#{
+#  useconds_t microseconds = 1;
+#
+#  usleep(microseconds);
+#}
+#  ],
+#  [AC_MSG_RESULT([yes])
+#   AC_DEFINE([HAVE_USLEEP], [1], [we have the usleep() function])],
+#  [AC_MSG_RESULT([no, we do not have usleep()])])
+
 # Switch tests to fortran.
 AC_LANG(Fortran)
 

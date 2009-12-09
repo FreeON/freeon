@@ -1,24 +1,54 @@
-#include <unistd.h>
+#include "config.h"
+
+#include <time.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
 void
 freeonsleep_single (float *sleeptime)
 {
-  int seconds = (int) floor(*sleeptime);
-  int microseconds = (int) floor((*sleeptime-seconds)*1e6);
+  struct timespec nanoseconds;
 
-  if (sleep(seconds) != 0)
+  /* Split the sleeptime into seconds and nanoseconds. */
+  nanoseconds.tv_sec = (time_t) floor(*sleeptime);
+  nanoseconds.tv_nsec = (long) floor((*sleeptime-nanoseconds.tv_sec)*1e9);
+
+  if (nanosleep(&nanoseconds, NULL) != 0)
   {
-    printf("[FreeONSleep] could not sleep, dying out of sleep deprevation.\n");
+    printf("[FreeONSleep] could not sleep, dying out of sleep deprevation: %s\n", strerror(errno));
     exit(1);
   }
-  if (usleep(microseconds) != 0)
-  {
-    printf("[FreeONSleep] could not microsleep, dying out of sleep deprevation.\n");
-    exit(1);
-  }
+
+//#ifdef HAVE_USLEEP
+//  useconds_t microseconds = (useconds_t) floor((*sleeptime-seconds)*1e6);
+//#endif
+
+//if (sleep(seconds) != 0)
+//{
+//  printf("[FreeONSleep] could not sleep, dying out of sleep deprevation.\n");
+//  exit(1);
+//}
+
+//#ifdef HAVE_USLEEP
+//  if (usleep(microseconds) != 0)
+//  {
+//    printf("[FreeONSleep] could not microsleep, dying out of sleep deprevation.\n");
+//    exit(1);
+//  }
+//#else
+//  if (seconds == 0)
+//  {
+//    /* Sleep a little bit more. */
+//    if (sleep(1) != 0)
+//    {
+//      printf("[FreeONSleep] could not sleep, dying out of sleep deprevation.\n");
+//      exit(1);
+//    }
+//  }
+//#endif
 }
 
 void
