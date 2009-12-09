@@ -169,7 +169,7 @@ CONTAINS
 
         ! Sleep a little.
         !CALL MondoLog(DEBUG_NONE, "Invoke", "sleeping")
-        CALL FreeONSleep(2)
+        CALL FreeONSleep(0.5)
         !CALL MondoLog(DEBUG_NONE, "Invoke", "done sleeping")
       ENDDO
 

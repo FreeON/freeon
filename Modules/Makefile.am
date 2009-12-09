@@ -459,4 +459,5 @@ Utilities.lo : \
   MondoLogger.lo \
   ParsingConstants.lo \
   Parse.lo \
+  GlobalScalars.lo \
   FreeONSleep.lo

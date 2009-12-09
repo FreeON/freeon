@@ -62,11 +62,23 @@ MODULE Utilities
       INTEGER, INTENT(IN)             :: length
     END SUBROUTINE TemporaryDirectory
 
-    SUBROUTINE FreeONSleep (time)
-      INTEGER, INTENT(IN) :: time
-    END SUBROUTINE FreeONSleep
-
   END INTERFACE
+
+  ! The parameter sleeptime is in seconds. It can be fractions of a second, down
+  ! to a microsecond.
+  INTERFACE FreeONSleep
+
+    SUBROUTINE FreeONSleep_integer (sleeptime)
+      INTEGER, INTENT(IN) :: sleeptime
+    END SUBROUTINE FreeONSleep_integer
+
+    SUBROUTINE FreeONSleep_single (sleeptime)
+      USE GlobalScalars
+      REAL(SINGLE), INTENT(IN) :: sleeptime
+    END SUBROUTINE FreeONSleep_single
+
+  END INTERFACE FreeONSleep
+
 
 CONTAINS
 
