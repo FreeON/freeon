@@ -1103,6 +1103,7 @@ Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
 PostProcessing/Makefile
 BasisSets/Makefile
+tests/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
