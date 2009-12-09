@@ -1043,6 +1043,13 @@ CONTAINS
           ENDDO
        ENDIF
 
+       ! Add additional External Forces to Atoms
+       DO iATS=1,G%Clone(iCLONE)%NAtms
+          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==3)THEN
+             G%Clone(iCLONE)%Gradients%D(1:3,iATS)=G%Clone(iCLONE)%Gradients%D(1:3,iATS)-G%Clone(iCLONE)%Fext%D(1:3,iATS)
+          ENDIF
+       ENDDO
+
        ! Zero forces on constrained atoms
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
@@ -1052,13 +1059,7 @@ CONTAINS
           ENDIF
        ENDDO
 
-       ! Add additional External Forces to Atoms
-       DO iATS=1,G%Clone(iCLONE)%NAtms
-          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==3)THEN
-             G%Clone(iCLONE)%Gradients%D(1:3,iATS)=G%Clone(iCLONE)%Gradients%D(1:3,iATS)-G%Clone(iCLONE)%Fext%D(1:3,iATS)
-          ENDIF
-       ENDDO
-!      Calculate GrandMax and GrandRMS
+       ! Calculate GrandMax and GrandRMS
        G%Clone(iCLONE)%GradMax=Zero
        G%Clone(iCLONE)%GradRMS=Zero
        DO iATS=1,G%Clone(iCLONE)%NAtms
@@ -1070,6 +1071,7 @@ CONTAINS
        ENDDO
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
     ENDDO
+
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
 
@@ -1140,16 +1142,39 @@ CONTAINS
         "Clone "//TRIM(IntToChar(iCLONE)))
 
       DO iATS=1, G%Clone(iCLONE)%NAtms
-        CALL MondoLog(DEBUG_NONE, "Force", &
-          TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
-          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
-          TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
-          TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
-          TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms))//" "// &
-          TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(iATS))), &
-          "Clone "//TRIM(IntToChar(iCLONE)))
+        IF(G%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
+          CALL MondoLog(DEBUG_NONE, "Force", &
+            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ELSEIF(G%Clone(iCLONE)%CConstrain%I(iATS) == 1) THEN
+          CALL MondoLog(DEBUG_NONE, "Force", &
+            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms))//" "// &
+            "C", &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ELSEIF(G%Clone(iCLONE)%CConstrain%I(iATS) == 2) THEN
+          CALL MondoLog(DEBUG_NONE, "Force", &
+            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms))//" "// &
+            "R", &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDIF
       ENDDO
     ENDDO
 
