@@ -182,7 +182,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
       IF(MyID == ROOT) &
 #endif
-      CALL Warn("[P2Use:"//TRIM(SCFActn)//"] Attempting to use density superpostion with a non STO basis set. Going for scaled I.")
+      CALL Warn("[P2Use:"//TRIM(SCFActn)//"] Attempting to use density superposition with a non STO basis set. Going for scaled I.")
 
       IF(NSMat.EQ.1)THEN
         !Set the P
@@ -209,14 +209,7 @@ PROGRAM P2Use
         CALL Warn("[P2Use:"//TRIM(SCFActn)//"] TrP = "//TRIM(DblToChar(TrP)))
       ENDIF
     ENDIF
-#ifdef PARALLEL
-    IF(MyId==ROOT)THEN
-#endif
-      INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-#ifdef PARALLEL
-    ENDIF
-    CALL BCast(Present)
-#endif
+
     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
     IF(Present)THEN
       CALL Get(X,TrixFile('X',Args))    ! T1=S_new^(-1/2)

@@ -251,18 +251,14 @@ PROGRAM DIIS
     CALL Delete(DIISInfo)
 
     DO I = DIISFirstSCF, iSCF
-      IF(MyID.EQ.ROOT) THEN
-        FFile=TrixFile('OrthoE_DIIS',Args,I-iSCF)
-        INQUIRE(FILE=FFile,EXIST=Present)
-        IF(Present) THEN
-          IPresent = 0
-        ELSE
-          IPresent = 1
-        ENDIF
+      FFile=TrixFile('OrthoE_DIIS',Args,I-iSCF)
+      INQUIRE(FILE=FFile,EXIST=Present)
+      IF(Present) THEN
+        IPresent = 0
+      ELSE
+        IPresent = 1
       ENDIF
-#ifdef PARALLEL
-      CALL BCast(IPresent)
-#endif
+
       IF(IPresent /= 0) THEN
 
 #ifdef USE_AO
@@ -308,15 +304,11 @@ PROGRAM DIIS
 
       ! We dont filter E for obvious reasons
       DO J = iSCF-N+2, I
-        IF(MyID.EQ.ROOT) THEN
-          FFile=TrixFile('OrthoE_DIIS',Args,J-iSCF)
-          INQUIRE(FILE=FFile,EXIST=Present)
-          JPresent=1
-          IF(Present) JPresent=0
-        ENDIF
-#ifdef PARALLEL
-        CALL BCast(JPresent)
-#endif
+        FFile=TrixFile('OrthoE_DIIS',Args,J-iSCF)
+        INQUIRE(FILE=FFile,EXIST=Present)
+        JPresent=1
+        IF(Present) JPresent=0
+
         IF(JPresent.EQ.0) then
           CALL Get(EJ,TrixFile('OrthoE_DIIS',Args,J-iSCF))
         ELSE

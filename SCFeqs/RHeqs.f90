@@ -322,12 +322,10 @@ PROGRAM RHEqs
   CALL PPrint(sP,'OrthoP['//TRIM(NxtCycl)//']')
 
   CALL Plot(sP,'OrthoP['//TRIM(NxtCycl)//']')
+
   ! Transform to non-orthogonal rep
   XFile=TrixFile('X',Args)
-  IF(MyID.EQ.0) INQUIRE(FILE=XFile,EXIST=Present)
-#ifdef PARALLEL
-  CALL BCast(Present)
-#endif
+  INQUIRE(FILE=XFile,EXIST=Present)
 
   IF(Present)THEN
     CALL Get(sX,XFile)                  ! X =S^{-1/2}
