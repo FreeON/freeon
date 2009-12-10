@@ -973,7 +973,7 @@ CONTAINS
     TYPE(Parallel)     :: M
     TYPE(BasisSets)    :: B
     INTEGER            :: cBAS,cGEO,I,J,K,iATS,iCLONE,A1,A2
-    CHARACTER(LEN=DCL) :: chGEO,chBAS
+    CHARACTER(LEN=DCL) :: chGEO,chBAS, tempString, tempAtom
     REAL(DOUBLE)       :: GradVal,Pres,Vol,PMat, FMagnitude, FMax
     TYPE(DBL_RNK2)     :: AuxLatF
     TYPE(DBL_VECT)     :: Ftmp
@@ -1049,53 +1049,39 @@ CONTAINS
              G%Clone(iCLONE)%Gradients%D(1:3,iATS)=G%Clone(iCLONE)%Gradients%D(1:3,iATS)-G%Clone(iCLONE)%Fext%D(1:3,iATS)
           ENDIF
        ENDDO
-
-       ! Zero forces on constrained atoms
-       DO iATS=1,G%Clone(iCLONE)%NAtms
-          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
-             !IF(O%Coordinates /= GRAD_INTS_OPT) THEN
-             G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
-             !ENDIF
-          ENDIF
-       ENDDO
-
-       ! Calculate GrandMax and GrandRMS
-       G%Clone(iCLONE)%GradMax=Zero
-       G%Clone(iCLONE)%GradRMS=Zero
-       DO iATS=1,G%Clone(iCLONE)%NAtms
-          DO J=1,3
-             GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
-             G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
-             G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
-          ENDDO
-       ENDDO
-       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
     ENDDO
 
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
 
-    ! Double check zero forces on constrained atoms.
-    DO iCLONE=1,G%Clones
-      DO iATS=1,G%Clone(iCLONE)%NAtms
-        IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
-          IF((G%Clone(iCLONE)%Gradients%D(1,iATS) /= Zero) .OR. &
-             (G%Clone(iCLONE)%Gradients%D(2,iATS) /= Zero) .OR. &
-             (G%Clone(iCLONE)%Gradients%D(3,iATS) /= Zero)) THEN
-            CALL MondoLog(DEBUG_NONE, "Force", "force on atom " &
-              //TRIM(IntToChar(iATS))//" in clone " &
-              //TRIM(IntToChar(iCLONE))//" is not zero!")
-            G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
-          ENDIF
-        ENDIF
-      ENDDO
-    ENDDO
-
     ! Now add in any NEB force projections
-    IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
+    IF(O%Grad == GRAD_TS_SEARCH_NEB) THEN
       CALL MondoLog(DEBUG_NONE, "Force", "adding in NEB forces")
       CALL NEBForce(G,O)
     ENDIF
+
+    DO iCLONE=1,G%Clones
+      ! Zero forces on constrained atoms
+      DO iATS=1,G%Clone(iCLONE)%NAtms
+        IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
+          !IF(O%Coordinates /= GRAD_INTS_OPT) THEN
+          G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+          !ENDIF
+        ENDIF
+      ENDDO
+
+      ! Calculate GrandMax and GrandRMS
+      G%Clone(iCLONE)%GradMax=Zero
+      G%Clone(iCLONE)%GradRMS=Zero
+      DO iATS=1,G%Clone(iCLONE)%NAtms
+        DO J=1,3
+          GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
+          G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal**2
+          G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
+        ENDDO
+      ENDDO
+      G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
+    ENDDO
 
     ! Finally, archive the whole mother
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
@@ -1121,10 +1107,10 @@ CONTAINS
     ENDIF
 
     ! Print out the positions.
-    DO iCLONE=LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
+    DO iCLONE = LBOUND(G%Clone, 1), UBOUND(G%Clone, 1)
       FMagnitude = Zero
       FMax = Zero
-      DO iATS=1, G%Clone(iCLONE)%NAtms
+      DO iATS = 1, G%Clone(iCLONE)%NAtms
         FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(1, iATS)))
         FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(2, iATS)))
         FMax = MAX(FMax, ABS(G%Clone(iCLONE)%Gradients%D(3, iATS)))
@@ -1141,40 +1127,41 @@ CONTAINS
         "max(F_{i}) = "//TRIM(DblToMedmChar(FMax*au2eV/AUToAngstroms))//" eV/A", &
         "Clone "//TRIM(IntToChar(iCLONE)))
 
-      DO iATS=1, G%Clone(iCLONE)%NAtms
+      DO iATS = 1, G%Clone(iCLONE)%NAtms
+        tempAtom = G%Clone(iCLONE)%AtNam%C(iATS)
+        CALL UpCase(tempAtom)
         IF(G%Clone(iCLONE)%CConstrain%I(iATS) == 0) THEN
-          CALL MondoLog(DEBUG_NONE, "Force", &
-            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms)), &
-            "Clone "//TRIM(IntToChar(iCLONE)))
+          WRITE(tempString, "(1X,A2,6(F22.16,' '),A1)") &
+            tempAtom, &
+            G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms, &
+            " "
         ELSEIF(G%Clone(iCLONE)%CConstrain%I(iATS) == 1) THEN
-          CALL MondoLog(DEBUG_NONE, "Force", &
-            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms))//" "// &
-            "C", &
-            "Clone "//TRIM(IntToChar(iCLONE)))
+          WRITE(tempString, "(1X,A2,6(F22.16,' '),A1)") &
+            tempAtom, &
+            G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms, &
+            "C"
         ELSEIF(G%Clone(iCLONE)%CConstrain%I(iATS) == 2) THEN
-          CALL MondoLog(DEBUG_NONE, "Force", &
-            TRIM(G%Clone(iCLONE)%AtNam%C(iATS))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms))//" "// &
-            TRIM(DblToMedmChar(-G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms))//" "// &
-            "R", &
-            "Clone "//TRIM(IntToChar(iCLONE)))
+          WRITE(tempString, "(1X,A2,6(F22.16,' '),A1)") &
+            tempAtom, &
+            G%Clone(iCLONE)%Carts%D(1, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(2, iATS)*AUToAngstroms, &
+            G%Clone(iCLONE)%Carts%D(3, iATS)*AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(1, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(2, iATS)*au2eV/AUToAngstroms, &
+            -G%Clone(iCLONE)%Gradients%D(3, iATS)*au2eV/AUToAngstroms, &
+            "R"
         ENDIF
+        CALL MondoLog(DEBUG_NONE, "Force", tempString, "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
     ENDDO
 
