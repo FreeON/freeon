@@ -132,15 +132,15 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), INTENT(IN)            :: tag
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
-    CHARACTER(LEN=2048)                     :: output
-    CHARACTER(LEN=2048)                     :: line_string
     INTEGER, OPTIONAL, INTENT(IN)           :: line_O
     LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
-    INTEGER :: logLevel
-    LOGICAL :: isOpen, fileOutput
+
+    CHARACTER(LEN=2048)                     :: output
+    CHARACTER(LEN=2048)                     :: line_string
+    INTEGER                                 :: logLevel
+    LOGICAL                                 :: isOpen, fileOutput
 
     ! Check whether logLevel is sufficiently high.
-
     IF(logLevel <= PrintFlags%Key) THEN
       ! Open the logfile.
       fileOutput = OpenLogfile(OutFile, 123)
@@ -176,10 +176,10 @@ CONTAINS
       ENDIF
 
       IF(fileOutput) THEN
-        WRITE(123,"(A)") TRIM(output)
+        WRITE(123, "(A)") TRIM(output)
       ENDIF
 
-      WRITE(*,"(A)") TRIM(output)
+      WRITE(*, "(A)") TRIM(output)
 
       ! Close logfile.
       IF(fileOutput) CLOSE(123)
