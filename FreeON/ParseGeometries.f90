@@ -486,7 +486,10 @@ CONTAINS
     G%NBeta=(G%NElec-NUnPEl)/2
     CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NAlpha = "//TRIM(IntToChar(G%NAlph)))
     CALL MondoLog(DEBUG_MAXIMUM, "SpinCoords", "NBeta  = "//TRIM(IntToChar(G%NBeta)))
-    IF(G%NAlph+G%NBeta.NE.G%NElec)CALL Halt('SpinCoords: Did you give the right charge/multiplicity!')
+    IF(G%NAlph+G%NBeta.NE.G%NElec) THEN
+      CALL Halt("SpinCoords: NAlpha+NBeta = "//TRIM(IntToChar(G%NAlph+G%NBeta)) &
+        //" while NElec = "//TRIM(IntToChar(G%NElec))//". Did you give the right charge/multiplicity!")
+    ENDIF
   END SUBROUTINE SpinCoords
 
   SUBROUTINE ReSetAtNum(G)
