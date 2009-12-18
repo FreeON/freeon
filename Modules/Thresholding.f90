@@ -129,7 +129,7 @@ MODULE Thresholding
           T=Box%Center-(Pair%A+Pair%B)*Half
           TMag=SQRT(T(1)**2+T(2)**2+T(3)**2)
           !
-          IF(TMag==0)THEN
+          IF(TMag==Zero)THEN
              BoxPairOverlap=.TRUE.
              RETURN
           ENDIF
