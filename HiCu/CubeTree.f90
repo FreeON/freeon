@@ -314,8 +314,7 @@ CONTAINS !
     TYPE(CubeNode), POINTER            :: Cube
     REAL(DOUBLE),   DIMENSION(NGrid * 3):: Rho,AbsGradRho2         !<<< SPIN
     REAL(DOUBLE),   DIMENSION(NGrid * 3):: E,dEdRho,dEdAbsGradRho2 !<<< SPIN
-    REAL(DOUBLE),   DIMENSION(NGrid * 6):: Buf
-    REAL(DOUBLE),   DIMENSION(3)       :: GradRhoOnTheCube
+     REAL(DOUBLE),   DIMENSION(3)       :: GradRhoOnTheCube
     REAL(DOUBLE)                       :: EOnTheCube,dEd1OnTheCube, &
          dEd2OnTheCube,RhoOnTheCube, &
          DeltaRho,DeltaGrad
@@ -370,6 +369,8 @@ CONTAINS !
         Cube%Vals(I,4)=RhoV(I,3)!GRho_tot_y
         Cube%Vals(I,5)=RhoV(I,4)!GRho_tot_z
       ENDDO
+      ! Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
+      CALL ExcOnTheGrid_ClSh(NGrid,Rho(1),AbsGradRho2(1),E(1),dEdRho(1),dEdAbsGradRho2(1))
     ELSEIF(NSDen.EQ.3)THEN
       DO I=1,NGrid
         I1=I+  NGrid
@@ -386,11 +387,11 @@ CONTAINS !
         Cube%Vals(I1,4)=RhoV(I2,3)!GRho_b_y
         Cube%Vals(I1,5)=RhoV(I2,4)!GRho_b_z
       ENDDO
+      ! Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
+      CALL ExcOnTheGrid_OpnSh(NGrid,Rho(1),AbsGradRho2(1),E(1),dEdRho(1),dEdAbsGradRho2(1))
     ELSE
-      CALL Halt('LayGrid: Wrong NSDen')
+       CALL Halt('LayGrid: Wrong NSDen')
     ENDIF
-    ! Evaluate Exc, dExcdRho, and dExcdAbsGradRho2 on the grid
-    CALL ExcOnTheGrid_ClSh(NGrid,Rho(1),AbsGradRho2(1),E(1),dEdRho(1),dEdAbsGradRho2(1),Buf(1),NSDen)
     ! Transfer global values to the cube and compute approximate integrals
     ! of E, dE/dRho, dE/d(AbsGradRho^2), Rho and GradRho over the cube
     EOnTheCube=Zero
@@ -405,7 +406,9 @@ CONTAINS !
         Cube%Vals(I,2)=dEdAbsGradRho2(I)
         EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
         dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)*dEdRho(I)        ! dEdRho on the cube
+
         dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)*dEdAbsGradRho2(I)! dEdAbsGradRho on the cube
+
         RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)          ! Rho on the cube
         GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &             ! GradRho on the cube
              +Cube%Wght(I)*RhoV(I,2:4)
@@ -415,11 +418,15 @@ CONTAINS !
       CALL DCOPY(3*NGrid,dEdAbsGradRho2(1),1,Cube%Vals(1,2),1)
       DO I=1,NGrid
         EOnTheCube=EOnTheCube+Cube%Wght(I)*E(I)                   ! E on the cube
+
         dEd1OnTheCube=dEd1OnTheCube+Cube%Wght(I)* &
              (dEdRho(I)+dEdRho(I+NGrid))                 ! dEdRho on the cube
+
         dEd2OnTheCube=dEd2OnTheCube+Cube%Wght(I)* &
              (dEdAbsGradRho2(I)+dEdAbsGradRho2(I+NGrid)) ! dEdAbsGradRho on the cube
+
         RhoOnTheCube=RhoOnTheCube+Cube%Wght(I)*RhoV(I,1)          ! Rho on the cube
+
         GradRhoOnTheCube(1:3)=GradRhoOnTheCube(1:3) &             ! GradRho on the cube
              +Cube%Wght(I)*RhoV(I,2:4)
       ENDDO
