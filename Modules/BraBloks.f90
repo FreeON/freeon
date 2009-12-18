@@ -456,8 +456,12 @@ CONTAINS
                             !      Compute McMurchie Davidson E coefficients for HG Primitives
                             CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3))
                             !
+                            Ext=Zero
                             Ell=MaxLA+MaxLB
                             Len=LHGTF(Ell)
+                            HGSum%D(1:Len)=Zero
+                            HGBra%D(1:Len,1:StopLA,1:StopLB)=Zero
+
                             IA = IndexA
                             DO LMNA=StartLA,StopLA
                                IA=IA+1
@@ -467,6 +471,7 @@ CONTAINS
                                   CALL DBL_VECT_EQ_DBL_SCLR(Len,HGBra%D(1:Len,IA,IB),Zero)
                                ENDDO
                             ENDDO
+
                             IA = IndexA
                             DO LMNA=StartLA,StopLA
                                IA=IA+1

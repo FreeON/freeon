@@ -1,0 +1,40 @@
+# GAMESS UHF/3-21G:  -227.0801896220
+# GAMESS UPBE/3-21G: -228.1552238186
+# FreeON UPEB/3-21G:-.228 1552207149339D+03 (Tight)
+# FreeON UPEB/3-21G:-.228 1552259757854D+03 (VeryTight)
+
+
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Guess=Superpos
+OutPut=XYZ
+DebugAll=(MatDebug,MaxDebug)
+
+#Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+
+SCFMethod=(RH,RH)
+SpinModel=(U,U)
+BasisSets=(3-21G,3-21G)
+ModelChem=(HF,PBExc)
+Accuracy=(Good,Good)
+SCFConvergence=(DIIS,DIIS)
+
+Geometry=InAngstrom
+
+<EndOptions>
+
+<BeginGeometry>
+C         -2.18521        2.71755        0.00000
+C         -2.67354        1.15557        0.00455
+C          0.33959        1.15799        0.04795
+C          0.06666        2.63125        0.00000
+O         -1.02842        3.48189        0.00000
+H         -3.12854        3.22334       -0.00000
+H         -3.34971        0.31905        0.00455
+H          0.94982        0.27209        0.04795
+H          1.04581        3.06337       -0.00000
+<EndGeometry>
