@@ -32,16 +32,24 @@ MODULE PBlokGuess
    USE MatFunk
    IMPLICIT NONE
    CONTAINS
-   SUBROUTINE FillPBlok(N,K,PBlok)
+   SUBROUTINE FillPBlok(N,K,PBlok,Random_O)
       INTEGER,                    INTENT(IN)  :: N,K
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT) :: PBlok
       REAL(DOUBLE),DIMENSION(50,104)          :: AvP
       INTEGER                                 :: I,J
+      LOGICAL,OPTIONAL                        :: Random_O
 !------------------------------------------------------
-!     Consistency check ...
-!
-      IF(K>55)CALL Halt(' Add parameters for Z = '  &
-              //TRIM(IntToChar(K))//' in FillPBlok ')
+      !
+      IF(K>55.OR.PRESENT(Random_O))THEN
+         DO I=1,N
+            DO J=1,N
+               PBlok(I,J)=Random((/-1D0,1D0/))
+            ENDDO
+         ENDDO
+         ! Semi-normalize
+         PBlok=PBlok*DBLE(2*N)/SUM(PBlok)
+         RETURN
+      ENDIF
 !------------------------------------------------------
 !     H
 !
@@ -1129,5 +1137,6 @@ MODULE PBlokGuess
       DO I=1,N
          PBlok(I,I)=AvP(I,K)
       ENDDO
+
    END SUBROUTINE FillPBlok
 END MODULE

@@ -145,23 +145,39 @@ PROGRAM P2Use
          ! Check for the case of an uncharged singlet
          IF(NAlph==NBeta)THEN
             ! We have a perfectly paired singlet.  Alternate the spin density to avoid the restricted solution.
-            BlkP%D=Zero
-            DO I=1,NAtoms
-               IF(MOD(I,2)==0) &
-                    CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
-            ENDDO
-            A1=SUM(BlkP%D)
-            BlkP%D=BlkP%D*(Dble(NAlph)/A1)
-            CALL SetToI(P,BlkP,Expert_O=1)
-            BlkP%D=Zero
-            DO I=1,NAtoms
-               IF(MOD(I,2)==1) &
-                    CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+            IF(NAtoms>1)THEN
+               BlkP%D=Zero
+               DO I=1,NAtoms
+                  IF(MOD(I,2)==0) &
+                       CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+               ENDDO
+               A1=SUM(BlkP%D)
+               BlkP%D=BlkP%D*(Dble(NAlph)/A1)
+               CALL SetToI(P,BlkP,Expert_O=1)
+               BlkP%D=Zero
+               DO I=1,NAtoms
+                  IF(MOD(I,2)==1) &
+                       CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
 
-            ENDDO
-            B1=SUM(BlkP%D)
-            BlkP%D=BlkP%D*(Dble(NBeta)/B1)
-            CALL SetToI(P,BlkP,Expert_O=2)
+               ENDDO
+               B1=SUM(BlkP%D)
+               BlkP%D=BlkP%D*(Dble(NBeta)/B1)
+               CALL SetToI(P,BlkP,Expert_O=2)
+            ELSE
+               BlkP%D=Zero
+               CALL FillPBlok(BSiz%I(1),INT(GM%AtNum%D(1)),BlkP%D(:,1),Random_O=.TRUE.)
+               A1=SUM(BlkP%D)
+               BlkP%D=BlkP%D*(Dble(NAlph)/A1)
+               CALL SetToI(P,BlkP,Expert_O=1)
+               BlkP%D=Zero
+               CALL FillPBlok(BSiz%I(1),INT(GM%AtNum%D(1)),BlkP%D(:,1),Random_O=.TRUE.)
+               B1=SUM(BlkP%D)
+               BlkP%D=BlkP%D*(Dble(NBeta)/B1)
+               CALL SetToI(P,BlkP,Expert_O=2)
+               WRITE(*,*)'AB=',A1,B1
+
+            ENDIF
+
          ELSE
             !Set the P_alpha
             CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl),BlkP%D(1,1),1)
