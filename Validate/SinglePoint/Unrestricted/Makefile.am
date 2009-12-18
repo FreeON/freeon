@@ -7,4 +7,6 @@ TESTS = \
 EXTRA_DIST = \
   $(TESTS) \
   Furan.inp \
-  H2.inp
+  Furan.reference \
+  H2.inp \
+  H2.reference
