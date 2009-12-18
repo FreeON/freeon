@@ -63,7 +63,7 @@ PROGRAM P2Use
 
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale, MDDeltaTime
+  REAL(DOUBLE)                  :: MaxDS,NoiseLevel, alpha, beta, v_scale, MDDeltaTime,A1,B1
   INTEGER                       :: MDDampStep, m_step, mm_step, Imin, Imin_divergence_check
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, &
        DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
@@ -121,7 +121,6 @@ PROGRAM P2Use
 
     ! Density SuperPosition
   CASE('DensitySuperposition','DMDGeuss')
-
     CALL New(P,NSMat_O=NSMat)
     CALL New(Tmp1)
     CALL New(Tmp2)
@@ -143,13 +142,34 @@ PROGRAM P2Use
         !Set the P
         CALL SetToI(P,BlkP)
       ELSEIF(NSMat.EQ.2)THEN
-        !Set the P_alpha
-        CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl),BlkP%D(1,1),1)
-        CALL SetToI(P,BlkP,Expert_O=1)
+         ! Check for the case of an uncharged singlet
+         IF(NAlph==NBeta)THEN
+            ! We have a perfectly paired singlet.  Alternate the spin density to avoid the restricted solution.
+            BlkP%D=Zero
+            DO I=1,NAtoms
+               IF(MOD(I,2)==0) &
+                    CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
+            ENDDO
+            A1=SUM(BlkP%D)
+            BlkP%D=BlkP%D*(Dble(NAlph)/A1)
+            CALL SetToI(P,BlkP,Expert_O=1)
+            BlkP%D=Zero
+            DO I=1,NAtoms
+               IF(MOD(I,2)==1) &
+                    CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
 
-        !Set the P_beta
-        CALL DSCAL(MaxBlkSize**2*NAtoms,DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
-        CALL SetToI(P,BlkP,Expert_O=2)
+            ENDDO
+            B1=SUM(BlkP%D)
+            BlkP%D=BlkP%D*(Dble(NBeta)/B1)
+            CALL SetToI(P,BlkP,Expert_O=2)
+         ELSE
+            !Set the P_alpha
+            CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl),BlkP%D(1,1),1)
+            CALL SetToI(P,BlkP,Expert_O=1)
+            !Set the P_beta
+            CALL DSCAL(MaxBlkSize**2*NAtoms,DBLE(NBeta)/DBLE(NAlph),BlkP%D(1,1),1)
+            CALL SetToI(P,BlkP,Expert_O=2)
+         ENDIF
       ELSEIF(NSMat.EQ.4)THEN
         !Set the P_alpha
         CALL DSCAL(MaxBlkSize**2*NAtoms,2D0*DBLE(NAlph)/DBLE(NEl)  ,BlkP%D(1,1),1)
@@ -188,10 +208,46 @@ PROGRAM P2Use
         !Set the P
         CALL Multiply(P,DBLE(NEl)/(Two*DBLE(NBasF)))
       ELSEIF(NSMat.EQ.2)THEN
-        !Set the P_alpha
-        CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
-        !Set the P_beta
-        CALL Multiply(P,DBLE(NBeta)/DBLE(NBasF),Expert_O=2)
+         IF(NAlph==NBeta)THEN
+            CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
+            ! We have a perfectly paired singlet.  Alternate the spin density to avoid the restricted solution.
+            A1=Zero
+            BlkP%D=Zero
+            DO I=1,NAtoms
+               IF(MOD(I,2)==0)THEN
+                  BlkP%D(:,I)=One
+                  A1=A1+BS%BFKnd%I(GM%AtTyp%I(I))
+               ENDIF
+            ENDDO
+
+            BlkP%D=BlkP%D*(Dble(NAlph)/A1)
+
+!            WRITE(*,*)' Alpha, Beta = ',SUM(BlkP%D)
+
+            CALL SetToI(P,BlkP,Expert_O=1)
+!
+            B1=Zero
+            BlkP%D=Zero
+            DO I=1,NAtoms
+               IF(MOD(I,2)==1)THEN
+                  BlkP%D(:,I)=One
+                  B1=B1+BS%BFKnd%I(GM%AtTyp%I(I))
+               ENDIF
+            ENDDO
+
+            BlkP%D=BlkP%D*(Dble(NBeta)/B1)
+            CALL SetToI(P,BlkP,Expert_O=2)
+
+            WRITE(*,*)' Alpha, Beta = ',SUM(BlkP%D)
+
+
+            CALL Delete(BlkP)
+         ELSE
+            !Set the P_alpha
+            CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)
+            !Set the P_beta
+            CALL Multiply(P,DBLE(NBeta)/DBLE(NBasF),Expert_O=2)
+         ENDIF
       ELSEIF(NSMat.EQ.4)THEN
         !Set the P_alpha
         CALL Multiply(P,DBLE(NAlph)/DBLE(NBasF),Expert_O=1)

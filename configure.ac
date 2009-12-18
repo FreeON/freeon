@@ -1101,6 +1101,7 @@ Validate/Response/TDSCF/Makefile
 Validate/Restart/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
+Validate/SinglePoint/Unrestricted/Makefile
 PostProcessing/Makefile
 BasisSets/Makefile
 tests/Makefile

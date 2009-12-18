@@ -110,8 +110,8 @@ MODULE Thresholding
        INTEGER                   :: I
        TYPE(AtomPair)            :: Pair
        TYPE(BBox),OPTIONAL       :: Box
-       REAL(DOUBLE)              :: Ext,R,LMag,HL,d,s
-       REAL(DOUBLE),DIMENSION(3) :: RayAB,LHat,T,THat,TMag
+       REAL(DOUBLE)              :: Ext,R,TMag,LMag,HL,d,s
+       REAL(DOUBLE),DIMENSION(3) :: RayAB,LHat,T,THat
        !----------------------------------------------------------------
        BoxPairOverlap=.FALSE.
        IF(Pair%AB2>1.D-20)THEN ! This is the Cylinder-Box test
@@ -128,6 +128,11 @@ MODULE Thresholding
           ! Distance from Box center to RayAB midpoint
           T=Box%Center-(Pair%A+Pair%B)*Half
           TMag=SQRT(T(1)**2+T(2)**2+T(3)**2)
+          !
+          IF(TMag==Zero)THEN
+             BoxPairOverlap=.TRUE.
+             RETURN
+          ENDIF
           ! Unit vector in direction T
           THat=T/TMag
           ! Recompute T to change test from Ray-Box to Cylinder-Box
