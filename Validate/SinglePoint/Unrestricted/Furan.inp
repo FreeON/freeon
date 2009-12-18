@@ -20,7 +20,7 @@ SCFMethod=(RH,RH)
 SpinModel=(U,U)
 BasisSets=(3-21G,3-21G)
 ModelChem=(HF,PBExc)
-Accuracy=(Good,Good)
+Accuracy=(Good,verytight)
 SCFConvergence=(DIIS,DIIS)
 
 Geometry=InAngstrom
