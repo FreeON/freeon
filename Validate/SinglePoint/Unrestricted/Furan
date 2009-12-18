@@ -1,0 +1,3 @@
+#!/bin/bash
+
+FreeON ${srcdir}/Furan.inp | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/Furan.reference
