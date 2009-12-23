@@ -546,13 +546,17 @@ CONTAINS
     TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O
     LOGICAL                             :: UpDate
     INTEGER                             :: NSMat,N1,N2
-    TYPE(DBL_RNK2)                      :: AD,BD,CD,DD
     TYPE(INT_VECT)                      :: Flag
+
+#ifdef CHECK_UNRESTRICTED
+
+    TYPE(DBL_RNK2)                      :: AD,BD,CD,DD
 
     CALL Initialize(AD)
     CALL Initialize(BD)
     CALL Initialize(CD)
     CALL Initialize(DD)
+#endif
     CALL Initialize(Flag)
 
     NSMat=MAX(A%NSMat,B%NSMat)
@@ -1731,33 +1735,35 @@ CONTAINS
     TYPE(BCSR),         INTENT(INOUT) :: C
     TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O
     INTEGER                           :: Status
+    INTEGER                           :: NSMat,N2
+    TYPE(INT_VECT)                    :: Flag
 #ifdef CHECK_UNRESTRICTED
     REAL(DOUBLE)                      :: FlOp
-#endif
-    INTEGER                           :: NSMat,N2
     TYPE(DBL_RNK2)                    :: AD,BD,CD,DD
-    TYPE(INT_VECT)                    :: Flag
-
     CALL Initialize(AD)
     CALL Initialize(BD)
     CALL Initialize(CD)
     CALL Initialize(DD)
+#endif
     CALL Initialize(Flag)
 
     NSMat=MAX(A%NSMat,B%NSMat)
     IF(.NOT.AllocQ(C%Alloc)) THEN
       !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C not allocated, allocating")
       CALL New(C,NSMat_O=NSMat)
+      CALL DSCAL(SIZE(C%MTrix%D),Zero,C%MTrix%D,1)
     ELSE
       !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "C already allocated, reallocating")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
+      CALL DSCAL(SIZE(C%MTrix%D),Zero,C%MTrix%D,1)
     ENDIF
 
     IF(NSMat.NE.C%NSMat) THEN
       !CALL MondoLog(DEBUG_MAXIMUM, "Add_BCSR", "NSMat.NE.C%NSMat! Deallocate-reallocate")
       CALL Delete(C)
       CALL New(C,NSMat_O=NSMat)
+      CALL DSCAL(SIZE(C%MTrix%D),Zero,C%MTrix%D,1)
     ENDIF
 
 #ifndef CHECK_UNRESTRICTED
@@ -1778,9 +1784,15 @@ CONTAINS
         CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
         CALL NumerikADD(A,B,C,2,2,2,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.1.AND.B%NSMat.EQ.4)THEN
-        CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
-        CALL NumerikADD(A,B,C,1,4,4,Flag,Perf_O)
+         ! Fill in off diagonal spin blocks ...
+         CALL SetEq(C,B)
+         ! ... then add in diagonal blocks
+         CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
+         CALL NumerikADD(A,B,C,1,4,4,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.1)THEN
+         ! Fill in off diagonal spin blocks ...
+         CALL SetEq(C,A)
+         ! ... then add in diagonal blocks
         CALL NumerikADD(A,B,C,1,1,1,Flag,Perf_O)
         CALL NumerikADD(A,B,C,4,1,4,Flag,Perf_O)
       ELSEIF(A%NSMat.EQ.4.AND.B%NSMat.EQ.4)THEN
