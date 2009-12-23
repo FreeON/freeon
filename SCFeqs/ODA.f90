@@ -47,7 +47,7 @@ PROGRAM ODA
   REAL(DOUBLE)                   :: e0,e1,e0p,e1p,a3,b3,c3,d3,EMns,EPls,EMin,        &
        LMns,LPls,L,L1,ENucTotTilde,                     &
        DIISErr,Enuc0,Enuc1,Exc0,Exc1
-  REAL(DOUBLE)                   :: Tmp1,Tmp2,Tmp3,Tmp4,alph
+  REAL(DOUBLE)                   :: Tmp1,Tmp2,Tmp3,Tmp4,alph,SFac
   INTEGER                        :: I,iSCF
   LOGICAL                        :: Present,HasECPs
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: ODAMssg,ODATag,MatFile
@@ -78,7 +78,11 @@ PROGRAM ODA
   CALL Get(PTilde,TrixFile('D',Args,-1))
   CALL Get(FTilde,TrixFile('F',Args,-1))
   CALL Get(P,TrixFile('D',Args,0))
-  IF(P%NSMat.GE.2)CALL Halt('ODA: The unrestricted theories haven''t been implemented yet!')
+  !---------------------------------------------
+  ! Rescaling factor for R/U/G theory.
+  SFac=1D0
+  IF(P%NSMat.GT.1) SFac=0.5D0
+  !---------------------------------------------
   CALL Get(F,TrixFile('F',Args,0))
   ! Get Kinectic Energy and ECPs
   CALL Get(T,TrixFile('T',Args))
@@ -133,17 +137,17 @@ PROGRAM ODA
 #ifdef PARALLEL
   ! Compute the Traces
   CALL Multiply(PTilde,T,T1)
-  TrP0T = Trace(T1)
+  TrP0T = Trace(T1)*SFac
   CALL Multiply(P,T,T1)
-  TrP1T = Trace(T1)
+  TrP1T = Trace(T1)*SFac
   CALL Multiply(PTilde,FTilde,T1)
-  TrP0F0 = Trace(T1)
+  TrP0F0 = Trace(T1)*SFac
   CALL Multiply(P,FTilde,T1)
-  TrP1F0 = Trace(T1)
+  TrP1F0 = Trace(T1)*SFac
   CALL Multiply(PTilde,F,T1)
-  TrP0F1 = Trace(T1)
+  TrP0F1 = Trace(T1)*SFac
   CALL Multiply(P,F,T1)
-  TrP1F1 = Trace(T1)
+  TrP1F1 = Trace(T1)*SFac
   IF(HasDFT(ModelChem)) THEN
     CALL Multiply(PTilde,K0,T1)
     TrP0K0 = Trace(T1)
@@ -165,37 +169,39 @@ PROGRAM ODA
     e1p = e1p + TrP1K0-TrP0K1
   ENDIF
 #else
+  !!! HEY, WE ARE OVERCOMPUTING HERE!!  CLEAN UP THE REDUNDANT TRACE ETC!!!
   ! Avoid assumption of two electron integral symmetry which may be lost
   ! in the case of small cell PBC HF and also due to excesive thresholding.
-  e0  = Trace(PTilde,T)+Trace(PTilde,FTilde) + Enuc0
-  e1  = Trace(P,T)     +Trace(P,F)           + Enuc1
-  e0p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Trace(P,FTilde)+Trace(PTilde,F)-Two*Trace(PTilde,FTilde)
-  e1p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Two*Trace(P,F)-Trace(P,FTilde)-Trace(PTilde,F)
+  e0  = Trace(PTilde,T)*SFac+Trace(PTilde,FTilde)*SFac + Enuc0
+!  CALL PPrint(P," P1 ",Unit_O=6)
+  e1  = Trace(P,T)*SFac     +Trace(P,F)*SFac           + Enuc1
+  e0p = Enuc1-Enuc0+Trace(P,T)*SFac-Trace(PTilde,T)*SFac+Trace(P,FTilde)*SFac+Trace(PTilde,F)*SFac-Two*Trace(PTilde,FTilde)*SFac
+  e1p = Enuc1-Enuc0+Trace(P,T)*SFac-Trace(PTilde,T)*SFac+Two*Trace(P,F)*SFac-Trace(P,FTilde)*SFac-Trace(PTilde,F)*SFac
   IF(HasDFT(ModelChem)) THEN
-    e0  = e0  + Exc0 - Trace(PTilde,K0)
-    e1  = e1  + Exc1 - Trace(P,K1)
-    e0p = e0p + (Trace(P,K0)-Trace(PTilde,K1))
-    e1p = e1p + (Trace(P,K0)-Trace(PTilde,K1))
+    e0  = e0  + Exc0 - Trace(PTilde,K0)*SFac
+    e1  = e1  + Exc1 - Trace(P,K1)*SFac
+    e0p = e0p + (Trace(P,K0)-Trace(PTilde,K1))*SFac
+    e1p = e1p + (Trace(P,K0)-Trace(PTilde,K1))*SFac
   ENDIF
 #endif
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   !
-  !  WRITE(*,*) "e0  = ",e0
-  !  WRITE(*,*) "e1  = ",e1
-  !  WRITE(*,*) "e0p = ",e0p
-  !  WRITE(*,*) "e1p = ",e1p
-  !  WRITE(*,*) " "
+!!$    WRITE(*,*) "e0  = ",e0
+!!$    WRITE(*,*) "e1  = ",e1
+!!$    WRITE(*,*) "e0p = ",e0p
+!!$    WRITE(*,*) "e1p = ",e1p
+!!$    WRITE(*,*) " "
   !
   a3=e0
   b3=e0p
   c3=-3D0*e0-2D0*e0p+3D0*e1-e1p
   d3=2D0*e0+e0p-2D0*e1+e1p
   !
-  !  WRITE(*,*) "a3 = ",a3
-  !  WRITE(*,*) "b3 = ",b3
-  !  WRITE(*,*) "c3 = ",c3
-  !  WRITE(*,*) "d3 = ",d3
+!!$    WRITE(*,*) "a3 = ",a3
+!!$    WRITE(*,*) "b3 = ",b3
+!!$    WRITE(*,*) "c3 = ",c3
+!!$    WRITE(*,*) "d3 = ",d3
   !
   IF(ABS(d3)<1D-6.OR.c3*c3-3*b3*d3<Zero)THEN
     L=-Half*b3/c3
@@ -222,7 +228,7 @@ PROGRAM ODA
   ! End point and Midpoint checks
   IF((L<=Zero.OR.L>One) .OR. (EMin>e0 .AND. EMin > e1))THEN
     IF(e0<e1)THEN
-      L=0.1D0
+      L=1D-2
       L1=One-L
       EMin=a3+b3*L+c3*L**2
     ELSE
@@ -335,6 +341,8 @@ PROGRAM ODA
   CALL Delete(T1)
   CALL Delete(T2)
   CALL Delete(T3)
+!  STOP
+  !
   CALL ShutDown(Prog)
   !
 END PROGRAM ODA
