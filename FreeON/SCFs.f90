@@ -48,7 +48,7 @@ MODULE SCFs
   IMPLICIT NONE
 
   INTEGER HDFFileID,H5GroupID
-  INTEGER,PARAMETER :: NOT_CONVERGE=0
+!!  INTEGER,PARAMETER :: NOTYET_CNVRGNC=0
   INTEGER,PARAMETER :: SCF_STALLED =1
   INTEGER,PARAMETER :: DIIS_NOPATH =2
   INTEGER,PARAMETER :: DID_CONVERGE=3
@@ -86,8 +86,9 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "SCF", "doing SCF")
 
     ! Allocate space for action.
-    CALL New(C%Stat%Action,1)
-
+    CALL New(C%Stat%Action,2)
+    C%Stat%Action%C=""
+    !
     ! Determine if there was a geomety or Basis Set Change
     CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat,C%Geos)
 
@@ -115,66 +116,66 @@ CONTAINS
 
   END SUBROUTINE SCF
 
-  SUBROUTINE SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,IConAls,N,S,O,D)
+  SUBROUTINE SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,ConvergeKey,N,S,O,D)
     TYPE(FileNames) :: N
     TYPE(State)     :: S
     TYPE(Options)   :: O
     TYPE(Dynamics)  :: D
-    INTEGER         :: cSCF,cBAS,cGEO,IConAls,MinMDGeo,iREMOVE
+    INTEGER         :: cSCF,cBAS,cGEO,ConvergeKey,MinMDGeo,iREMOVE
     INTEGER         :: SCF_STATUS
     LOGICAL         :: DIIS_FAIL,ODA_DONE
 
     IF(cSCF == 0) THEN
-      SCF_STATUS = NOT_CONVERGE
+      SCF_STATUS = NOTYET_CNVRGNC
       ODA_DONE   = .FALSE.
       DIIS_FAIL  = .FALSE.
     ENDIF
 
-    ! Logic for Algorithm Choice
-    IF(O%ConAls(cBAS) == ODMIX_CONALS) THEN
+    ! Logic for choice of convergence algorithm
+    IF(O%Convergence(cBAS) == ODMIX_CNVRGNC) THEN
       IF(ODA_DONE) THEN
-        IConAls = DIIS_CONALS
+        ConvergeKey = DIIS_CNVRGNC
       ELSE
         IF(SCF_STATUS == DIIS_NOPATH) THEN
-          IConAls = DIIS_CONALS
+          ConvergeKey = DIIS_CNVRGNC
           ODA_DONE = .TRUE.
           CALL MondoLog(DEBUG_NONE, "SCFLogic", "Turning on DIIS")
         ELSE
-          IConAls = ODA_CONALS
+          ConvergeKey = ODA_CNVRGNC
         ENDIF
       ENDIF
     ELSE
-      IConAls = O%ConAls(cBAS)
+      ConvergeKey = O%Convergence(cBAS)
     ENDIF
 
     ! Parse for strict ODA or DIIS Over-Ride
     CALL OpenASCII(N%IFile,Inp)
-    IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_ODA))  IConAls = ODA_CONALS
-    IF(OptKeyQ(Inp,CONALS_OVRIDE,CONALS_DIIS)) IConAls = DIIS_CONALS
+    IF(OptKeyQ(Inp,CNVRGNC_OVRIDE,CNVRGNC_ODA))  ConvergeKey = ODA_CNVRGNC
+    IF(OptKeyQ(Inp,CNVRGNC_OVRIDE,CNVRGNC_DIIS)) ConvergeKey = DIIS_CNVRGNC
     CLOSE(Inp)
 
     ! Defaults
-    IF(cSCF < 1) THEN
-      IConAls = NO_CONALS
+    IF(cSCF<1)THEN
+      ConvergeKey = NOTYET_CNVRGNC
     ENDIF
 
     IF(S%Action%C(1) == SCF_GUESSEQCORE .AND. cSCF < 1) THEN
-      IConAls = NO_CONALS
+      ConvergeKey = NOTYET_CNVRGNC
     ENDIF
 
     IF(S%Action%C(1) == SCF_BASISSETSWITCH .AND. cSCF < 2) THEN
-      IConAls = NO_CONALS
+      ConvergeKey = NOTYET_CNVRGNC
     ENDIF
 
     IF(S%Action%C(1) == SCF_RWBSS .AND. cSCF < 2) THEN
-      IConAls = NO_CONALS
+      ConvergeKey = NOTYET_CNVRGNC
     ENDIF
 
     ! MD OverRule
     IF(D%DoingMD) THEN
       CALL CalculateMDGeo(D,iREMOVE,MinMDGeo)
       IF(cGEO > MinMDGeo) THEN
-        ! IConAls = NO_CONALS
+        ! ConvergeKey = NOTYET_CNVRGNC
       ENDIF
     ENDIF
 
@@ -188,7 +189,7 @@ CONTAINS
     TYPE(Dynamics)     :: D
     TYPE(Parallel)     :: M
     TYPE(DBL_RNK2)     :: ETot,DMax,DIIS
-    INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,IConAls
+    INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,ConvergeKey
     INTEGER,SAVE       :: SCF_STATUS
     LOGICAL,OPTIONAL   :: CPSCF_O
     LOGICAL            :: SCFCycle,DoCPSCF
@@ -210,7 +211,7 @@ CONTAINS
     CALL StateArchive(N,G,S,Init_O=.TRUE.)
 
     ! Decide on the Choice of convergence Algorithms
-    CALL SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,IConAls,N,S,O,D)
+    CALL SCFLogic(cSCF,cBAS,cGEO,SCF_STATUS,ODA_DONE,DIIS_FAIL,ConvergeKey,N,S,O,D)
 
     ! The options...
     IF(DoCPSCF)THEN
@@ -235,52 +236,42 @@ CONTAINS
     ELSE
       CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
       CALL DensityBuild(N,S,M)
-      CALL FockBuild(cSCF,cBAS,N,S,O,M)
-
       ! Select the Case
-      SELECT CASE (IConAls)
-
-      CASE (DIIS_CONALS)
-        CALL Invoke('DIIS',N,S,M)
-        CALL SolveSCF(cBAS,N,S,O,M)
-        CALL Invoke('SCFstats',N,S,M)
-
-      CASE (ODA_CONALS)
-        CALL SolveSCF(cBAS,N,S,O,M)
-        CALL Invoke('ODA',N,S,M)
-        IF(HasDFT(O%Models(cBAS)))THEN
-          ! Rebuild non-linear KS matrix
-          CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
-          CALL DensityBuild(N,S,M)
-#ifdef DIPMW
-          CALL Invoke('HiCu',N,S,M)
-          CALL Invoke('DipMW',N,S,M)
-          IF(.TRUE.) STOP
-#else
-          CALL Invoke('HiCu',N,S,M)
-#endif
-          CALL Invoke('FBuild',N,S,M)
-        ENDIF
-        CALL SolveSCF(cBAS,N,S,O,M)
-        CALL Invoke('SCFstats',N,S,M)
-
-      CASE (NO_CONALS)
-        CALL SolveSCF(cBAS,N,S,O,M)
-        CALL Invoke('SCFstats',N,S,M)
-
-      CASE DEFAULT
-        CALL MondoHalt(DRIV_ERROR,'Logic failure in SCFCycle')
-      END SELECT
+      IF(ConvergeKey==DIIS_CNVRGNC.OR.ConvergeKey==INCF_CNVRGNC)THEN
+         IF(ConvergeKey==INCF_CNVRGNC.AND.cSCF>1)S%Action%C(1)='InkFok'
+         CALL FockBuild(cSCF,cBAS,N,S,O,M)
+         CALL Invoke('DIIS',N,S,M)
+         CALL SolveSCF(cBAS,N,S,O,M)
+         CALL Invoke('SCFstats',N,S,M)
+      ELSEIF(ConvergeKey==ODA_CNVRGNC)THEN
+         CALL FockBuild(cSCF,cBAS,N,S,O,M)
+         CALL SolveSCF(cBAS,N,S,O,M)
+         CALL Invoke('ODA',N,S,M)
+         IF(HasDFT(O%Models(cBAS)))THEN
+            ! Rebuild non-linear KS matrix
+            CALL DensityLogic(cSCF,cBAS,cGEO,N,S,O,D)
+            CALL DensityBuild(N,S,M)
+            CALL Invoke('HiCu',N,S,M)
+            CALL Invoke('FBuild',N,S,M)
+         ENDIF
+         CALL SolveSCF(cBAS,N,S,O,M)
+         CALL Invoke('SCFstats',N,S,M)
+      ELSEIF(ConvergeKey==NOTYET_CNVRGNC)THEN
+         CALL FockBuild(cSCF,cBAS,N,S,O,M)
+         CALL SolveSCF(cBAS,N,S,O,M)
+         CALL Invoke('SCFstats',N,S,M)
+      ELSE
+         CALL MondoHalt(DRIV_ERROR,'Failure in SCFCycle with ConvergeKey='//TRIM(IntToChar(ConvergeKey)))
+      ENDIF
     ENDIF
-
     ! Archive and Check Status
     CALL StateArchive(N,G,S)
-    SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,IConAls,CPSCF_O)
+    SCF_STATUS=ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,ConvergeKey,CPSCF_O)
     S%Previous%I=S%Current%I
     IF(SCF_STATUS==DID_CONVERGE) SCFCycle=.TRUE.
   END FUNCTION SCFCycle
 
-  FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,IConAls,CPSCF_O)
+  FUNCTION ConvergedQ(cSCF,cBAS,cGEO,N,S,O,G,D,M,ETot,DMax,DIIS,ConvergeKey,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
     TYPE(Options)               :: O
@@ -297,7 +288,7 @@ CONTAINS
                                    DETOT,ETOTA,ETOTB,ETOTQ,ETest, &
                                    DDMAX,DMAXA,DMAXB,DMAXQ,DTest,ETOTO,ODAQ,DMaxMax
     INTEGER,DIMENSION(G%Clones) :: Converged
-    INTEGER                     :: ConvergedQ,iSCF,IConAls,MinSCF,MaxSCF
+    INTEGER                     :: ConvergedQ,iSCF,ConvergeKey,MinSCF,MaxSCF
     CHARACTER(LEN=DCL)          :: chGEO
 
     IF(PRESENT(CPSCF_O)) THEN
@@ -313,7 +304,7 @@ CONTAINS
       ETest=RTol(O%AccuracyLevels(cBAS))
       DTest=DTol(O%AccuracyLevels(cBAS))
       IF(cSCF==0)THEN
-        ConvergedQ=NOT_CONVERGE
+        ConvergedQ=NOTYET_CNVRGNC
         RETURN
       ENDIF
 
@@ -330,7 +321,7 @@ CONTAINS
         ! Load current energies
         G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
 
-        Converged(iCLONE)=NOT_CONVERGE
+        Converged(iCLONE)=NOTYET_CNVRGNC
         IF(cSCF>1)THEN
           ETotA=ETot%D(cSCF-1,iCLONE)
           ETotB=ETot%D(cSCF  ,iCLONE)
@@ -378,25 +369,25 @@ CONTAINS
         ENDIF
       ENDDO
       CALL CloseHDF(HDFFileID)
-      ! IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+      ! IF(cSCF>1)ConvergedQ=NOTYET_CNVRGNC
       ConvergedQ = DID_CONVERGE
       DO iCLONE=1,G%Clones
         ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
       ENDDO
       ! Convergence announcement
-      IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_MAXIMUM)THEN
+      IF(ConvergedQ.NE.NOTYET_CNVRGNC.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_MAXIMUM)THEN
         CALL MondoLogPlain(TRIM(Mssg))
         CALL MondoLogPlain("Normal CPSCF convergence")
       ENDIF
 
-    ELSE ! IF(DoCPSCF) THEN
+    ELSE
 
       ! NORMAL HUMANS CONVERGENCE CRITERIA
 
-      IF(IConAls==DIIS_CONALS) THEN
+      IF(ConvergeKey==DIIS_CNVRGNC.OR.ConvergeKey==INCF_CNVRGNC) THEN
         DoDIIS=.TRUE.
         DoODA =.FALSE.
-      ELSEIF(IConAls==ODA_CONALS) THEN
+      ELSEIF(ConvergeKey==ODA_CNVRGNC) THEN
         DoDIIS=.FALSE.
         DoODA =.TRUE.
       ELSE
@@ -435,7 +426,7 @@ CONTAINS
         ! Load current energy into energy vector.
         G%Clone(iCLONE)%ETotalPerSCF%D(cSCF) = G%Clone(iCLONE)%ETotal
 
-        Converged(iCLONE)=NOT_CONVERGE
+        Converged(iCLONE)=NOTYET_CNVRGNC
         IF(cSCF>1)THEN
           ETotA=ETot%D(cSCF-1,iCLONE)
           ETotB=ETot%D(cSCF  ,iCLONE)
@@ -479,7 +470,7 @@ CONTAINS
     !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DMaxA = '//TRIM(FltToChar(DMaxA)))
     !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DMaxB = '//TRIM(FltToChar(DMaxB)))
 
-          Converged(iCLONE)=NOT_CONVERGE
+          Converged(iCLONE)=NOTYET_CNVRGNC
           ! Convergence from above +/- expected delta relative to historical
           ! minimum energy
           ALogic=ETotB*(One+ETest)<ETotA
@@ -505,18 +496,20 @@ CONTAINS
           FLogic=DoODA.AND..NOT.ALogic.AND.cSCF>3
 
           ! Sort through logic hopefully in the conditionally correct order ...
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETest  = '//TRIM(FltToChar(ETest)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DTest  = '//TRIM(FltToChar(DTest)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ALogic = '//TRIM(LogicalToChar(ALogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'A2Logic= '//TRIM(LogicalToChar(A2Logic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ELogic = '//TRIM(LogicalToChar(ELogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'CLogic = '//TRIM(LogicalToChar(CLogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DLogic = '//TRIM(LogicalToChar(DLogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'QLogic = '//TRIM(LogicalToChar(QLogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ILogic = '//TRIM(LogicalToChar(ILogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'GLogic = '//TRIM(LogicalToChar(GLogic)))
-    !!$      CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'FLogic = '//TRIM(LogicalToChar(FLogic)))
-
+!!$
+!!$
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ETest  = '//TRIM(FltToChar(ETest)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DTest  = '//TRIM(FltToChar(DTest)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ALogic = '//TRIM(LogicalToChar(ALogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'A2Logic= '//TRIM(LogicalToChar(A2Logic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ELogic = '//TRIM(LogicalToChar(ELogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'CLogic = '//TRIM(LogicalToChar(CLogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'DLogic = '//TRIM(LogicalToChar(DLogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'QLogic = '//TRIM(LogicalToChar(QLogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'ILogic = '//TRIM(LogicalToChar(ILogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'GLogic = '//TRIM(LogicalToChar(GLogic)))
+!!$          CALL MondoLog(DEBUG_MAXIMUM, "ConvergedQ", 'FLogic = '//TRIM(LogicalToChar(FLogic)))
+!!$
           ! No message.
           Mssg=" "
           IF(ALogic.AND.CLogic)THEN
@@ -577,7 +570,7 @@ CONTAINS
       !    RETURN
       !  ELSE
       !    IF(DMaxMax > DTest*1.D-2) THEN
-      !      ConvergedQ=NOT_CONVERGE
+      !      ConvergedQ=NOTYET_CNVRGNC
       !      Mssg = " "
       !    ELSE
       !      ConvergedQ=DID_CONVERGE
@@ -589,7 +582,7 @@ CONTAINS
       ! No message.
       Mssg = " "
       IF(cSCF .LT. MinSCF) THEN
-        ConvergedQ=NOT_CONVERGE
+        ConvergedQ=NOTYET_CNVRGNC
         Mssg = " "
       ENDIF
       IF(cSCF .GE. MaxSCF) THEN
@@ -726,27 +719,16 @@ CONTAINS
     TYPE(Parallel) :: M
     REAL(DOUBLE)   :: Lambda
     INTEGER        :: cSCF,cBAS,Modl
-    LOGICAL        :: DoDIIs
     !----------------------------------------------------------------------------!
     Modl=O%Models(cBAS)
-
-    IF(S%Action%C(1).NE.CPSCF_START_RESPONSE) CALL Invoke('QCTC',N,S,M)
-
+    IF(S%Action%C(1).NE.CPSCF_START_RESPONSE) &
+       CALL Invoke('QCTC',N,S,M)
     IF(S%Action%C(1)/=SCF_GUESSEQCORE.AND.S%Action%C(1).NE.CPSCF_START_RESPONSE)THEN
-      IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
-#ifdef DIPMW
-      IF(HasDFT(Modl)) THEN
+      IF(HasHF(Modl))  &
+         CALL Invoke('ONX',N,S,M)
+      IF(HasDFT(Modl)) &
         CALL Invoke('HiCu',N,S,M)
-        CALL Invoke('DipMW',N,S,M)
-        IF(.TRUE.) STOP
-      ENDIF
-#else
-      IF(HasDFT(Modl)) THEN
-        CALL Invoke('HiCu',N,S,M)
-      ENDIF
-#endif
     ENDIF
-
     CALL Invoke('FBuild',N,S,M)
   END SUBROUTINE FockBuild
   !===============================================================================

@@ -68,7 +68,7 @@ CONTAINS
     ! Parse for SCF methods to use in solution of SCF equations and put to HDF
     CALL ParseSCFMethods(O%NMthds,O%Methods)
     ! Parse for Convergence Algorithms
-    CALL ParseConAls(O%NConAls,O%ConAls)
+    CALL ParseConvergence(O%NConvergence,O%Convergence)
     ! Parse for model chemistries
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for spin model.
@@ -355,52 +355,55 @@ CONTAINS
          //'Options include '//SCF_SDMM//', '//SCF_PM//', '//SCF_SP2//', '//SCF_TS4//', and '//SCF_RHHF)
   END SUBROUTINE ParseSCFMethods
   !============================================================================
-  !  PARSE THE CONVERGENCE ALGORITHMN'S USE TO SOLVE THE SCF EQUATIONS
+  !  PARSE CONVERGENCE ALGORITHMS
   !============================================================================
-  SUBROUTINE ParseConAls(NConAls,ConALs)
-    INTEGER                       :: NConAls,NLoc,I
-    INTEGER,   DIMENSION(MaxSets) :: ConAls
+  SUBROUTINE ParseConvergence(NConvergence,Convergence)
+    INTEGER                       :: NConvergence,NLoc,I
+    INTEGER,   DIMENSION(MaxSets) :: Convergence
     !----------------------------------------------------------------------------
-    NConAls=0
-    ConAls(:) = ODMIX_CONALS
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_DIIS,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
+    NConvergence=0
+    ! ODA -> DIIS convergence is the default
+    Convergence(:) = ODMIX_CNVRGNC
+    !
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_DIIS,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
       DO I=1,NLoc
-        ConAls(Location(I))=DIIS_CONALS
+        Convergence(Location(I))=DIIS_CNVRGNC
       ENDDO
     ENDIF
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_ODA,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_ODA,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
       DO I=1,NLoc
-        ConAls(Location(I))=ODA_CONALS
+        Convergence(Location(I))=ODA_CNVRGNC
       ENDDO
     ENDIF
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_ODMIX,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_ODMIX,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
       DO I=1,NLoc
-        ConAls(Location(I))=ODMIX_CONALS
+        Convergence(Location(I))=ODMIX_CNVRGNC
       ENDDO
     ENDIF
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_DOMIX,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_DOMIX,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
       DO I=1,NLoc
-        ConAls(Location(I))=DOMIX_CONALS
+        Convergence(Location(I))=DOMIX_CNVRGNC
       ENDDO
     ENDIF
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_SMIX,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_SMIX,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
       DO I=1,NLoc
-        ConAls(Location(I))=SMIX_CONALS
-      ENDDO
-    ENDIF
-    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_TEST,MaxSets,NLoc,Location))THEN
-      NConAls=NConAls+NLoc
-      DO I=1,NLoc
-        ConAls(Location(I))=TEST_CONALS
+        Convergence(Location(I))=SMIX_CNVRGNC
       ENDDO
     ENDIF
     !
-  END SUBROUTINE ParseConAls
+    IF(OptKeyLocQ(Inp,CNVRGNC_OPTION,CNVRGNC_INCF,MaxSets,NLoc,Location))THEN
+      NConvergence=NConvergence+NLoc
+      DO I=1,NLoc
+        Convergence(Location(I))=INCF_CNVRGNC
+      ENDDO
+    ENDIF
+    !
+  END SUBROUTINE ParseConvergence
   !===============================================================================================
   ! PARSE FOR ACCURACY LEVELS AND SET THRESHOLDS
   !===============================================================================================

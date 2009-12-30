@@ -49,28 +49,32 @@ MODULE OptionKeys
   CHARACTER(LEN=*), PARAMETER :: SCF_TS4            ='TRS4'
   INTEGER,          PARAMETER :: TS4_R_SCF          =58638506
   !------------------------------------------------------------------------------
-  ! Options:ConAls=
-  CHARACTER(LEN=*), PARAMETER :: CONALS_OPTION ='SCFConvergence'
-  CHARACTER(LEN=*), PARAMETER :: CONALS_OVRIDE ='OverRideSCFConvergence'
-  INTEGER,          PARAMETER :: NO_CONALS     =41414141
+  ! Options:Convergence=
+  !
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_OPTION ='SCFConvergence'
+  !
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_OVRIDE ='OverideSCFConvergence'
+  ! Not yet in the basin of convergence,
+  ! because SCF just started, basis set switch, etc
+  INTEGER,          PARAMETER :: NOTYET_CNVRGNC =0
   ! DIIS
-  CHARACTER(LEN=*), PARAMETER :: CONALS_DIIS   ='DIIS'
-  INTEGER,          PARAMETER :: DIIS_CONALS   =42424242
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_DIIS   ='DIIS'
+  INTEGER,          PARAMETER :: DIIS_CNVRGNC   =42424242
+  ! DIIS with incremental Fock builds
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_INCF   ='DIIS-INC'
+  INTEGER,          PARAMETER :: INCF_CNVRGNC   =42734534
   ! ODA
-  CHARACTER(LEN=*), PARAMETER :: CONALS_ODA    ='ODA'
-  INTEGER,          PARAMETER :: ODA_CONALS    =43434343
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_ODA    ='ODA'
+  INTEGER,          PARAMETER :: ODA_CNVRGNC    =43434343
   ! ODA then DIIS
-  CHARACTER(LEN=*), PARAMETER :: CONALS_ODMIX  ='ODA-DIIS'
-  INTEGER,          PARAMETER :: ODMIX_CONALS  =44444444
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_ODMIX  ='ODA-DIIS'
+  INTEGER,          PARAMETER :: ODMIX_CNVRGNC  =44444444
   ! DIIS then ODA on Fail
-  CHARACTER(LEN=*), PARAMETER :: CONALS_DOMIX  ='DIIS-ODA'
-  INTEGER,          PARAMETER :: DOMIX_CONALS  =45454545
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_DOMIX  ='DIIS-ODA'
+  INTEGER,          PARAMETER :: DOMIX_CNVRGNC  =45454545
   ! Stanton Mixing
-  CHARACTER(LEN=*), PARAMETER :: CONALS_SMIX   ='SMIX'
-  INTEGER,          PARAMETER :: SMIX_CONALS   =46464646
-  ! Test Algorithm
-  CHARACTER(LEN=*), PARAMETER :: CONALS_TEST   ='TestSCF'
-  INTEGER,          PARAMETER :: TEST_CONALS   =47474747
+  CHARACTER(LEN=*), PARAMETER :: CNVRGNC_SMIX   ='SMIX'
+  INTEGER,          PARAMETER :: SMIX_CNVRGNC   =46464646
   !------------------------------------------------------------------------------
   ! Options:Accuracy=
   CHARACTER(LEN=*), PARAMETER :: ACCURACY_OPTION    ='Accuracy'

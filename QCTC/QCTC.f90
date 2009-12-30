@@ -45,6 +45,9 @@ PROGRAM QCTC
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+
+
+!.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
   NukesOn=.TRUE.
 
   ! ---------------------------------------------------------------------------------
@@ -60,6 +63,7 @@ PROGRAM QCTC
      CALL Get(OffS,'atoff',PrvBase)
      CALL Get(NBasF,'nbasf',PrvBase)
      CALL Get(Dmat,TrixFile('D',Args,-1))
+     NukesOn=.TRUE.
   ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
      ! Get the current geometry from the current HDF first
      CALL Get(GM,CurGeom)
@@ -96,12 +100,15 @@ PROGRAM QCTC
      HDF_CurrentID=H5GroupID
      !
      CALL Get(Dmat,TrixFile('D',Args,0))
-
+     !
+     NukesOn=.TRUE.
   ELSE
      ! Get the current information
      CALL Get(BS,CurBase)
      CALL Get(GM,CurGeom)
-     IF(SCFActn=='InkFok')THEN
+
+     IF(SCFActn=='InkFok')THEN ! Incremental Fock build
+        ! Maybe the difference density build should go elswhere?
         CALL Get(D1,TrixFile('D',Args,-1))
         CALL Get(D2,TrixFile('D',Args,0))
         CALL Multiply(D1,-One)
@@ -112,19 +119,20 @@ PROGRAM QCTC
         ENDIF
         CALL Delete(D1)
         CALL Delete(D2)
-     ELSEIF(SCFActn=='ForceEvaluation')THEN
-        CALL Get(Dmat,TrixFile('D',Args,1))
-     ELSEIF(SCFActn=='StartResponse')THEN
-        CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
-     ELSEIF(SCFActn=='FockPrimeBuild')THEN
-       NukesOn=.FALSE.
-        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
-     ELSEIF(SCFActn=='TD-SCF')THEN
+        !
         NukesOn=.FALSE.
+     ELSEIF(SCFActn=='FockPrimeBuild')THEN
+        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
+        NukesOn=.FALSE.
+     ELSEIF(SCFActn=='TD-SCF')THEN
         CALL Get(Dmat,TrixFile(Args%C%C(3),Args,0))
+        NukesOn=.FALSE.
      ELSEIF(SCFActn/='Core')THEN
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
+        NukesOn=.TRUE.
+     ELSE
+        CALL Halt('No idea what is going on in QCTC with SCF Action = '//TRIM(SCFActn))
      ENDIF
   ENDIF
   ! Set thresholds local to the density build
@@ -139,7 +147,7 @@ PROGRAM QCTC
   ! Here, the LL is filled out
   CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
   ! Add in the nuclear charges only in certain cases
-  IF(NukesOn)THEN !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
+  IF(NukesOn)THEN
      CALL AddNukes(GM,RhoHead,NoWrap)
      NLink=NLink+GM%NAtms
   ENDIF
@@ -206,8 +214,6 @@ PROGRAM QCTC
   ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
   ! Set up the crystal field
-
-
   CALL PBCFarFieldSetUp(GM,Rho,'QCTC',MaxPFFFEll,Etot)
   ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
@@ -250,16 +256,14 @@ PROGRAM QCTC
   ENDIF
   ! Nuclear-total density Coulomb interaction
   IF(NukesOn)THEN
-     IF(SCFActn=='InkFok')THEN
-        CALL Get(E_Nuc_Tot,'E_NuclearTotal')
-        CALL Elapsed_Time(TimeNukE,'Init')
-        E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
-        CALL Elapsed_Time(TimeNukE,'Accum')
-     ELSE
-        CALL Elapsed_Time(TimeNukE,'Init')
-        E_Nuc_Tot=NukE(GM,Rho,NoWrap)
-        CALL Elapsed_Time(TimeNukE,'Accum')
-     ENDIF
+     CALL Elapsed_Time(TimeNukE,'Init')
+     E_Nuc_Tot=NukE(GM,Rho,NoWrap)
+     CALL Elapsed_Time(TimeNukE,'Accum')
+  ELSEIF(SCFActn=='InkFok')THEN
+     CALL Get(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Previous)
+     CALL Elapsed_Time(TimeNukE,'Init')
+     E_Nuc_Tot=E_Nuc_Tot+NukE(GM,Rho,NoWrap)
+     CALL Elapsed_Time(TimeNukE,'Accum')
   ELSE
      E_Nuc_Tot=Zero
   ENDIF
@@ -273,6 +277,7 @@ PROGRAM QCTC
 !!$     WRITE(*,55)I,100D0*NNearCount(I)/(NLeaf*NPrim)
 !!$55   FORMAT('Cell# ',I2,", % NF = ",F6.2)
 !!$  ENDDO
+!!$
 !!$  WRITE(*,11)' Density_Time  = ',Density_Time
 !!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
 !!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
