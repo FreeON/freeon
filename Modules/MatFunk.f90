@@ -75,10 +75,16 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN)            :: String
     !----------------------------------------------------------------------------
     !
+    IF(PRESENT(PosDefMat_O))THEN
+      PosDefMat=PosDefMat_O
+    ELSE
+      PosDefMat=.TRUE.
+    ENDIF
+
     IF(PRESENT(EigenThresh_O))THEN
       EigenThreshold=EigenThresh_O
     ELSE
-      EigenThreshold=1.D-10
+       EigenThreshold=1.D-16
     ENDIF
     !
     IF(PRESENT(PrintCond_O))THEN
@@ -93,11 +99,6 @@ CONTAINS
       PrintValues=.FALSE.
     ENDIF
     !
-    IF(PRESENT(PosDefMat_O))THEN
-      PosDefMat=PosDefMat_O
-    ELSE
-      PosDefMat=.TRUE.
-    ENDIF
     !
     BLKVECT%D(1:N,1:N)=A(1:N,1:N)
     !     CALL PPrint(A,'A',Unit_O=6)
@@ -146,7 +147,11 @@ CONTAINS
       ENDDO
     ELSE
       DO I=1,N
-        BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
+         IF(ABS(BLKVALS%D(I))<EigenThreshold)THEN
+            BLKMAT1%D(I,I)=Zero
+         ELSE
+            BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
+         ENDIF
       ENDDO
     ENDIF
     !

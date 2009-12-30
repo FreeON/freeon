@@ -358,10 +358,10 @@ PROGRAM DIIS
       CALL SetDSYEVWork(N)
       BInv%D=Zero
       IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
-        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,PosDefMat_O=.FALSE., &
+        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,PosDefMat_O=.FALSE.,EigenThresh_O=1D-12, &
              PrintValues_O=.TRUE.,PrintCond_O=.TRUE.,Prog_O=Prog)
       ELSE
-        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,PosDefMat_O=.FALSE.)
+        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,PosDefMat_O=.FALSE.,EigenThresh_O=1D-12)
       ENDIF
       CALL UnSetDSYEVWork()
       CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
