@@ -7,10 +7,10 @@ DebugAll=(MaxDebug,CheckSums)
 
 Guess=SuperPos
 SCFMethod=(TC2)
-BasisSets=(STO-3G-SPLIT)
+BasisSets=(STO-3G)
 ModelChem=(HF)
-Accuracy=(Loose)
-SCFConvergence=(DIIS)
+Accuracy=(Tight)
+SCFConvergence=(DIIS-INC)
 
 <EndOptions>
 

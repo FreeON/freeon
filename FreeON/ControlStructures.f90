@@ -52,7 +52,7 @@ MODULE ControlStructures
 
   TYPE Options
     INTEGER                       :: NMthds
-    INTEGER                       :: NConAls
+    INTEGER                       :: NConvergence
     INTEGER                       :: NModls
     INTEGER                       :: NSpinModels
     INTEGER                       :: NThrsh
@@ -62,7 +62,7 @@ MODULE ControlStructures
     INTEGER                       :: EndPts
     INTEGER                       :: Coordinates
     INTEGER,   DIMENSION(MaxSets) :: Methods
-    INTEGER,   DIMENSION(MaxSets) :: ConAls
+    INTEGER,   DIMENSION(MaxSets) :: Convergence
     INTEGER,   DIMENSION(MaxSets) :: Models
     INTEGER,   DIMENSION(MaxSets) :: NSMat
     INTEGER,   DIMENSION(MaxSets) :: AccuracyLevels
