@@ -147,7 +147,6 @@ CONTAINS
 
     ! Print out a timestamp.
     CALL TimeStamp("Starting FreeON")
-    CALL MondoLogPlain("")
 
   END SUBROUTINE StartUpHeader
 
