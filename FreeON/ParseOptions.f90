@@ -247,7 +247,7 @@ CONTAINS
         Models(Location(I))=HYBRID_B3LYP_VWN5
       ENDDO
     ENDIF
-    !    ! Hybrid B3LYP/PW91 exchange-correlation
+    ! Hybrid B3LYP/PW91 exchange-correlation
     !    IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_PW91,MaxSets,NLoc,Location))THEN
     !       NModls=NModls+NLoc
     !       DO I=1,NLoc

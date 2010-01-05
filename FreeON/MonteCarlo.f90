@@ -91,13 +91,13 @@ MODULE MonteCarlo
 !
 !   Initial Guess
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
-       WRITE(*,*) 'Geuss==RESTART'
+       WRITE(*,*) 'Guess==RESTART'
 !      Init the Time
        HDFFileID=OpenHDF(C%Nams%RFile)
        DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Get(MDIter%I(iCLONE)  ,"MDIter")
-          CALL Get(C%Dyns%MDGeuss    ,"MDGeuss")
+          CALL Get(C%Dyns%MDGuess    ,"MDGuess")
           CALL Get(MCEtot0%D(iCLONE) ,"MCEtot0")
           CALL Get(MCTemp0%D(iCLONE) ,"MCTemp0")
           CALL Get(Carts,"MCCarts0")
@@ -113,7 +113,7 @@ MODULE MonteCarlo
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
           CALL Put(.TRUE.,"DoingHybridMC")
-          CALL Put(C%Dyns%MDGeuss   ,"MDGeuss")
+          CALL Put(C%Dyns%MDGuess   ,"MDGuess")
           CALL Put(MCEtot0%D(iCLONE),"MCEtot0")
           CALL Put(MCTemp0%D(iCLONE),"MCTemp0")
           Carts%D(:,:) = MCCarts0%D(:,:,iCLONE)
@@ -127,7 +127,7 @@ MODULE MonteCarlo
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ELSE
-       WRITE(*,*) 'Geuss==SUPERPOS'
+       WRITE(*,*) 'Guess==SUPERPOS'
 !      Do The initial SCF: Build the SCF
        DO iBAS=1,C%Sets%NBSets
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
@@ -150,7 +150,7 @@ MODULE MonteCarlo
           CALL Put(MDTime%D(iCLONE),"MDTime")
           CALL Put(.TRUE.,"DoingMD")
           CALL Put(.TRUE.,"DoingHybridMC")
-          CALL Put(C%Dyns%MDGeuss   ,"MDGeuss")
+          CALL Put(C%Dyns%MDGuess   ,"MDGuess")
           CALL Put(MCEtot0%D(iCLONE),"MCEtot0")
           CALL Put(MCTemp0%D(iCLONE),"MCTemp0")
           Carts%D(:,:) = MCCarts0%D(:,:,iCLONE)
@@ -160,7 +160,7 @@ MODULE MonteCarlo
        CALL CloseHDF(HDFFileID)
     ENDIF
 !   Determine iREMOVE
-    SELECT CASE(C%Dyns%MDGeuss)
+    SELECT CASE(C%Dyns%MDGuess)
     CASE ('DMVerlet')
        iREMOVE = 4
     CASE ('FMVerlet')
@@ -175,7 +175,7 @@ MODULE MonteCarlo
        iREMOVE = 4
     CASE ('DMProj4')
        iREMOVE = 5
-    CASE ('DMDGeuss')
+    CASE ('DMDGuess')
        iREMOVE = 0
     END SELECT
 !   Initialize MD and MC
@@ -298,7 +298,7 @@ MODULE MonteCarlo
           WRITE(Out,97) Line
           Line = "# MD Algorithm = Verlet"
           WRITE(Out,97) Line
-          Line = "# MDGeuss      = "//TRIM(C%Dyns%MDGeuss)
+          Line = "# MDGuess      = "//TRIM(C%Dyns%MDGuess)
           WRITE(Out,97) Line
           Line = "# Minium SCF   = "//TRIM(IntToChar(C%Opts%MinSCF))
           WRITE(Out,97) Line

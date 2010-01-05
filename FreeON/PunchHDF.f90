@@ -176,7 +176,7 @@ CONTAINS
       CALL Put(D%MDDampStep, 'MDDampStep')
       CALL Put(.FALSE.,'DoingMD')
       CALL Put(.FALSE.,'DoingHybridMC')
-      CALL Put("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",'MDGeuss')
+      CALL Put("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",'MDGuess')
       CALL Put(BIG_DBL,'MCEtot0')
       CALL Put(BIG_DBL,'MCTemp0')
       CALL New(DoubleRnk2,(/3,MaxAtoms/))

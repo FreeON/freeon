@@ -82,7 +82,7 @@ MODULE ControlStructures
     REAL(DOUBLE)                  :: ConjugateGradientdR
     CHARACTER(LEN=3)              :: GeomPrint
 
-    CHARACTER(LEN=20)             :: GeussToP2Use
+    CHARACTER(LEN=20)             :: GuessToP2Use
     INTEGER                       :: MinSCF
     INTEGER                       :: MaxSCF
     INTEGER                       :: MaxRQI
@@ -93,7 +93,7 @@ MODULE ControlStructures
 
   TYPE Dynamics
     LOGICAL           :: DoingMD
-    CHARACTER(LEN=32) :: MDGeuss
+    CHARACTER(LEN=32) :: MDGuess
     INTEGER           :: MDNumSCF
 
     INTEGER           :: MCMaxSteps
