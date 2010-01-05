@@ -51,8 +51,8 @@ MODULE DynamicsKeys
   CHARACTER(LEN=*), PARAMETER :: MD_DMP3                = 'DMProj3'
   CHARACTER(LEN=*), PARAMETER :: MD_DMP4                = 'DMProj4'
 
-  ! Diagonal Geuss
-  CHARACTER(LEN=*), PARAMETER :: MD_DGeuss              = 'DMDGeuss'
+  ! Diagonal Guess
+  CHARACTER(LEN=*), PARAMETER :: MD_DGuess              = 'DMDGuess'
 
   ! MD Algorithm
   CHARACTER(LEN=*), PARAMETER :: MD_AL_OPTION           = 'MDMethod'

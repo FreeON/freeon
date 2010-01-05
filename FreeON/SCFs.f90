@@ -88,7 +88,7 @@ CONTAINS
     ! Allocate space for action.
     CALL New(C%Stat%Action,2)
     C%Stat%Action%C=""
-    !
+
     ! Determine if there was a geomety or Basis Set Change
     CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat,C%Geos)
 
@@ -694,9 +694,9 @@ CONTAINS
       ENDIF
     ENDIF
 
-    ! If we are doing MD, Geuss to P2Use is Different
+    ! If we are doing MD, Guess to P2Use is Different
     IF(D%DoingMD .AND. cSCF==0) THEN
-      S%Action%C(1)=O%GeussToP2Use
+      S%Action%C(1)=O%GuessToP2Use
     ENDIF
 
     CALL MondoLog(DEBUG_MAXIMUM, "DensityLogic", "Action = "//TRIM(S%Action%C(1)))
@@ -2257,7 +2257,7 @@ CONTAINS
     INTEGER         :: iREMOVE,MinMDGeo
 
     iREMOVE = D%MDMaxSteps+1
-    SELECT CASE(D%MDGeuss)
+    SELECT CASE(D%MDGuess)
     CASE("DMLinear","FMVerlet0")
       iREMOVE  = 2
       MinMDGeo = 2
@@ -2300,11 +2300,11 @@ CONTAINS
     CASE('DMProj4')
       iREMOVE  = 5
       MinMDGeo = 5
-    CASE('DMDGeuss')
+    CASE('DMDGuess')
       iREMOVE  = 1
       MinMDGeo = 1
     CASE DEFAULT
-      CALL Halt("[SCFs.CalculateMDGeo] unknown MDGeuss "//TRIM(D%MDGeuss))
+      CALL Halt("[SCFs.CalculateMDGeo] unknown MDGuess "//TRIM(D%MDGuess))
     END SELECT
   END SUBROUTINE CalculateMDGeo
 

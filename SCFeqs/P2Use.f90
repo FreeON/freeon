@@ -73,7 +73,7 @@ PROGRAM P2Use
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,DoingMD,AOSPExit
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,FileName,DMFile,logtag
-  CHARACTER(LEN=8)              :: MDGeuss
+  CHARACTER(LEN=8)              :: MDGuess
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
 
   !-------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ PROGRAM P2Use
     CALL Delete(P)
 
     ! Density SuperPosition
-  CASE('DensitySuperposition','DMDGeuss')
+  CASE('DensitySuperposition','DMDGuess')
     CALL New(P,NSMat_O=NSMat)
     CALL New(Tmp1)
     CALL New(Tmp2)
@@ -1888,8 +1888,8 @@ PROGRAM P2Use
       CALL Get(DoingMD ,'DoingMD')
       IF(DoingMD) THEN
         DMPOrder=0
-        CALL Get(MDGeuss ,"MDGeuss")
-        SELECT CASE(MDGeuss)
+        CALL Get(MDGuess ,"MDGuess")
+        SELECT CASE(MDGuess)
 
         CASE('DMProj0')
           DMPOrder=0
@@ -1907,7 +1907,7 @@ PROGRAM P2Use
           DMPOrder=4
 
         CASE DEFAULT
-          CALL Halt("illegal DMPOrder ("//TRIM(MDGeuss)//")")
+          CALL Halt("illegal DMPOrder ("//TRIM(MDGuess)//")")
         END SELECT
         iGEO     = Args%I%I(3)
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)

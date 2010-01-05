@@ -55,45 +55,45 @@ CONTAINS
     D%Const_Temp     = .FALSE.
     D%Const_Press    = .FALSE.
     D%Parallel_Rep   = .FALSE.
-    D%MDGeuss        = MD_DGeuss
+    D%MDGuess        = MD_DGuess
 
     ! Parse MD
     IF(O%Grad==GRAD_DO_DYNAMICS) THEN
       ! Parse the Density Matrix Projection Algoithm
       IF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMLinear)) THEN
-        D%MDGeuss=MD_DMLinear
+        D%MDGuess=MD_DMLinear
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO)) THEN
-        D%MDGeuss=MD_DMTRBO
+        D%MDGuess=MD_DMTRBO
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt3)) THEN
-        D%MDGeuss=MD_DMTRBO_Damp_dt3
+        D%MDGuess=MD_DMTRBO_Damp_dt3
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt5)) THEN
-        D%MDGeuss=MD_DMTRBO_Damp_dt5
+        D%MDGuess=MD_DMTRBO_Damp_dt5
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt7)) THEN
-        D%MDGeuss=MD_DMTRBO_Damp_dt7
+        D%MDGuess=MD_DMTRBO_Damp_dt7
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt9)) THEN
-        D%MDGeuss=MD_DMTRBO_Damp_dt9
+        D%MDGuess=MD_DMTRBO_Damp_dt9
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO_Damp_dt11)) THEN
-        D%MDGeuss=MD_DMTRBO_Damp_dt11
+        D%MDGuess=MD_DMTRBO_Damp_dt11
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMSymplectic)) THEN
-        D%MDGeuss=MD_DMSymplectic
+        D%MDGuess=MD_DMSymplectic
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
-        D%MDGeuss=MD_FMVerlet0
+        D%MDGuess=MD_FMVerlet0
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet1)) THEN
-        D%MDGeuss=MD_FMVerlet1
+        D%MDGuess=MD_FMVerlet1
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)) THEN
-        D%MDGeuss=MD_DMP0
+        D%MDGuess=MD_DMP0
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)) THEN
-        D%MDGeuss=MD_DMP1
+        D%MDGuess=MD_DMP1
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)) THEN
-        D%MDGeuss=MD_DMP2
+        D%MDGuess=MD_DMP2
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)) THEN
-        D%MDGeuss=MD_DMP3
+        D%MDGuess=MD_DMP3
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
-        D%MDGeuss=MD_DMP4
+        D%MDGuess=MD_DMP4
       ELSE
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", 'In input file, no MD DM Projection (MDProjection) algorithm defined')
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", "using DMLinear")
-        D%MDGeuss = MD_DMLinear
+        D%MDGuess = MD_DMLinear
       ENDIF
 
       ! Parse MD Options: First MD Algorithmn
@@ -226,25 +226,25 @@ CONTAINS
     ELSEIF(O%Grad==GRAD_DO_HYBRIDMC) THEN
       ! Parse the Density Matrix Projection Algoithm
       IF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMLinear)) THEN
-        D%MDGeuss=MD_DMLinear
+        D%MDGuess=MD_DMLinear
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMTRBO)) THEN
-        D%MDGeuss=MD_DMTRBO
+        D%MDGuess=MD_DMTRBO
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMSymplectic)) THEN
-        D%MDGeuss=MD_DMSymplectic
+        D%MDGuess=MD_DMSymplectic
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet0)) THEN
-        D%MDGeuss=MD_FMVerlet0
+        D%MDGuess=MD_FMVerlet0
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_FMVerlet1)) THEN
-        D%MDGeuss=MD_FMVerlet1
+        D%MDGuess=MD_FMVerlet1
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP0)) THEN
-        D%MDGeuss=MD_DMP0
+        D%MDGuess=MD_DMP0
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP1)) THEN
-        D%MDGeuss=MD_DMP1
+        D%MDGuess=MD_DMP1
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP2)) THEN
-        D%MDGeuss=MD_DMP2
+        D%MDGuess=MD_DMP2
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP3)) THEN
-        D%MDGeuss=MD_DMP3
+        D%MDGuess=MD_DMP3
       ELSEIF(OptKeyQ(Inp,MD_PM_OPTION,MD_DMP4)) THEN
-        D%MDGeuss=MD_DMP4
+        D%MDGuess=MD_DMP4
       ELSE
         CALL MondoLog(DEBUG_NONE, "LoadDynamics", 'In input file, no MD DM Projection algorithm defined')
       ENDIF

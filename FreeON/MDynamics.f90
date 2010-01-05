@@ -107,7 +107,7 @@ CONTAINS
         CALL Get(iMDStep,"iMDStep")
         CALL Get(MDTime%D(iCLONE),"MDTime")
         CALL Get(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEOBegin)))
-        CALL Get(C%Dyns%MDGeuss,"MDGeuss")
+        CALL Get(C%Dyns%MDGuess,"MDGuess")
         CALL CloseHDFGroup(HDF_CurrentID)
       ENDDO
       CALL CloseHDF(HDFFileID)
@@ -121,7 +121,7 @@ CONTAINS
         CALL Put(MDTime%D(iCLONE),"MDTime")
         CALL Put(MDDeltaTime, "MDDeltaTime", Tag_O = TRIM(IntToChar(iGEOBegin)))
         CALL Put(.TRUE.,"DoingMD")
-        CALL Put(C%Dyns%MDGeuss,"MDGeuss")
+        CALL Put(C%Dyns%MDGuess,"MDGuess")
         CALL CloseHDFGroup(HDF_CurrentID)
       ENDDO
       CALL CloseHDF(HDFFileID)
@@ -166,7 +166,7 @@ CONTAINS
         CALL Put(MDTime%D(iCLONE),"MDTime")
 
         CALL Put(.TRUE.,"DoingMD")
-        CALL Put(C%Dyns%MDGeuss,"MDGeuss")
+        CALL Put(C%Dyns%MDGuess,"MDGuess")
         CALL CloseHDFGroup(HDF_CurrentID)
       ENDDO
       CALL CloseHDF(HDFFileID)
@@ -210,9 +210,9 @@ CONTAINS
         CALL MondoLog(DEBUG_NONE, "MD", "iGEO <= MinMDGeo, guessing...")
         DO iBAS=1,C%Sets%NBSets
           IF(iBAS==1) THEN
-            C%Opts%GeussToP2Use=SCF_SUPERPOSITION
+            C%Opts%GuessToP2Use=SCF_SUPERPOSITION
           ELSE
-            C%Opts%GeussTOP2Use=SCF_BASISSETSWITCH
+            C%Opts%GuessTOP2Use=SCF_BASISSETSWITCH
           ENDIF
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
           CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
@@ -226,7 +226,7 @@ CONTAINS
         CALL CopyMatrices(C,.FALSE.)
       ELSE
         ! Normal MD-SCF
-        C%Opts%GeussTOP2Use = C%Dyns%MDGeuss
+        C%Opts%GuessTOP2Use = C%Dyns%MDGuess
 
         IF(C%Dyns%MDNumSCF < 0) THEN
           CALL MondoLog(DEBUG_NONE, "MD", "MDNumSCF not set")
@@ -1114,7 +1114,7 @@ CONTAINS
     CALL MondoLog(DEBUG_MAXIMUM, "CopyMatrices", "Current state = "//TRIM(IntVectToChar(C%Stat%Current)))
 
     IF(Tilde) THEN
-      SELECT CASE(C%Dyns%MDGeuss)
+      SELECT CASE(C%Dyns%MDGuess)
       CASE('DMLinear', &
            'DMTRBO', &
            'DMTRBO_Damp_dt3', &
@@ -1157,7 +1157,7 @@ CONTAINS
         CALL MondoLog(DEBUG_MAXIMUM, "CopyMatrices", "in default case with tilde")
       ENDSELECT
     ELSE
-      SELECT CASE(C%Dyns%MDGeuss)
+      SELECT CASE(C%Dyns%MDGuess)
       CASE('DMLinear', &
            'DMTRBO', &
            'DMTRBO_Damp_dt3', &
@@ -1220,7 +1220,7 @@ CONTAINS
       DO iGEO=iGEOBegin-MinMDGeo,iGEOBegin
         chCLONE = IntToChar(iCLONE)
         chGEO   = IntToChar(iGEO)
-        SELECT CASE(C%Dyns%MDGeuss)
+        SELECT CASE(C%Dyns%MDGuess)
         CASE('DMLinear', &
              'DMTRBO', &
              "DMTRBO_Damp_dt3", &
