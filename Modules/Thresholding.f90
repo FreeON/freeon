@@ -120,7 +120,7 @@ MODULE Thresholding
           ! Ray from A to B
           RayAB=Pair%A-Pair%B
           ! Length of RayAB
-          LMag=SQRT(RayAB(1)**2+RayAB(2)**2+RayAB(3))
+          LMag=SQRT(RayAB(1)**2+RayAB(2)**2+RayAB(3)**2)
           ! AB unit vector
           LHat=RayAB/LMag
           ! Half length
