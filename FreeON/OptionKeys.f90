@@ -184,33 +184,40 @@ MODULE OptionKeys
   CHARACTER(LEN=*),  PARAMETER :: NEB_SPRING          = 'NEBSpring'
   CHARACTER(LEN=*),  PARAMETER :: NEB_REACTANT_ENERGY = 'NEBReactantEnergy'
   CHARACTER(LEN=*),  PARAMETER :: NEB_PRODUCT_ENERGY  = 'NEBProductEnergy'
+
   !------------------------------------------------------------------------------
   ! Options:
-  CHARACTER(LEN=*), PARAMETER :: Op_MinSCF          ='MinSCF'
-  CHARACTER(LEN=*), PARAMETER :: Op_MaxSCF          ='MaxSCF'
-  CHARACTER(LEN=*), PARAMETER :: RQICycles          ='MaxRQI'
-  CHARACTER(LEN=*), PARAMETER :: RQIGuess           ='RQIGuess'
+  CHARACTER(LEN=*), PARAMETER :: Op_MinSCF ='MinSCF'
+  CHARACTER(LEN=*), PARAMETER :: Op_MaxSCF ='MaxSCF'
+  CHARACTER(LEN=*), PARAMETER :: RQICycles ='MaxRQI'
+  CHARACTER(LEN=*), PARAMETER :: RQIGuess  ='RQIGuess'
 
   !------------------------------------------------------------------------------
   ! Option: misc
-  CHARACTER(LEN=*), PARAMETER :: Op_Pressure        ='Pressure'
+  CHARACTER(LEN=*), PARAMETER :: Op_Pressure ='Pressure'
+
   !------------------------------------------------------------------------------
   ! Options: Output=
   CHARACTER(LEN=*), PARAMETER :: OUTPUT_OPTION       ='Output'
-  !
+
   CHARACTER(LEN=*), PARAMETER :: OUTPUT_PDB          ='PDB'
   INTEGER,          PARAMETER :: PDB_FILE            = -40
-  !
+
   CHARACTER(LEN=*), PARAMETER :: OUTPUT_XYZ          ='XYZ'
   INTEGER,          PARAMETER :: XYZ_FILE            = -41
-  !
+
   CHARACTER(LEN=*), PARAMETER :: OUTPUT_XCD          ='XSF'
   INTEGER,          PARAMETER :: XSF_FILE            = -42
-  !
+
   CHARACTER(LEN=*), PARAMETER :: OUTPUT_CIF          ='CIF'
   INTEGER,          PARAMETER :: CIF_FILE            = -43
 
   CHARACTER(LEN=*), PARAMETER :: RECYCLE_HDF_OPTION    = "RecycleHDF"
   CHARACTER(LEN=*), PARAMETER :: RANDOM_SCRATCH_OPTION = "RandomScratch"
   CHARACTER(LEN=*), PARAMETER :: CLEAN_SCRATCH_OPTION  = "CleanScratch"
+
+  ! For debugging, use a Lennard-Jones potential. This can be useful to test the
+  ! optimizer for instance.
+  CHARACTER(LEN=*), PARAMETER :: USE_LENNARD_JONES = "LennardJones"
+
 END MODULE OptionKeys

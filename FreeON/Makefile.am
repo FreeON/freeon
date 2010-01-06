@@ -13,6 +13,7 @@ FreeON_SOURCES = \
   Hessian.f90 \
   InCoords.f90 \
   ls_rmsd.f90 \
+  LennardJones.f90 \
   Massage.f90 \
   MDynamics.f90 \
   MLP.f90 \
@@ -343,6 +344,7 @@ SCFs.o : \
   OptionKeys.o \
   ControlStructures.o \
   NEB.o \
+  LennardJones.o \
   $(top_builddir)/Modules/setxyz.mod \
   $(top_builddir)/Modules/prettyprint.mod \
   $(top_builddir)/Modules/mondologger.mod \
@@ -417,3 +419,8 @@ ControlStructures.o : \
 
 Numerics.o : \
   $(top_builddir)/MondoConfig.h
+
+LennardJones.o :\
+  ControlStructures.o \
+  $(top_builddir)/Modules/mondologger.mod \
+  $(top_builddir)/Modules/parse.mod

@@ -99,6 +99,8 @@ MODULE GlobalScalars
   REAL(DOUBLE), PARAMETER :: eVkkal=23.06035D0                ! eV to kkal
   REAL(DOUBLE), PARAMETER :: auDeb=4.803242                   ! exA to Debye
   REAL(DOUBLE), PARAMETER :: amuToKg = 1.66053886D-27         ! atomic mass units into kg.
+  REAL(DOUBLE), PARAMETER :: au2inverseCM = 219474.6314       ! hartree in cm^{-1}
+  REAL(DOUBLE), PARAMETER :: inverseCM2au = 1/au2inverseCM    ! cm^{-1} in hartree
 
   ! Symplectic expansion coefficient 4th order by McLachlan and Atela,
   ! Nonlinearity, vol 5, 541 (1992)

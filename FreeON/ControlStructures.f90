@@ -89,6 +89,11 @@ MODULE ControlStructures
     CHARACTER(LEN=20)             :: RQIGuess
 
     REAL(DOUBLE)                  :: Pressure
+
+    ! For the Lennard-Jones debugging option.
+    LOGICAL                       :: UseLennardJones
+    REAL(DOUBLE)                  :: LennardJonesR0
+    REAL(DOUBLE)                  :: LennardJonesEpsilon
   END TYPE Options
 
   TYPE Dynamics
@@ -205,7 +210,7 @@ MODULE ControlStructures
     REAL(DOUBLE),DIMENSION(3) :: RatioABC
     REAL(DOUBLE),DIMENSION(3) :: RatioAlpBetGam
   END TYPE Constr
-  !
+
   TYPE BackTrf
     INTEGER      :: MaxIt_CooTrf
     REAL(DOUBLE) :: CooTrfCrit
@@ -213,13 +218,13 @@ MODULE ControlStructures
     REAL(DOUBLE) :: MaxCartDiff
     REAL(DOUBLE) :: DistRefresh
   END TYPE BackTrf
-  !
+
   TYPE GrdTrf
     INTEGER      :: MaxIt_GrdTrf
     REAL(DOUBLE) :: GrdTrfCrit
     REAL(DOUBLE) :: MaxGradDiff
   END TYPE GrdTrf
-  !
+
   TYPE GConvCrit
     REAL(DOUBLE) :: Grad
     REAL(DOUBLE) :: Stre
@@ -242,7 +247,7 @@ MODULE ControlStructures
     LOGICAL      :: HBondOnly
     LOGICAL      :: NoFragmConnect
   END TYPE GConvCrit
-  !
+
   TYPE GOptStat
     INTEGER      :: ActStep
     REAL(DOUBLE) :: MaxStreDispl
@@ -267,7 +272,7 @@ MODULE ControlStructures
     LOGICAL      :: GeOpConvgd
     REAL(DOUBLE) :: RMSIntDispl
   END TYPE GOptStat
-  !
+
   TYPE Hessian
     REAL(DOUBLE) :: Stre
     REAL(DOUBLE) :: Bend
@@ -276,7 +281,7 @@ MODULE ControlStructures
     REAL(DOUBLE) :: Tors
     REAL(DOUBLE) :: StpDescInvH
   END TYPE Hessian
-  !
+
   TYPE TrfCtrl
     LOGICAL                     :: DoFullTrf
     LOGICAL                     :: DoClssTrf
@@ -296,7 +301,7 @@ MODULE ControlStructures
     LOGICAL                     :: PrtBackTr
     LOGICAL                     :: NOBTRep
   END TYPE TrfCtrl
-  !
+
   TYPE CoordCtrl
     INTEGER                        :: RefreshIn
     INTEGER                        :: Refresh
