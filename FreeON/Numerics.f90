@@ -52,7 +52,7 @@ MODULE Numerics
   ! Max element of the density matrix
   REAL(DOUBLE),DIMENSION(4) :: DTol       =(/ 1.D-2, 1.D-3, 1.D-4,  1.D-5  /)
   ! Max Cartesian gradient
-  REAL(DOUBLE),DIMENSION(4) :: GTol       =(/ 5.D-2, 5.D-3, 5.D-4,  5.D-5  /)
+  REAL(DOUBLE),DIMENSION(4) :: GTol       =(/ 5.D-2, 5.D-3, 5.D-4,  5.D-10 /)
   ! Max Cartesian displacement
   REAL(DOUBLE),DIMENSION(4) :: XTol       =(/ 1.D-1, 1.D-2, 1.D-3,  1.D-4  /)
   ! Max error in the response.

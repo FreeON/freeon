@@ -18,4 +18,5 @@ EXTRA_DIST = \
   11-CO2.inp \
   12-BPA.inp \
   12-BPA.reference \
-  13-PhyticAcid.inp
+  13-PhyticAcid.inp \
+  13-LJ-2-SD.inp

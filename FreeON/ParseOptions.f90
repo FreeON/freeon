@@ -89,7 +89,7 @@ CONTAINS
     ! Parse RQI guess and max iteration count
     CALL ParseRQI(O%RQIGuess,O%MaxRQI)
     ! Parse Misc
-    CALL ParseMISC(O%Pressure)
+    CALL ParseMISC(O%Pressure, O%UseLennardJones, O%LennardJonesR0, O%LennardJonesEpsilon)
     ! close
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
@@ -354,6 +354,7 @@ CONTAINS
          CALL MondoHalt(PRSE_ERROR,'Option '//SCF_OPTION//' not set in input.'//RTRN   &
          //'Options include '//SCF_SDMM//', '//SCF_PM//', '//SCF_SP2//', '//SCF_TS4//', and '//SCF_RHHF)
   END SUBROUTINE ParseSCFMethods
+
   !============================================================================
   !  PARSE CONVERGENCE ALGORITHMS
   !============================================================================
@@ -784,7 +785,9 @@ CONTAINS
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientMaxMove = "//TRIM(DblToChar(ConjugateGradientMaxMove*AUToAngstroms))//" A")
 
     IF(.NOT. OptDblQ(Inp, CG_STEPSIZE, ConjugateGradientdR)) THEN
-      ConjugateGradientdR = 1.0D-4
+      ! This default should depend on the chosen accuracy, i.e. how many digits
+      ! we expect to have in the force.
+      ConjugateGradientdR = 1.0D-3
     ENDIF
     ConjugateGradientdR = ConjugateGradientdR*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientdR = "//TRIM(DblToChar(ConjugateGradientdR*AUToAngstroms))//" A")
@@ -820,8 +823,11 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseMISC(Pressure)
-    REAL(DOUBLE) :: Pressure
+  SUBROUTINE ParseMISC(Pressure, UseLennardJones, LennardJonesR0, LennardJonesEpsilon)
+    REAL(DOUBLE), INTENT(INOUT) :: Pressure
+    LOGICAL, INTENT(INOUT)      :: UseLennardJones
+    REAL(DOUBLE), INTENT(INOUT) :: LennardJonesR0
+    REAL(DOUBLE), INTENT(INOUT) :: LennardJonesEpsilon
 
     ! Parse the Pressure, used in Optimizer, MD and MC routines
     IF(.NOT. OptDblQ(Inp,Op_Pressure, Pressure)) THEN
@@ -850,6 +856,19 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "cleaning out scratch")
     ELSE
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "I will not clean out scratch")
+    ENDIF
+
+    IF(.NOT.OptLogicalQ(Inp, USE_LENNARD_JONES, UseLennardJones)) THEN
+      UseLennardJones = .FALSE.
+    ENDIF
+
+    IF(UseLennardJones) THEN
+      ! J. Chem. Phys. 89, 4535 (1988)
+      LennardJonesR0 = 3.761*AngstromsToAU
+      LennardJonesEpsilon = 99.2*inverseCM2au
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "using Lennard-Jones potential with")
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "  epsilon = "//TRIM(FltToChar(LennardJonesEpsilon*au2eV))//" eV")
+      CALL MondoLog(DEBUG_NONE, "ParseMISC", "  R0      = "//TRIM(FltToChar(LennardJonesR0*AUToAngstroms))//" A")
     ENDIF
 
   END SUBROUTINE ParseMISC

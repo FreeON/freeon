@@ -44,6 +44,7 @@ MODULE SCFs
   USE PrettyPrint
   USE MondoLogger
   USE Utilities
+  USE LennardJones
 
   IMPLICIT NONE
 
@@ -84,6 +85,13 @@ CONTAINS
     INTEGER              :: cBAS,cGEO,iSCF
 
     CALL MondoLog(DEBUG_NONE, "SCF", "doing SCF")
+
+    ! Check whether we are doing Lennard-Jones.
+    IF(C%Opts%UseLennardJones) THEN
+      CALL MondoLog(DEBUG_NONE, "SCF", "Lennard-Jones potential")
+      CALL LennardJonesPotential(C%Opts, C%Geos)
+      RETURN
+    ENDIF
 
     ! Allocate space for action.
     CALL New(C%Stat%Action,2)
@@ -960,13 +968,20 @@ CONTAINS
     TYPE(DBL_RNK2)     :: AuxLatF
     TYPE(DBL_VECT)     :: Ftmp
 
-    !----------------------------------------------------------------------------!
+    ! Check whether we are doing Lennard-Jones.
+    IF(O%UseLennardJones) THEN
+      CALL MondoLog(DEBUG_NONE, "Force", "Lennard-Jones force")
+      CALL LennardJonesForce(O, G)
+      RETURN
+    ENDIF
+
+    ! Allocate some space.
     CALL New(S%Action,1)
 
     ! Initialize the force vector in HDF, clone by clone
     chGEO=IntToChar(cGEO)
     chBAS=IntToChar(cBAS)
-    !
+
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Gradients%D=BIG_DBL
        G%Clone(iCLONE)%GradRMS = SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
