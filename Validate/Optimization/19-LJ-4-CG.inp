@@ -1,11 +1,11 @@
-# Ar dimer with Lennard-Jones potential.
+# Ar cluster with Lennard-Jones potential.
 
 <BeginOptions>
 Charge=0
 
 Multiplicity=1
 Guess=SuperPos
-Grad=(Optimize,Cartesian,SteepestDescent)
+Grad=(Optimize,Cartesian,CG)
 DebugAll=(MaxDebug,CheckSums,MaxGeOp)
 BasisSets=(STO-2G-SPLIT)
 SCFMethod=(RH)
@@ -21,4 +21,6 @@ UseLennardJones=yes
 <BeginGeometry>
 Ar 0.0 0.0 0.0
 Ar 2.0 0.0 0.0
+Ar 0.0 2.0 0.0
+Ar 0.0 0.0 2.0
 <EndGeometry>

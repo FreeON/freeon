@@ -298,6 +298,16 @@ CONTAINS
         ENDDO
       ENDIF
 
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "R["//TRIM(IntToChar(iAtom))//"] = "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+      ENDDO
+
       ! Instead of a line search we will guess the step size based on a local
       ! approximation of the curvature.
       IF(Global) THEN
@@ -349,6 +359,16 @@ CONTAINS
           ENDDO
         ENDDO
       ENDIF
+
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RPrime["//TRIM(IntToChar(iAtom))//"] = "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+      ENDDO
 
       ! Calculate the gradient for the trial step.
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating trial step force (dR = "//TRIM(FltToChar(C%Opts%ConjugateGradientdR))//")")
@@ -599,9 +619,9 @@ CONTAINS
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "new search direction (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "d["//TRIM(IntToChar(iAtom))//"] = "// &
-            TRIM(DblToChar(direction(1, iAtom, iCLONE)/directionNorm))//" "// &
-            TRIM(DblToChar(direction(2, iAtom, iCLONE)/directionNorm))//" "// &
-            TRIM(DblToChar(direction(3, iAtom, iCLONE)/directionNorm)), &
+            TRIM(DblToChar(direction(1, iAtom, iCLONE)))//" "// &
+            TRIM(DblToChar(direction(2, iAtom, iCLONE)))//" "// &
+            TRIM(DblToChar(direction(3, iAtom, iCLONE))), &
             "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
@@ -618,9 +638,9 @@ CONTAINS
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "new search direction (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "d["//TRIM(IntToChar(iAtom))//"] = "// &
-            TRIM(DblToChar(direction(1, iAtom, iCLONE)/directionNorm))//" "// &
-            TRIM(DblToChar(direction(2, iAtom, iCLONE)/directionNorm))//" "// &
-            TRIM(DblToChar(direction(3, iAtom, iCLONE)/directionNorm)), &
+            TRIM(DblToChar(direction(1, iAtom, iCLONE)))//" "// &
+            TRIM(DblToChar(direction(2, iAtom, iCLONE)))//" "// &
+            TRIM(DblToChar(direction(3, iAtom, iCLONE))), &
             "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
@@ -633,7 +653,7 @@ CONTAINS
     DEALLOCATE(oldConfiguration)
 
     IF(converged) THEN
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we have converged")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we have converged in "//TRIM(IntToChar(iGEO))//" steps")
     ELSE
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we did not converge")
     ENDIF

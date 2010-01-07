@@ -19,4 +19,11 @@ EXTRA_DIST = \
   12-BPA.inp \
   12-BPA.reference \
   13-PhyticAcid.inp \
-  13-LJ-2-SD.inp
+  14-LJ-2-SD.inp \
+  15-LJ-2-CG.inp \
+  16-LJ-3-SD.inp \
+  17-LJ-3-CG.inp \
+  18-LJ-4-SD.inp \
+  19-LJ-4-CG.inp \
+  20-LJ-5-SD.inp \
+  21-LJ-5-CG.inp

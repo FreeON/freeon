@@ -5,7 +5,7 @@ Charge=0
 
 Multiplicity=1
 Guess=SuperPos
-Grad=(Optimize,Cartesian,SteepestDescent)
+Grad=(Optimize,Cartesian,CG)
 DebugAll=(MaxDebug,CheckSums,MaxGeOp)
 BasisSets=(STO-2G-SPLIT)
 SCFMethod=(RH)
