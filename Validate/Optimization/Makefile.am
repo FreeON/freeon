@@ -26,4 +26,6 @@ EXTRA_DIST = \
   18-LJ-4-SD.inp \
   19-LJ-4-CG.inp \
   20-LJ-5-SD.inp \
-  21-LJ-5-CG.inp
+  21-LJ-5-CG.inp \
+  22-LJ-100-SD.inp \
+  23-LJ-100-CG.inp
