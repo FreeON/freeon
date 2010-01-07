@@ -79,7 +79,7 @@ MODULE ControlStructures
     REAL(DOUBLE)                  :: NEBSteepMaxMove
     INTEGER                       :: CartesianOptimizerMethod
     REAL(DOUBLE)                  :: ConjugateGradientMaxMove
-    REAL(DOUBLE)                  :: ConjugateGradientdR
+    REAL(DOUBLE)                  :: ConjugateGradientAlpha
     CHARACTER(LEN=3)              :: GeomPrint
 
     CHARACTER(LEN=20)             :: GuessToP2Use

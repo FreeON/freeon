@@ -83,7 +83,7 @@ CONTAINS
                     N%ProductsFile, O%NEBReactantEnergy, O%NEBProductEnergy)
     ENDIF
     ! Parse Optimizer options.
-    CALL ParseOptimizer(O%ConjugateGradientMaxMove, O%ConjugateGradientdR)
+    CALL ParseOptimizer(O%ConjugateGradientMaxMove, O%ConjugateGradientAlpha)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%MinSCF,O%MaxSCF)
     ! Parse RQI guess and max iteration count
@@ -775,8 +775,8 @@ CONTAINS
     ENDIF
   END SUBROUTINE ParseNEB
 
-  SUBROUTINE ParseOptimizer(ConjugateGradientMaxMove, ConjugateGradientdR)
-    REAL(DOUBLE) :: ConjugateGradientMaxMove, ConjugateGradientdR
+  SUBROUTINE ParseOptimizer(ConjugateGradientMaxMove, ConjugateGradientAlpha)
+    REAL(DOUBLE) :: ConjugateGradientMaxMove, ConjugateGradientAlpha
 
     IF(.NOT. OptDblQ(Inp, CG_MAX_MOVE, ConjugateGradientMaxMove)) THEN
       ConjugateGradientMaxMove = 0.2D0
@@ -784,13 +784,12 @@ CONTAINS
     ConjugateGradientMaxMove = ConjugateGradientMaxMove*AngstromsToAU
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientMaxMove = "//TRIM(DblToChar(ConjugateGradientMaxMove*AUToAngstroms))//" A")
 
-    IF(.NOT. OptDblQ(Inp, CG_STEPSIZE, ConjugateGradientdR)) THEN
-      ! This default should depend on the chosen accuracy, i.e. how many digits
-      ! we expect to have in the force.
-      ConjugateGradientdR = 1.0D-3
+    IF(.NOT. OptDblQ(Inp, CG_STEPSIZE, ConjugateGradientAlpha)) THEN
+      ! This default depends on the chosen accuracy, i.e. how many digits we
+      ! expect to have in the force.
+      ConjugateGradientAlpha = 1.0D-3
     ENDIF
-    ConjugateGradientdR = ConjugateGradientdR*AngstromsToAU
-    CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientdR = "//TRIM(DblToChar(ConjugateGradientdR*AUToAngstroms))//" A")
+    CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientAlpha = "//TRIM(DblToChar(ConjugateGradientAlpha)))
 
   END SUBROUTINE ParseOptimizer
 
