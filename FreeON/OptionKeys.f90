@@ -169,7 +169,7 @@ MODULE OptionKeys
   CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_ALPHA      = "NEBSteepAlpha"
   CHARACTER(LEN=*), PARAMETER :: NEB_STEEP_MAX_MOVE   = "NEBSteepMaxMove"
   ! Conjugate Gradient parameters.
-  CHARACTER(LEN=*), PARAMETER :: CG_STEPSIZE          = "ConjugateGradientdR"
+  CHARACTER(LEN=*), PARAMETER :: CG_STEPSIZE          = "ConjugateGradientAlpha"
   CHARACTER(LEN=*), PARAMETER :: CG_MAX_MOVE          = "ConjugateGradientMaxMove"
   ! Start NEB from reactants and products HDF files
   CHARACTER(LEN=*), PARAMETER :: NEB_READ_HDF         = 'HDF'
