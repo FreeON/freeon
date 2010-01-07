@@ -45,6 +45,7 @@ MODULE SCFs
   USE MondoLogger
   USE Utilities
   USE LennardJones
+  USE Harmonic
 
   IMPLICIT NONE
 
@@ -90,6 +91,7 @@ CONTAINS
     IF(C%Opts%UseLennardJones) THEN
       CALL MondoLog(DEBUG_NONE, "SCF", "Lennard-Jones potential")
       CALL LennardJonesPotential(C%Opts, C%Geos)
+      !CALL HarmonicPotential(C%Opts, C%Geos)
       RETURN
     ENDIF
 
@@ -972,6 +974,7 @@ CONTAINS
     IF(O%UseLennardJones) THEN
       CALL MondoLog(DEBUG_NONE, "Force", "Lennard-Jones force")
       CALL LennardJonesForce(O, G)
+      !CALL HarmonicForce(O, G)
       RETURN
     ENDIF
 

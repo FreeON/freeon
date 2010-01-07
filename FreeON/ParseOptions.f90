@@ -866,6 +866,11 @@ CONTAINS
       ! J. Chem. Phys. 89, 4535 (1988)
       LennardJonesR0 = 3.761*AngstromsToAU
       LennardJonesEpsilon = 99.2*inverseCM2au
+
+      ! For debugging.
+      !LennardJonesR0 = 4*AngstromsToAU
+      !LennardJonesEpsilon = AUToAngstroms**2
+
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "using Lennard-Jones potential with")
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "  epsilon = "//TRIM(FltToChar(LennardJonesEpsilon*au2eV))//" eV")
       CALL MondoLog(DEBUG_NONE, "ParseMISC", "  R0      = "//TRIM(FltToChar(LennardJonesR0*AUToAngstroms))//" A")

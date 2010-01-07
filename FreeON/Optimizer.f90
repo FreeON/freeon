@@ -378,16 +378,16 @@ CONTAINS
 
       ! Calculate an approximate step towards the minimum using Newton's method.
       IF(Global) THEN
-        fPrime = Zero
         f = Zero
+        fPrime = Zero
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            fPrime = fPrime + direction(1, iAtom, iCLONE)*(oldGradient(1, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)) &
-                            + direction(2, iAtom, iCLONE)*(oldGradient(2, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)) &
-                            + direction(3, iAtom, iCLONE)*(oldGradient(3, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom))
-            f = f + direction(1, iAtom, iCLONE)*oldGradient(1, iATOM, iCLONE) &
-                  + direction(2, iAtom, iCLONE)*oldGradient(2, iATOM, iCLONE) &
-                  + direction(3, iAtom, iCLONE)*oldGradient(3, iATOM, iCLONE)
+            f = f + direction(1, iAtom, iCLONE)*oldGradient(1, iAtom, iCLONE) &
+                  + direction(2, iAtom, iCLONE)*oldGradient(2, iAtom, iCLONE) &
+                  + direction(3, iAtom, iCLONE)*oldGradient(3, iAtom, iCLONE)
+            fPrime = fPrime + direction(1, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE)) &
+                            + direction(2, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE)) &
+                            + direction(3, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))
           ENDDO
         ENDDO
 
@@ -425,9 +425,9 @@ CONTAINS
         DO iCLONE = 1, C%Geos%Clones
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
-            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
-            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) + stepsize*direction(1, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) + stepsize*direction(2, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) + stepsize*direction(3, iAtom, iCLONE)
 
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
               TRIM(DblToMedmChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
@@ -449,15 +449,15 @@ CONTAINS
           ENDDO
           directionNorm = SQRT(directionNorm)
 
-          fPrime = Zero
           f = Zero
+          fPrime = Zero
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            fPrime = fPrime + direction(1, iAtom, iCLONE)*(oldGradient(1, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)) &
-                            + direction(2, iAtom, iCLONE)*(oldGradient(2, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)) &
-                            + direction(3, iAtom, iCLONE)*(oldGradient(3, iATOM, iCLONE)-C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom))
             f = f + direction(1, iAtom, iCLONE)*oldGradient(1, iATOM, iCLONE) &
                   + direction(2, iAtom, iCLONE)*oldGradient(2, iATOM, iCLONE) &
                   + direction(3, iAtom, iCLONE)*oldGradient(3, iATOM, iCLONE)
+            fPrime = fPrime + direction(1, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iATOM, iCLONE)) &
+                            + direction(2, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iATOM, iCLONE)) &
+                            + direction(3, iAtom, iCLONE)*(C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iATOM, iCLONE))
           ENDDO
 
           ! Calculate steplength.
@@ -491,9 +491,9 @@ CONTAINS
 
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) - stepsize*direction(1, iAtom, iCLONE)
-            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) - stepsize*direction(2, iAtom, iCLONE)
-            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) - stepsize*direction(3, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(1, iAtom) = oldConfiguration(1, iAtom, iCLONE) + stepsize*direction(1, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(2, iAtom) = oldConfiguration(2, iAtom, iCLONE) + stepsize*direction(2, iAtom, iCLONE)
+            C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = oldConfiguration(3, iAtom, iCLONE) + stepsize*direction(3, iAtom, iCLONE)
 
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
               TRIM(DblToMedmChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
@@ -654,6 +654,32 @@ CONTAINS
 
     IF(converged) THEN
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we have converged in "//TRIM(IntToChar(iGEO))//" steps")
+
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB)THEN
+        DO iCLONE = 0, C%Geos%Clones+1
+          CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = C%Nams%GFile, &
+                      Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Clone_O = iCLONE, &
+                      Gradients_O = 'Gradients')
+        ENDDO
+
+        CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
+      ELSE
+        DO iCLONE=1,C%Geos%Clones
+          CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = TRIM(C%Nams%GFile), &
+                      Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Gradients_O = "Gradients")
+        ENDDO
+      ENDIF
+
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "R["//TRIM(IntToChar(iAtom))//"] = "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+      ENDDO
+
     ELSE
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "we did not converge")
     ENDIF
