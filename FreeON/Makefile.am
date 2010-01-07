@@ -10,6 +10,7 @@ FreeON_SOURCES = \
   GeometryKeys.f90 \
   GeomOptKeys.f90 \
   GetPID.c \
+  Harmonic.f90 \
   Hessian.f90 \
   InCoords.f90 \
   ls_rmsd.f90 \
@@ -345,6 +346,7 @@ SCFs.o : \
   ControlStructures.o \
   NEB.o \
   LennardJones.o \
+  Harmonic.o \
   $(top_builddir)/Modules/setxyz.mod \
   $(top_builddir)/Modules/prettyprint.mod \
   $(top_builddir)/Modules/mondologger.mod \
@@ -421,6 +423,11 @@ Numerics.o : \
   $(top_builddir)/MondoConfig.h
 
 LennardJones.o :\
+  ControlStructures.o \
+  $(top_builddir)/Modules/mondologger.mod \
+  $(top_builddir)/Modules/parse.mod
+
+Harmonic.o :\
   ControlStructures.o \
   $(top_builddir)/Modules/mondologger.mod \
   $(top_builddir)/Modules/parse.mod
