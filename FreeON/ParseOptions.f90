@@ -787,7 +787,7 @@ CONTAINS
     IF(.NOT. OptDblQ(Inp, CG_STEPSIZE, ConjugateGradientAlpha)) THEN
       ! This default depends on the chosen accuracy, i.e. how many digits we
       ! expect to have in the force.
-      ConjugateGradientAlpha = 1.0D-3
+      ConjugateGradientAlpha = 1.0D-4
     ENDIF
     CALL MondoLog(DEBUG_NONE, "ParseOptimizer", "using ConjugateGradientAlpha = "//TRIM(DblToChar(ConjugateGradientAlpha)))
 
