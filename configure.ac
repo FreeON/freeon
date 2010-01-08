@@ -375,26 +375,29 @@ if test "${use_optimizations}" = "yes"; then
     case ${build_cpu} in
       *386)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -O3" ;;
-          *)     CFLAGS="-g -O3" ;;
+          GCC)   CFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) CFLAGS="-g -fast" ;;
+          PGI)   CFLAGS="-g -fast" ;;
+          *)     CFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -O3" ;;
-          *)     CFLAGS="-g -O3" ;;
+          GCC)   CFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) CFLAGS="-g -fast" ;;
+          PGI)   CFLAGS="-g -fast" ;;
+          *)     CFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
-          GCC)   CFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -O3" ;;
-          *)     CFLAGS="-g -O3" ;;
+          GCC)   CFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) CFLAGS="-g -fast" ;;
+          PGI)   CFLAGS="-g -fast" ;;
+          *)     CFLAGS="-g -O" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) CFLAGS="-g -O3 -mcpu=G5" ;;
-          *)   CFLAGS="-g -O3" ;;
+          GCC) CFLAGS="-g -O2 -mcpu=G5" ;;
+          *)   CFLAGS="-g -O" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          CFLAGS="-g -O" ;;
@@ -424,26 +427,29 @@ main ()
     case ${build_cpu} in
       *386)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -O3" ;;
-          *)     FFLAGS="-g -O3" ;;
+          GCC)   FFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FFLAGS="-g -fast" ;;
+          PGI)   FFLAGS="-g -fast" ;;
+          *)     FFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -O3" ;;
-          *)     FFLAGS="-g -O3" ;;
+          GCC)   FFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FFLAGS="-g -fast" ;;
+          PGI)   FFLAGS="-g -fast" ;;
+          *)     FFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
-          GCC)   FFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -O3" ;;
-          *)     FFLAGS="-g -O3" ;;
+          GCC)   FFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FFLAGS="-g -fast" ;;
+          PGI)   FFLAGS="-g -fast" ;;
+          *)     FFLAGS="-g -O" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) FFLAGS="-g -O3 -mcpu=G5" ;;
-          *)   FFLAGS="-g -O3" ;;
+          GCC) FFLAGS="-g -O2 -mcpu=G5" ;;
+          *)   FFLAGS="-g -O" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          FFLAGS="-g -O" ;;
@@ -472,26 +478,29 @@ main ()
     case ${build_cpu} in
       *386)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -O3" ;;
-          *)     FCFLAGS="-g -O3" ;;
+          GCC)   FCFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FCFLAGS="-g -fast" ;;
+          PGI)   FCFLAGS="-g -fast" ;;
+          *)     FCFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -O3" ;;
-          *)     FCFLAGS="-g -O3" ;;
+          GCC)   FCFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FCFLAGS="-g -fast" ;;
+          PGI)   FCFLAGS="-g -fast" ;;
+          *)     FCFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
-          GCC)   FCFLAGS="-g -O3 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -O3" ;;
-          *)     FCFLAGS="-g -O3" ;;
+          GCC)   FCFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
+          Intel) FCFLAGS="-g -fast" ;;
+          PGI)   FCFLAGS="-g -fast" ;;
+          *)     FCFLAGS="-g -O" ;;
         esac ;;
       *powerpc)
         case ${CC_COMPILERNAME} in
-          GCC) FCFLAGS="-g -O3 -mcpu=G5" ;;
-          *)   FCFLAGS="-g -O3" ;;
+          GCC) FCFLAGS="-g -O2 -mcpu=G5" ;;
+          *)   FCFLAGS="-g -O" ;;
         esac ;;
       *) AC_MSG_NOTICE([unknown build_cpu ${build_cpu}])
          FCFLAGS="-g -O" ;;
