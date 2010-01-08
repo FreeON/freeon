@@ -147,7 +147,7 @@ if test -n "${CC_COMPILERNAME}"; then
   fi
 else
   # Try to find out what compiler this is.
-  CC_RESULT=`${CC} --version | head -n1 | awk '{print $1}'`
+  CC_RESULT=`(${CC} --version 2> /dev/null) | head -n1 | awk '{print $1}' 2> /dev/null`
   if test "`echo ${CC_RESULT} | sed -e 's/^.*gcc.*/gcc/'`" = "gcc"; then
     AC_MSG_NOTICE([CC:  identified GNU gcc compiler])
     CC_COMPILERNAME="GCC"
@@ -155,14 +155,21 @@ else
     AC_MSG_NOTICE([CC:  identified Intel icc compiler])
     CC_COMPILERNAME="Intel"
   else
-    # Fall back to looking at the compiler executable name.
-    AC_MSG_NOTICE([CC: could not automatically detect compiler (${CC_RESULT})])
-    case ${CC} in
-      *gcc*) CC_COMPILERNAME="GCC" ;;
-      *icc*) CC_COMPILERNAME="Intel" ;;
-      *pgc*) CC_COMPILERNAME="PGI" ;;
-      *)     CC_COMPILERNAME="unknown" ;;
-    esac
+    # Check for Portland Group compiler.
+    CC_RESULT=`(${CC} -V 2> /dev/null) | grep pgcc | awk '{print $1}'`
+    if test "${CC_RESULT}" = "pgcc"; then
+      AC_MSG_NOTICE([CC: identified Portland Group pgcc compiler])
+      CC_COMPILERNAME="PGI"
+    else
+      # Fall back to looking at the compiler executable name.
+      AC_MSG_NOTICE([CC: could not automatically detect compiler (${CC_RESULT})])
+      case ${CC} in
+        *gcc*) CC_COMPILERNAME="GCC" ;;
+        *icc*) CC_COMPILERNAME="Intel" ;;
+        *pgc*) CC_COMPILERNAME="PGI" ;;
+        *)     CC_COMPILERNAME="unknown" ;;
+      esac
+    fi
   fi
 fi
 
@@ -181,7 +188,7 @@ if test -n "${F77_COMPILERNAME}"; then
   fi
 else
   # Try to find out what compiler this is.
-  F77_RESULT=`${F77} --version | head -n1 | awk '{print $1}'`
+  F77_RESULT=`(${F77} --version 2> /dev/null) | head -n1 | awk '{print $1}' 2> /dev/null`
   if test "${F77_RESULT}" = "GNU"; then
     AC_MSG_NOTICE([F77: identified GNU gcc compiler])
     F77_COMPILERNAME="GCC"
@@ -189,14 +196,21 @@ else
     AC_MSG_NOTICE([F77: identified Intel ifort compiler])
     F77_COMPILERNAME="Intel"
   else
-    # Fall back to looking at the compiler executable name.
-    AC_MSG_NOTICE([F77: could not automatically detect compiler (${F77_RESULT})])
-    case ${F77} in
-      *gfortran*) F77_COMPILERNAME="GCC" ;;
-      *ifort*)    F77_COMPILERNAME="Intel" ;;
-      *pgf*)      F77_COMPILERNAME="PGI" ;;
-      *)          F77_COMPILERNAME="unknown" ;;
-    esac
+    # Check for Portland Group compiler.
+    F77_RESULT=`(${F77} -V 2> /dev/null) | grep pgf | awk '{print $1}'`
+    if test -n "${F77_RESULT}"; then
+      AC_MSG_NOTICE([F77: identified Portland Group pgf* compiler])
+      F77_COMPILERNAME="PGI"
+    else
+      # Fall back to looking at the compiler executable name.
+      AC_MSG_NOTICE([F77: could not automatically detect compiler (${F77_RESULT})])
+      case ${F77} in
+        *gfortran*) F77_COMPILERNAME="GCC" ;;
+        *ifort*)    F77_COMPILERNAME="Intel" ;;
+        *pgf*)      F77_COMPILERNAME="PGI" ;;
+        *)          F77_COMPILERNAME="unknown" ;;
+      esac
+    fi
   fi
 fi
 
@@ -215,7 +229,7 @@ if test -n "${FC_COMPILERNAME}"; then
   fi
 else
   # Try to find out what compiler this is.
-  FC_RESULT=`${FC} --version | head -n1 | awk '{print $1}'`
+  FC_RESULT=`(${FC} --version 2> /dev/null) | head -n1 | awk '{print $1}' 2> /dev/null`
   if test "${FC_RESULT}" = "GNU"; then
     AC_MSG_NOTICE([FC:  identified GNU gcc compiler])
     FC_COMPILERNAME="GCC"
@@ -223,14 +237,21 @@ else
     AC_MSG_NOTICE([FC:  identified Intel ifort compiler])
     FC_COMPILERNAME="Intel"
   else
-    # Fall back to looking at the compiler executable name.
-    AC_MSG_NOTICE([FC: could not automatically detect compiler (${FC_RESULT})])
-    case ${FC} in
-      *gfortran*) FC_COMPILERNAME="GCC" ;;
-      *ifort*)    FC_COMPILERNAME="Intel" ;;
-      *pgf*)      FC_COMPILERNAME="PGI" ;;
-      *)          FC_COMPILERNAME="unknown" ;;
-    esac
+    # Check for Portland Group compiler.
+    FC_RESULT=`(${FC} -V 2> /dev/null) | grep pgf | awk '{print $1}'`
+    if test -n "${FC_RESULT}"; then
+      AC_MSG_NOTICE([FC: identified Portland Group pgf* compiler])
+      FC_COMPILERNAME="PGI"
+    else
+      # Fall back to looking at the compiler executable name.
+      AC_MSG_NOTICE([FC: could not automatically detect compiler (${FC_RESULT})])
+      case ${FC} in
+        *gfortran*) FC_COMPILERNAME="GCC" ;;
+        *ifort*)    FC_COMPILERNAME="Intel" ;;
+        *pgf*)      FC_COMPILERNAME="PGI" ;;
+        *)          FC_COMPILERNAME="unknown" ;;
+      esac
+    fi
   fi
 fi
 
@@ -240,18 +261,21 @@ AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC
 case "${CC_COMPILERNAME}" in
   GCC)   cc_compiler_version_string="`${CC} --version | head -n1`" ;;
   Intel) cc_compiler_version_string="`${CC} --version | head -n1`" ;;
+  PGI)   cc_compiler_version_string="`${CC} -V | head -n2 | tail -n1`" ;;
   *)     cc_compiler_version_string="unset" ;;
 esac
 
 case "${F77_COMPILERNAME}" in
   GCC)   f77_compiler_version_string="`${F77} --version | head -n1`" ;;
   Intel) f77_compiler_version_string="`${F77} --version | head -n1`" ;;
+  PGI)   f77_compiler_version_string="`${F77} -V | head -n2 | tail -n1`" ;;
   *)     f77_compiler_version_string="unset" ;;
 esac
 
 case "${FC_COMPILERNAME}" in
   GCC)   fc_compiler_version_string="`${FC} --version | head -n1`" ;;
   Intel) fc_compiler_version_string="`${FC} --version | head -n1`" ;;
+  PGI)   fc_compiler_version_string="`${FC} -V | head -n2 | tail -n1`" ;;
   *)     fc_compiler_version_string="unset" ;;
 esac
 
