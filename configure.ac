@@ -158,7 +158,7 @@ else
     # Check for Portland Group compiler.
     CC_RESULT=`(${CC} -V 2> /dev/null) | grep pgcc | awk '{print $1}'`
     if test "${CC_RESULT}" = "pgcc"; then
-      AC_MSG_NOTICE([CC: identified Portland Group pgcc compiler])
+      AC_MSG_NOTICE([CC:  identified Portland Group pgcc compiler])
       CC_COMPILERNAME="PGI"
     else
       # Fall back to looking at the compiler executable name.
@@ -240,7 +240,7 @@ else
     # Check for Portland Group compiler.
     FC_RESULT=`(${FC} -V 2> /dev/null) | grep pgf | awk '{print $1}'`
     if test -n "${FC_RESULT}"; then
-      AC_MSG_NOTICE([FC: identified Portland Group pgf* compiler])
+      AC_MSG_NOTICE([FC:  identified Portland Group pgf* compiler])
       FC_COMPILERNAME="PGI"
     else
       # Fall back to looking at the compiler executable name.
