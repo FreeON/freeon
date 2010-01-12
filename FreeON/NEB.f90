@@ -465,6 +465,8 @@ CONTAINS
           + (G%Clone(iCLONE+1)%Carts%D(3, j)-G%Clone(iCLONE)%Carts%D(3, j))**2
       ENDDO
       theta = theta/SQRT(thetaNormMinus*thetaNormPlus)
+      theta = MIN(1.0D0, theta)
+      theta = MAX(-1.0D0, theta)
       CALL MondoLog(DEBUG_NONE, "NEBForce", "theta ("//TRIM(IntToChar(iCLONE-1))//" - "// &
         TRIM(IntToChar(iCLONE))//" - "//TRIM(IntToChar(iCLONE+1))//") = "// &
         TRIM(FltToShrtChar(ACOS(theta)*RadToDeg))//" degrees")

@@ -30,6 +30,7 @@ CONTAINS
           G%Clone(iCLONE)%ETotal = G%Clone(iCLONE)%ETotal + O%LennardJonesEpsilon*R6*(R6-2)
         ENDDO
       ENDDO
+
       CALL MondoLog(DEBUG_NONE, "LennardJones", "ETotal = " &
         //TRIM(FltToChar(G%Clone(iCLONE)%ETotal/O%LennardJonesEpsilon))//" epsilon = " &
         //TRIM(DblToChar(G%Clone(iCLONE)%ETotal*au2eV))//" eV", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -45,8 +46,6 @@ CONTAINS
 
     DO iCLONE = 1, G%Clones
       G%Clone(iCLONE)%Gradients%D = Zero
-      G%Clone(iCLONE)%GradMax = Zero
-      G%Clone(iCLONE)%GradRMS = Zero
       DO i = 1, G%Clone(iCLONE)%NAtms
         DO j = 1, G%Clone(iCLONE)%NAtms
           IF(i == j) THEN
@@ -64,17 +63,7 @@ CONTAINS
           G%Clone(iCLONE)%Gradients%D(2, i) = G%Clone(iCLONE)%Gradients%D(2, i) + FMagnitude*(G%Clone(iCLONE)%Carts%D(2, i)-G%Clone(iCLONE)%Carts%D(2, j))
           G%Clone(iCLONE)%Gradients%D(3, i) = G%Clone(iCLONE)%Gradients%D(3, i) + FMagnitude*(G%Clone(iCLONE)%Carts%D(3, i)-G%Clone(iCLONE)%Carts%D(3, j))
         ENDDO
-
-        G%Clone(iCLONE)%GradMax = MAX(G%Clone(iCLONE)%GradMax, ABS(G%Clone(iCLONE)%Gradients%D(1, i)))
-        G%Clone(iCLONE)%GradMax = MAX(G%Clone(iCLONE)%GradMax, ABS(G%Clone(iCLONE)%Gradients%D(2, i)))
-        G%Clone(iCLONE)%GradMax = MAX(G%Clone(iCLONE)%GradMax, ABS(G%Clone(iCLONE)%Gradients%D(3, i)))
-
-        G%Clone(iCLONE)%GradRMS = G%Clone(iCLONE)%GradRMS &
-          + G%Clone(iCLONE)%Gradients%D(1, i)**2 &
-          + G%Clone(iCLONE)%Gradients%D(2, i)**2 &
-          + G%Clone(iCLONE)%Gradients%D(3, i)**2
       ENDDO
-      G%Clone(iCLONE)%GradRMS = SQRT(G%Clone(iCLONE)%GradRMS/DBLE(3*G%Clone(iCLONE)%NAtms))
 
       CALL MondoLog(DEBUG_NONE, "LennardJones", "Gradient in eV/A", "Clone "//TRIM(IntToChar(iCLONE)))
       DO i = 1, G%Clone(iCLONE)%NAtms
