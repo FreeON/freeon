@@ -970,14 +970,6 @@ CONTAINS
     TYPE(DBL_RNK2)     :: AuxLatF
     TYPE(DBL_VECT)     :: Ftmp
 
-    ! Check whether we are doing Lennard-Jones.
-    IF(O%UseLennardJones) THEN
-      CALL MondoLog(DEBUG_NONE, "Force", "Lennard-Jones force")
-      CALL LennardJonesForce(O, G)
-      !CALL HarmonicForce(O, G)
-      RETURN
-    ENDIF
-
     ! Allocate some space.
     CALL New(S%Action,1)
 
@@ -986,43 +978,63 @@ CONTAINS
     chBAS=IntToChar(cBAS)
 
     DO iCLONE=1,G%Clones
-       G%Clone(iCLONE)%Gradients%D=BIG_DBL
-       G%Clone(iCLONE)%GradRMS = SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+      G%Clone(iCLONE)%Gradients%D = BIG_DBL
+      G%Clone(iCLONE)%GradRMS = SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
     ENDDO
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "N%SCF_NAME = "//TRIM(N%SCF_NAME))
+    !!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "N%SCF_NAME = "//TRIM(N%SCF_NAME))
     CALL GeomArchive(cBAS,cGEO,N,O,B,G)
 
-    ! Now evaluate the forces
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Current = "//TRIM(IntVectToChar(S%Current)))
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Previous = "//TRIM(IntVectToChar(S%Previous)))
+    ! Check whether we are doing Lennard-Jones.
+    IF(O%UseLennardJones) THEN
+      CALL MondoLog(DEBUG_NONE, "Force", "Lennard-Jones force")
+      CALL LennardJonesForce(O, G)
+      !CALL HarmonicForce(O, G)
 
-    S%Action%C(1)='ForceEvaluation'
-    ! The non-orthogonal response
-    CALL Invoke('SForce',N,S,M)
-    ! Kinetic energy piece
-    CALL Invoke('TForce',N,S,M)
-!!$    CALL NTHessian(cBAS,cGEO,N,G,B,S,M)
-    ! Compute ECP component of the force
-    IF(B%BSets(1,cBAS)%HasECPs)THEN
-!!$       CALL NLATTFORCE_U(cBAS,cGEO,G,B,N,O,S,M)
-       CALL Invoke('UForce',N,S,M)
-    ENDIF
-    ! Build density with last DM
-    CALL Invoke('MakeRho',N,S,M)
-    ! Coulomb part
-    CALL Invoke('JForce',N,S,M)
-    ! DFT exchange corrleation term
-    IF(HasDFT(O%Models(cBas))) THEN
-!!$       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
-       CALL Invoke('XCForce',N,S,M)
-    ENDIF
-    ! Exact Hartree-Fock exchange component
-    IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)
+      HDFFileID = OpenHDF(N%HFile)
+      DO iCLONE = 1, G%Clones
+        ! Put everything to hdf.
+        HDF_CurrentID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(G%Clone(iCLONE), Tag_O=chGEO)
+        CALL CloseHDFGroup(HDF_CurrentID)
+      ENDDO
+      CALL CloseHDF(HDFFileID)
+
+    ELSE
+
+      ! Now evaluate the forces
+      !!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Current = "//TRIM(IntVectToChar(S%Current)))
+      !!$    CALL MondoLog(DEBUG_MAXIMUM, "Force", "State%Previous = "//TRIM(IntVectToChar(S%Previous)))
+
+      S%Action%C(1)='ForceEvaluation'
+      ! The non-orthogonal response
+      CALL Invoke('SForce',N,S,M)
+      ! Kinetic energy piece
+      CALL Invoke('TForce',N,S,M)
+      !!$    CALL NTHessian(cBAS,cGEO,N,G,B,S,M)
+      ! Compute ECP component of the force
+      IF(B%BSets(1,cBAS)%HasECPs)THEN
+        !!$       CALL NLATTFORCE_U(cBAS,cGEO,G,B,N,O,S,M)
+        CALL Invoke('UForce',N,S,M)
+      ENDIF
+      ! Build density with last DM
+      CALL Invoke('MakeRho',N,S,M)
+      ! Coulomb part
+      CALL Invoke('JForce',N,S,M)
+      ! DFT exchange corrleation term
+      IF(HasDFT(O%Models(cBas))) THEN
+        !!$       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+        CALL Invoke('XCForce',N,S,M)
+      ENDIF
+      ! Exact Hartree-Fock exchange component
+      IF(HasHF(O%Models(cBas)))THEN
+        CALL Invoke('GONX',N,S,M)
+      ENDIF
+
     ENDIF
 
     ! Open the HDF and monkey with forces
     HDFFileID=OpenHDF(N%HFile)
+
     DO iCLONE=1,G%Clones
        ! Get forces and corresponding geometry straight up for each clone in HDF
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))

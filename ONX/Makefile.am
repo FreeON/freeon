@@ -76,6 +76,12 @@ LDADD = \
   $(builddir)/../TwoE/HRR/libHRR.la \
   $(builddir)/../TwoE/MSC/libTwoEMisc.la
 
+# In case we have ctags installed, make the necessary tags files.
+.PHONY : tags
+tags :
+	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.{f,f90} ../Modules/*.{c,f,f90}
+
+# Dependencies.
 ONXInit.o : \
   ONXParameters.o
 

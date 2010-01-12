@@ -279,7 +279,7 @@ PROGRAM GONX2
   !------------------------------------------------
   ! Add Exchange Gradient.
   !
-  CALL Get(GradAux,'gradients',Tag_O=CurGeom)
+  CALL Get(GradAux,'Gradients',Tag_O=CurGeom)
   KScale=ExactXScale(ModelChem)
   IF(NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,GradX%D(1,1),1)
 #ifdef ONX2_PARALLEL
@@ -354,7 +354,7 @@ PROGRAM GONX2
   !------------------------------------------------
   ! Save Exchange Gradients and Stress.
   !
-  CALL Put(GradAux,'gradients',Tag_O=CurGeom)
+  CALL Put(GradAux,'Gradients',Tag_O=CurGeom)
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   IF(DoStrs) CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
