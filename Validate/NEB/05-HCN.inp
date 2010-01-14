@@ -1,15 +1,22 @@
+# Compare with
+#
+# J. Comput. Chem. 24, 990,   A Flexible Nudged Elastic Band Program for
+# Optimization of Minimum Energy Pathways Using Ab Initio Electronic Structure
+# Methods (2002)
+
 <BeginOptions>
 
 Charge=0
 Multiplicity=1
 
-Clones=5
+Clones=13
 Grad=(TSSearch,Cartesian,Global-CG)
 
 NEBReactantEnergy=-.2513083568263040D+04
 NEBProductEnergy=-.2512692522154103D+04
 
-OutPut=xyz
+NEBSpring=1.0D0
+
 DebugAll=(MinDebug,CheckSums)
 
 Guess=SuperPos
@@ -27,11 +34,11 @@ H          0.00000        0.00000        2.18737
 N          0.00000        0.00000        0.00000
 <EndReactants>
 
-<BeginClone_3>
+<BeginClone_7>
 C          0.00000       -0.79644        1.11562
 H          0.00000        0.00000        2.18737
 N          0.00000        0.73346        1.14007
-<EndClone_3>
+<EndClone_7>
 
 <BeginProducts>
 C          0.00000        0.00000        0.00000
