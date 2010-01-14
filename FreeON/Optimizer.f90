@@ -83,112 +83,6 @@ CONTAINS
     ENDIF
   END SUBROUTINE Descender
 
-  SUBROUTINE SteepD(C)
-    TYPE(Controls)                                      :: C
-    INTEGER                                             :: iBAS,iGEO,iCLONE
-    REAL(DOUBLE),DIMENSION(C%Geos%Clones,C%Opts%NSteps) :: Energy
-    INTEGER                                             :: NatmsLoc,IStart,gtmp,GBeg,GEnd,j
-    TYPE(DBL_RNK2)                                      :: OldXYZ
-    LOGICAL                                             :: NewFile,ExitQ
-
-    IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-       GBeg=0
-       GEnd=C%Geos%Clones+1
-    ELSE
-       GBeg=1
-       GEnd=C%Geos%Clones
-    ENDIF
-
-    ! initial geometry
-    iGEO=C%Stat%Previous%I(3)
-    NatmsLoc=C%Geos%Clone(1)%Natms
-
-    ! Build the guess
-    DO iBAS=1,C%Sets%NBSets
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-       CALL SCF(iBAS,iGEO,C)
-    ENDDO
-
-    ! Print the starting coordinates and energy
-    IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
-    DO iCLONE = GBeg, GEnd
-      CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint,Clone_O=iCLONE,Gradients_O='Gradients')
-    ENDDO
-
-    IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB)THEN
-      CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-    ENDIF
-
-    iBAS=C%Sets%NBSets
-    IStart=iGEO
-
-    ! Follow the gradient downhill for NSteps
-    DO iGEO=IStart,C%Opts%NSteps
-       ! Compute new gradients
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-       DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
-       ENDDO
-       ExitQ = SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
-       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-          ! Overwrite the most recent GFile (doing transition state)
-          !          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.)
-          !          CLOSE(Geo)
-          !IF(C%Opts%GeomPrint=='XSF') &
-             !CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
-          DO iCLONE=GBeg,GEnd
-             ! If transition states, geometry is the image number
-             ! otherwise, it is the step number
-             !gtmp=C%Geos%Clone(iCLONE)%Confg
-             !C%Geos%Clone(iCLONE)%Confg=iCLONE+1
-             !CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
-             !CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-             CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = C%Nams%GFile, &
-                         Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Clone_O = iCLONE, &
-                         Gradients_O = 'Gradients')
-             !C%Geos%Clone%Confg=gtmp
-          ENDDO
-
-          CALL MergePrintClones(C%Geos, C%Nams, C%Opts, Gradients_O = "Gradients")
-       ELSE
-          ! No transitions states, just good old downhill
-          IF(C%Opts%GeomPrint=='XSF') THEN
-             CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
-          ENDIF
-          DO iCLONE=1,C%Geos%Clones
-             CALL PPrint(C%Geos%Clone(iCLONE),TRIM(C%Nams%GFile)//IntToChar(iCLONE),Geo,C%Opts%GeomPrint)
-          ENDDO
-       ENDIF
-       IF(ExitQ) THEN
-         CALL MondoLog(DEBUG_NONE, "Optimizer", "optimization converged")
-         DO iCLONE=1,C%Geos%Clones
-           CALL MondoLog(DEBUG_NONE, "Optimizer", "Clone "//TRIM(IntToChar(iCLONE)))
-           DO j=1, C%Geos%Clone(iCLONE)%NAtms
-             CALL MondoLog(DEBUG_NONE, "Optimizer", "R["//TRIM(IntToChar(j))//"] = "// &
-               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1,j)))//" "// &
-               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2,j)))//" "// &
-               TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3,j)))//" ]")
-           ENDDO
-         ENDDO
-         EXIT
-       ENDIF
-       CALL New(OldXYZ,(/3,NatmsLoc/))
-       DO iCLONE=1,C%Geos%Clones
-          OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
-          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%Carts%D
-          C%Geos%Clone(iCLONE)%Carts%D=OldXYZ%D
-       ENDDO
-       CALL Delete(OldXYZ)
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Opts,C%Sets,C%Geos)
-       DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Displ%D
-       ENDDO
-       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Opts,C%Sets,C%Geos)
-       ! CALL MergePrintClones(C%Geos,C%Nams,C%Opts)
-    ENDDO
-  END SUBROUTINE SteepD
-
   SUBROUTINE ConjugateGradient(C, Global_O, SteepestDescent_O)
     TYPE(Controls)                              :: C
     LOGICAL, OPTIONAL                           :: Global_O, SteepestDescent_O
@@ -539,13 +433,21 @@ CONTAINS
       CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
       ! Print out the energy.
-      CALL MondoLog(DEBUG_NONE, "ConjgateGradient", "barrier energy profile")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "barrier energy profile")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
+        TRIM(DblToChar(C%Opts%NEBReactantEnergy))//" hartree = "// &
+        TRIM(DblToChar(C%Opts%NEBReactantEnergy*au2eV))//" eV", &
+        "Clone "//TRIM(IntToChar(0)))
       DO iCLONE = 1, C%Geos%Clones
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
           TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" hartree = "// &
           TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal*au2eV))//" eV", &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
+        TRIM(DblToChar(C%Opts%NEBProductEnergy))//" hartree = "// &
+        TRIM(DblToChar(C%Opts%NEBProductEnergy*au2eV))//" eV", &
+        "Clone "//TRIM(IntToChar(C%Geos%Clones+1)))
 
       ! Check for convergence.
       maxGrad = Zero

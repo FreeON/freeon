@@ -488,7 +488,7 @@ CONTAINS
       ENDIF
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, "NEBForce", "found climbing image, Clone "// &
+    CALL MondoLog(DEBUG_NONE, "NEBForce", "climbing image is Clone "// &
       TRIM(IntToChar(UMaxClone))//" with energy "// &
       TRIM(DblToChar(G%Clone(UMaxClone)%ETotal*au2eV))//" eV")
 
