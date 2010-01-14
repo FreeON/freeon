@@ -16,8 +16,8 @@ parser.add_option("--pretend",
     dest = "pretend")
 
 parser.add_option("--tab",
-    help = "Replace a TAB character with N spaces (default N = 2)",
-    default = 2,
+    help = "Replace a TAB character with N spaces (default N = 8)",
+    default = 8,
     type = "int",
     dest = "tab",
     metavar = "N")
@@ -40,16 +40,31 @@ for file in arguments:
 
   lineNumber = 0
   fileNeedsFixing = False
-  for line in lines:
-    lineNumber += 1
-    if re.compile("[ \t]+$").search(line):
+  for lineNumber in range(len(lines)):
+    if re.compile("[ \t]+$").search(lines[lineNumber]):
       fileNeedsFixing = True
-      print("trailing whitespace in file " + file + " on line " + str(lineNumber))
+      print("trailing whitespace in file " + file + " on line " + str(lineNumber+1) + ": " + lines[lineNumber].rstrip())
+      if not options.pretend:
+        lines[lineNumber] = lines[lineNumber].rstrip()
+
+    if re.compile("^ +\t+").search(lines[lineNumber]):
+      fileNeedsFixing = True
+      print("indent SP followed by TAB in file " + file + " on line " + str(lineNumber+1) + ": " + lines[lineNumber].rstrip())
+      if not options.pretend:
+        tabInSpace = ""
+        for i in range(options.tab):
+          tabInSpace += " "
+
+        while True:
+          result = re.compile("^( +)\t").search(lines[lineNumber])
+          if result:
+            lines[lineNumber] = re.sub("^ +\t", result.group(1) + tabInSpace, lines[lineNumber])
+          else:
+            break
 
   if not options.pretend and fileNeedsFixing:
-    print("fixing file " + file)
+    print("writing out fixed file " + file)
     fd = open(file, "w")
     for line in lines:
-      line = re.sub("\s+$", "", line)
-      print >> fd, line
+      print >> fd, line.rstrip()
     fd.close()
