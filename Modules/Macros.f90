@@ -175,11 +175,9 @@ CONTAINS
 
     ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
     IF(InParallel)THEN
-      CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),  &
-           (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+      CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),(/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
     ELSE
-      CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/1,SpaceTime%I(2)/),  &
-           (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+      CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/1,SpaceTime%I(2)/),(/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
     ENDIF
     CALL ErrChk(IErr,Sub)
 
