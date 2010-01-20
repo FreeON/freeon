@@ -937,12 +937,12 @@ MODULE MondoMPI
 
           ! Set up non-blocking receive from rank 0 front-end.
           CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "waiting for shutdown message from Frontend rank 0", "Frontend rank "//TRIM(IntToChar(MyID)))
-          CALL MPI_Irecv(shutdownBuffer, 1, MPI_CHARACTER, 0, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(0), IErr(0))
+          CALL MPI_Irecv(shutdownBuffer, 1, MPI_CHARACTER, 0, FRONTEND_TAG, MPI_COMM_WORLD, shutdownRequest(1), IErr(1))
 
           done = .FALSE.
           DO WHILE(.NOT. done)
             CALL FreeONSleep(2)
-            CALL MPI_Test(shutdownRequest(0), done, shutdownStatus(0,:), IErr(0))
+            CALL MPI_Test(shutdownRequest(1), done, shutdownStatus(1,:), IErr(1))
           ENDDO
           CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "received shutdown message from rank 0", "Frontend rank "//TRIM(IntToChar(MyID)))
         ENDIF
@@ -953,7 +953,7 @@ MODULE MondoMPI
         DEALLOCATE(IErr)
 
         ! Shut down MPI.
-        CALL MPI_FINALIZE(IErr(0))
+        CALL MPI_FINALIZE(IErr(1))
       END SUBROUTINE AlignFrontends
 
 #endif
