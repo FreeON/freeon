@@ -27,10 +27,16 @@ to return derivative works to the MondoSCF group for review, and possible
 disemination in future releases.
 ])
 
+# Check the build system.
+AC_CANONICAL_TARGET
+
+# Initialize automake.
 AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip])
 
+# Define the aclocal macro directory.
 AC_CONFIG_MACRO_DIR([m4])
 
+# Check for localversion.
 if test -f ${srcdir}/localversion; then
   . ${srcdir}/localversion
 else
@@ -63,9 +69,6 @@ user_CFLAGS=${CFLAGS}
 user_FFLAGS=${FFLAGS}
 user_FCFLAGS=${FCFLAGS}
 
-# Check the build system.
-AC_CANONICAL_BUILD
-
 # Check whether to build for parallel (MPI).
 AC_MSG_CHECKING([whether to build fully parallel MPI version])
 AC_ARG_ENABLE([MPI],
@@ -82,7 +85,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-# Check what parts to parallelize.
+# Check whether we are building parallelization across clones only.
 AC_MSG_CHECKING([whether to build MPI version, parallelized across clones only])
 AC_ARG_ENABLE([parallel-clones],
   [AS_HELP_STRING([--enable-parallel-clones],
@@ -104,7 +107,7 @@ if test "${use_MPI}" = "yes" -a "${use_parallel_clones}" = "yes"; then
   AC_MSG_FAILURE([can not build with both MPI and parallel-clones enabled])
 fi
 
-# Find compilers.
+# Define what compiler executable names to look for.
 if test "${use_MPI}" = "yes" -o "${use_parallel_clones}" = "yes"; then
   C_COMPILERS="mpicc"
   FC_COMPILERS="mpif90"
@@ -115,6 +118,7 @@ else
   F77_COMPILERS="gfortran ifort pgf90"
 fi
 
+# Find compilers.
 AC_PROG_CC([${C_COMPILERS}])
 AC_PROG_FC([${FC_COMPILERS}])
 AC_PROG_F77([${F77_COMPILERS}])
@@ -279,6 +283,7 @@ case "${FC_COMPILERNAME}" in
   *)     fc_compiler_version_string="unset" ;;
 esac
 
+# Define compiler version strings.
 AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The C compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
 AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
@@ -307,51 +312,6 @@ CPP=cpp
 
 # Set $(MAKE).
 AC_PROG_MAKE_SET
-
-# Testing whether the C compiler works.
-AC_MSG_CHECKING([whether the C-compiler produces executable code])
-AC_LANG(C)
-AC_RUN_IFELSE([
-int
-main ()
-{
-  int i = 1;
-  return 0;
-}
-],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])
-   AC_MSG_FAILURE([Please verify your choice of C-compiler])])
-
-# Test whether the F77-compiler works.
-AC_MSG_CHECKING([whether the F77-compiler produces executable code])
-AC_LANG(Fortran 77)
-AC_RUN_IFELSE([
-      INTEGER I
-
-      I = 1
-      STOP
-      END
-],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])
-   AC_MSG_FAILURE([Please verify your choice of F77-compiler])])
-
-# Test whether the F90-compiler works.
-AC_MSG_CHECKING([whether the F90-compiler produces executable code])
-AC_LANG(Fortran)
-AC_RUN_IFELSE([
-program runtest
-
-  integer :: i
-
-  i = 1
-
-end program runtest
-],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])
-   AC_MSG_FAILURE([Please verify your choice of F90-compiler])])
 
 # Store additional optimization flags.
 optimization_flags=""
@@ -569,7 +529,7 @@ else
   fi
 fi
 
-# Check whether to check for case differences in names.
+# Check whether to check for case differences in names (for debugging).
 AC_MSG_CHECKING([whether to check for case differences in names])
 AC_ARG_ENABLE([case-check],
   [AS_HELP_STRING([--enable-case-check],
@@ -598,9 +558,9 @@ else
 fi
 
 # Check whether the f90 and f77 compilers are the same. We currently need that
-# to make sure that Mondo is linked correctly. Right now automake thinks that it
-# needs to link with the f77 compiler. So we better have an f90 compiler there,
-# otherwise we can't link correctly.
+# to make sure that FreeON is linked correctly. Right now automake thinks that
+# it needs to link with the f77 compiler. So we better have an f90 compiler
+# there, otherwise we can't link correctly.
 AC_MSG_CHECKING([whether F77 (${F77}) and F90 (${FC}) compilers are identical])
 if test "`$as_basename -- ${FC}`" != "`$as_basename -- ${F77}`"; then
   AC_MSG_RESULT([no])
@@ -622,11 +582,11 @@ case ${FC_COMPILERNAME} in
     FCFLAGS="${FCFLAGS} -132"
     ;;
   *)
-    AC_MSG_RESULT([not needed])
+    AC_MSG_RESULT([don't know])
     ;;
 esac
 
-# Change to C.
+# Change language to C.
 AC_LANG(C)
 
 # Check for some standard headers.
@@ -692,8 +652,7 @@ fi
 # Test some stuff for C-code.
 AC_LANG(C)
 
-AC_CHECK_LIB([m], [round], [],
-  [AC_MSG_FAILURE([we need the round() function])])
+AC_CHECK_LIB([m], [round], [], [AC_MSG_FAILURE([we need the round() function])])
 
 # Switch tests to fortran.
 AC_LANG(Fortran)
@@ -713,7 +672,7 @@ END PROGRAM test_compiler
   [AC_MSG_RESULT([failed test])
   AC_MSG_FAILURE([The compiler does not understand the ALLOCATABLE attribute
                   inside a type definition. If you are using gcc, we suggest
-                  you use a version >= 4.2.])])
+                  you use a version >= 4.2.0])])
 
 # Compile LinearAlgebraLibrary.
 AC_CONFIG_SUBDIRS([LinearAlgebraLibrary])
@@ -1017,16 +976,6 @@ else
 
 fi
 
-# Set some preprocessor command line options.
-FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/Modules"
-FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/Modules"
-
-# Set this stuff in the makefiles.
-AC_SUBST(CPP, ${CPP})
-AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
-AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
-AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
-
 AC_MSG_CHECKING([whether we should remove preprocessed files])
 AC_ARG_ENABLE([delete-preprocessed-files],
   [AS_HELP_STRING([--disable-delete-preprocessed-files],
@@ -1075,6 +1024,16 @@ AC_ARG_WITH([MONDO_SCRATCH],
 AC_MSG_RESULT([using ${MONDO_SCRATCH}])
 
 # Define FreeON variables.
+
+# Set some preprocessor command line options.
+FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/Modules"
+FORTRAN_DEFAULT_INCLUDES="-I\$(srcdir) -I\$(top_builddir)/Modules"
+
+# Set this stuff in the makefiles.
+AC_SUBST(CPP, ${CPP})
+AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
+AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
+AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
 
 # In case prefix was not set on command line.
 if test "${prefix}" = "NONE"; then
