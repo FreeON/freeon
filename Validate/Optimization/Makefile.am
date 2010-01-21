@@ -28,4 +28,8 @@ EXTRA_DIST = \
   20-LJ-5-SD.inp \
   21-LJ-5-CG.inp \
   22-LJ-100-SD.inp \
-  23-LJ-100-CG.inp
+  23-LJ-100-CG.inp \
+  24-Vancomycin-internal.inp \
+  25-Vancomycin-CG.inp \
+  26-Vancomycin-CG.inp \
+  27-Vancomycin-CG.inp
