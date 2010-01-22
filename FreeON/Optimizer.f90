@@ -139,7 +139,7 @@ CONTAINS
     ! Hardcode stepsize.
     CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "initiating conjugate gradient optimization")
     CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "convergence reached when maxForce and RMSForce are below " &
-      //TRIM(DblToShrtChar(GTol(C%Opts%AccuracyLevels(iBAS))*au2eV/AUToAngstroms))//" eV/A)")
+      //TRIM(DblToShrtChar(GTol(C%Opts%AccuracyLevels(iBAS))*au2eV/AUToAngstroms))//" eV/A")
 
     ! Calculate the gradient.
     CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating initial force")
