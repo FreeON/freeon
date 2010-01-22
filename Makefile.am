@@ -96,3 +96,5 @@ tags :
 	$(MAKE) -C Modules tags
 	$(MAKE) -C FreeON tags
 	$(MAKE) -C SCFeqs tags
+	$(MAKE) -C OneE tags
+	$(MAKE) -C QCTC tags
