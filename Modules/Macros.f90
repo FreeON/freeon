@@ -201,8 +201,10 @@ CONTAINS
     !CALL ErrChk(IErr,Sub)
 
     ! Reload local rank and PE number for the new MONDO_COMM
-    !CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
-    !  //" after MyID = "//TRIM(IntToChar(MRank()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
+    IF(MyID /= MRank() .OR. NPrc /= MSize()) THEN
+      CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
+        //" after MyID = "//TRIM(IntToChar(MRank()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
+    ENDIF
     MyID=MRank()
     NPrc=MSize()
   END FUNCTION CartCommSplit
