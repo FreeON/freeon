@@ -432,6 +432,13 @@ PROGRAM ONX2
      CALL Filter(Kx,T2)
      CALL Delete(T1)
      CALL Delete(T2)
+  ELSE
+     CALL New(T1,NSMat_O=Kx%NSMat)
+     CALL Filter(T1,Kx)
+!!     WRITE(*,*)SIZE(Kx%MTrix%D),Kx%NNon0
+!!     WRITE(*,*)SIZE(T1%MTrix%D),T1%NNon0
+     CALL SetEq(Kx,T1)
+!!     WRITE(*,*)SIZE(Kx%MTrix%D),Kx%NNon0
   ENDIF
 #endif
   !
