@@ -336,21 +336,21 @@ if test "${use_optimizations}" = "yes"; then
       *386)
         case ${CC_COMPILERNAME} in
           GCC)   CFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -fast" ;;
+          Intel) CFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   CFLAGS="-g -fast" ;;
           *)     CFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${CC_COMPILERNAME} in
           GCC)   CFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -fast" ;;
+          Intel) CFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   CFLAGS="-g -fast" ;;
           *)     CFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${CC_COMPILERNAME} in
           GCC)   CFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) CFLAGS="-g -fast" ;;
+          Intel) CFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   CFLAGS="-g -fast" ;;
           *)     CFLAGS="-g -O" ;;
         esac ;;
@@ -388,21 +388,21 @@ main ()
       *386)
         case ${F77_COMPILERNAME} in
           GCC)   FFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -fast" ;;
+          Intel) FFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FFLAGS="-g -fast" ;;
           *)     FFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${F77_COMPILERNAME} in
           GCC)   FFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -fast" ;;
+          Intel) FFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FFLAGS="-g -fast" ;;
           *)     FFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${F77_COMPILERNAME} in
           GCC)   FFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FFLAGS="-g -fast" ;;
+          Intel) FFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FFLAGS="-g -fast" ;;
           *)     FFLAGS="-g -O" ;;
         esac ;;
@@ -439,21 +439,21 @@ main ()
       *386)
         case ${FC_COMPILERNAME} in
           GCC)   FCFLAGS="-g -O2 -march=native -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -fast" ;;
+          Intel) FCFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FCFLAGS="-g -fast" ;;
           *)     FCFLAGS="-g -O" ;;
         esac ;;
       *686)
         case ${FC_COMPILERNAME} in
           GCC)   FCFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -fast" ;;
+          Intel) FCFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FCFLAGS="-g -fast" ;;
           *)     FCFLAGS="-g -O" ;;
         esac ;;
       *x86_64)
         case ${FC_COMPILERNAME} in
           GCC)   FCFLAGS="-g -O2 -march=native -msse -msse2 -mfpmath=sse -ffast-math -ftree-vectorize -pipe" ;;
-          Intel) FCFLAGS="-g -fast" ;;
+          Intel) FCFLAGS="-g -O3 -no-prec-div -xHost" ;;
           PGI)   FCFLAGS="-g -fast" ;;
           *)     FCFLAGS="-g -O" ;;
         esac ;;
