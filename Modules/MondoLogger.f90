@@ -138,7 +138,7 @@ CONTAINS
     CHARACTER(LEN=2048)                     :: output
     CHARACTER(LEN=2048)                     :: line_string
     INTEGER                                 :: logLevel
-    LOGICAL                                 :: isOpen, fileOutput
+    LOGICAL                                 :: fileOutput
 
     ! Check whether logLevel is sufficiently high.
     IF(logLevel <= PrintFlags%Key) THEN

@@ -352,7 +352,8 @@ AInv.lo : \
   GlobalCharacters.lo \
   MemMan.lo \
   LinAlg.lo \
-  MatFunk.lo
+  MatFunk.lo \
+  $(top_builddir)/MondoConfig.h
 
 ParsingConstants.lo : GlobalScalars.lo
 

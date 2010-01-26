@@ -392,8 +392,6 @@ CONTAINS
       Pls1=1
       !            ENDIF
       !            WRITE(*,111 )K1,S1,K2,S2,J,TmpLine(K1:K2),TmpLine(K1+Pls1:K2+Mns1)
-111   FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
-           ' S2 = ',I3,'J = ',I3,' ALine1 = <',A,'>, ',' ALine2 = <',A,'>')
       IF(S1==0.OR.K1>L.OR.K2>L)RETURN
       IF(K1==K2)K2=L
       J=K2
@@ -409,16 +407,17 @@ CONTAINS
   FUNCTION OptKeyLocQ(Unit,Option,Key,M,N,Loc)
     INTEGER,         INTENT(IN)    :: Unit
     CHARACTER(LEN=*),INTENT(IN)    :: Option,Key
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,LCLine,Char,OptLC,KeyLC
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,LCLine,OptLC,KeyLC
     INTEGER                        :: M,N,NN,J,K1,K2,L,V,S1,S2,LD,Pls1,Mns1
     INTEGER, DIMENSION(M)          :: Loc
     LOGICAL                        :: OptKeyLocQ
+
     REWIND(Unit)
     OptLC=Option
     KeyLC=Key
     CALL LowCase(OptLC)
     CALL LowCase(KeyLC)
-    !         WRITE(*,*)' Opt, key = ',OptLC,KeyLC
+
     N=0
     NN=0
     Loc=0
@@ -430,7 +429,6 @@ CONTAINS
       LCLine=Line
       CALL LowCase(LCLine)
       IF(INDEX(LCLine,TRIM(OptLC))/=0)THEN
-        !              WRITE(*,*)TRIM(LCLine)
         J=1
         L=LEN(TRIM(LCLine))
         DO V=1,L
@@ -446,27 +444,21 @@ CONTAINS
             Mns1=-1
           ENDIF
           Pls1=1
-          !                 WRITE(*,111 )N,NN,LCLine(K1:K2),LCLine(K1+Pls1:K2+Mns1)
           IF(S1==0.OR.K1>L.OR.K2>L)RETURN
           IF(K1==K2)K2=L
           J=K2
           IF(K1+Pls1<=K2+Mns1)THEN
             NN=NN+1
-            !                    WRITE(*,11)TRIM(ADJUSTL(KeyLC)),TRIM(ADJUSTL(LCLine(K1+Pls1:K2+Mns1)))
-            !11 format(' Test1 = <',A,'>, ',' Test2 = <',A,'>')
             IF(TRIM(ADJUSTL(KeyLC))==TRIM(ADJUSTL(LCLine(K1+Pls1:K2+Mns1))))THEN
-              !                 IF(SCAN(LCLine(K1+Pls1:K2+Mns1),Lower)/=0)THEN
-              !                    Char=ADJUSTL(Line(K1+Pls1:K2+Mns1))
               N=N+1
               Loc(N)=NN
             ENDIF
           ENDIF
         ENDDO
-111     FORMAT('NLoc = ',I1,' Loc = ',I3,' ALine1 = <',A,'>, ',' ALine2 = <',A,'>')
       ENDIF
     ENDDO
 1   CONTINUE
-    !         WRITE(*,*)' 1 CONTINUE 1 CONTINUE 1 CONTINUE 1 CONTINUE 1 CONTINUE '
+
     IF(N==0)THEN
       OptKeyLocQ=.FALSE.
     ELSE
@@ -671,10 +663,6 @@ CONTAINS
       J=K2+1
     ENDDO
     IF(PRESENT(NULL_O))Chars%C(N+1)=Blnk
-111 FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
-         ' S2 = ',I3,'J = ',I3,' ALine1 = <',A,'>')
-112 FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
-         ' S2 = ',I3,'J = ',I3,' Chars = <',A,'>')
   END SUBROUTINE LineToChars
 
   !------------------------------------------------------------------
@@ -892,7 +880,6 @@ CONTAINS
     INTEGER,DIMENSION(3), OPTIONAL,INTENT(IN) :: Stats_O
     INTEGER,         OPTIONAL,INTENT(IN)      :: OffSet_O
     LOGICAL,         OPTIONAL,INTENT(IN)      :: NoTags_O
-    INTEGER                                   :: OffSet
     INTEGER, DIMENSION(3)                     :: Stats
     CHARACTER(LEN=DEFAULT_CHR_LEN)            :: Name,TrixFile,Cycl,Base,Geom
 
@@ -1068,6 +1055,10 @@ CONTAINS
       !
       ! Read a line from inputfile.
       READ(Unit,DEFAULT_CHR_FMT,IOSTAT=ISTAT) Line
+
+      ! Remove comments.
+      CALL RemoveComments(Line)
+
       !write(*,*) 'ISTAT',ISTAT
       IF(ISTAT.NE.0) EXIT
       !write(*,*) 'Line<'//trim(line)//'>'

@@ -26,6 +26,9 @@
 ! SPARSE-BLOCKED O(N) AINV WITH DISTANCE THRESHOLDING
 ! Author: Matt Challacombe
 !-----------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE AInv
   USE DerivedTypes
   USE GlobalScalars
@@ -36,33 +39,36 @@ MODULE AInv
   IMPLICIT NONE
 CONTAINS
   SUBROUTINE BlockedAInv(A,TrixThresh,GM,DstncThresh,Z,Zt,Perf)
-    TYPE(BCSR)          :: A,Z,Zt,DiagD
+    TYPE(BCSR)     :: A,Z,Zt,DiagD
 #ifdef FIND_CONDA
-    TYPE(DBL_RNK2)      :: B,C
+    TYPE(DBL_RNK2) :: B,C
 #endif
-    TYPE(BSET)          :: BS
-    TYPE(CRDS)          :: GM
-    TYPE(TIME)          :: Perf
-    TYPE(INT_VECT)      :: AiFlg,ZiFlg,ColPt,BlkPt
-    TYPE(ARGMT)         :: Args
-    INTEGER             :: I,J,Q,R,IDex,JDex,ZDex,ZBlk,NIJ, &
-                           n,ni,msiz,strtai,stopai,strtaj,stopaj, &
-                           strtzi,stopzi,nj,strtzj,stopzj,jcol,k,kdex, &
-                           aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt, &
-                           zblkpt,NewBloks,EndBloks,IRow,JRow,ZBlksPreFilter,ZBlksPostFilter
-    TYPE(DBL_VECT)      :: Blk1,Blk2
-    TYPE(DBL_RNK2)      :: P,DA
-    REAL(DOUBLE)        :: Op,Mx0,B2Norm
-    REAL(DOUBLE)        :: TrixThresh,DstncThresh,IRowX,IRowY,IRowZ
-    TYPE(AtomPair)      :: Pair
-    REAL(DOUBLE), &
-         EXTERNAL       :: DDOT
-    LOGICAL             :: TEST_AINV
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-    CHARACTER(LEN=8),&
-         PARAMETER  :: Prog='BlokAInv'
-    INTEGER :: II
-!------------------------------------------------------------------------------------------------
+    TYPE(CRDS)     :: GM
+    TYPE(TIME)     :: Perf
+    TYPE(INT_VECT) :: AiFlg,ZiFlg,ColPt,BlkPt
+    INTEGER        :: I,J,IDex,JDex,ZDex,ZBlk,NIJ, &
+                      n,ni,strtai,stopai,strtaj,stopaj, &
+                      strtzi,stopzi,nj,strtzj,stopzj,jcol,kdex, &
+                      aiblk,ajblk,zjblk,m,ziblk,icol, &
+                      NewBloks,EndBloks,IRow,JRow,ZBlksPreFilter,ZBlksPostFilter
+    TYPE(DBL_VECT) :: Blk1,Blk2
+    TYPE(DBL_RNK2) :: P
+    REAL(DOUBLE)   :: B2Norm
+    REAL(DOUBLE)   :: TrixThresh
+    REAL(DOUBLE)   :: DstncThresh
+
+#ifdef SPATIAL_THRESHOLDING
+    INTEGER :: IRowX, IRowY, IRowZ
+#endif
+
+    REAL(DOUBLE),EXTERNAL       :: DDOT
+    CHARACTER(LEN=8),PARAMETER  :: Prog='BlokAInv'
+    INTEGER                     :: II
+
+#ifdef SPATIAL_THRESHOLDING
+    CALL MondoLog(DEBUG_NONE, Prog, "using spatial thresholding")
+#endif
+
 #ifdef FIND_CONDA
     ! Useful if AInv is behaving badly.  If A is singular, you
     ! will have problems.

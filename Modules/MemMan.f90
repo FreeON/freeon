@@ -865,11 +865,11 @@ CONTAINS
   END SUBROUTINE Initialize_CRDS
 
   SUBROUTINE New_BCSR(A,N_O,OnAll_O,NSMat_O)
-    TYPE(BCSR),INTENT(INOUT)             :: A
-    INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
-    LOGICAL,OPTIONAL                     :: OnAll_O
-    INTEGER,OPTIONAL                     :: NSMat_O
-    LOGICAL                              :: OnAll
+    TYPE(BCSR),INTENT(INOUT)      :: A
+    INTEGER,OPTIONAL,DIMENSION(3) :: N_O
+    LOGICAL,OPTIONAL              :: OnAll_O
+    INTEGER,OPTIONAL              :: NSMat_O
+    LOGICAL                       :: OnAll
 
     IF(PRESENT(OnAll_O))THEN
        OnAll=OnAll_O
@@ -887,17 +887,17 @@ CONTAINS
           A%NBlks=N_O(2)
           A%NNon0=N_O(3)
           CALL New(A%RowPt,A%NAtms+1)
-          CALL New(A%ColPt,A%NBlks  )
-          CALL New(A%BlkPt,A%NBlks  )!*A%NSMat)
-          CALL New(A%MTrix,A%NNon0  )
+          CALL New(A%ColPt,A%NBlks)
+          CALL New(A%BlkPt,A%NBlks)!*A%NSMat)
+          CALL New(A%MTrix,A%NNon0)
        ELSE
           A%NAtms=NAtoms! MaxAtms
           A%NBlks=MaxBlks
           A%NNon0=MaxNon0*A%NSMat
           CALL New(A%RowPt,A%NAtms+1)
-          CALL New(A%ColPt,A%NBlks  )
-          CALL New(A%BlkPt,A%NBlks  )!*A%NSMat)
-          CALL New(A%MTrix,A%NNon0  )
+          CALL New(A%ColPt,A%NBlks)
+          CALL New(A%BlkPt,A%NBlks)!*A%NSMat)
+          CALL New(A%MTrix,A%NNon0)
        ENDIF
        A%Alloc=ALLOCATED_TRUE
 #ifdef PARALLEL

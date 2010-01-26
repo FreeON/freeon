@@ -144,7 +144,7 @@ CONTAINS
     REAL(DOUBLE) :: BWEstim,ShrinkFactor
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.3D3, 1.3D3,1.6D3/)
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
-    !-------------------------------------------------------------------------!
+
     ! Use assymptotics to set the max matrix dimensions
     MaxAtms=1+G%NAtms
     BWEstim=MIN(G%NAtms,CEILING((DBLE(G%NAtms) &
@@ -152,12 +152,19 @@ CONTAINS
          /(One+BWDecay(AccL)*DBLE(G%NAtms)**2) ) )
     MaxBlks=1+G%NAtms*BWEstim
     MaxNon0=1+B%NBasF*(DBLE(B%NBasF)*DBLE(BWEstim)/DBLE(G%NAtms))
+
+    ! Print out what we found.
+    CALL MondoLog(DEBUG_MAXIMUM, "BCSRDimensions", "estimated MaxBlks = "//TRIM(IntToChar(MaxBlks)))
+    CALL MondoLog(DEBUG_MAXIMUM, "BCSRDimensions", "estimated MaxNon0 = "//TRIM(IntToChar(MaxNon0)))
+
     ! Set the variable if def in the input.
     IF(MaxNon0s.GT.0) MaxNon0=MaxNon0s !if def in the input.
     IF(MaxNBlks.GT.0) MaxBlks=MaxNBlks !if def in the input.
-    !    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks-1)/DBLE(G%NAtms**2)
-    !    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0-1)/DBLE(B%NBasF**2)
-    !    STOP
+
+    ! Print out result.
+    CALL MondoLog(DEBUG_MAXIMUM, "BCSRDimensions", "MaxBlks = "//TRIM(IntToChar(MaxBlks)))
+    CALL MondoLog(DEBUG_MAXIMUM, "BCSRDimensions", "MaxNon0 = "//TRIM(IntToChar(MaxNon0)))
+
   END SUBROUTINE BCSRDimensions
   !============================================================================
   ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND
@@ -545,6 +552,7 @@ CONTAINS
     CALL Align(BASIS_SETS,Inp)
     BACKSPACE(Inp)
     READ(Inp,DEFAULT_CHR_FMT)Line
+    CALL RemoveComments(Line)
     CALL MondoLog(DEBUG_MAXIMUM, "ParseBasisNames", "parsing "//TRIM(Line))
     CALL LineToChars(Line,Chars)
     B%NBSets=SIZE(Chars%C)-1
@@ -567,6 +575,7 @@ CONTAINS
     ENDDO
     CALL Delete(Chars)
   END SUBROUTINE ParseBasisNames
+
   !=============================================================================
   ! PRECOMPUTE PRIMITIVE DISTRIBUTION INFORMATION
   !=============================================================================
@@ -676,13 +685,13 @@ CONTAINS
       IF(SIZE(Arg%C).NE.NBSets) &
            CALL Halt('The number of MaxNon0s arguments <'  //TRIM(IntToChar(SIZE(Arg%C)))// &
            '> must be the same as the number of BasisSets <'//TRIM(IntToChar(NBSets))//'>.')
-      !
+
       ! Copy info.
       DO iBS=1,NBSets
         IF(TRIM(Arg%C(iBS)).EQ.BCSR_MAXDEFAULT) THEN
           ArrMaxNon0s%I(iBS)=-BIG_INT
         ELSE
-          !
+
           ! Check for strange char.
           IF(.NOT.ChrCkkIfInt(Arg%C(iBS))) &
                CALL Halt('The argument <'//TRIM(Arg%C(iBS))// &
@@ -691,22 +700,22 @@ CONTAINS
         ENDIF
         !write(*,*) 'ArrMaxNon0s%I(iBS)',ArrMaxNon0s%I(iBS)
       ENDDO
-      !
+
       CALL Delete(Arg)
     ENDIF
-    !
+
     ! Look for MaxNBlks
     IF(OptGetKeyArg(Unit,BCSR_MAXNBLKS,Arg)) THEN
       IF(SIZE(Arg%C).NE.NBSets) &
            CALL Halt('The number of MaxNBlks arguments <'  //TRIM(IntToChar(SIZE(Arg%C)))// &
            '> must be the same as the number of BasisSets <'//TRIM(IntToChar(NBSets))//'>.')
-      !
+
       ! Copy info.
       DO iBS=1,NBSets
         IF(TRIM(Arg%C(iBS)).EQ.BCSR_MAXDEFAULT) THEN
           ArrMaxNon0s%I(iBS)=-BIG_INT
         ELSE
-          !
+
           ! Check for strange char.
           IF(.NOT.ChrCkkIfInt(Arg%C(iBS))) &
                CALL Halt('The argument <'//TRIM(Arg%C(iBS))// &
@@ -715,11 +724,10 @@ CONTAINS
         ENDIF
         !write(*,*) 'ArrMaxNBlks%I(iBS)',ArrMaxNBlks%I(iBS)
       ENDDO
-      !
+
       CALL Delete(Arg)
     ENDIF
-    !
+
   END SUBROUTINE ParseMaxElemBCSR
-  !
-  !
+
 END MODULE ParseBasis
