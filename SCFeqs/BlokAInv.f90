@@ -66,18 +66,25 @@ PROGRAM BlokAInv
   TYPE(DBL_RNK2)      :: P,DA
   REAL(DOUBLE)        :: Op,Mx0,B2Norm
 
-  REAL(DOUBLE)        :: AInvDistanceThresh,IRowX,IRowY,IRowZ
-  TYPE(AtomPair)      :: Pair
-  REAL(DOUBLE), &
-       EXTERNAL :: DDOT
+  REAL(DOUBLE)                    :: AInvDistanceThresh,IRowX,IRowY,IRowZ
+  TYPE(AtomPair)                  :: Pair
+  REAL(DOUBLE), EXTERNAL          :: DDOT
+  LOGICAL                         :: TEST_AINV
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
+  CHARACTER(LEN=8),PARAMETER      :: Prog='BlokAInv'
 
-  LOGICAL             :: TEST_AINV
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-  CHARACTER(LEN=8),&
-       PARAMETER  :: Prog='BlokAInv'
-  !-----------------------------------------------------------------------------------------------------------
   ! Start up macro
   CALL StartUp(Args,Prog)
+
+  ! Initialize variables.
+  CALL Initialize(A)
+  CALL Initialize(Z)
+  CALL Initialize(Zt)
+  CALL Initialize(DiagD)
+
+  CALL Initialize(BS)
+  CALL Initialize(GM)
+
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)

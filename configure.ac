@@ -1128,6 +1128,9 @@ AC_DEFINE_UNQUOTED(HAVE_FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags 
 # Store information on how we were configured.
 AC_DEFINE_UNQUOTED(HAVE_CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command line arguments to the configure script])
 
+# For AInv.
+#AC_DEFINE(SPATIAL_THRESHOLDING, [1], [Use spatial thresholding in AInv])
+
 # Print out a summary of options used to compile.
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC                       = ${CC}])
