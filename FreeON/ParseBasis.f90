@@ -34,6 +34,7 @@ MODULE ParseBasis
   IMPLICIT NONE
 
   CHARACTER(LEN=*), PARAMETER :: BASIS_SETS     = 'BasisSets'
+
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNON0S   = 'maxnon0s'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNBLKS   = 'maxnblks'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXDEFAULT = 'default'
@@ -284,7 +285,7 @@ CONTAINS
         ENDIF
         ! Look for an ECP in the basis set
         IF(INDEX(Line,'ECP')/=0)THEN
-          ! Add a dilimeter (space) to allow correct parsing
+          ! Add a delimeter (space) to allow correct parsing
           Line=" "//Line
           IF(KeyQ(Line,TRIM(Ats(BS%Kinds%I(NK)))//'-ecp'))THEN
             BS%HasECPs=.TRUE.
@@ -542,13 +543,13 @@ CONTAINS
   END SUBROUTINE ReNormalizePrimitives
 
   SUBROUTINE ParseBasisNames(B)
-    TYPE(BasisSets) :: B
-    INTEGER                               :: I,J
-    TYPE(CHR_VECT) :: Chars
-    CHARACTER(LEN=DCL) :: Line
-    CHARACTER(LEN=BASESET_CHR_LEN) :: LowC1,LowC2
-    LOGICAL            :: Found
-    !----------------------------------------------------------------------------
+    TYPE(BasisSets)                 :: B
+    INTEGER                         :: I,J
+    TYPE(CHR_VECT)                  :: Chars
+    CHARACTER(LEN=DCL)              :: Line
+    CHARACTER(LEN=BASESET_CHR_LEN)  :: LowC1,LowC2
+    LOGICAL                         :: Found
+
     CALL Align(BASIS_SETS,Inp)
     BACKSPACE(Inp)
     READ(Inp,DEFAULT_CHR_FMT)Line
