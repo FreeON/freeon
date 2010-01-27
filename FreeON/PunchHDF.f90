@@ -150,12 +150,12 @@ CONTAINS
       CALL Delete(DoubleVect)
       ! END STUPID REDUNDANCY
 
-      CALL Put(BIG_DBL,'e_nucleartotal')
-      CALL Put(BIG_DBL,'exc')
+      CALL Put(BIG_DBL,'E_NuclearTotal')
+      CALL Put(BIG_DBL,'Exc')
       CALL Put(BIG_DBL,'homolumogap')
       CALL Put(-1.0D0, "Entropy")
-      CALL Put(BIG_DBL,'e_electronictotal')
-      CALL Put(BIG_DBL,'etot')
+      CALL Put(BIG_DBL,'E_ElectronicTotal')
+      CALL Put(BIG_DBL,'Etot')
       CALL Put(BIG_DBL,'dmax')
       CALL Put(BIG_DBL,'diiserr')
       CALL New(IntVect,2)
@@ -395,8 +395,7 @@ CONTAINS
     S%Previous%I=(/0,LastBAS,LastGEO/)
     S%Current%I=(/1,LastBAS,LastGEO/)
   END SUBROUTINE InitState
-  !-----------------------------------------------------------------
-  !
+
   SUBROUTINE StateArchive(N,G,S,Init_O)
     TYPE(FileNames) :: N
     TYPE(Geometries):: G

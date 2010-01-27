@@ -267,9 +267,10 @@ PROGRAM QCTC
   ELSE
      E_Nuc_Tot=Zero
   ENDIF
-  !
+
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree")
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
-  !
+
   !-------------------------------------------------------------------------------
   ! Printing
   !-------------------------------------------------------------------------------
