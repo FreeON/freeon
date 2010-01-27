@@ -49,7 +49,7 @@ PROGRAM SCFStatus
 #else
   TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
-  REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc,Gap,Etot,DMax,Virial,DIISErr,S2,SFac,Entropy
+  REAL(DOUBLE)                    :: E_el_tot,E_Nuc_Tot,E_es_tot,E_ECPs,KinE,ExchE,Exc,Gap,Etot,DMax,Virial,DIISErr,S2,SFac,Entropy
 #ifdef MMech
   REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
@@ -142,10 +142,10 @@ PROGRAM SCFStatus
   ENDIF
   ExchE=ExchE*SFac !<<< SPIN
   !   Exc  =Exc  *SFac !<<< SPIN
-  !  Get E_nuc_tot =<Vnn+Vne>
+  !  Get E_Nuc_Tot =<Vnn+Vne>
   CALL Get(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
   ! Total electrostaic energy
-  E_es_tot=E_el_tot+E_nuc_tot
+  E_es_tot=E_el_tot+E_Nuc_Tot
   ! Total SCF energy
   Etot=KinE+E_es_tot+Exc+ExchE
   !   WRITE(*,*)' KinE = ',KinE
