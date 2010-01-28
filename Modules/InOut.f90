@@ -41,8 +41,7 @@ MODULE InOut
   USE Utilities
   USE SetXYZ
 
-#ifdef PARALLEL
-  USE MPI
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   USE MondoMPI
 #endif
 
@@ -110,14 +109,14 @@ CONTAINS
   FUNCTION InitHDF(FileName) RESULT(FileID)
     CHARACTER(LEN=*), INTENT(IN) :: FileName
     INTEGER                      :: NC,STATUS,FileID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NC=StringLen(FileName)
       FileID=HDF5CreateFile(NC,Char2Ints(NC,FileName))
       IF(FileID==FAIL) &
            CALL Halt(' Failed to create the HDF file <'//TRIM(FileName)//'>.')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END FUNCTION InitHDF
@@ -128,7 +127,7 @@ CONTAINS
     CHARACTER(LEN=*),INTENT(IN) :: FileName
     INTEGER                     :: NC,STATUS
     INTEGER                     :: FileID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NC=StringLen(FileName)
@@ -136,7 +135,7 @@ CONTAINS
       IF(FileID==FAIL) THEN
         CALL Halt(' Failed to open the HDF file <'//TRIM(FileName)//'>.')
       ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END FUNCTION OpenHDF
@@ -145,7 +144,7 @@ CONTAINS
   !===============================================================================
   SUBROUTINE CloseHDF(FileID)
     INTEGER :: Status,FileID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       Status=HDF5CloseFile(FileID)
@@ -153,7 +152,7 @@ CONTAINS
         CALL Halt(' Failed to close an HDF file with HDF_CurrentID=' &
              //'<'//TRIM(IntToChar(FileID))//'>. ')
       ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE CloseHDF
@@ -163,14 +162,14 @@ CONTAINS
   FUNCTION InitHDFGroup(FileID,GroupName) RESULT(GroupID)
     CHARACTER(LEN=*), INTENT(IN) :: GroupName
     INTEGER                      :: FileID,NC,STATUS,GroupID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NC=StringLen(GroupName)
       GroupID=HDF5CreateGroup(FileID,NC,Char2Ints(NC,GroupName))
       IF(GroupID==FAIL) &
            CALL Halt(' Failed to create the Group file <'//TRIM(GroupName)//'>.')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END FUNCTION InitHDFGroup
@@ -181,14 +180,14 @@ CONTAINS
     CHARACTER(LEN=*),INTENT(IN) :: GroupName
     INTEGER                     :: NC,STATUS
     INTEGER                     :: FileID,GroupID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NC=StringLen(GroupName)
       GroupID=HDF5OpenGroup(FileID,NC,Char2Ints(NC,GroupName))
       IF(GroupID==FAIL) &
            CALL Halt(' Failed to open the Group file <'//TRIM(GroupName)//'>.')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END FUNCTION OpenHDFGroup
@@ -197,14 +196,14 @@ CONTAINS
   !===============================================================================
   SUBROUTINE CloseHDFGroup(GroupID)
     INTEGER :: Status,GroupID
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       Status=HDF5CloseGroup(GroupID)
       IF(Status==FAIL) &
            CALL Halt(' Failed to close a Group with GroupID=' &
            //'<'//TRIM(IntToChar(GroupID))//'>. ')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE CloseHDFGroup
@@ -395,7 +394,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     INTEGER,DIMENSION(1)                    :: B
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -408,7 +407,7 @@ CONTAINS
       CALL ReadIntegerVector(Meta,B)
       CALL CloseData(Meta)
       A=B(1)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -421,7 +420,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -433,7 +432,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -467,7 +466,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN) :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     !
-    !#ifdef PARALLEL
+    !#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     !       IF(MyId==ROOT)THEN
     !#endif
     CALL Put(A%N,                'NIntC'//TRIM(VarName),Tag_O=Tag_O)
@@ -481,7 +480,7 @@ CONTAINS
     CALL Put(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
     CALL Put(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
     CALL Put(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
-    !#ifdef PARALLEL
+    !#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     !       ENDIF
     !#endif
   END SUBROUTINE Put_INTC
@@ -494,7 +493,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -506,7 +505,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -519,7 +518,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -531,7 +530,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -544,7 +543,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -556,7 +555,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -570,7 +569,7 @@ CONTAINS
     INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
     REAL(DOUBLE),DIMENSION(1)                :: B
     TYPE(META_DATA)                          :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(Stats_O).AND.PRESENT(Tag_O)) THEN
@@ -581,7 +580,7 @@ CONTAINS
       CALL ReadDoubleVector(Meta,B)
       CALL CloseData(Meta)
       A=B(1)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -592,7 +591,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -604,7 +603,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -615,7 +614,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -627,7 +626,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -638,7 +637,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -650,7 +649,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -661,7 +660,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -673,7 +672,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -684,7 +683,7 @@ CONTAINS
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT) THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -696,7 +695,7 @@ CONTAINS
       CALL OpenData(Meta)
       CALL ReadDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -711,7 +710,7 @@ CONTAINS
     INTEGER,DIMENSION(DEFAULT_CHR_LEN)      :: B=ICHAR(' ')
     INTEGER                                 :: I,N
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       N=LEN(A)
@@ -730,7 +729,7 @@ CONTAINS
         A(I:I)=CHAR(B(I))
       ENDDO
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -744,7 +743,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
     INTEGER,DIMENSION(1)                    :: ILog
     TYPE(META_DATA)                         :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -763,7 +762,7 @@ CONTAINS
       ELSE
         CALL Halt('Error in Get_LOG_SCLR.')
       ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     IF(InParallel)CALL Bcast(A)
 #endif
@@ -777,7 +776,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     INTEGER,DIMENSION(1)                 :: B
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(Tag_O)) THEN
@@ -790,7 +789,7 @@ CONTAINS
       B(1)=A
       CALL WriteIntegerVector(Meta,B)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_INT_SCLR
@@ -804,7 +803,7 @@ CONTAINS
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -821,7 +820,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
 
@@ -835,7 +834,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -852,7 +851,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_INT_RNK2
@@ -865,7 +864,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -882,7 +881,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_INT_RNK3
@@ -895,7 +894,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -912,7 +911,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,A%I)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_INT_RNK4
@@ -927,7 +926,7 @@ CONTAINS
     INTEGER,DIMENSION(3),OPTIONAL,INTENT(IN) :: Stats_O
     REAL(DOUBLE),DIMENSION(1)                :: B
     TYPE(META_DATA)                          :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       Meta=SetMeta(NameTag(VarName,Tag_O=Tag_O,Stats_O=Stats_O),NATIVE_DOUBLE,1,.FALSE.)
@@ -935,7 +934,7 @@ CONTAINS
       B(1)=A
       CALL WriteDoubleVector(Meta,B)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_SCLR
@@ -948,7 +947,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -965,7 +964,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_VECT
@@ -978,7 +977,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -996,7 +995,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_RNK2
@@ -1009,7 +1008,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -1026,7 +1025,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_RNK3
@@ -1039,7 +1038,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -1056,7 +1055,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_RNK4
@@ -1069,7 +1068,7 @@ CONTAINS
     LOGICAL,         OPTIONAL,INTENT(IN) :: Unlimit_O
     INTEGER                              :: N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       IF(PRESENT(N_O))THEN
@@ -1087,7 +1086,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteDoubleVector(Meta,A%D)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_DBL_RNK6
@@ -1101,7 +1100,7 @@ CONTAINS
     INTEGER,DIMENSION(DEFAULT_CHR_LEN)   :: B=ICHAR(' ')
     INTEGER                              :: I,N
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       N=LEN(A)
@@ -1121,7 +1120,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,B)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_CHR_SCLR
@@ -1134,7 +1133,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     INTEGER,DIMENSION(1)                 :: ILog
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       ILog(1)=0
@@ -1148,7 +1147,7 @@ CONTAINS
       CALL OpenData(Meta,.TRUE.)
       CALL WriteIntegerVector(Meta,ILog)
       CALL CloseData(Meta)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_LOG_SCLR
@@ -1507,7 +1506,7 @@ CONTAINS
     ELSE
       Bcast = .FALSE.
     ENDIF
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==0)THEN
 #endif
       IF(PRESENT(CheckPoint_O))THEN
@@ -1620,8 +1619,11 @@ CONTAINS
 #endif
 
       CLOSE(UNIT=Seq,STATUS='KEEP')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(Bcast) THEN
       CALL BcastBCSR(A)
     ENDIF
@@ -1702,7 +1704,7 @@ CONTAINS
 !!$    Chk=SQRT(Chk)
 !!$    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==0)THEN
 #endif
       IF(PRESENT(PFix_O))THEN
@@ -1775,7 +1777,7 @@ CONTAINS
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(I),I=1,A%NNon0)
 #endif
       CLOSE(UNIT=Seq,STATUS='KEEP')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
 
@@ -2272,7 +2274,7 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Tmp1,Tmp2
     INTEGER                        :: I,NArg,NChar,NInts
     INTEGER,PARAMETER              :: MaxArg=10
-#ifdef PARALLEL
+#if defined(PARALLEL)
     IF(MyId==ROOT)THEN
 #endif
       NArg=IARGC()
@@ -2287,15 +2289,18 @@ CONTAINS
           NChar=NChar+1
         ENDIF
       ENDDO
-#ifdef PARALLEL
+#if defined(PARALLEL)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(InParallel)THEN
       CALL Bcast(NInts)
       CALL Bcast(NChar)
     ENDIF
 #endif
     CALL New(A,(/NChar,NInts/))
-#ifdef PARALLEL
+#if defined(PARALLEL)
     IF(MyId==ROOT)THEN
 #endif
       NChar=0
@@ -2312,16 +2317,17 @@ CONTAINS
           A%C%C(NChar)=TRIM(Tmp1)
         ENDIF
       ENDDO
-#ifdef PARALLEL
+#if defined(PARALLEL)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(InParallel)THEN
       CALL Bcast(A%I)
       CALL Bcast_CHR_VECT(A%C)
     ENDIF
 #endif
   END SUBROUTINE Get_ARGMT
-
-
 
   SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle,BCast_O)
     TYPE(HGRho)                      :: A
@@ -2341,7 +2347,7 @@ CONTAINS
     ENDIF
 #endif
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
       FileName=TrixFile(Name,Args,SCFCycle)
@@ -2356,8 +2362,11 @@ CONTAINS
 
       ! Allocate Memory
       READ(UNIT=Seq,Err=100,IOSTAT=IOS) NSDen,NExpt,NDist,NCoef
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(BcastQ) THEN
       CALL Bcast(NSDen)
       CALL Bcast(NExpt)
@@ -2376,7 +2385,7 @@ CONTAINS
     !  //"MyID = "//TRIM(IntToChar(MyID)))
 
     ! Read In the Density
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
       READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
@@ -2388,8 +2397,11 @@ CONTAINS
       READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
       READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
       READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef*A%NSDen)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(BcastQ) THEN
       Call Bcast(A%NQ,N_O=A%NExpt)
       Call Bcast(A%OffQ,N_O=A%NExpt)
@@ -2401,15 +2413,19 @@ CONTAINS
       Call Bcast(A%Qz,N_O=A%NDist)
       Call Bcast(A%Co,N_O=A%NCoef*A%NSDen)
     ENDIF
+#endif
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
 
       Close(UNIT=Seq,STATUS='KEEP')
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_HGRho.')
+
   END SUBROUTINE Get_HGRho
   !===============================================================================
   ! Write  the density to disk
@@ -2569,7 +2585,7 @@ CONTAINS
     INTEGER :: RunInd,BufSize
 #endif
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
 
@@ -2623,12 +2639,12 @@ CONTAINS
       CALL CloseData(Meta)
       DEALLOCATE(B)
 #endif
-#ifdef PARALLEL
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_CHR_VECT
 
-  !-------------------------------------------------------------------------------
   SUBROUTINE Get_CHR_VECT(A,VarName,Tag_O)
     INTEGER                                 :: I,N,II,NN
     TYPE(CHR_VECT),           INTENT(INOUT) :: A
@@ -2648,8 +2664,7 @@ CONTAINS
     CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
 #endif
 
-#ifdef PARALLEL
-
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
 
@@ -2699,13 +2714,13 @@ CONTAINS
       DEALLOCATE(B)
 #endif
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     ! not supported yet. IF(InParallel)CALL Bcast(A)
     !! STOP 'ERROR : Bcast in Get_Chr_vect (InOut.F90) not supported!'
 #endif
   END SUBROUTINE Get_CHR_VECT
-  !-------------------------------------------------------------------------------
+
   SUBROUTINE Put_CHR10_VECT(A,VarName,Tag_O)
     INTEGER                               :: I,N,II,NN
     TYPE(CHR10_VECT)                      :: A
@@ -2714,7 +2729,7 @@ CONTAINS
     TYPE(META_DATA)                       :: Meta
     INTEGER,ALLOCATABLE                   :: B(:)
     INTEGER                               :: RunInd,BufSize
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NN = SIZE(A%C)
@@ -2755,12 +2770,11 @@ CONTAINS
       CALL WriteIntegerVector(Meta,B)
       CALL CloseData(Meta)
       DEALLOCATE(B)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_CHR10_VECT
 
-  !-------------------------------------------------------------------------------
   SUBROUTINE Get_CHR10_VECT(A,VarName,Tag_O)
     INTEGER                                 :: I,N,II,NN
     TYPE(CHR10_VECT),           INTENT(INOUT) :: A
@@ -2775,8 +2789,7 @@ CONTAINS
     ELSE
       CALL Get(BufSize,NameTag(VarName//TRIM(IntToChar(0))))
     ENDIF
-#ifdef PARALLEL
-
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NN = SIZE(A%C)
@@ -2812,7 +2825,7 @@ CONTAINS
       ENDDO
       IF(BufSize /= RunInd -1 ) STOP 'ERR: Index problem in Get_CHR10_VECT'
       DEALLOCATE(B)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
     ! not supported yet. IF(InParallel)CALL Bcast(A)
     !! STOP 'ERROR : Bcast in Get_Chr10_vect (InOut.F90) not supported!'
@@ -2826,7 +2839,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     TYPE(INT_VECT)                       :: ILog
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       !
@@ -2846,7 +2859,7 @@ CONTAINS
       CALL WriteIntegerVector(Meta,ILog%I)
       CALL CloseData(Meta)
       CALL Delete(ILog)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   END SUBROUTINE Put_LOG_VECT
@@ -2858,7 +2871,7 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     TYPE(INT_VECT)                       :: ILog
     TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyId==ROOT)THEN
 #endif
       NN=SIZE(A%L)
@@ -2880,8 +2893,11 @@ CONTAINS
         ENDIF
       ENDDO
       CALL Delete(ILog)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
+#endif
+
+#if defined(PARALLEL)
     IF(InParallel) CALL Bcast(A)
 #endif
   END SUBROUTINE Get_LOG_VECT

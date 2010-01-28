@@ -217,7 +217,6 @@ Parse.lo : \
 
 Clock.lo : \
   DerivedTypes.lo \
-  MondoMPI.lo \
   $(top_builddir)/MondoConfig.h
 
 GlobalObjects.lo : \
