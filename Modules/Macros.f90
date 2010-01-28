@@ -197,8 +197,8 @@ CONTAINS
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
     ! parallel in the spatial domain and using MONDO_COMM as their default
     ! communicator
-    !CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
-    !CALL ErrChk(IErr,Sub)
+    CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
+    CALL ErrChk(IErr,Sub)
 
     ! Reload local rank and PE number for the new MONDO_COMM
     IF(MyID /= MRank() .OR. NPrc /= MSize()) THEN

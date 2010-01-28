@@ -28,10 +28,9 @@
 
 MODULE Clock
    USE DerivedTypes
-#ifdef PARALLEL
-   USE MondoMPI
-#endif
+
    IMPLICIT NONE
+
    INTERFACE
 
       FUNCTION CPU_Seconds()
@@ -54,7 +53,7 @@ MODULE Clock
 
       FUNCTION MTimer()
         REAL(DOUBLE) MTimer
-#if defined (IPM) || defined (PARALLEL)
+#if defined(IPM) || defined(PARALLEL) || defined(PARALLEL_CLONES)
         MTimer=MondoTimer()
 #else
         MTimer=Wall_Seconds()
@@ -64,7 +63,7 @@ MODULE Clock
 
       FUNCTION CPUSec()
          REAL(DOUBLE) CPUSec
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
          CPUSec=0.0D0
 #else
          CPUSec=CPU_Seconds()

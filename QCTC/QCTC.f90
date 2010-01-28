@@ -294,15 +294,14 @@ PROGRAM QCTC
 !!$11 FORMAT(A20,D12.6)
 
   PerfMon%FLOP=Zero
-  CALL MondoLog(DEBUG_MAXIMUM,Prog,'Coulomb Energy = '//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1))))
-  !
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,'Coulomb Energy = '//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//" hartree")
+
   CALL MondoLog(DEBUG_MAXIMUM,Prog,'CPUSec='//TRIM(DblToMedmChar(MTimer()-QCTC_TotalTime_Start)) &
                                //'; RhoBld='//TRIM(DblToShrtChar(Density_Time))                  &
                                //', TreeBld='//TRIM(DblToShrtChar(TreeMake_Time)))
   CALL MondoLog(DEBUG_MAXIMUM,Prog,'Walk='//TRIM(DblToShrtChar(JWalk_Time))                     &
                                 //', Ints='//TRIM(DblToShrtChar(Integral_Time))                  &
                                 //', Mults='//TRIM(DblToShrtChar(Multipole_Time)))
-
 
   IF(CS_IN%NCells>1)THEN
      CALL MondoLog(DEBUG_MAXIMUM,Prog, &

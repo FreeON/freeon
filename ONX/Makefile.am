@@ -68,11 +68,6 @@ EXTRA_INCLUDES = \
   -I$(top_srcdir)/TwoE/GRD \
   -I$(top_builddir)/TwoE/MSC
 
-# In case we have ctags installed, make the necessary tags files.
-.PHONY : tags
-tags :
-	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.f90 ../Modules/*.{c,f,f90}
-
 LDADD = \
   $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) \
   $(builddir)/../TwoE/GRD/libGRD.la \
