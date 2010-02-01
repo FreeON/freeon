@@ -973,7 +973,7 @@ MODULE MondoMPI
         CALL MPI_COMM_SIZE(lock%communicator, lock%lockSize, IErr)
         CALL MPI_COMM_RANK(lock%communicator, lock%lockRank, IErr)
 
-        CALL MondoLog(DEBUG_NONE, "AllocateLock", "allocating lock", "rank "//TRIM(IntToChar(lock%lockRank))//" ("//TRIM(IntToChar(lock%lockSize))//")")
+        CALL MondoLog(DEBUG_NONE, "AllocateLock", "allocating lock", "rank "//TRIM(IntToChar(lock%lockRank)))
 
         ! Create window object.
         CALL MPI_INFO_CREATE(lock%windowInfo, IErr)
@@ -1103,6 +1103,9 @@ MODULE MondoMPI
             ! Somebody else is holding this lock. We have to wait.
             CALL MondoLog(DEBUG_NONE, "AcquireLock", "another rank is holding the lock, I am going to wait", "rank "//TRIM(IntToChar(lock%lockRank)))
             CALL MPI_RECV(emptyBuffer, 0, MPI_BYTE, MPI_ANY_SOURCE, LOCK_TAG, lock%communicator, MPI_STATUS_IGNORE, IErr)
+            CALL MondoLog(DEBUG_NONE, "AcquireLock", "received notification, acquiring lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+          ELSE
+            CALL MondoLog(DEBUG_NONE, "AcquireLock", "no rank is holding the lock, done", "rank "//TRIM(IntToChar(lock%lockRank)))
           ENDIF
         ENDIF
 
@@ -1181,6 +1184,8 @@ MODULE MondoMPI
 
             CALL MondoLog(DEBUG_NONE, "ReleaseLock", "another rank is waiting for the lock, I am going to notify rank "//TRIM(IntToChar(nextrank)), "rank "//TRIM(IntToChar(lock%lockRank)))
             CALL MPI_SEND(emptyBuffer, 0, MPI_BYTE, nextrank, LOCK_TAG, lock%communicator, IErr)
+          ELSE
+            CALL MondoLog(DEBUG_NONE, "ReleaseLock", "no other rank is waiting for the lock, done", "rank "//TRIM(IntToChar(lock%lockRank)))
           ENDIF
         ENDIF
 
