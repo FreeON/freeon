@@ -1167,7 +1167,7 @@ MODULE MondoMPI
             DO i = lock%lockRank+1, lock%lockSize-1
               IF(lock%waitflagCopy(i) == 1) THEN
                 ! Remember that ranks start counting with 0.
-                nextrank = i
+                nextrank = (i-1)+1
                 EXIT
               ENDIF
             ENDDO
