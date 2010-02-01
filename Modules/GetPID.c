@@ -24,7 +24,7 @@
      disemination in future releases.
 */
 /*
-  GETPID BASED ON C INTRINSICS 
+  GetPID from libc.
 */
 
 #include <sys/types.h>

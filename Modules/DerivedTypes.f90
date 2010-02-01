@@ -8,7 +8,13 @@
 MODULE DerivedTypes
    USE GlobalScalars
    USE GlobalCharacters
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+   USE MPI
+#endif
+
    IMPLICIT NONE
+
 !==============================================================
 !
 !  FUNDAMENTAL ARRAY TYPES: VECTOR => RANK FOUR ARRAY
@@ -652,8 +658,20 @@ MODULE DerivedTypes
      TYPE(INT_RNK2)   :: IJK
      TYPE(CHR10_VECT) :: Type
    END TYPE ANGLEDATA
-!
-!----------------------------------------------------------------------
-!
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+
+  TYPE FreeONLock
+    INTEGER                                         :: Alloc
+    LOGICAL                                         :: lockAcquired
+    INTEGER                                         :: lockRank, lockSize, lockType
+    INTEGER                                         :: communicator
+    INTEGER                                         :: windowInfo, window
+    INTEGER                                         :: waitflagCopyType
+    INTEGER(KIND = INT1), DIMENSION(:), ALLOCATABLE :: waitflag, waitflagCopy
+  END TYPE FreeONLock
+
+#endif
+
 END MODULE
 

@@ -59,6 +59,9 @@ MODULE GlobalObjects
   !  Scheduling vector
   !
   !  TYPE(INT_VECT), SAVE :: ShredSched
+
+  ! hdf access lock.
+  TYPE(FreeONLock), SAVE :: HDFLock
 #endif
 
 END MODULE GlobalObjects

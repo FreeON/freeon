@@ -85,7 +85,7 @@ main (int argc, char **argv)
     {
       waitflag[i] = 0;
     }
-    MPI_Win_create((void*) waitflag, size, sizeof(int), win_info, MPI_COMM_WORLD, &win);
+    MPI_Win_create((void*) waitflag, size*sizeof(int), sizeof(int), win_info, MPI_COMM_WORLD, &win);
   }
 
   else
@@ -100,19 +100,20 @@ main (int argc, char **argv)
 
   for (i = 0; i < size; ++i)
   {
-    array_of_blocklengths[i] = 1;
     if (i < rank)
     {
+      array_of_blocklengths[i] = 1;
       array_of_displacements[i] = i;
     }
 
     else if (i > rank)
     {
+      array_of_blocklengths[i-1] = 1;
       array_of_displacements[i-1] = i;
     }
   }
 
-  /* Create new datatype to get all waitflags except for ours. */
+  /* Create new datatype to represent all waitflags except for ours. */
   MPI_Type_indexed(size-1, array_of_blocklengths, array_of_displacements, MPI_INT, &waitflagcopy_t);
   MPI_Type_commit(&waitflagcopy_t);
 

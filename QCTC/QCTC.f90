@@ -1,6 +1,9 @@
 !    FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
 !    Authors:  Matt Challacombe and CJ Tymczak
 !===============================================================================
+
+#include "MondoConfig.h"
+
 PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
@@ -45,7 +48,6 @@ PROGRAM QCTC
   QCTC_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
-
 
 !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
   NukesOn=.TRUE.
@@ -268,8 +270,38 @@ PROGRAM QCTC
      E_Nuc_Tot=Zero
   ENDIF
 
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree")
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Acquire exclusive lock.
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL ReleaseLock(HDFLock)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
 
   !-------------------------------------------------------------------------------
   ! Printing

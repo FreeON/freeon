@@ -956,6 +956,240 @@ MODULE MondoMPI
         CALL MPI_FINALIZE(IErr(1))
       END SUBROUTINE AlignFrontends
 
+      ! Initialize a lock object.
+      SUBROUTINE AllocateLock (lock, communicator)
+        TYPE(FreeONLock), INTENT(INOUT)     :: lock
+        INTEGER, INTENT(IN)                 :: communicator
+        INTEGER                             :: IErr
+        INTEGER                             :: i
+        INTEGER, DIMENSION(:), ALLOCATABLE  :: arrayOfBlocklengths, arrayOfDisplacements
+
+        IF(AllocQ(lock%Alloc)) THEN
+          CALL MondoHalt(MPIS_ERROR, "lock is already allocated")
+        ENDIF
+
+        ! Get information on size of current communicator.
+        lock%communicator = communicator
+        CALL MPI_COMM_SIZE(lock%communicator, lock%lockSize, IErr)
+        CALL MPI_COMM_RANK(lock%communicator, lock%lockRank, IErr)
+
+        CALL MondoLog(DEBUG_NONE, "AllocateLock", "allocating lock", "rank "//TRIM(IntToChar(lock%lockRank))//" ("//TRIM(IntToChar(lock%lockSize))//")")
+
+        ! Create window object.
+        CALL MPI_INFO_CREATE(lock%windowInfo, IErr)
+        IF(lock%lockRank == ROOT) THEN
+          ALLOCATE(lock%waitflag(lock%lockSize))
+          DO i = 1, lock%lockSize
+            lock%waitflag(i) = 0
+          ENDDO
+          CALL MondoLog(DEBUG_NONE, "AllocateLock", "creating window", "rank "//TRIM(IntToChar(lock%lockRank)))
+          CALL MondoLog(DEBUG_NONE, "AllocateLock", "size = "//TRIM(IntToChar(lock%lockSize)), "rank "//TRIM(IntToChar(lock%lockRank)))
+          CALL MPI_WIN_CREATE(lock%waitflag, lock%lockSize, 1, lock%windowInfo, lock%communicator, lock%window, IErr)
+          !CALL MPI_WIN_CREATE(lock%waitflag, 2, 1, lock%windowInfo, lock%communicator, lock%window, IErr)
+        ELSE
+          ! Only rank 0 stores the actual flags. If we are rank > 0 we create a
+          ! window of 0 size.
+          CALL MondoLog(DEBUG_NONE, "AllocateLock", "creating empty window", "rank "//TRIM(IntToChar(lock%lockRank)))
+          CALL MPI_WIN_CREATE(lock%waitflag, 0, 1, lock%windowInfo, lock%communicator, lock%window, IErr)
+        ENDIF
+
+        ! Create local copy of waitflag array. This array contains size-1 flags,
+        ! it excludes the flag for rank.
+        ALLOCATE(arrayOfBlocklengths(lock%lockSize-1))
+        ALLOCATE(arrayOfDisplacements(lock%lockSize-1))
+        DO i = 1, lock%lockSize
+          IF(i-1 < lock%lockRank) THEN
+            arrayOfBlocklengths(i) = 1
+            arrayOfDisplacements(i) = i-1
+          ELSE IF(i-1 > lock%lockRank) THEN
+            arrayOfBlocklengths(i-1) = 1
+            arrayOfDisplacements(i-1) = i-1
+          ENDIF
+        ENDDO
+
+        ! Create new datatype to represent all waitflags except for ours.
+        CALL MondoLog(DEBUG_NONE, "AllocateLock", "creating new datatype", "rank "//TRIM(IntToChar(lock%lockRank)))
+        CALL MPI_TYPE_INDEXED(lock%lockSize-1, arrayOfBlocklengths, arrayOfDisplacements, MPI_BYTE, lock%waitflagCopyType, IErr)
+        CALL MPI_TYPE_COMMIT(lock%waitflagCopyType, IErr)
+
+        ! Allocate local copy of waitflags.
+        ALLOCATE(lock%waitflagCopy(lock%lockSize-1))
+
+        ! Free some memory.
+        DEALLOCATE(arrayOfBlocklengths)
+        DEALLOCATE(arrayOfDisplacements)
+
+        ! We are done allocating.
+        lock%Alloc = ALLOCATED_TRUE
+        lock%lockAcquired = .FALSE.
+
+      END SUBROUTINE AllocateLock
+
+      SUBROUTINE FreeLock (lock)
+        TYPE(FreeONLock), INTENT(INOUT) :: lock
+        INTEGER                         :: IErr
+
+        IF(.NOT. AllocQ(lock%Alloc)) THEN
+          CALL MondoHalt(MPIS_ERROR, "lock not allocated")
+        ENDIF
+
+        ! Free window.
+        CALL MPI_WIN_FREE(lock%window, IErr)
+
+        ! Free the waitflag datatype.
+        CALL MPI_TYPE_FREE(lock%waitflagCopyType, IErr)
+
+        ! Deallocate memory.
+        IF(lock%lockRank == ROOT) THEN
+          DEALLOCATE(lock%waitflag)
+        ENDIF
+        DEALLOCATE(lock%waitflagCopy)
+
+        ! We are done freeing.
+        lock%Alloc = ALLOCATED_FALSE
+
+      END SUBROUTINE FreeLock
+
+      SUBROUTINE AcquireLock (lock, lockType)
+        TYPE(FreeONLock), INTENT(INOUT) :: lock
+        INTEGER, INTENT(IN)             :: lockType
+        INTEGER(KIND = INT1)            :: value
+        INTEGER                         :: i
+        INTEGER                         :: rank
+        INTEGER                         :: IErr
+        INTEGER                         :: emptyBuffer
+        CHARACTER(LEN=100)              :: outputBuffer
+
+        ! Sanity check.
+        IF(lock%lockAcquired) THEN
+          CALL MondoHalt(MPIS_ERROR, "this lock is already acquired")
+        ENDIF
+
+        CALL MondoLog(DEBUG_NONE, "AcquireLock", "acquiring lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+
+        ! Store the lock type.
+        lock%lockType = lockType
+
+        ! Get exclusive lock on window.
+        CALL MPI_WIN_LOCK(MPI_LOCK_EXCLUSIVE, ROOT, 0, lock%window, IErr)
+
+        ! Get waitflags.
+        CALL MPI_GET(lock%waitflagCopy, lock%lockSize-1, MPI_BYTE, ROOT, 0, 1, lock%waitflagCopyType, lock%window, IErr)
+
+        ! Put our waitflag, indicating that we would like to acquire this lock.
+        value = 1
+        CALL MPI_PUT(value, 1, MPI_BYTE, ROOT, lock%lockRank, 1, MPI_BYTE, lock%window, IErr)
+
+        ! Unlock window.
+        CALL MPI_WIN_UNLOCK(ROOT, lock%window, IErr)
+
+        ! Debugging.
+        WRITE(outputBuffer, *) lock%waitflagCopy
+        CALL MondoLog(DEBUG_NONE, "AcquireLock", "waitflagCopy = [ "//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
+
+        IF(lock%lockType == FreeONLockExclusive) THEN
+          ! Check whether another rank is already holding this lock.
+          rank = -1
+          DO i = 1, lock%lockSize-1
+            IF(lock%waitflagCopy(i) == 1) THEN
+              ! Remember that ranks start counting with 0.
+              rank = i-1
+              CALL MondoLog(DEBUG_NONE, "AcquireLock", "rank "//TRIM(IntToChar(rank))//" is holding the lock already", "rank "//TRIM(IntToChar(lock%lockRank)))
+              EXIT
+            ENDIF
+          ENDDO
+
+          IF(rank >= 0) THEN
+            ! Somebody else is holding this lock. We have to wait.
+            CALL MondoLog(DEBUG_NONE, "AcquireLock", "another rank is holding the lock, I am going to wait", "rank "//TRIM(IntToChar(lock%lockRank)))
+            CALL MPI_RECV(emptyBuffer, 0, MPI_BYTE, MPI_ANY_SOURCE, LOCK_TAG, lock%communicator, MPI_STATUS_IGNORE, IErr)
+          ENDIF
+        ENDIF
+
+        ! We successfully acquired this lock.
+        CALL MondoLog(DEBUG_NONE, "AcquireLock", "lock acquired", "rank "//TRIM(IntToChar(lock%lockRank)))
+        lock%lockAcquired = .TRUE.
+
+      END SUBROUTINE AcquireLock
+
+      SUBROUTINE ReleaseLock (lock)
+        TYPE(FreeONLock), INTENT(INOUT) :: lock
+        INTEGER(KIND = INT1)            :: value
+        INTEGER                         :: i
+        INTEGER                         :: nextrank
+        INTEGER                         :: IErr
+        INTEGER                         :: emptyBuffer
+        CHARACTER(LEN=100)              :: outputBuffer
+
+        ! Sanity check.
+        IF(.NOT. lock%lockAcquired) THEN
+          CALL MondoHalt(MPIS_ERROR, "this lock has not been acquired")
+        ENDIF
+
+        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "releasing lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+
+        ! Get exclusive lock on window.
+        CALL MPI_WIN_LOCK(MPI_LOCK_EXCLUSIVE, ROOT, 0, lock%window, IErr)
+
+        ! Get waitflags.
+        CALL MPI_GET(lock%waitflagCopy, lock%lockSize-1, MPI_BYTE, ROOT, 0, 1, lock%waitflagCopyType, lock%window, IErr)
+
+        ! Put our waitflag, indicating that we would like to acquire this lock.
+        value = 0
+        CALL MPI_PUT(value, 1, MPI_BYTE, ROOT, lock%lockRank, 1, MPI_BYTE, lock%window, IErr)
+
+        ! Unlock window.
+        CALL MPI_WIN_UNLOCK(ROOT, lock%window, IErr)
+
+        ! Debugging.
+        WRITE(outputBuffer, *) lock%waitflagCopy
+        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "waitflagCopy = [ "//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
+
+        IF(lock%lockType == FreeONLockExclusive) THEN
+          ! In case someone else is waiting on the lock, notify them that we are
+          ! done.
+          nextrank = -1
+          DO i = 1, lock%lockSize-1
+            IF(lock%waitflagCopy(i) == 1) THEN
+              ! Remember that ranks start counting with 0.
+              nextrank = i-1
+              EXIT
+            ENDIF
+          ENDDO
+
+          IF(nextrank >= 0) THEN
+            ! Somebody else is holding this lock. We should notify them that we
+            ! are releasing the lock.
+            nextrank = -1
+            DO i = lock%lockRank+1, lock%lockSize-1
+              IF(lock%waitflagCopy(i) == 1) THEN
+                ! Remember that ranks start counting with 0.
+                nextrank = i
+                EXIT
+              ENDIF
+            ENDDO
+
+            IF(nextrank < 0) THEN
+              DO i = 1, lock%lockRank
+                IF(lock%waitflagCopy(i) == 1) THEN
+                  ! Remember that ranks start counting with 0.
+                  nextrank = i-1
+                  EXIT
+                ENDIF
+              ENDDO
+            ENDIF
+
+            CALL MondoLog(DEBUG_NONE, "ReleaseLock", "another rank is waiting for the lock, I am going to notify rank "//TRIM(IntToChar(nextrank)), "rank "//TRIM(IntToChar(lock%lockRank)))
+            CALL MPI_SEND(emptyBuffer, 0, MPI_BYTE, nextrank, LOCK_TAG, lock%communicator, IErr)
+          ENDIF
+        ENDIF
+
+        ! We successfully released this lock.
+        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "lock released", "rank "//TRIM(IntToChar(lock%lockRank)))
+        lock%lockAcquired = .FALSE.
+
+      END SUBROUTINE ReleaseLock
+
 #endif
 
 END MODULE
