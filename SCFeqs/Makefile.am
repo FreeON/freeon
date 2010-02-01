@@ -75,3 +75,4 @@ LowdinO.o        : DenMatMethods.o
 P2Use.o          : $(top_builddir)/MondoConfig.h DenMatMethods.o FillPBlok.o
 RHeqs.o          : DenMatMethods.o
 BlokAInv.o       : DenMatMethods.o
+SCFstats.o			 : $(top_builddir)/MondoConfig.h

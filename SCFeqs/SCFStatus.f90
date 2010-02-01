@@ -24,6 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 PROGRAM SCFStatus
   USE DerivedTypes
   USE GlobalScalars
@@ -123,7 +125,39 @@ PROGRAM SCFStatus
   E_el_tot=E_el_tot*SFac !<<< SPIN
   ! Total electrostatic energy icluding ECPs
   E_el_tot=E_el_tot+E_ECPs
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Acquire exclusive lock.
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   CALL Put(E_el_tot,'E_ElectronicTotal')
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL ReleaseLock(HDFLock)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   ExchE=Zero
   Exc=Zero
   IF(SCFActn/="GuessEqCore")THEN
@@ -153,8 +187,40 @@ PROGRAM SCFStatus
   !   WRITE(*,*)' Exc  = ',Exc
   !   WRITE(*,*)' Exch = ',ExchE
   !   WRITE(*,*)' Etot = ',Etot
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Acquire exclusive lock.
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   CALL Put(Etot,'Etot')
   CALL Put(Etot,'Etot',Stats_O=Current)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL ReleaseLock(HDFLock)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   !  The Virial
   Virial=E_es_tot/KinE
   !--------------------------------------------------------
@@ -169,7 +235,39 @@ PROGRAM SCFStatus
     CALL Add(Tmp1,Tmp2,P)
     DMax=Max(P)
   ENDIF
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Acquire exclusive lock.
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   CALL Put(DMax,'DMax')
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL ReleaseLock(HDFLock)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   !  IO for the delta density matrix
   IF(SCFActn=='InkFok')THEN
     CALL Put(P,TrixFile('DeltaD',Args,1))
