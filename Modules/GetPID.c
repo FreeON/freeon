@@ -30,5 +30,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int getpid_(void){return getpid();}
-int getpid__(void){return getpid_();}
+int getpidwrapper (void) {return getpid();}
+int getpidwrapper_ (void) {return getpidwrapper();}
+int getpidwrapper__ (void) {return getpidwrapper();}

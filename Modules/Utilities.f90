@@ -62,6 +62,10 @@ MODULE Utilities
       INTEGER, INTENT(IN)             :: length
     END SUBROUTINE TemporaryDirectory
 
+    FUNCTION GetPIDWrapper ()
+      INTEGER :: GetPIDWrapper
+    END FUNCTION GetPIDWrapper
+
   END INTERFACE
 
   ! The parameter sleeptime is in seconds. It can be fractions of a second, down

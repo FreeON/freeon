@@ -53,7 +53,6 @@ CONTAINS
     CHARACTER(LEN=DCL)  :: PROCESS_ID
     INTEGER             :: i, indexBegin, indexEnd
     LOGICAL             :: Exists
-    INTEGER, EXTERNAL   :: GetPID
 
     ! Get command line arguments
     CALL Get(Args)
@@ -93,7 +92,7 @@ CONTAINS
     N%M_HOME=TRIM(N%M_HOME)//'/'
 
     ! Here is the scf name, tagged with the PID.
-    PROCESS_ID = IntToChar(GetPID())
+    PROCESS_ID = IntToChar(GetPIDWrapper())
 
     CALL MondoLog(DEBUG_NONE, "FreeON", "input file "//TRIM(Args%C%C(1)), "LoadCommand")
 
