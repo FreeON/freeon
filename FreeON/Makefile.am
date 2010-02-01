@@ -9,7 +9,6 @@ FreeON_SOURCES = \
   FreeON.f90 \
   GeometryKeys.f90 \
   GeomOptKeys.f90 \
-  GetPID.c \
   Harmonic.f90 \
   Hessian.f90 \
   InCoords.f90 \

@@ -41,6 +41,7 @@ libfreeonmodules_la_SOURCES = \
   GetAddress.c \
   GetHostname.c \
   GetLimits.c \
+  GetPID.c \
   GetPWD.c \
   GetRUsage.c \
   GlobalCharacters.f90 \
@@ -398,6 +399,7 @@ Macros.lo : \
   AtomPairs.lo \
   Mechanics.lo \
   MondoMPI.lo \
+  MondoLogger.lo \
   $(top_builddir)/MondoConfig.h
 
 PBC.lo : \

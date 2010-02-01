@@ -298,6 +298,9 @@ MODULE GlobalScalars
   INTEGER, PARAMETER :: MaxProc=1024
   INTEGER, PARAMETER :: BARRIER_TAG = 1207
   INTEGER, PARAMETER :: FRONTEND_TAG = 4409
+  INTEGER, PARAMETER :: LOCK_TAG = 4711
+  INTEGER, PARAMETER :: FreeONLockShared = 1
+  INTEGER, PARAMETER :: FreeONLockExclusive = 2
   !
   !  Send in the clones...
   !
