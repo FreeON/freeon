@@ -17,7 +17,7 @@ PROGRAM locktest
   INTEGER          :: pid
 
   ! Initialize MPI.
-  CALL InitMPI()
+  CALL MPI_INIT(IErr)
 
   ! Get some information on worl communicator.
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, IErr)
@@ -42,9 +42,10 @@ PROGRAM locktest
 
   ! Free lock.
   CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "freeing lock", "rank "//TRIM(IntToChar(MyID)))
+  CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "communicator = "//TRIM(IntToChar(lock%communicator)), "rank "//TRIM(IntToChar(MyID)))
   CALL FreeLock(lock)
 
-  CALL FiniMPI()
+  CALL MPI_FINALIZE(IErr)
 
 #endif
 
