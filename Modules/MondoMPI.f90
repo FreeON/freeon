@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,8 +20,8 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 
 #include "MondoConfig.h"
@@ -985,7 +985,6 @@ MODULE MondoMPI
           CALL MondoLog(DEBUG_NONE, "AllocateLock", "creating window", "rank "//TRIM(IntToChar(lock%lockRank)))
           CALL MondoLog(DEBUG_NONE, "AllocateLock", "size = "//TRIM(IntToChar(lock%lockSize)), "rank "//TRIM(IntToChar(lock%lockRank)))
           CALL MPI_WIN_CREATE(lock%waitflag, lock%lockSize, 1, lock%windowInfo, lock%communicator, lock%window, IErr)
-          !CALL MPI_WIN_CREATE(lock%waitflag, 2, 1, lock%windowInfo, lock%communicator, lock%window, IErr)
         ELSE
           ! Only rank 0 stores the actual flags. If we are rank > 0 we create a
           ! window of 0 size.
@@ -1058,14 +1057,19 @@ MODULE MondoMPI
         INTEGER                         :: rank
         INTEGER                         :: IErr
         INTEGER                         :: emptyBuffer
-        CHARACTER(LEN=100)              :: outputBuffer
+        CHARACTER(LEN=200)              :: outputFormat
+        CHARACTER(LEN=200)              :: outputBuffer
 
         ! Sanity check.
         IF(lock%lockAcquired) THEN
           CALL MondoHalt(MPIS_ERROR, "this lock is already acquired")
         ENDIF
 
-        CALL MondoLog(DEBUG_NONE, "AcquireLock", "acquiring lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        IF(lockType == FreeONLockExclusive) THEN
+          CALL MondoLog(DEBUG_NONE, "AcquireLock", "acquiring exclusive lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        ELSE
+          CALL MondoLog(DEBUG_NONE, "AcquireLock", "acquiring shared lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        ENDIF
 
         ! Store the lock type.
         lock%lockType = lockType
@@ -1084,8 +1088,9 @@ MODULE MondoMPI
         CALL MPI_WIN_UNLOCK(ROOT, lock%window, IErr)
 
         ! Debugging.
-        WRITE(outputBuffer, *) lock%waitflagCopy
-        CALL MondoLog(DEBUG_NONE, "AcquireLock", "waitflagCopy = [ "//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
+        WRITE(outputFormat, "(A,I3,A)") "(", lock%lockSize-1, "I2)"
+        WRITE(outputBuffer, outputFormat) lock%waitflagCopy
+        CALL MondoLog(DEBUG_NONE, "AcquireLock", "waitflagCopy = ["//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
 
         IF(lock%lockType == FreeONLockExclusive) THEN
           ! Check whether another rank is already holding this lock.
@@ -1122,14 +1127,19 @@ MODULE MondoMPI
         INTEGER                         :: nextrank
         INTEGER                         :: IErr
         INTEGER                         :: emptyBuffer
-        CHARACTER(LEN=100)              :: outputBuffer
+        CHARACTER(LEN=200)              :: outputFormat
+        CHARACTER(LEN=200)              :: outputBuffer
 
         ! Sanity check.
         IF(.NOT. lock%lockAcquired) THEN
           CALL MondoHalt(MPIS_ERROR, "this lock has not been acquired")
         ENDIF
 
-        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "releasing lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        IF(lock%lockType == FreeONLockExclusive) THEN
+          CALL MondoLog(DEBUG_NONE, "ReleaseLock", "releasing exclusive lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        ELSE
+          CALL MondoLog(DEBUG_NONE, "ReleaseLock", "releasing shared lock", "rank "//TRIM(IntToChar(lock%lockRank)))
+        ENDIF
 
         ! Get exclusive lock on window.
         CALL MPI_WIN_LOCK(MPI_LOCK_EXCLUSIVE, ROOT, 0, lock%window, IErr)
@@ -1145,9 +1155,12 @@ MODULE MondoMPI
         CALL MPI_WIN_UNLOCK(ROOT, lock%window, IErr)
 
         ! Debugging.
-        WRITE(outputBuffer, *) lock%waitflagCopy
-        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "waitflagCopy = [ "//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
+        WRITE(outputFormat, "(A,I3,A)") "(", lock%lockSize-1, "I2)"
+        WRITE(outputBuffer, outputFormat) lock%waitflagCopy
+        CALL MondoLog(DEBUG_NONE, "ReleaseLock", "waitflagCopy = ["//TRIM(outputBuffer)//" ]", "rank "//TRIM(IntToChar(lock%lockRank)))
 
+        ! We need to notify anybody only in the case of holding an exclusive
+        ! lock.
         IF(lock%lockType == FreeONLockExclusive) THEN
           ! In case someone else is waiting on the lock, notify them that we are
           ! done.

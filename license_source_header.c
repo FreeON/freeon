@@ -1,5 +1,5 @@
 /*
-     This code is part of the MondoSCF suite of programs for linear scaling
+     This code is part of the FreeON suite of programs for linear scaling
      electronic structure theory and ab initio molecular dynamics.
 
      Copyright (2004). The Regents of the University of California. This
@@ -20,6 +20,6 @@
 
      While you may do as you like with this software, the GNU license requires
      that you clearly mark derivative software.  In addition, you are encouraged
-     to return derivative works to the MondoSCF group for review, and possible
-     disemination in future releases.
+     to return derivative works to the FreeON group for review, and possible
+     dissemination in future releases.
 */

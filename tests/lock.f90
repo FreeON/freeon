@@ -19,7 +19,7 @@ PROGRAM locktest
   ! Initialize MPI.
   CALL MPI_INIT(IErr)
 
-  ! Get some information on worl communicator.
+  ! Get some information on world communicator.
   CALL MPI_COMM_RANK(MPI_COMM_WORLD, rank, IErr)
   pid = GetPIDWrapper()
   CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "starting up...", "rank "//TRIM(IntToChar(MyID)))
@@ -32,7 +32,7 @@ PROGRAM locktest
   CALL AcquireLock(lock, FreeONLockExclusive)
   CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "sleeping", "rank "//TRIM(IntToChar(MyID)))
   CALL FreeONSleep(5)
-  CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "relasing lock", "rank "//TRIM(IntToChar(MyID)))
+  CALL MondoLog(DEBUG_NONE, "lock "//TRIM(IntToChar(pid)), "releasing lock", "rank "//TRIM(IntToChar(MyID)))
   CALL ReleaseLock(lock)
 
   ! Wait for other ranks.

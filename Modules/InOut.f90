@@ -121,7 +121,7 @@ CONTAINS
 #endif
   END FUNCTION InitHDF
   !===============================================================================
-  !    Open a HDF file
+  !    Open an HDF file
   !===============================================================================
   FUNCTION OpenHDF(FileName) RESULT(FileID)
     CHARACTER(LEN=*),INTENT(IN) :: FileName
@@ -140,7 +140,7 @@ CONTAINS
 #endif
   END FUNCTION OpenHDF
   !===============================================================================
-  ! CLOSE AN HDF FILE
+  ! Close an HDF file
   !===============================================================================
   SUBROUTINE CloseHDF(FileID)
     INTEGER :: Status,FileID

@@ -1,3 +1,28 @@
+!------------------------------------------------------------------------------
+!    This code is part of the FreeON suite of programs for linear scaling
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!    Copyright (2004). The Regents of the University of California. This
+!    material was produced under U.S. Government contract W-7405-ENG-36
+!    for Los Alamos National Laboratory, which is operated by the University
+!    of California for the U.S. Department of Energy. The U.S. Government has
+!    rights to use, reproduce, and distribute this software.  NEITHER THE
+!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
+!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!
+!    This program is free software; you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by the
+!    Free Software Foundation; either version 2 of the License, or (at your
+!    option) any later version. Accordingly, this program is distributed in
+!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+!
+!    While you may do as you like with this software, the GNU license requires
+!    that you clearly mark derivative software.  In addition, you are encouraged
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
+!------------------------------------------------------------------------------
 !    FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
 !    Authors:  Matt Challacombe and CJ Tymczak
 !===============================================================================
@@ -26,7 +51,9 @@ PROGRAM QCTC
   USE Density
   USE Clock
   USE TreeWalk
+
   IMPLICIT NONE
+
   TYPE(BCSR)                     :: J,  P
   TYPE(BCSR)                     :: T1,T2
   TYPE(BCSR)                     :: Dmat,D1,D2
@@ -42,12 +69,18 @@ PROGRAM QCTC
 
   TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
 
-  !
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
-  !-------------------------------------------------------------------------------
+
   QCTC_TotalTime_Start=MTimer()
+
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file again. We will protect any hdf file access with the HDFLock.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+#endif
 
 !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
   NukesOn=.TRUE.
@@ -105,9 +138,31 @@ PROGRAM QCTC
      !
      NukesOn=.TRUE.
   ELSE
-     ! Get the current information
-     CALL Get(BS,CurBase)
-     CALL Get(GM,CurGeom)
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    ! Acquire shared lock.
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 143", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+    ! Open hdf file.
+    HDFFileID=OpenHDF(H5File)
+    HDF_CurrentID=HDFFileID
+    H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID=H5GroupID
+#endif
+
+    ! Get the current information
+    CALL Get(BS,CurBase)
+    CALL Get(GM,CurGeom)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    ! Close hdf file.
+    CALL CloseHDFGroup(H5GroupID)
+    CALL CloseHDF(HDFFileID)
+
+    ! Release lock.
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 163", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL ReleaseLock(HDFLock)
+#endif
 
      IF(SCFActn=='InkFok')THEN ! Incremental Fock build
         ! Maybe the difference density build should go elswhere?
@@ -175,19 +230,88 @@ PROGRAM QCTC
   IF(SCFCycl=='0'.AND.CurGeom=='1')THEN
      ETot=1D2
   ELSE
-     CALL Get(Etot,'Etot')
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    ! Acquire shared lock.
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 235", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+    ! Open hdf file.
+    HDFFileID=OpenHDF(H5File)
+    HDF_CurrentID=HDFFileID
+    H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID=H5GroupID
+#endif
+
+    CALL Get(Etot,'Etot')
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    ! Close hdf file.
+    CALL CloseHDFGroup(H5GroupID)
+    CALL CloseHDF(HDFFileID)
+
+    ! Release lock.
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 253", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL ReleaseLock(HDFLock)
+#endif
   ENDIF
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Acquire shared lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 260", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   ! Now that we are done with the density, lets make sure we have the
   ! current basis set, matrix block sizes etc:
-
   CALL Get(BS,CurBase)
   CALL Get(BSiz,'atsiz',CurBase)
   CALL Get(OffS,'atoff',CurBase)
   CALL Get(NBasF,'nbasf',CurBase)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 283", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL ReleaseLock(HDFLock)
+#endif
+
   ! Set space for bra blocking
   CALL NewBraBlok(BS)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Acquire shared lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 292", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL AcquireLock(HDFLock, FreeONLockExclusive)
+
+  ! Open hdf file.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   ! Thresholds local to J matrix build (may be different from those used to build density)
   CALL SetThresholds(CurBase)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Close hdf file.
+  CALL CloseHDFGroup(H5GroupID)
+  CALL CloseHDF(HDFFileID)
+
+  ! Release lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 311", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL ReleaseLock(HDFLock)
+#endif
+
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! Initialize addressing for tensor contraction loops
   CALL TensorIndexingSetUp()
@@ -271,11 +395,8 @@ PROGRAM QCTC
   ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
   ! Acquire exclusive lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 399", "Clone "//TRIM(IntToChar(MyClone)))
   CALL AcquireLock(HDFLock, FreeONLockExclusive)
 
   ! Open hdf file.
@@ -293,14 +414,12 @@ PROGRAM QCTC
   CALL CloseHDFGroup(H5GroupID)
   CALL CloseHDF(HDFFileID)
 
-  ! Release lock.
-  CALL ReleaseLock(HDFLock)
+  ! Wait a bit so NFS has time to realize that the hdf file changed.
+  CALL FreeONSleep(2.5)
 
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
+  ! Release lock.
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 418", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL ReleaseLock(HDFLock)
 #endif
 
   !-------------------------------------------------------------------------------
@@ -362,9 +481,18 @@ PROGRAM QCTC
 !!$  CALL Delete(GM)
 !!$  CALL Delete(Args)
 !!$  CALL Delete(RhoPoles)
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  ! Open hdf file again.
+  HDFFileID=OpenHDF(H5File)
+  HDF_CurrentID=HDFFileID
+  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+  HDF_CurrentID=H5GroupID
+#endif
+
   !-------------------------------------------------------------------------------
   ! All done
   !-------------------------------------------------------------------------------
   CALL ShutDown(Prog)
-  !
+
 END PROGRAM QCTC

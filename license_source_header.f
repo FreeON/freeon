@@ -1,5 +1,5 @@
 C------------------------------------------------------------------------------
-C    This code is part of the MondoSCF suite of programs for linear scaling
+C    This code is part of the FreeON suite of programs for linear scaling
 C    electronic structure theory and ab initio molecular dynamics.
 C
 C    Copyright (2004). The Regents of the University of California. This
@@ -20,6 +20,6 @@ C    PURPOSE. See the GNU General Public License at www.gnu.org for details.
 C
 C    While you may do as you like with this software, the GNU license requires
 C    that you clearly mark derivative software.  In addition, you are encouraged
-C    to return derivative works to the MondoSCF group for review, and possible
-C    disemination in future releases.
+C    to return derivative works to the FreeON group for review, and possible
+C    dissemination in future releases.
 C------------------------------------------------------------------------------
