@@ -99,7 +99,7 @@ PROGRAM SCFStatus
   KinE=Two*Trace(P,Tmp1)
 #endif
   KinE=KinE*SFac !<<< SPIN
-  !
+
   CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
   IF(HasECPs)THEN
     ! Get the pseudopotential matrix U
@@ -171,22 +171,25 @@ PROGRAM SCFStatus
       ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)
 #endif
     ENDIF
-    !  Get the exchange correlation energy
+    ! Get the exchange correlation energy
     IF(HasDFT(ModelChem)) CALL Get(Exc,'Exc',Stats_O=Current)
   ENDIF
   ExchE=ExchE*SFac !<<< SPIN
-  !   Exc  =Exc  *SFac !<<< SPIN
+  !  Exc = Exc*SFac !<<< SPIN
   !  Get E_Nuc_Tot =<Vnn+Vne>
   CALL Get(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
-  ! Total electrostaic energy
+  ! Total electrostatic energy
   E_es_tot=E_el_tot+E_Nuc_Tot
   ! Total SCF energy
   Etot=KinE+E_es_tot+Exc+ExchE
-  !   WRITE(*,*)' KinE = ',KinE
-  !   WRITE(*,*)' Elec = ',E_es_tot
-  !   WRITE(*,*)' Exc  = ',Exc
-  !   WRITE(*,*)' Exch = ',ExchE
-  !   WRITE(*,*)' Etot = ',Etot
+
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "KinE      = "//TRIM(DblToChar(KinE))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_el_tot  = "//TRIM(DblToChar(E_el_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_nuc_tot = "//TRIM(DblToChar(E_nuc_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_es_tot  = "//TRIM(DblToChar(E_es_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "Exc       = "//TRIM(DblToChar(Exc))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "Exch      = "//TRIM(DblToChar(ExchE))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "Etot      = "//TRIM(DblToChar(Etot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
   ! Close hdf file.
@@ -292,28 +295,28 @@ PROGRAM SCFStatus
   ELSE
      SCFTag='['//TRIM(SCFCycl)//','//TRIM(CurBase)//','//TRIM(CurGeom)//']'
   ENDIF
-  !
+
   SCFMessage=""
-  IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap = '//TRIM(DblToShrtChar(-Gap))
+  IF(Gap/=Zero)SCFMessage=TRIM(SCFMessage)//'Gap = '//TRIM(DblToShrtChar(-Gap))//" hartree"
   IF(Entropy > Zero) SCFMessage = TRIM(SCFMessage)//", Entropy = "//TRIM(DblToShrtChar(Entropy))//" hartree"
   IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2> = '//TRIM(FltToShrtChar(S2))
   IF(TRIM(SCFMessage) /= "") &
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
-  !
-  SCFMessage='<T> = '//TRIM(DblToMedmChar(KinE))//', <V> = '//TRIM(DblToMedmChar( E_es_tot))
-  IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF> = '//TRIM(DblToMedmChar(ExchE))
-  IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT> = '//TRIM(DblToMedmChar(Exc))
+
+  SCFMessage='<T> = '//TRIM(DblToMedmChar(KinE))//', <V> = '//TRIM(DblToMedmChar(E_es_tot))//" hartree"
+  IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF> = '//TRIM(DblToMedmChar(ExchE))//" hartree"
+  IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT> = '//TRIM(DblToMedmChar(Exc))//" hartree"
   CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
-  !
+
   IF(SCFActn=='BasisSetSwitch')THEN
      SCFMessage='Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
   ELSE
-     SCFMessage='<SCF> = '//TRIM(DblToChar(Etot))//' Hartree, '//TRIM(DblToChar(Etot*au2eV))//' eV, dD = '//TRIM(DblToShrtChar(DMax))
+     SCFMessage='<SCF> = '//TRIM(DblToChar(Etot))//' hartree, '//TRIM(DblToChar(Etot*au2eV))//' eV, dD = '//TRIM(DblToShrtChar(DMax))
   ENDIF
+
   ! Add in DIIS error
   IF(DIISErr/=Zero)SCFMessage=TRIM(SCFMessage)//', DIIS = '//TRIM(DblToShrtChar(DIISErr))
   CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag)
-
 
   CALL Delete(P)
   CALL Delete(Tmp1)

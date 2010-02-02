@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,8 +20,8 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 
 #include "MondoConfig.h"
@@ -85,7 +85,6 @@ CONTAINS
 
     ! The HDF5 file name
     H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
-    !WRITE(*,*) "setting H5File to "//TRIM(H5File)
     InfFile=H5File
     ! Open the HDF file
     HDFFileID=OpenHDF(H5File)
@@ -222,7 +221,7 @@ CONTAINS
     !    IF(MyID==ROOT)WRITE(*,33)Prog,MyId,MyClone,H5GroupID,HDFFileID
     !    33 FORMAT(A10,'SHUTDOWN: MyId = ',I2,', MyClone = ',I2,', GroupID = ',I10,' FileID = ',I10)
 
-    ! Following is a bit of fancy HDF footwork, nessesary for parallel-clones to work properly
+    ! Following is a bit of fancy HDF footwork, necessary for parallel-clones to work properly
     !
     ! Close the clone directories
     CALL CloseHDFGroup(H5GroupID)
@@ -237,7 +236,7 @@ CONTAINS
     ! and reopen the upper level HDF directory for just the world root node
     HDFFileID=OpenHDF(H5File)
 #endif
-    ! Here is the global file ID for the upper level HDF direcory, for the world root node
+    ! Here is the global file ID for the upper level HDF directory, for the world root node
     HDF_CurrentID=HDFFileID
     IF(HasQM()) THEN
       CALL Delete(BSiz)
@@ -277,7 +276,7 @@ CONTAINS
       CALL PPrint(MemStats,Prog)
     ENDIF
 
-    ! Now mark sucess of this program ...
+    ! Now mark success of this program ...
     CALL Put(.FALSE.,'ProgramFailed')
     ! ... and close the HDF file ...
     CALL CloseHDF(HDFFileID)
@@ -524,4 +523,5 @@ CONTAINS
 #endif
     CLOSE(Inp)
   END SUBROUTINE Init_DEBG
+
 END MODULE Macros
