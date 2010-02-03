@@ -185,7 +185,7 @@ PROGRAM SCFStatus
 
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "KinE      = "//TRIM(DblToChar(KinE))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_el_tot  = "//TRIM(DblToChar(E_el_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_nuc_tot = "//TRIM(DblToChar(E_nuc_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_Nuc_Tot = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_es_tot  = "//TRIM(DblToChar(E_es_tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "Exc       = "//TRIM(DblToChar(Exc))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "Exch      = "//TRIM(DblToChar(ExchE))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))

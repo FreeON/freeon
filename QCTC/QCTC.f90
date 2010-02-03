@@ -52,6 +52,10 @@ PROGRAM QCTC
   USE Clock
   USE TreeWalk
 
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+  USE MondoMPI
+#endif
+
   IMPLICIT NONE
 
   TYPE(BCSR)                     :: J,  P
@@ -63,7 +67,7 @@ PROGRAM QCTC
 
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-  INTEGER                        :: I,K,NLink,OldFileID
+  INTEGER                        :: I,K,NLink,OldFileID, oldMyClone, IErr
 
   REAL(DOUBLE)                   :: QCTC_TotalTime_Start
 
@@ -71,16 +75,11 @@ PROGRAM QCTC
 
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
 
+  ! Start timer.
   QCTC_TotalTime_Start=MTimer()
 
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file again. We will protect any hdf file access with the HDFLock.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-#endif
 
 !.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
   NukesOn=.TRUE.
@@ -138,31 +137,10 @@ PROGRAM QCTC
      !
      NukesOn=.TRUE.
   ELSE
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    ! Acquire shared lock.
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 143", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL AcquireLock(HDFLock, FreeONLockExclusive)
 
-    ! Open hdf file.
-    HDFFileID=OpenHDF(H5File)
-    HDF_CurrentID=HDFFileID
-    H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-    HDF_CurrentID=H5GroupID
-#endif
-
-    ! Get the current information
-    CALL Get(BS,CurBase)
-    CALL Get(GM,CurGeom)
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    ! Close hdf file.
-    CALL CloseHDFGroup(H5GroupID)
-    CALL CloseHDF(HDFFileID)
-
-    ! Release lock.
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 163", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL ReleaseLock(HDFLock)
-#endif
+     ! Get the current information
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
 
      IF(SCFActn=='InkFok')THEN ! Incremental Fock build
         ! Maybe the difference density build should go elswhere?
@@ -230,42 +208,8 @@ PROGRAM QCTC
   IF(SCFCycl=='0'.AND.CurGeom=='1')THEN
      ETot=1D2
   ELSE
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    ! Acquire shared lock.
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 235", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-    ! Open hdf file.
-    HDFFileID=OpenHDF(H5File)
-    HDF_CurrentID=HDFFileID
-    H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-    HDF_CurrentID=H5GroupID
-#endif
-
     CALL Get(Etot,'Etot')
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    ! Close hdf file.
-    CALL CloseHDFGroup(H5GroupID)
-    CALL CloseHDF(HDFFileID)
-
-    ! Release lock.
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 253", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL ReleaseLock(HDFLock)
-#endif
   ENDIF
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Acquire shared lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 260", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
 
   ! Now that we are done with the density, lets make sure we have the
   ! current basis set, matrix block sizes etc:
@@ -274,43 +218,11 @@ PROGRAM QCTC
   CALL Get(OffS,'atoff',CurBase)
   CALL Get(NBasF,'nbasf',CurBase)
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Release lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 283", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL ReleaseLock(HDFLock)
-#endif
-
   ! Set space for bra blocking
   CALL NewBraBlok(BS)
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Acquire shared lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 292", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
   ! Thresholds local to J matrix build (may be different from those used to build density)
   CALL SetThresholds(CurBase)
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Release lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 311", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL ReleaseLock(HDFLock)
-#endif
 
   CALL SetLocalThresholds(Thresholds%TwoE)
   ! Initialize addressing for tensor contraction loops
@@ -394,32 +306,16 @@ PROGRAM QCTC
      E_Nuc_Tot=Zero
   ENDIF
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Acquire exclusive lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "acquire: line 399", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
-
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Wait a bit so NFS has time to realize that the hdf file changed.
-  CALL FreeONSleep(2.5)
-
-  ! Release lock.
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "release: line 418", "Clone "//TRIM(IntToChar(MyClone)))
-  CALL ReleaseLock(HDFLock)
+  ! To avoid parallel writes to hdf, we temporarily store E_Nuc_Tot in a file
+  ! and collect the values later into the hdf.
+  OPEN(UNIT = Seq, FILE = TrixFile("QCTC-E_Nuc_Tot", Args, 0), &
+    STATUS = "NEW", FORM = "UNFORMATTED", ACCESS = "SEQUENTIAL")
+  WRITE(UNIT = Seq) E_Nuc_Tot
+  CLOSE(UNIT = Seq)
+#else
+  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
 #endif
 
   !-------------------------------------------------------------------------------
@@ -474,20 +370,48 @@ PROGRAM QCTC
      CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
   ENDIF
 
-!!$
-!!$  CALL Delete(J)
-!!$  CALL Delete(T1)
-!!$  CALL Delete(BS)
-!!$  CALL Delete(GM)
-!!$  CALL Delete(Args)
-!!$  CALL Delete(RhoPoles)
-
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Open hdf file again.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
+  ! Make sure we are all done.
+  CALL MPI_Barrier(MPI_COMM_WORLD, IErr)
+
+  IF(MyClone == 1) THEN
+    ! Collect data written to files and write to hdf.
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "collecting data to commit to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+
+    ! Close out hdf group.
+    CALL CloseHDFGroup(H5GroupID)
+    CALL CloseHDF(HDFFileID)
+
+    ! Store clone.
+    oldMyClone = MyClone
+
+    DO MyClone = 1, NClones
+      ! Read previously stored values and collect them.
+      OPEN(UNIT = Seq, FILE = TrixFile("QCTC-E_Nuc_Tot", Args, 0), &
+        STATUS = "OLD", FORM = "UNFORMATTED", ACCESS = "SEQUENTIAL")
+      READ(UNIT = Seq) E_Nuc_Tot
+      CLOSE(UNIT = Seq)
+
+      ! Some output.
+      CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
+
+      ! Open hdf group.
+      HDFFileID = OpenHDF(H5File)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+
+      ! Write to hdf.
+      CALL Put(E_Nuc_Tot, "E_NuclearTotal", Stats_O = Current)
+
+      ! Close hdf group.
+      CALL CloseHDFGroup(H5GroupID)
+      CALL CloseHDF(HDFFileID)
+    ENDDO
+
+    ! Re-open hdf group.
+    MyClone = oldMyClone
+    HDFFileID = OpenHDF(H5File)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+  ENDIF
 #endif
 
   !-------------------------------------------------------------------------------
