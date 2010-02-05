@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,9 +20,12 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM GONX2
 
 #ifndef PARALLEL
@@ -81,17 +84,16 @@ PROGRAM GONX2
 #endif
   REAL(DOUBLE)               :: Time1,Time2
   REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
-  REAL(DOUBLE),DIMENSION(3)  :: Frc
   CHARACTER(LEN=*),PARAMETER :: Prog='GONX2'
   LOGICAL                    :: DoStrs
-!--------------------------------------------------------------------------------
+
   TYPE(INT_RNK2) :: OffArr
 #ifdef ONX2_PARALLEL
   TYPE(CList), DIMENSION(:), POINTER :: ListC,ListD
 #else
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
-!--------------------------------------------------------------------------------
+
   INTEGER :: ixyz,jxyz,A1,A2
   DoStrs=.TRUE.!.FALSE.
 
@@ -354,10 +356,30 @@ PROGRAM GONX2
   !------------------------------------------------
   ! Save Exchange Gradients and Stress.
   !
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing gradients to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(GradAux,'Gradients',Tag_O=CurGeom)
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending gradients to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
   CALL Put(GradAux,'Gradients',Tag_O=CurGeom)
+#endif
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
-  IF(DoStrs) CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
+  IF(DoStrs) THEN
+#if defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing stress to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending stress to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
+#else
+    CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
+#endif
+  ENDIF
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
   !------------------------------------------------

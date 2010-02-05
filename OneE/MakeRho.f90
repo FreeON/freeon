@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,13 +20,15 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 ! COMPUTE THE DENSITY IN A HGTF BASIS FROM THE DENSITY MATRIX
 ! BASED ON AHMADI AND ALMLOF, CPL 246 p.364 (1995)
 ! Authors: Matt Challacombe and C.J. Tymczak and C. K. Gan
 !----------------------------------------------------------------
+
+#include "MondoConfig.h"
 
 PROGRAM MakeRho
   USE DerivedTypes
@@ -43,6 +45,7 @@ PROGRAM MakeRho
   USE RhoBlok
   USE RhoTools
   USE MondoLogger
+
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -58,29 +61,30 @@ PROGRAM MakeRho
 #else
   TYPE(BCSR)                      :: Dmat,D1,D2
 #endif
-  INTEGER                         :: NC,EllPrune
+  INTEGER                         :: NC
   REAL(DOUBLE),DIMENSION(3)       :: B
   TYPE(AtomPair)                  :: Pair
   TYPE(BSET)                      :: BS
-  TYPE(CRDS)                      :: GM,GM_MM
+  TYPE(CRDS)                      :: GM
   TYPE(ARGMT)                     :: Args
   TYPE(HGRho)                     :: Rho
   TYPE(HGRho_new)                 :: RhoA
   TYPE(CMPoles)                   :: MP
   TYPE(INT_VECT)                  :: Stat
   TYPE(DBL_VECT)                  :: PTmp
-  INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2,IL
-  INTEGER                         :: NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
-  INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
-  REAL(DOUBLE)                    :: DistThresh,RSumE,RSumE2,RSumN,dNel,RelRhoErr,PcntCharge
-  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,Prog1,Prog2,RestartHDF,ResponsePostFix
+  INTEGER                         :: P,R,AtA,AtB,NN
+  INTEGER                         :: NDist,NCoef,Pbeg,Pend,NDist_old,NDist_new
+  INTEGER                         :: PcntDist,OldFileID
+  REAL(DOUBLE)                    :: RSumE,RSumE2,RSumN,dNel,RelRhoErr
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,Prog1,Prog2
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
 
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
 #endif
+
   ! Chose a density matrix
   IF(SCFActn=='BasisSetSwitch')THEN
     ! Get the previous information
@@ -394,11 +398,11 @@ PROGRAM MakeRho
     ENDIF
 #endif
   ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
       CALL MondoLog(DEBUG_MAXIMUM, Prog, Mssg1, Prog1)
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     ENDIF
 #endif
   ENDIF
@@ -419,27 +423,52 @@ PROGRAM MakeRho
   SELECT CASE(SCFActn)
 
   CASE('ForceEvaluation')
-#ifdef PARALLEL
+#if defined(PARALLEL)
     CALL Put(Rho,'Rho'//IntToChar(MyID),Args,1)
+#elif defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(Rho,'Rho',Args,1)
+      CALL Put(MP)
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
 #else
     CALL Put(Rho,'Rho',Args,1)
-#endif
     CALL Put(MP)
+#endif
 
   CASE('InkFok')
 #ifdef PARALLEL
+    CALL Halt("[FIXME]")
+#elif defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(Rho,'Rho',Args,1)
+      CALL Put(MP,'Delta'//TRIM(SCFCycl))
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
 #else
     CALL Put(Rho,'DeltaRho',Args,0)
-#endif
     CALL Put(MP,'Delta'//TRIM(SCFCycl))
+#endif
 
   CASE DEFAULT
-#ifdef PARALLEL
+#if defined(PARALLEL)
     CALL Put(Rho,'Rho'//IntToChar(MyID),Args,0)
+#elif defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(Rho,'Rho',Args,1)
+      CALL Put(MP)
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
 #else
     CALL Put(Rho,'Rho',Args,0)
-#endif
     CALL Put(MP)
+#endif
 
   END SELECT
 

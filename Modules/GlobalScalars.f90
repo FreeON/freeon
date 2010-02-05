@@ -292,18 +292,23 @@ MODULE GlobalScalars
   !
   !  MPI Scalars, default values
   !
-  INTEGER, SAVE      :: MyID=ROOT
+  INTEGER, SAVE      :: MyID = ROOT
   INTEGER, SAVE      :: NPrc
-  LOGICAL, SAVE      :: InParallel=.FALSE.
-  INTEGER, PARAMETER :: MaxProc=1024
+  LOGICAL, SAVE      :: InParallel = .FALSE.
+  INTEGER, PARAMETER :: MaxProc = 1024
   INTEGER, PARAMETER :: BARRIER_TAG = 1207
   INTEGER, PARAMETER :: FRONTEND_TAG = 4409
   INTEGER, PARAMETER :: LOCK_TAG = 4711
+  INTEGER, PARAMETER :: PUT_TAG = 3835
   INTEGER, PARAMETER :: FreeONLockShared = 1
   INTEGER, PARAMETER :: FreeONLockExclusive = 2
   !
-  !  Send in the clones...
+  ! Send in the clones...
   !
-  INTEGER, SAVE           :: NClones
-  INTEGER, SAVE           :: MyClone
+  INTEGER, SAVE :: NClones = -1
+  INTEGER, SAVE :: MyClone = -1
+  !
+  ! Some information regarding front-end <--> back-end.
+  !
+  LOGICAL, SAVE :: inFrontend = .TRUE.
 END MODULE GlobalScalars

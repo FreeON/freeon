@@ -1,7 +1,34 @@
+!------------------------------------------------------------------------------
+!    This code is part of the FreeON suite of programs for linear scaling
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!    Copyright (2004). The Regents of the University of California. This
+!    material was produced under U.S. Government contract W-7405-ENG-36
+!    for Los Alamos National Laboratory, which is operated by the University
+!    of California for the U.S. Department of Energy. The U.S. Government has
+!    rights to use, reproduce, and distribute this software.  NEITHER THE
+!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
+!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!
+!    This program is free software; you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by the
+!    Free Software Foundation; either version 2 of the License, or (at your
+!    option) any later version. Accordingly, this program is distributed in
+!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+!
+!    While you may do as you like with this software, the GNU license requires
+!    that you clearly mark derivative software.  In addition, you are encouraged
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
+!------------------------------------------------------------------------------
 !    FAST O(N Lg N) COMPUTATION OF GRADIENTS OF THE COULOMB ENERGY 
 !    WRT TO NUCLEAR COORDINATES
 !    Author: Matt Challacombe
 !==============================================================================
+
+#include "MondoConfig.h"
 
 PROGRAM JForce
   USE DerivedTypes
@@ -20,7 +47,9 @@ PROGRAM JForce
   USE PBCFarField
   USE BlokTrPdJ
   USE SetXYZ 
+
   IMPLICIT NONE
+
   TYPE(BCSR)                   :: P,PT,P2
   TYPE(AtomPair)               :: Pair
   TYPE(HGLL),POINTER           :: RhoHead
@@ -35,14 +64,14 @@ PROGRAM JForce
   TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,PMat2Use
-  !-------------------------------------------------------------------------------- 
+
   JFORCE_TotalTime_Start=MTimer()
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  !
+
   PMat2Use=TrixFile('D',Args,1) ! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   CALL Get(P,TRIM(PMat2Use))
@@ -231,7 +260,16 @@ PROGRAM JForce
   CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)  
   ! Save Forces to Disk
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing forces to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(GM,Tag_O=CurGeom)
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending forces to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
   CALL Put(GM,Tag_O=CurGeom)
+#endif
   ! Tidy Up  
   CALL Delete(JFrc)
   CALL Delete(LatFrc_J)

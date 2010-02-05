@@ -68,7 +68,7 @@ tags :
 IRInv.o          : DenMatMethods.o
 ODA.o            : DenMatMethods.o
 TC2Response.o    : DenMatMethods.o DenMatResponse.o
-SP2.o            : DenMatMethods.o
+SP2.o            : $(top_builddir)/MondoConfig.h DenMatMethods.o
 TS4.o            : DenMatMethods.o
 DenMatResponse.o : DenMatMethods.o
 LowdinO.o        : DenMatMethods.o
@@ -76,3 +76,5 @@ P2Use.o          : $(top_builddir)/MondoConfig.h DenMatMethods.o FillPBlok.o
 RHeqs.o          : DenMatMethods.o
 BlokAInv.o       : DenMatMethods.o
 SCFstats.o			 : $(top_builddir)/MondoConfig.h
+DenMatMethods.o  : $(top_builddir)/MondoConfig.h
+DIIS.o				   : $(top_builddir)/MondoConfig.h

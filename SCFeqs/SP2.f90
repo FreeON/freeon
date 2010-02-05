@@ -30,6 +30,8 @@
 ! trace correcting purification expansion with 2nd order purifications.
 !-------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE DerivedTypes
   USE GlobalScalars
@@ -43,13 +45,16 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE LinAlg
   USE DenMatMethods
   USE MondoLogger
+
   IMPLICIT NONE
+
 #ifdef PARALLEL
   TYPE(DBCSR)                     :: F,P,Pold,Tmp1,Tmp2
   TYPE(BCSR)                      :: F_BCSR
 #else
   TYPE(BCSR)                     :: F,FT,P,PT,Pold,Tmp1,Tmp2
 #endif
+
   !-------------------------------------------------------------------------------
   ! Trace Setting SP2
   !-------------------------------------------------------------------------------
@@ -60,11 +65,12 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
   !-------------------------------------------------------------------------------
-#ifdef PARALLEL
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
 #endif
+
   ! Check for matrix threshold overide
   CALL SussTrix('TCTwoTrix',Prog)
 
@@ -82,7 +88,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL New(Pold)
   CALL New(Tmp1)
   CALL New(Tmp2)
-  !
+
   MM=0
   Ne=Half*DBLE(NEl)
 
@@ -140,7 +146,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 
   ! Orthogonal put and xform to AO rep and put
   CALL PutXForm(Prog,Args,P,POld,Tmp1)
-  !
+
   CALL Delete(F)
   CALL Delete(P)
   CALL Delete(Pold)

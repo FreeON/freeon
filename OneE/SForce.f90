@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,13 +20,16 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 !    COMPUTE THE FORCE DUE TO CHANGES IN THE DENSITY MATRIX:
 !    dP.(2T+J+K)=-2*dS.P.F.P (Early work by McWeeny, need a cite...)
 !    Authors: Matt Challacombe and CJ Tymczak
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM SForce
   USE DerivedTypes
   USE GlobalScalars
@@ -66,18 +69,16 @@ PROGRAM SForce
   TYPE(DBL_RNK2)                 :: LatFrc_S
   CHARACTER(LEN=6),PARAMETER     :: Prog='SForce'
   LOGICAL                        :: Present
-  !----------------------------------------------
+
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-  !----------------------------------------------
+
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  !----------------------------------------------
-  ! Allocations
 
-#ifdef PARALLEL
-#else
+  ! Allocations
+#if ! defined(PARALLEL)
   CALL New(P,OnAll_O=.TRUE.)
   CALL New(F)
   CALL New(S)
@@ -87,7 +88,7 @@ PROGRAM SForce
   CALL New(T2)
   CALL New(T3)
 #endif
-  !--------------------------------------
+
   ! Compute W=P.F.P
 #ifdef PARALLEL
   CALL Get(P_DBCSR,TrixFile('D',Args,1))
@@ -271,8 +272,19 @@ PROGRAM SForce
   ! Do some checksumming and IO
   CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)
   CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)
+
   ! Save Forces to Disk
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing forces to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(GM,Tag_O=CurGeom)
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending forces to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
   CALL Put(GM,Tag_O=CurGeom)
+#endif
+
   ! Tidy up
   CALL Delete(SFrc)
   CALL Delete(LatFrc_S)
