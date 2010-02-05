@@ -62,9 +62,9 @@ MakeT.o   : TBlok.o
 MakeM.o		: MBlok.o
 Make1E.o	: Make1X.o
 Make1X.o	: Int1E.o
-MakeRho.o : RhoBlok.o RhoTools.o
-SForce.o  : BlokTrWdS.o
-TForce.o  : BlokTrPdT.o
+MakeRho.o : $(top_builddir)/MondoConfig.h RhoBlok.o RhoTools.o
+SForce.o  : $(top_builddir)/MondoConfig.h BlokTrWdS.o
+TForce.o  : $(top_builddir)/MondoConfig.h BlokTrPdT.o
 MForce.o  : BlokTrPdM.o
 THess.o   : BlokTrPd2T.o
 UForce.o  : UBlok.o

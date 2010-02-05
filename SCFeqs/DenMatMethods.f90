@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 MODULE DenMatMethods
   USE DerivedTypes
   USE GlobalScalars
@@ -296,13 +299,13 @@ CONTAINS
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
   END SUBROUTINE PutXForm_DBCSR
 #endif
-  !-------------------------------------------------------------------------------
+
   SUBROUTINE PutXForm_BCSR(Prog,Args,P,Z,Tmp1)
     TYPE(BCSR)       :: P,Z,Tmp1
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
     LOGICAL          :: Present,DensityArchive
-    !-------------------------------------------------------------------------------
+
     ! IO for the orthogonal P
     CALL Put(P,TrixFile('OrthoD',Args,1))
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
@@ -323,18 +326,26 @@ CONTAINS
     CALL Filter(Tmp1,P)     ! Thresholding
     ! Archive the AO-DM ?
     CALL Get(DensityArchive,'ArchiveDensity')
-    IF(DensityArchive) &
-         CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    IF(DensityArchive) THEN
+      CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    ENDIF
     CALL Put(Tmp1,TrixFile('D',Args,1))
+#if defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing homolumogap to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(Zero,'homolumogap')
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending homolumogap to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
+#else
     CALL Put(Zero,'homolumogap')
+#endif
     ! CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']',Unit_O=6)
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
   END SUBROUTINE PutXForm_BCSR
-  !-------------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------------
   SUBROUTINE SetVarThresh(MM_O)
     INTEGER,OPTIONAL  :: MM_O
     INTEGER           :: MM

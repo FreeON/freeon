@@ -24,6 +24,8 @@
 !    disemination in future releases.
 !------------------------------------------------------------------------------
 
+#include "MondoConfig.h"
+
 PROGRAM DIIS
   USE DerivedTypes
   USE GlobalScalars
@@ -70,6 +72,7 @@ PROGRAM DIIS
   ! Initial setup
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   iSCF=Args%I%I(1)
+
   ! Parse for DIIS options
   CALL OpenASCII(InpFile,Inp)
 
@@ -247,7 +250,16 @@ PROGRAM DIIS
       DIISInfo%I(2)=Args%I%I(3)
     ENDIF
 
+#if defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing DIISInfo to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(DIISInfo,'diisinfo')
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending DIISInfo to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
+#else
     CALL Put(DIISInfo,'diisinfo')
+#endif
     CALL Delete(DIISInfo)
 
     DO I = DIISFirstSCF, iSCF
@@ -341,7 +353,16 @@ PROGRAM DIIS
       ! We reach the size of the matrix, we reduce it.
       BTmp%D(1:N-2,1:N-2)=B%D(2:N-1,2:N-1)
     ENDIF
+#if defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+      CALL MondoLog(DEBUG_NONE, Prog, "writing BTmp to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Put(BTmp,'diismtrix')
+    ELSE
+      CALL MondoLog(DEBUG_NONE, Prog, "sending BTmp to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
+#else
     CALL Put(BTmp,'diismtrix')
+#endif
     CALL Delete(BTmp)
 
     CALL PPrint(B, "DIIS B matrix")
@@ -396,7 +417,16 @@ PROGRAM DIIS
   ENDIF
 
   ! IO
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing DIISErr to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(DIISErr,'diiserr')
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending DIISErr to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
   CALL Put(DIISErr,'diiserr')
+#endif
 
   ! Allocate some indecies for re-ordering
   CALL New(Idx,N)

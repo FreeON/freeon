@@ -126,38 +126,6 @@ PROGRAM SCFStatus
   ! Total electrostatic energy icluding ECPs
   E_el_tot=E_el_tot+E_ECPs
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Acquire exclusive lock.
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
-  CALL Put(E_el_tot,'E_ElectronicTotal')
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Release lock.
-  CALL ReleaseLock(HDFLock)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
   ExchE=Zero
   Exc=Zero
   IF(SCFActn/="GuessEqCore")THEN
@@ -191,39 +159,6 @@ PROGRAM SCFStatus
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "Exch      = "//TRIM(DblToChar(ExchE))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "Etot      = "//TRIM(DblToChar(Etot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Acquire exclusive lock.
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
-  CALL Put(Etot,'Etot')
-  CALL Put(Etot,'Etot',Stats_O=Current)
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Release lock.
-  CALL ReleaseLock(HDFLock)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
   !  The Virial
   Virial=E_es_tot/KinE
   !--------------------------------------------------------
@@ -239,36 +174,21 @@ PROGRAM SCFStatus
     DMax=Max(P)
   ENDIF
 
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Acquire exclusive lock.
-  CALL AcquireLock(HDFLock, FreeONLockExclusive)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
-#endif
-
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing E_ElectronicTotal, Etot, and DMax to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(E_el_tot,'E_ElectronicTotal')
+    CALL Put(Etot,'Etot')
+    CALL Put(Etot,'Etot',Stats_O=Current)
+    CALL Put(DMax,'DMax')
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending E_ElectronicTotal, Etot, and DMax to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
+  CALL Put(E_el_tot,'E_ElectronicTotal')
+  CALL Put(Etot,'Etot')
+  CALL Put(Etot,'Etot',Stats_O=Current)
   CALL Put(DMax,'DMax')
-
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Close hdf file.
-  CALL CloseHDFGroup(H5GroupID)
-  CALL CloseHDF(HDFFileID)
-
-  ! Release lock.
-  CALL ReleaseLock(HDFLock)
-
-  ! Open hdf file.
-  HDFFileID=OpenHDF(H5File)
-  HDF_CurrentID=HDFFileID
-  H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-  HDF_CurrentID=H5GroupID
 #endif
 
   !  IO for the delta density matrix

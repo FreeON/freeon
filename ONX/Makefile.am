@@ -125,4 +125,5 @@ GONX2.o : \
   ONXCtrSclg.o \
   ONX2List.o \
   GONX2ComputDK.o \
-  ONXGet.o
+  ONXGet.o \
+  $(top_builddir)/MondoConfig.h

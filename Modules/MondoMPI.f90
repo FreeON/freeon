@@ -104,12 +104,7 @@ MODULE MondoMPI
          MONDO_COMM=MPI_COMM_WORLD
          ! Load global MPI variables
          MyID=MRank()
-         !CALL MondoLog(DEBUG_NONE, "InitMPI", "setting MyID = "//TRIM(IntToChar(MyID)) &
-         !  //", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
          NPrc=MSize()
-         !IF(MyID == 0) THEN
-         !  CALL MondoLog(DEBUG_NONE, "FreeON", "MPI parallel version, running on "//TRIM(IntToChar(NPrc))//" nodes")
-         !ENDIF
          InParallel=.TRUE.
       END SUBROUTINE InitMPI
 
@@ -138,18 +133,30 @@ MODULE MondoMPI
         CALL MPI_FINALIZE(IErr)
       END SUBROUTINE FiniMPI
 
-      FUNCTION MRank()
-         INTEGER :: IErr,MRank
-         CHARACTER(LEN=*),PARAMETER :: Sub='MRank'
-         CALL MPI_COMM_RANK(MONDO_COMM,MRank,IErr)
-         CALL ErrChk(IErr,Sub)
-      END FUNCTION MRANK
+      FUNCTION MRank(communicator_O)
+        INTEGER                     :: IErr,MRank
+        INTEGER, OPTIONAL           :: communicator_O
+        CHARACTER(LEN=*), PARAMETER :: Sub = 'MRank'
 
-      FUNCTION MSize()
-         INTEGER :: IErr,MSize
-         CHARACTER(LEN=*),PARAMETER :: Sub='MSize'
-         CALL MPI_COMM_SIZE(MONDO_COMM,MSize,IErr)
-         CALL ErrChk(IErr,Sub)
+        IF(PRESENT(communicator_O)) THEN
+          CALL MPI_COMM_RANK(communicator_O, MRank, IErr)
+        ELSE
+          CALL MPI_COMM_RANK(MONDO_COMM, MRank, IErr)
+        ENDIF
+        CALL ErrChk(IErr, Sub)
+      END FUNCTION MRank
+
+      FUNCTION MSize(communicator_O)
+        INTEGER                     :: IErr,MSize
+        INTEGER, OPTIONAL           :: communicator_O
+        CHARACTER(LEN=*), PARAMETER :: Sub = 'MSize'
+
+        IF(PRESENT(communicator_O)) THEN
+          CALL MPI_COMM_SIZE(communicator_O, MSize, IErr)
+        ELSE
+          CALL MPI_COMM_SIZE(MONDO_COMM, MSize, IErr)
+        ENDIF
+        CALL ErrChk(IErr, Sub)
       END FUNCTION MSize
 
 !===============================================================================

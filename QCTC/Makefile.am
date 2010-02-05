@@ -118,7 +118,8 @@ JForce.o : \
   Globals.o \
   PoleTree.o \
   PBCFarField.o \
-  BlokTrPdJ.o
+  BlokTrPdJ.o \
+  $(top_builddir)/MondoConfig.h
 
 JGen.o : \
   Globals.o \

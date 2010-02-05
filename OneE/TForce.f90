@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,13 +20,16 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 !    COMPUTE THE FORCE CORESPONDING TO THE DERIVATIVE OF THE 
 !    KINETIC ENERGY MATRIX, TForce=2*Tr{P.dT}
 !    Authors: Matt Challacombe and CJ Tymczak
 !----------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM TForce
   USE DerivedTypes
   USE GlobalScalars
@@ -193,7 +196,16 @@ PROGRAM TForce
   CALL PChkSum(TFrc,    'dT/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_T,'LFrcT',Proc_O=Prog)  
 ! Save Forces to Disk
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL MondoLog(DEBUG_NONE, Prog, "writing forces to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Put(GM,Tag_O=CurGeom)
+  ELSE
+    CALL MondoLog(DEBUG_NONE, Prog, "sending forces to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+  ENDIF
+#else
   CALL Put(GM,Tag_O=CurGeom)
+#endif
 ! Tidy up 
   CALL Delete(TFrc)
   CALL Delete(LatFrc_T)

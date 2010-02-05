@@ -68,7 +68,12 @@ CONTAINS
     LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc,iTAG
     CHARACTER(LEN=DCL)                   :: MONDO_HOST
+#endif
 
+    ! We are in the back-end:
+    inFrontend = .FALSE.
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
     CALL InitMPI()
 #endif
 
@@ -154,8 +159,6 @@ CONTAINS
       CALL TimeStamp('Entering '//TRIM(Prog))
 #endif
     ENDIF
-
-    ! CALL ShutDown(Prog)
   END SUBROUTINE StartUp
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
