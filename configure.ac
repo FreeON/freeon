@@ -284,9 +284,9 @@ case "${FC_COMPILERNAME}" in
 esac
 
 # Define compiler version strings.
-AC_DEFINE_UNQUOTED(HAVE_CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The C compiler version string])
-AC_DEFINE_UNQUOTED(HAVE_F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
-AC_DEFINE_UNQUOTED(HAVE_FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
+AC_DEFINE_UNQUOTED(CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The C compiler version string])
+AC_DEFINE_UNQUOTED(F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
+AC_DEFINE_UNQUOTED(FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
 
 AC_MSG_NOTICE([C compiler version:   ${cc_compiler_version_string}])
 AC_MSG_NOTICE([F77 compiler version: ${f77_compiler_version_string}])
@@ -1121,12 +1121,12 @@ AC_DEFINE(LOG_MEMORY_USAGE,
           [A helper macro to print out memory usage.])
 
 # Store the compiler flags used somewhere.
-AC_DEFINE_UNQUOTED(HAVE_CFLAGS_STRING,  ["${CFLAGS}"],  [The C-compiler flags used])
-AC_DEFINE_UNQUOTED(HAVE_FFLAGS_STRING,  ["${FFLAGS}"],  [The F77-compiler flags used])
-AC_DEFINE_UNQUOTED(HAVE_FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags used])
+AC_DEFINE_UNQUOTED(CFLAGS_STRING,  ["${CFLAGS}"],  [The C-compiler flags used])
+AC_DEFINE_UNQUOTED(FFLAGS_STRING,  ["${FFLAGS}"],  [The F77-compiler flags used])
+AC_DEFINE_UNQUOTED(FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags used])
 
 # Store information on how we were configured.
-AC_DEFINE_UNQUOTED(HAVE_CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command line arguments to the configure script])
+AC_DEFINE_UNQUOTED(CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command line arguments to the configure script])
 
 # For AInv.
 #AC_DEFINE(SPATIAL_THRESHOLDING, [1], [Use spatial thresholding in AInv])
