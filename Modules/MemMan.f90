@@ -1677,6 +1677,7 @@ CONTAINS
        CALL Delete(A%Qz)
        CALL Delete(A%Co)
     ENDIF
+    A%Alloc = ALLOCATED_FALSE
   END SUBROUTINE Delete_HGRho
 
   FUNCTION AllocQ(Alloc)
@@ -1858,6 +1859,7 @@ CONTAINS
        CS%NCells = 0
        CALL Delete(CS%CellCarts)
     ENDIF
+    CS%Alloc = ALLOCATED_FALSE
   END SUBROUTINE Delete_CellSet
 
   SUBROUTINE New_PBCFit(A,MaxMem)
