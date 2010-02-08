@@ -103,10 +103,6 @@ CONTAINS
     CALL Init(PrintFlags,Prog)
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    ! Initialize a lock for hdf access.
-    HDFLock%Alloc = ALLOCATED_FALSE
-    CALL AllocateLock(HDFLock, MPI_COMM_WORLD)
-
     ! Get the space-time parallel topology
     CALL New(SpaceTimeSplit,3)
     CALL Get(SpaceTimeSplit,'SpaceTime')
@@ -289,9 +285,6 @@ CONTAINS
       IF(MyId == ROOT) THEN
         CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
       ENDIF
-
-      ! Free the hdf lock.
-      CALL FreeLock(HDFLock)
 
       ! Shutdown MPI
       CALL FiniMPI()
