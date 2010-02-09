@@ -1296,14 +1296,6 @@ CONTAINS
 
     !-------------------------------------------------------------------------------
     !        Items that should not change with geometry...
-!!$                IF(PRESENT(Tag_O))THEN
-!!$                   WRITE(*,*)'==================================================================='
-!!$                   WRITE(*,*)'==================================================================='
-!!$                   WRITE(*,*)' PUTTING COORDINATES WITH TAG = ',TAG_O
-!!$                   WRITE(*,*)'==================================================================='
-!!$                   WRITE(*,*)'==================================================================='
-!!$                ENDIF
-
     CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
     CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
     CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
@@ -2260,7 +2252,7 @@ CONTAINS
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
-      IF(.NOT. inFrontend) THEN
+      IF(.NOT. inFrontend .AND. MRank(MPI_COMM_WORLD) > 0) THEN
         CALL MondoLog(DEBUG_MAXIMUM, "Get_HGRho", "getting HGRho from "//TRIM(Name)//", rank "//TRIM(IntToChar(MRank(MPI_COMM_WORLD)))//", clone "//TRIM(IntToChar(MyClone)))
       ENDIF
 #endif
@@ -2349,7 +2341,7 @@ CONTAINS
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
-      IF(.NOT. inFrontend) THEN
+      IF(.NOT. inFrontend .AND. MRank(MPI_COMM_WORLD) > 0) THEN
         CALL MondoLog(DEBUG_MAXIMUM, "Put_HGRho", "putting HGRho to "//TRIM(Name)//", rank "//TRIM(IntToChar(MRank(MPI_COMM_WORLD)))//", clone "//TRIM(IntToChar(MyClone)))
       ENDIF
 #endif
