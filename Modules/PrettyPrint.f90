@@ -1183,13 +1183,21 @@ MODULE PrettyPrint
     INTEGER                          :: PU
     INTEGER                          :: L,M,N,LMN,NPrim,iadd,jadd,zq,iq,oq,orr,Ell,LenKet
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
-!
+
     IF(.NOT. AllocQ(A%Alloc)) THEN
-       CALL Halt(' Density not allocated in PPrint_HGRho')
+       CALL Halt('Density not allocated in PPrint_HGRho')
     ENDIF
-!
-    PU=OpenPU(Unit_O=Unit_O)
-!
+
+    IF(PRESENT(Unit_O) .AND. PRESENT(FileName_O)) THEN
+      PU = OpenPU(Unit_O = Unit_O, FileName_O = FileName_O)
+    ELSE IF(PRESENT(Unit_O)) THEN
+      PU = OpenPU(Unit_O = Unit_O)
+    ELSE IF(PRESENT(FileName_O)) THEN
+      PU = OpenPU(FileName_O = FileName_O)
+    ELSE
+      PU = OpenPU()
+    ENDIF
+
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE) THEN
        NPrim=0
        WRITE(PU,*)'ClearAll[Rho];'
@@ -1233,7 +1241,7 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        WRITE(PU,*)'RhoSum];'
-    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM.OR.PU==6) THEN
+    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM .OR. PU==6) THEN
        NPrim=0
        WRITE(PU,30) Name
        WRITE(PU,31)
