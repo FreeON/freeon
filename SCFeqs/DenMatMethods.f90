@@ -290,9 +290,9 @@ CONTAINS
     CALL Filter(Tmp1,P)     ! Thresholding
     ! Archive the AO-DM ?
     CALL Get(DensityArchive,'ArchiveDensity')
-    IF(DensityArchive) THEN
-      CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
-    ENDIF
+    !IF(DensityArchive) THEN
+    !  CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    !ENDIF
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
@@ -331,14 +331,13 @@ CONTAINS
     CALL Filter(Tmp1,P)     ! Thresholding
     ! Archive the AO-DM ?
     CALL Get(DensityArchive,'ArchiveDensity')
-    IF(DensityArchive) THEN
-      CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
-    ENDIF
+    !IF(DensityArchive) THEN
+    !  CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    !ENDIF
     CALL Put(Tmp1,TrixFile('D',Args,1))
 #if defined(PARALLEL_CLONES)
     homolumogap = Zero
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing homolumogap to hdf", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Put(homolumogap, "homolumogap")
 
       oldClone = MyClone
@@ -359,7 +358,6 @@ CONTAINS
       H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
       HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending homolumogap to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(homolumogap, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF

@@ -341,9 +341,9 @@ PROGRAM RHEqs
 
   ! Archive the AO-DM
   CALL Get(DensityArchive,'ArchiveDensity')
-  IF(DensityArchive) THEN
-    CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)
-  ENDIF
+  !IF(DensityArchive) THEN
+  !  CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+  !ENDIF
 
   CALL Put(sTmp1,TrixFile('D',Args,1))
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)

@@ -455,7 +455,6 @@ PROGRAM MakeRho
       H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
       HDF_CurrentID = H5GroupID
     ELSE
-      !CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(Rho, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(MP, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
@@ -510,7 +509,6 @@ PROGRAM MakeRho
       H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
       HDF_CurrentID = H5GroupID
     ELSE
-      !CALL MondoLog(DEBUG_MAXIMUM, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(Rho, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(MP, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)

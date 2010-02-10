@@ -286,7 +286,7 @@ PROGRAM JForce
     HDF_CurrentID = H5GroupID
   ELSE
     CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
-    CALL Send(GM, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(GM, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
   CALL Put(GM, Tag_O = CurGeom)
