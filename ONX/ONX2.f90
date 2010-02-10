@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,9 +20,12 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM ONX2
 
 #ifndef PARALLEL
@@ -64,7 +67,7 @@ PROGRAM ONX2
   TYPE(FASTMAT),POINTER          :: KxFM
   TYPE(FASTMAT),POINTER          :: DFM
   TYPE(DBCSR)                    :: D
-  TYPE(BCSR )                    :: Kx,T1,T2
+  TYPE(BCSR)                     :: Kx,T1,T2
 #else
   TYPE(BCSR)                     :: D
   TYPE(BCSR)                     :: Kx,T1,T2
@@ -75,12 +78,12 @@ PROGRAM ONX2
   TYPE(CRDS)                     :: GMp
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: Stat
-!--------------------------------------------------------------------------------
+
 #ifdef ONX2_PARALLEL
   TYPE(DBL_RNK2)                 :: GradTmp
   TYPE(INT_VECT)                 :: APt,BPt,CPt,DPt
 #endif
-!--------------------------------------------------------------------------------
+
 #ifdef ONX2_PARALLEL
   TYPE(DBL_VECT)                 :: TmKxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr,TmREArr,TmFOArr
 !  REAL(DOUBLE),EXTERNAL          :: MondoTimer
@@ -94,21 +97,20 @@ PROGRAM ONX2
   REAL(DOUBLE)                   :: Time1,Time2
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
   CHARACTER(LEN=*),PARAMETER     :: Prog='ONX2'
-!--------------------------------------------------------------------------------
+
   TYPE(INT_RNK2) :: OffArrC,OffArrP
 #ifdef ONX2_PARALLEL
   TYPE(CList), DIMENSION(:), POINTER :: ListC,ListD
 #else
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
-!--------------------------------------------------------------------------------
-  !
+
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
 #endif
-  !
+
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
      ! Close current group and HDF

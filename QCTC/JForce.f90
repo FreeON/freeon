@@ -50,20 +50,23 @@ PROGRAM JForce
 
   IMPLICIT NONE
 
-  TYPE(BCSR)                   :: P,PT,P2
-  TYPE(AtomPair)               :: Pair
-  TYPE(HGLL),POINTER           :: RhoHead
-  TYPE(DBL_VECT)               :: Frc,JFrc
-  INTEGER                      :: AtA,AtB,A1,A2,B1,B2,MA,NB,MN1,MN,JP,Q
-  REAL(DOUBLE)                 :: JFrcChk,ETot
-  REAL(DOUBLE)                 :: JFORCE_TotalTime_Start
-  CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
-  INTEGER                      :: NLink,NC,I,J,K
-  REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm
-  REAL(DOUBLE),DIMENSION(15)   :: F_nlm
-  TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
+  TYPE(BCSR)                     :: P,PT,P2
+  TYPE(AtomPair)                 :: Pair
+  TYPE(HGLL),POINTER             :: RhoHead
+  TYPE(DBL_VECT)                 :: Frc,JFrc
+  INTEGER                        :: AtA,AtB,A1,A2,B1,B2,MA,NB,MN1,MN,JP,Q
+  REAL(DOUBLE)                   :: JFrcChk,ETot
+  REAL(DOUBLE)                   :: JFORCE_TotalTime_Start
+  CHARACTER(LEN=6),PARAMETER     :: Prog='JForce'
+  INTEGER                        :: NLink,NC,I,J,K
+  REAL(DOUBLE),DIMENSION(3)      :: A,B,nlm
+  REAL(DOUBLE),DIMENSION(15)     :: F_nlm
+  TYPE(DBL_RNK2)                 :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,PMat2Use
+#if defined(PARALLEL_CLONES)
+  INTEGER                        :: oldClone, rank
+#endif
 
   JFORCE_TotalTime_Start=MTimer()
   ! Start up macro
@@ -262,13 +265,31 @@ PROGRAM JForce
   ! Save Forces to Disk
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "writing forces to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL Put(GM,Tag_O=CurGeom)
+    CALL Put(GM, Tag_O = CurGeom)
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(GM, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(GM, Tag_O = CurGeom)
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "sending forces to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(GM, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
-  CALL Put(GM,Tag_O=CurGeom)
+  CALL Put(GM, Tag_O = CurGeom)
 #endif
   ! Tidy Up  
   CALL Delete(JFrc)

@@ -81,11 +81,6 @@ CONTAINS
     CALL Get(Args)
 
     ! Get SCRATCH directory from last argument.
-    !CALL GetEnv('MONDO_SCRATCH', MONDO_SCRATCH)
-    !if(LEN(TRIM(MONDO_SCRATCH)) == 0) then
-      !MONDO_SCRATCH = HAVE_MONDO_SCRATCH
-    !endif
-    !MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
     MONDO_SCRATCH = Args%C%C(SIZE(Args%C%C, 1))
 
     ! The HDF5 file name
@@ -377,8 +372,10 @@ CONTAINS
       DO I=1,NAtoms
         MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I))
       ENDDO
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+#if defined(PARALLEL)
       IF(InParallel)THEN
+#endif
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
         CALL New(OffSt,NPrc-1,0)
         CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
         !             CALL Get(ChkNPrc,'chknprc')
@@ -390,6 +387,8 @@ CONTAINS
         CALL New(End,NPrc-1,0)
         CALL Get(Beg,'beg',Tag_O=CurBase)
         CALL Get(End,'end',Tag_O=CurBase)
+#endif
+#if defined(PARALLEL)
       ENDIF
 #endif
 #ifdef MMech
@@ -442,9 +441,10 @@ CONTAINS
   !-------------------------------------------------------------------------------
   SUBROUTINE Init_TIME(A)
     TYPE(TIME),INTENT(OUT) :: A
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    IF(InParallel)  &
-         CALL AlignNodes()
+#if defined(PARALLEL)
+    IF(InParallel) THEN
+      CALL AlignNodes()
+    ENDIF
 #endif
     A%FLOP=Zero
     A%CPUS=CPUSec()
@@ -456,7 +456,8 @@ CONTAINS
   SUBROUTINE Init_DEBG(A,Prog)
     TYPE(DEBG), INTENT(OUT)      :: A
     CHARACTER(LEN=*), INTENT(IN) :: Prog
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+
+#if defined(PARALLEL)
     IF(MyId==ROOT)THEN
 #endif
       CALL OpenASCII(InpFile,Inp)
@@ -487,7 +488,7 @@ CONTAINS
       ELSE
         A%Mat=DEBUG_NONE
       ENDIF
-      !
+
       IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM) .OR. &
            OptKeyQ(Inp,TRIM(Prog)  ,DBG_PRT_MM)) THEN
         A%MM=DEBUG_MM
@@ -497,7 +498,7 @@ CONTAINS
       ELSE
         A%MM=DEBUG_NONE
       ENDIF
-      !
+
       IF(OptKeyQ(Inp,TRIM(Prog),  DBG_CHKSUMS).OR. &
            OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
         A%Chk=DEBUG_CHKSUMS
@@ -513,7 +514,7 @@ CONTAINS
       ELSE
         A%Fmt=DEBUG_DBLSTYLE
       ENDIF
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+#if defined(PARALLEL)
     ENDIF
     IF(InParallel)CALL BCast(A)
 #endif

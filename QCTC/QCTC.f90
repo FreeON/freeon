@@ -1,3 +1,4 @@
+! vim: tw=0:sw=3
 !------------------------------------------------------------------------------
 !    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
@@ -74,6 +75,10 @@ PROGRAM QCTC
   TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
 
   LOGICAL                        :: NoWrap=.FALSE. ! WRAPPING IS ON
+
+#if defined(PARALLEL_CLONES)
+  INTEGER :: oldClone, rank
+#endif
 
   ! Start timer.
   QCTC_TotalTime_Start=MTimer()
@@ -307,38 +312,6 @@ PROGRAM QCTC
   ENDIF
 
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! To avoid parallel writes to hdf, we temporarily store E_Nuc_Tot in a file
-  ! and collect the values later into the hdf.
-  OPEN(UNIT = Seq, FILE = TrixFile("QCTC-E_Nuc_Tot", Args, 0), &
-    STATUS = "NEW", FORM = "UNFORMATTED", ACCESS = "SEQUENTIAL")
-  WRITE(UNIT = Seq) E_Nuc_Tot
-  CLOSE(UNIT = Seq)
-#else
-  CALL Put(E_Nuc_Tot,'E_NuclearTotal',Stats_O=Current)
-#endif
-
-  !-------------------------------------------------------------------------------
-  ! Printing
-  !-------------------------------------------------------------------------------
-!!$  DO I=CS_IN%NCells,MAX(1,CS_IN%NCells-27)
-!!$     WRITE(*,55)I,100D0*NNearCount(I)/(NLeaf*NPrim)
-!!$55   FORMAT('Cell# ',I2,", % NF = ",F6.2)
-!!$  ENDDO
-!!$
-!!$  WRITE(*,11)' Density_Time  = ',Density_Time
-!!$  WRITE(*,11)' TreeMake_Time = ',TreeMake_Time
-!!$  WRITE(*,11)' JWalking_Time = ',JWalk_Time
-!!$  WRITE(*,11)' Integral_Time = ',Integral_Time
-!!$  WRITE(*,11)' Multipol_Time = ',Multipole_Time
-!!$  WRITE(*,11)' Total J Time  = ',Decompose_Time+TreeMake_Time+JWalk_Time+Multipole_Time+Integral_Time
-!!$  WRITE(*,11)' Total JWalks  = ',DBLE(NPrim)
-!!$  WRITE(*,11)' Av  Ints/Prim = ',DBLE(NInts)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # NF/Prim = ',DBLE(NNearAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Av  # FF/Prim = ',DBLE(NFarAv)/DBLE(NPrim)
-!!$  WRITE(*,11)' Time per INode= ',Integral_Time/DBLE(NNearAv)
-!!$  WRITE(*,11)' Time per MNode= ',Multipole_Time/DBLE(NFarAv)
-!!$11 FORMAT(A20,D12.6)
 
   PerfMon%FLOP=Zero
   CALL MondoLog(DEBUG_MAXIMUM,Prog,'Coulomb Energy = '//TRIM(DblToChar(E_Nuc_Tot+Trace(DMat,T1)))//" hartree")
@@ -371,47 +344,32 @@ PROGRAM QCTC
   ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-  ! Make sure we are all done.
-  CALL MPI_Barrier(MPI_COMM_WORLD, IErr)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+     CALL Put(E_Nuc_Tot, 'E_NuclearTotal', Stats_O = Current)
 
-  IF(MyClone == 1) THEN
-    ! Collect data written to files and write to hdf.
-    CALL MondoLog(DEBUG_MAXIMUM, Prog, "collecting data to commit to hdf", "Clone "//TRIM(IntToChar(MyClone)))
+     oldClone = MyClone
+     DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(E_Nuc_Tot, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
 
-    ! Close out hdf group.
-    CALL CloseHDFGroup(H5GroupID)
-    CALL CloseHDF(HDFFileID)
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(E_Nuc_Tot, 'E_NuclearTotal', Stats_O = Current)
+     ENDDO
+     MyClone = oldClone
 
-    ! Store clone.
-    oldMyClone = MyClone
-
-    DO MyClone = 1, NClones
-      ! Read previously stored values and collect them.
-      OPEN(UNIT = Seq, FILE = TrixFile("QCTC-E_Nuc_Tot", Args, 0), &
-        STATUS = "OLD", FORM = "UNFORMATTED", ACCESS = "SEQUENTIAL")
-      READ(UNIT = Seq) E_Nuc_Tot
-      CLOSE(UNIT = Seq)
-
-      ! Some output.
-      CALL MondoLog(DEBUG_MAXIMUM, Prog, "E_NuclearTotal = "//TRIM(DblToChar(E_Nuc_Tot))//" hartree", "Clone "//TRIM(IntToChar(MyClone)))
-
-      ! Open hdf group.
-      HDFFileID = OpenHDF(H5File)
-      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
-
-      ! Write to hdf.
-      CALL Put(E_Nuc_Tot, "E_NuclearTotal", Stats_O = Current)
-
-      ! Close hdf group.
-      CALL CloseHDFGroup(H5GroupID)
-      CALL CloseHDF(HDFFileID)
-    ENDDO
-
-    ! Re-open hdf group.
-    MyClone = oldMyClone
-    HDFFileID = OpenHDF(H5File)
-    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+     ! Reopen old HDFGroup.
+     CALL CloseHDFGroup(H5GroupID)
+     H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID = H5GroupID
+  ELSE
+     CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+     CALL Send(E_Nuc_Tot, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
+#else
+  CALL Put(E_Nuc_Tot, 'E_NuclearTotal', Stats_O = Current)
 #endif
 
   !-------------------------------------------------------------------------------

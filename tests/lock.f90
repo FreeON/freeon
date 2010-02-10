@@ -47,7 +47,6 @@ PROGRAM locktest
   CALL FreeLock(lock)
 
   CALL MPI_FINALIZE(IErr)
-
 #endif
 
 END PROGRAM locktest

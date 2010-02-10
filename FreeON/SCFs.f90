@@ -251,6 +251,7 @@ CONTAINS
          IF(ConvergeKey==INCF_CNVRGNC.AND.cSCF>1)S%Action%C(1)='InkFok'
          CALL FockBuild(cSCF,cBAS,N,S,O,M)
          CALL Invoke('DIIS',N,S,M)
+         !STOP
          CALL SolveSCF(cBAS,N,S,O,M)
          CALL Invoke('SCFstats',N,S,M)
       ELSEIF(ConvergeKey==ODA_CNVRGNC)THEN
@@ -741,6 +742,7 @@ CONTAINS
     ENDIF
     CALL Invoke('FBuild',N,S,M)
   END SUBROUTINE FockBuild
+
   !===============================================================================
   ! EXTRAPOLATE (DIIS)
   !===============================================================================
@@ -928,8 +930,7 @@ CONTAINS
       CALL Invoke('MakePFFT',N,S,M)
     ENDIF
 
-    IF((O%Guess==GUESS_EQ_RESTART .AND.(.NOT.S%SameGeom)) &
-         .OR.O%Guess==GUESS_EQ_NEWGEOM)THEN
+    IF((O%Guess==GUESS_EQ_RESTART .AND. (.NOT.S%SameGeom)) .OR. O%Guess==GUESS_EQ_NEWGEOM)THEN
       ! Make previous geometrys S matrix
       S%Action%C(1)='RestartGeomSwitch'
       CALL Invoke('MakeS',N,S,M)
@@ -1008,8 +1009,10 @@ CONTAINS
       S%Action%C(1)='ForceEvaluation'
       ! The non-orthogonal response
       CALL Invoke('SForce',N,S,M)
+      !STOP
       ! Kinetic energy piece
       CALL Invoke('TForce',N,S,M)
+      !STOP
       !!$    CALL NTHessian(cBAS,cGEO,N,G,B,S,M)
       ! Compute ECP component of the force
       IF(B%BSets(1,cBAS)%HasECPs)THEN
@@ -1020,6 +1023,7 @@ CONTAINS
       CALL Invoke('MakeRho',N,S,M)
       ! Coulomb part
       CALL Invoke('JForce',N,S,M)
+      !STOP
       ! DFT exchange corrleation term
       IF(HasDFT(O%Models(cBas))) THEN
         !!$       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
@@ -1028,6 +1032,7 @@ CONTAINS
       ! Exact Hartree-Fock exchange component
       IF(HasHF(O%Models(cBas)))THEN
         CALL Invoke('GONX',N,S,M)
+        !STOP
       ENDIF
 
     ENDIF

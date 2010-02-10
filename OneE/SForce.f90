@@ -70,6 +70,10 @@ PROGRAM SForce
   CHARACTER(LEN=6),PARAMETER     :: Prog='SForce'
   LOGICAL                        :: Present
 
+#if defined(PARALLEL_CLONES)
+  INTEGER :: oldClone, rank
+#endif
+
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 
@@ -247,28 +251,28 @@ PROGRAM SForce
     ! Rescale the Forces if needed.
     IF(P%NSMat.GT.1) CALL DSCAL(3*NAtoms,0.5D0,    SFrc%D(1  ),1)
     IF(P%NSMat.GT.1) CALL DSCAL(       9,0.5D0,LatFrc_S%D(1,1),1)
-    !    Zero the Lower Triange
+    ! Zero the Lower Triange
     DO I=1,3
       DO J=1,I-1
         LatFrc_S%D(I,J) = Zero
       ENDDO
     ENDDO
-    !    Sum in the S contribution to total force
+    ! Sum in the S contribution to total force
     DO AtA=1,NAtoms
       A1=3*(AtA-1)+1
       A2=3*AtA
       GM%Gradients%D(1:3,AtA) =  SFrc%D(A1:A2)
     ENDDO
-    !    Sum in the S contribution to total lattice force
+    ! Sum in the S contribution to total lattice force
     GM%PBC%LatFrc%D = LatFrc_S%D
 #ifdef PARALLEL
   ENDIF
 #endif
+
   ! Do some printing
   CALL Print_Force(GM,SFrc,'S Force')
-  CALL Print_Force(GM,SFrc,'S Force',Unit_O=6)
   CALL Print_LatForce(GM,LatFrc_S%D,'S Lattice Force')
-  CALL Print_LatForce(GM,LatFrc_S%D,'S Lattice Force',Unit_O=6)
+
   ! Do some checksumming and IO
   CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)
   CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)
@@ -276,13 +280,32 @@ PROGRAM SForce
   ! Save Forces to Disk
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "writing forces to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL Put(GM,Tag_O=CurGeom)
+    CALL Put(GM, Tag_O = CurGeom)
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(GM, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(GM, Tag_O = CurGeom)
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "sending forces to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    !CALL MondoLog(DEBUG_MAXIMUM, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(GM, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
-  CALL Put(GM,Tag_O=CurGeom)
+  CALL Put(GM, Tag_O = CurGeom)
 #endif
 
   ! Tidy up

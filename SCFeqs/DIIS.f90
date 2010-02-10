@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,8 +20,8 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 
 #include "MondoConfig.h"
@@ -67,7 +67,10 @@ PROGRAM DIIS
   LOGICAL                          :: Present,Sloshed
   INTEGER                          :: IPresent,JPresent
   CHARACTER(LEN=4),PARAMETER       :: Prog='DIIS'
-  CHARACTER(LEN=DCL) :: NAME
+  CHARACTER(LEN=DCL)               :: NAME
+#if defined(PARALLEL_CLONES)
+  INTEGER                          :: oldClone, rank
+#endif
 
   ! Initial setup
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -252,10 +255,28 @@ PROGRAM DIIS
 
 #if defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing DIISInfo to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(DIISInfo,'diisinfo')
+      CALL Put(DIISInfo, 'diisinfo')
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(DIISInfo, UBOUND(DIISInfo%I, 1), rank, PUT_TAG, M_O = LBOUND(DIISInfo%I, 1), comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(DIISInfo, 'diisinfo')
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending DIISInfo to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(DIISInfo, UBOUND(DIISInfo%I, 1), rank, PUT_TAG, M_O = LBOUND(DIISInfo%I, 1), comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
     CALL Put(DIISInfo,'diisinfo')
@@ -355,13 +376,31 @@ PROGRAM DIIS
     ENDIF
 #if defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing BTmp to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(BTmp,'diismtrix')
+      CALL Put(BTmp, 'diismtrix')
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(BTmp, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(BTmp, 'diismtrix')
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending BTmp to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(BTmp, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
-    CALL Put(BTmp,'diismtrix')
+    CALL Put(BTmp, 'diismtrix')
 #endif
     CALL Delete(BTmp)
 
@@ -419,13 +458,31 @@ PROGRAM DIIS
   ! IO
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "writing DIISErr to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL Put(DIISErr,'diiserr')
+    CALL Put(DIISErr, 'diiserr')
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(DIISErr, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(DIISErr, 'diiserr')
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "sending DIISErr to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(DIISErr, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
-  CALL Put(DIISErr,'diiserr')
+  CALL Put(DIISErr, 'diiserr')
 #endif
 
   ! Allocate some indecies for re-ordering

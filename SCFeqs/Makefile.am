@@ -74,7 +74,8 @@ DenMatResponse.o : DenMatMethods.o
 LowdinO.o        : DenMatMethods.o
 P2Use.o          : $(top_builddir)/MondoConfig.h DenMatMethods.o FillPBlok.o
 RHeqs.o          : DenMatMethods.o
-BlokAInv.o       : DenMatMethods.o
-SCFstats.o			 : $(top_builddir)/MondoConfig.h
+BlokAInv.o       : $(top_builddir)/MondoConfig.h DenMatMethods.o
+SCFstats.o       : $(top_builddir)/MondoConfig.h
 DenMatMethods.o  : $(top_builddir)/MondoConfig.h
-DIIS.o				   : $(top_builddir)/MondoConfig.h
+DIIS.o           : $(top_builddir)/MondoConfig.h
+FBuild.o         : $(top_builddir)/MondoConfig.h

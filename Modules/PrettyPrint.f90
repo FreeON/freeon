@@ -1,3 +1,28 @@
+!------------------------------------------------------------------------------
+!    This code is part of the FreeON suite of programs for linear scaling
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!    Copyright (2004). The Regents of the University of California. This
+!    material was produced under U.S. Government contract W-7405-ENG-36
+!    for Los Alamos National Laboratory, which is operated by the University
+!    of California for the U.S. Department of Energy. The U.S. Government has
+!    rights to use, reproduce, and distribute this software.  NEITHER THE
+!    GOVERNMENT NOR THE UNIVERSITY MAKES ANY WARRANTY, EXPRESS OR IMPLIED,
+!    OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.
+!
+!    This program is free software; you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by the
+!    Free Software Foundation; either version 2 of the License, or (at your
+!    option) any later version. Accordingly, this program is distributed in
+!    the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+!    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+!    PURPOSE. See the GNU General Public License at www.gnu.org for details.
+!
+!    While you may do as you like with this software, the GNU license requires
+!    that you clearly mark derivative software.  In addition, you are encouraged
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
+!------------------------------------------------------------------------------
 !    GENERIC PRETTY PRINTING FOR MONDOSCF TYPES
 !    Author: Matt Challacombe
 !---------------------------------------------------------
@@ -309,13 +334,15 @@ MODULE PrettyPrint
 #endif
          CALL Delete(CA)
       END SUBROUTINE Print_DBL_VECT
+
 !----------------------------------------------------------------PRINT BASIS SET
       SUBROUTINE Print_BSET(BS,Unit_O)
-        TYPE(BSET) :: BS
-        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
-        INTEGER :: NC,NP,MinL,MaxL
-        INTEGER :: I,J,K,L,M,PU
-        IF(PrintFlags%Set/=DEBUG_BASISSET)RETURN
+        TYPE(BSET)                  :: BS
+        INTEGER,OPTIONAL,INTENT(IN) :: Unit_O
+        INTEGER                     :: NC,NP,MinL,MaxL
+        INTEGER                     :: I,J,K,L,M,PU
+
+        !IF(PrintFlags%Set/=DEBUG_BASISSET)RETURN
         PU=OpenPU(Unit_O=Unit_O)
         CALL PrintProtectL(PU)
         WRITE(PU,*)'Internal representation of the ', &
@@ -1369,7 +1396,7 @@ MODULE PrettyPrint
       CALL MondoLog(DEBUG_NONE, "Force", Name_O)
     ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "Force", "Atom  Z  Forces (ev/A)")
+    CALL MondoLog(DEBUG_NONE, "Force", "Atom  Z  Forces (eV/A)")
     DO AtA = 1,GM%Natms
        A1=3*(AtA-1)+1
        CALL MondoLog(DEBUG_NONE, "Force", TRIM(IntToChar(AtA))//" "// &

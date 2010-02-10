@@ -1,3 +1,4 @@
+! vim: tw=0:sw=3
 !------------------------------------------------------------------------------
 !    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
@@ -32,33 +33,36 @@ PROGRAM GONX2
 #undef ONX2_PARALLEL
 #endif
 
-  USE DerivedTypes
-  USE GlobalScalars
-  USE GlobalCharacters
-  USE InOut
-  USE PrettyPrint
-  USE MemMan
-  USE Parse
-  USE Macros
-  USE LinAlg
-  USE Functionals
+   USE DerivedTypes
+   USE GlobalScalars
+   USE GlobalCharacters
+   USE InOut
+   USE PrettyPrint
+   USE MemMan
+   USE Parse
+   USE Macros
+   USE LinAlg
+   USE Functionals
 
-  USE ONX2DataType
-  USE ONXCtrSclg   , ONLY: TrnMatBlk
-  USE ONX2List     , ONLY: AllocList,DeAllocList,MakeGList,PrintList
-  USE GONX2ComputDK, ONLY: ComputDK
+   USE ONX2DataType
+   USE ONXCtrSclg   , ONLY: TrnMatBlk
+   USE ONX2List     , ONLY: AllocList,DeAllocList,MakeGList,PrintList
+   USE GONX2ComputDK, ONLY: ComputDK
 
 #ifdef ONX2_PARALLEL
-  USE MondoMPI
-  USE FastMatrices
-  USE ONXGet       , ONLY: Get_Essential_RowCol,GetOffArr,Set_DFASTMAT_EQ_DBCSR2,GetDab
-  USE PartDrv      , ONLY: PDrv_Initialize,PDrv_Finalize
+   USE MondoMPI
+   USE FastMatrices
+   USE ONXGet       , ONLY: Get_Essential_RowCol,GetOffArr,Set_DFASTMAT_EQ_DBCSR2,GetDab
+   USE PartDrv      , ONLY: PDrv_Initialize,PDrv_Finalize
+#elif defined(PARALLEL_CLONES)
+   USE MondoMPI
+   USE ONXGet, ONLY: GetOffArr
 #else
-  USE ONXGet       , ONLY: GetOffArr
+   USE ONXGet, ONLY: GetOffArr
 #endif
-  !
+
   IMPLICIT NONE
-  !
+
 #ifdef ONX2_PARALLEL
   TYPE(FASTMAT), POINTER     :: DFMcd,DFMab,KxFM
 #else
@@ -92,6 +96,11 @@ PROGRAM GONX2
   TYPE(CList), DIMENSION(:), POINTER :: ListC,ListD
 #else
   TYPE(CList), DIMENSION(:), POINTER :: ListC
+#endif
+
+#if defined(PARALLEL_CLONES)
+   TYPE(DBL_RNK2) :: LatFrc
+   INTEGER        :: rank, oldClone
 #endif
 
   INTEGER :: ixyz,jxyz,A1,A2
@@ -300,7 +309,6 @@ PROGRAM GONX2
   CALL DAXPY(3*NAtoms,KScale,GradTmp%D(1,1),1,GradAux%D(1,1),1)
 ! Print Out Forces
   CALL Print_Force(GMc,GTmp,'X Force')
-  CALL Print_Force(GMc,GTmp,'X Force',Unit_O=6)
   CALL Delete(GTmp)
   CALL Delete(GradTmp)
 ! STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
@@ -334,7 +342,6 @@ PROGRAM GONX2
   CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog) 
 ! Print Out Forces
   CALL Print_Force(GMc,GTmp,'X Force')
-  CALL Print_Force(GMc,GTmp,'X Force',Unit_O=6)
   CALL Delete(GTmp)
   CALL DAXPY(3*NAtoms,KScale,GradX%D(1,1),1,GradAux%D(1,1),1)
 !
@@ -359,12 +366,32 @@ PROGRAM GONX2
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
     CALL MondoLog(DEBUG_NONE, Prog, "writing gradients to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL Put(GradAux,'Gradients',Tag_O=CurGeom)
+    CALL Put(GradAux, 'Gradients', Tag_O = CurGeom)
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(GradAux, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(GradAux, "Gradients", Tag_O = CurGeom)
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
   ELSE
     CALL MondoLog(DEBUG_NONE, Prog, "sending gradients to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(GradAux, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
-  CALL Put(GradAux,'Gradients',Tag_O=CurGeom)
+  CALL Put(GradAux, 'Gradients', Tag_O = CurGeom)
 #endif
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
@@ -372,12 +399,32 @@ PROGRAM GONX2
 #if defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
       CALL MondoLog(DEBUG_NONE, Prog, "writing stress to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
+      CALL Put(GMc%PBC%LatFrc, 'latfrc', Tag_O = CurGeom)
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(LatFrc, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(LatFrc, "latfrc", Tag_O = CurGeom)
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
       CALL MondoLog(DEBUG_NONE, Prog, "sending stress to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(GMc%PBC%LatFrc, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
-    CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
+    CALL Put(GMc%PBC%LatFrc, 'latfrc', Tag_O = CurGeom)
 #endif
   ENDIF
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
@@ -387,32 +434,31 @@ PROGRAM GONX2
   !
 #ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
-  !
+
   ! End Total Timing
   CALL New(TmGxArr,NPrc)
   CALL New(TmMLArr,NPrc)
   CALL New(TmTMArr,NPrc)
   CALL New(TmALArr,NPrc)
   CALL New(TmDLArr,NPrc)
-  !
+
   CALL MPI_Gather(TmGx,1,MPI_DOUBLE_PRECISION,TmGxArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmML,1,MPI_DOUBLE_PRECISION,TmMLArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmTM,1,MPI_DOUBLE_PRECISION,TmTMArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmAL,1,MPI_DOUBLE_PRECISION,TmALArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmDL,1,MPI_DOUBLE_PRECISION,TmDLArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  !
+
   IF(MyID.EQ.ROOT) THEN
-     !
      ! Imbalance stuff.
      CALL PImbalance(TmGxArr ,NPrc,Prog_O='ComputeGK')
-     !
+
      WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
      WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
      WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
      WRITE(*,1004) SUM(TmGxArr%D )/DBLE(NPrc),MINVAL(TmGxArr%D ),MAXVAL(TmGxArr%D )
      WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
      !WRITE(*,1006) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
-     !
+
 1001 FORMAT(' GONX: Ave TmAL = ',F15.2,', Min TmAL = ',F15.2,', Max TmAL = ',F15.2)
 1002 FORMAT(' GONX: Ave TmML = ',F15.2,', Min TmML = ',F15.2,', Max TmML = ',F15.2)
 1003 FORMAT(' GONX: Ave TmTM = ',F15.2,', Min TmTM = ',F15.2,', Max TmTM = ',F15.2)
@@ -420,22 +466,22 @@ PROGRAM GONX2
 1005 FORMAT(' GONX: Ave TmDL = ',F15.2,', Min TmDL = ',F15.2,', Max TmDL = ',F15.2)
      !1006 FORMAT(' ONX: Tot ERI  = ',F15.2,', Min ERI  = ',F15.2,', Max ERI  = ',F15.2)
   ENDIF
-  !
+
   CALL Delete(TmALArr)
   CALL Delete(TmMLArr)
   CALL Delete(TmTMArr)
   CALL Delete(TmGxArr)
   CALL Delete(TmDLArr)
-  !
+
 #else
-  !
+
   WRITE(*,1001) TmAL
   WRITE(*,1002) TmML
   WRITE(*,1003) TmTM
   WRITE(*,1004) TmGx
   WRITE(*,1005) TmDL
   !WRITE(*,1006) ....
-  !
+
 1001 FORMAT(' GONX: Ave TmAL = ',F15.2)
 1002 FORMAT(' GONX: Ave TmML = ',F15.2)
 1003 FORMAT(' GONX: Ave TmTM = ',F15.2)
@@ -453,11 +499,11 @@ PROGRAM GONX2
   CALL Delete(GradAux)
   CALL Delete(BoxX)
   CALL Delete(OffArr)
-  !
+
   CALL Delete(BSc)
   CALL Delete(GMc)
-  !
+
   CALL ShutDown(Prog)
-  !
+
 END PROGRAM GONX2
 

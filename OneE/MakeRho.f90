@@ -1,3 +1,4 @@
+! vim: tw=0
 !------------------------------------------------------------------------------
 !    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
@@ -78,6 +79,10 @@ PROGRAM MakeRho
   REAL(DOUBLE)                    :: RSumE,RSumE2,RSumN,dNel,RelRhoErr
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,Prog1,Prog2
   CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
+
+#if defined(PARALLEL_CLONES)
+  INTEGER                         :: oldClone, rank
+#endif
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -424,17 +429,39 @@ PROGRAM MakeRho
 
   CASE('ForceEvaluation')
 #if defined(PARALLEL)
-    CALL Put(Rho,'Rho'//IntToChar(MyID),Args,1)
+    CALL Put(Rho, 'Rho'//IntToChar(MyID), Args, 1)
 #elif defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(Rho,'Rho',Args,1)
+      CALL Put(Rho, "Rho", Args, 1)
       CALL Put(MP)
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(Rho, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(MP, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(Rho, "Rho", Args, 1)
+        CALL Put(MP)
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      !CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(Rho, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(MP, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
-    CALL Put(Rho,'Rho',Args,1)
+    CALL Put(Rho, "Rho", Args, 1)
     CALL Put(MP)
 #endif
 
@@ -444,7 +471,8 @@ PROGRAM MakeRho
 #elif defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
       CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(Rho,'Rho',Args,1)
+      CALL Halt("[FIXME]")
+      CALL Put(Rho,'DeltaRho',Args,0)
       CALL Put(MP,'Delta'//TRIM(SCFCycl))
     ELSE
       CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
@@ -456,17 +484,39 @@ PROGRAM MakeRho
 
   CASE DEFAULT
 #if defined(PARALLEL)
-    CALL Put(Rho,'Rho'//IntToChar(MyID),Args,0)
+    CALL Put(Rho, "Rho"//IntToChar(MyID), Args, 0)
 #elif defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing density and multipoles to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(Rho,'Rho',Args,1)
+      CALL Put(Rho, "Rho", Args, 0)
       CALL Put(MP)
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(Rho, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(MP, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(Rho, "Rho", Args, 0)
+        CALL Put(MP)
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      !CALL MondoLog(DEBUG_MAXIMUM, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(Rho, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(MP, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
-    CALL Put(Rho,'Rho',Args,0)
+    CALL Put(Rho, "Rho", Args, 0)
     CALL Put(MP)
 #endif
 
