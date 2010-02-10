@@ -57,15 +57,15 @@ tags :
 
 # Dependencies.
 MakeU.o   : UBlok.o
-MakeS.o   : SBlok.o
-MakeT.o   : TBlok.o
-MakeM.o		: MBlok.o
-Make1E.o	: Make1X.o
-Make1X.o	: Int1E.o
+MakeS.o   : $(top_builddir)/MondoConfig.h SBlok.o
+MakeT.o   : $(top_builddir)/MondoConfig.h TBlok.o
+MakeM.o   : MBlok.o
+Make1E.o  : Make1X.o
+Make1X.o  : Int1E.o
 MakeRho.o : $(top_builddir)/MondoConfig.h RhoBlok.o RhoTools.o
 SForce.o  : $(top_builddir)/MondoConfig.h BlokTrWdS.o
 TForce.o  : $(top_builddir)/MondoConfig.h BlokTrPdT.o
 MForce.o  : BlokTrPdM.o
 THess.o   : BlokTrPd2T.o
 UForce.o  : UBlok.o
-RhoBlok.o	: RhoTools.o
+RhoBlok.o : RhoTools.o

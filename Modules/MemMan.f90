@@ -699,7 +699,7 @@ CONTAINS
 
   SUBROUTINE New_BONDDATA(A,NBond)
     TYPE(BONDDATA) :: A
-    INTEGER NBond,NatmsLoc
+    INTEGER NBond
 
     IF(AllocQ(A%Alloc)) CALL Delete(A)
     A%N=NBond
@@ -783,7 +783,7 @@ CONTAINS
   END SUBROUTINE Delete_Chol
 
   SUBROUTINE New_PBCInfo(A)
-    TYPE(PBCInfo),INTENT(INOUT)       :: A
+    TYPE(PBCInfo),INTENT(INOUT) :: A
 
     CALL AllocChk(A%Alloc)
     CALL New(A%AutoW     ,3)
@@ -1772,7 +1772,10 @@ CONTAINS
     INTEGER, INTENT(IN)                  :: MemStatus,Ints,Dbls
     INTEGER                              :: MemInBytes
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
-    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab,ChMyId
+    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMem,ChTab
+#ifdef PARALLEL
+    CHARACTER(LEN=INTERNAL_INT_LEN)      :: ChMyId
+#endif
 
     MemInBytes=ToBytes(Ints,Dbls)
     IF(MemStatus/=SUCCEED)THEN

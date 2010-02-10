@@ -289,7 +289,7 @@ CONTAINS
     INTEGER                                 :: Tag_INT_old, Tag_INT_new
 
     IF(PRESENT(Tag_O).AND.PRESENT(Stats_O))THEN
-      CALL Halt(' Logic error in NameTag with both tag and stats passed through! ')
+      CALL Halt('Logic error in NameTag with both tag and stats passed through!')
     ELSEIF(PRESENT(Tag_O))THEN
       ! Apply recycling.
       Tag_INT_old = CharToInt(Tag_O)

@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,8 +20,8 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
 
 #include "MondoConfig.h"
@@ -60,7 +60,10 @@ PROGRAM SCFStatus
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFMessage
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFTag
   CHARACTER(LEN=9),PARAMETER      :: Prog='SCF'
-  !---------------------------------------------------------------------------------------
+#if defined(PARALLEL_CLONES)
+  INTEGER                         :: oldClone, rank
+#endif
+
   !  Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 
@@ -176,13 +179,39 @@ PROGRAM SCFStatus
 
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "writing E_ElectronicTotal, Etot, and DMax to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-    CALL Put(E_el_tot,'E_ElectronicTotal')
-    CALL Put(Etot,'Etot')
-    CALL Put(Etot,'Etot',Stats_O=Current)
-    CALL Put(DMax,'DMax')
+    CALL Put(E_el_tot, 'E_ElectronicTotal')
+    CALL Put(Etot, 'Etot')
+    CALL Put(Etot, 'Etot', Stats_O = Current)
+    CALL Put(DMax, 'DMax')
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(E_el_tot, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(Etot, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(DMax, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(E_el_tot, 'E_ElectronicTotal')
+      CALL Put(Etot, 'Etot')
+      CALL Put(Etot, 'Etot', Stats_O = Current)
+      CALL Put(DMax, 'DMax')
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "sending E_ElectronicTotal, Etot, and DMax to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    !CALL MondoLog(DEBUG_MAXIMUM, Prog, "sending density and multipoles to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(E_el_tot, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(Etot, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(DMax, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
 #else
   CALL Put(E_el_tot,'E_ElectronicTotal')

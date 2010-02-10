@@ -290,8 +290,9 @@ CONTAINS
     CALL Filter(Tmp1,P)     ! Thresholding
     ! Archive the AO-DM ?
     CALL Get(DensityArchive,'ArchiveDensity')
-    IF(DensityArchive) &
-         CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    IF(DensityArchive) THEN
+      CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    ENDIF
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
@@ -305,6 +306,10 @@ CONTAINS
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
     LOGICAL          :: Present,DensityArchive
+#if defined(PARALLEL_CLONES)
+    REAL(DOUBLE)     :: homolumogap
+    INTEGER          :: oldClone, rank
+#endif
 
     ! IO for the orthogonal P
     CALL Put(P,TrixFile('OrthoD',Args,1))
@@ -331,14 +336,35 @@ CONTAINS
     ENDIF
     CALL Put(Tmp1,TrixFile('D',Args,1))
 #if defined(PARALLEL_CLONES)
+    homolumogap = Zero
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
       CALL MondoLog(DEBUG_NONE, Prog, "writing homolumogap to hdf", "Clone "//TRIM(IntToChar(MyClone)))
-      CALL Put(Zero,'homolumogap')
+      CALL Put(homolumogap, "homolumogap")
+
+      oldClone = MyClone
+      DO rank = 1, MSize(MPI_COMM_WORLD)-1
+        CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+        CALL Recv(homolumogap, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+        ! Put to correct HDFGroup.
+        CALL CloseHDFGroup(H5GroupID)
+        H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID = H5GroupID
+        CALL Put(homolumogap, "homolumogap")
+      ENDDO
+      MyClone = oldClone
+
+      ! Reopen old HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
     ELSE
       CALL MondoLog(DEBUG_NONE, Prog, "sending homolumogap to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(homolumogap, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
-    CALL Put(Zero,'homolumogap')
+    CALL Put(Zero, "homolumogap")
 #endif
     ! CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']',Unit_O=6)
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)

@@ -113,7 +113,8 @@ ONX2.o : \
   ONXCtrSclg.o \
   ONXRng.o \
   ONXFillOut.o \
-  ONXGet.o
+  ONXGet.o \
+  $(top_builddir)/MondoConfig.h
 
 GONX2ComputDK.o : \
   ONX2DataType.o \
