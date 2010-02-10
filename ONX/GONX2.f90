@@ -365,7 +365,6 @@ PROGRAM GONX2
   !
 #if defined(PARALLEL_CLONES)
   IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-    CALL MondoLog(DEBUG_NONE, Prog, "writing gradients to hdf", "Clone "//TRIM(IntToChar(MyClone)))
     CALL Put(GradAux, 'Gradients', Tag_O = CurGeom)
 
     oldClone = MyClone
@@ -386,7 +385,6 @@ PROGRAM GONX2
     H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
     HDF_CurrentID = H5GroupID
   ELSE
-    CALL MondoLog(DEBUG_NONE, Prog, "sending gradients to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
     CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     CALL Send(GradAux, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
   ENDIF
@@ -398,7 +396,6 @@ PROGRAM GONX2
   IF(DoStrs) THEN
 #if defined(PARALLEL_CLONES)
     IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
-      CALL MondoLog(DEBUG_NONE, Prog, "writing stress to hdf", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Put(GMc%PBC%LatFrc, 'latfrc', Tag_O = CurGeom)
 
       oldClone = MyClone
@@ -419,7 +416,6 @@ PROGRAM GONX2
       H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
       HDF_CurrentID = H5GroupID
     ELSE
-      CALL MondoLog(DEBUG_NONE, Prog, "sending stress to clone 1", "Clone "//TRIM(IntToChar(MyClone)))
       CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
       CALL Send(GMc%PBC%LatFrc, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
     ENDIF

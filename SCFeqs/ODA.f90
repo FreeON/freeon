@@ -259,7 +259,7 @@ PROGRAM ODA
   CALL Multiply(PTilde,L1)
   CALL Add(P,PTilde,T2)
   CALL Put(T2,TrixFile('D',Args,0))
-  CALL Put(T2,'CurrentDM',CheckPoint_O=.TRUE.)
+  !CALL Put(T2,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL PChkSum(T2,'Pao['//TRIM(NxtCycl)//']',Prog)
   ! Compute FTilde_N ~ (1-L)*FTilde_(N-1)+L*F_N
   CALL Multiply(F,L)

@@ -276,7 +276,7 @@ PROGRAM DIIS
       HDF_CurrentID = H5GroupID
     ELSE
       CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
-      CALL Send(DIISInfo, UBOUND(DIISInfo%I, 1), rank, PUT_TAG, M_O = LBOUND(DIISInfo%I, 1), comm_O = MPI_COMM_WORLD)
+      CALL Send(DIISInfo, UBOUND(DIISInfo%I, 1), ROOT, PUT_TAG, M_O = LBOUND(DIISInfo%I, 1), comm_O = MPI_COMM_WORLD)
     ENDIF
 #else
     CALL Put(DIISInfo,'diisinfo')
