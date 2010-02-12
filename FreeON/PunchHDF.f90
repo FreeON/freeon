@@ -213,7 +213,7 @@ CONTAINS
       CALL Delete(DoubleVect)
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
       !If parallel and we have clones, we need to put the D matrices in the HDF.
-      IF(G%Clones.GT.1) CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
+      !IF(G%Clones.GT.1) CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
 #endif
       CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO

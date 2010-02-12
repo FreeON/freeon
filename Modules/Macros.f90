@@ -277,9 +277,13 @@ CONTAINS
     ! ... shutdown MPI and print a time stamp
     IF(PrintFlags%Key>DEBUG_MEDIUM) THEN
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
+#if defined(PARALLEL)
       IF(MyId == ROOT) THEN
+#endif
         CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+#if defined(PARALLEL)
       ENDIF
+#endif
 
       ! Shutdown MPI
       CALL FiniMPI()
