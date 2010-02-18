@@ -147,7 +147,6 @@ CONTAINS
       ALLOCATE(message_status(M%Clump%I(3, iCLUMP), MPI_STATUS_SIZE))
 
       DO I = 1, M%Clump%I(3, iCLUMP)
-        !CALL MondoLog(DEBUG_NONE, "Invoke", "setting up receive buffers")
         CALL MPI_IRECV(message_buffer(I), 1, MPI_CHARACTER, MPI_ANY_SOURCE, BARRIER_TAG, SPAWN, message_request(I), IErr)
         message_flag(I) = .FALSE.
       ENDDO
@@ -158,7 +157,7 @@ CONTAINS
       DO WHILE(buffer_index < M%Clump%I(3, iCLUMP))
         DO I = 1, M%Clump%I(3, iCLUMP)
           IF(.NOT. message_flag(I)) THEN
-            !CALL MondoLog(DEBUG_NONE, "Invoke", "testing child "//TRIM(IntToChar(I)))
+            ! Test child.
             CALL MPI_TEST(message_request(I), message_flag(I), message_status(I,:), IErr)
             IF(message_flag(I)) THEN
               CALL MondoLog(DEBUG_MAXIMUM, "Invoke", "child "//TRIM(IntToChar(buffer_index+1))//" has finished")
@@ -168,13 +167,8 @@ CONTAINS
         ENDDO
 
         ! Sleep a little.
-        !CALL MondoLog(DEBUG_NONE, "Invoke", "sleeping")
         CALL FreeONSleep(0.5)
-        !CALL MondoLog(DEBUG_NONE, "Invoke", "done sleeping")
       ENDDO
-
-      ! All children are done.
-      !CALL MondoLog(DEBUG_NONE, "Invoke", "all children are done")
 
       ! Free the communicator.
       CALL MPI_COMM_FREE(SPAWN, IErr)

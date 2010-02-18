@@ -172,6 +172,7 @@ CONTAINS
       InParallel=.FALSE.
     ENDIF
 
+#if defined(PARALLEL)
     ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
     IF(InParallel)THEN
       CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),(/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
@@ -186,7 +187,7 @@ CONTAINS
       CALL ErrChk(IErr,Sub)
     ELSE
       ! This is a dead node
-      CALL ShutDown('DeaddNode')
+      CALL ShutDown('Dead Node')
     ENDIF
 
     ! Offset the actual clone
@@ -204,8 +205,17 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
         //" after MyID = "//TRIM(IntToChar(MRank()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
     ENDIF
+
     MyID=MRank()
     NPrc=MSize()
+#else
+    ! Figure out the clone.
+    MyClone = SpaceTime%I(3)+MRank()
+    MyID = ROOT
+    NPrc = 1
+    CALL MondoLog(DEBUG_MAXIMUM, "CartCommSplit", "parallel clones, MyClone = "//TRIM(IntToChar(MyClone)))
+#endif
+
   END FUNCTION CartCommSplit
 #endif
 
