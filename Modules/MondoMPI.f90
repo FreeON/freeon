@@ -146,6 +146,9 @@ CONTAINS
       ! Free the communicator.
       CALL MPI_COMM_FREE(PARENT, IErr)
       !CALL MPI_COMM_FREE(INTRA_PARENT, IErr)
+
+      ! Wait before finalizing...
+      CALL MPI_Barrier(MPI_COMM_WORLD, IErr)
 #endif
       CALL MPI_FINALIZE(IErr)
    END SUBROUTINE FiniMPI
