@@ -213,7 +213,6 @@ CONTAINS
     MyClone = SpaceTime%I(3)+MRank()
     MyID = ROOT
     NPrc = 1
-    CALL MondoLog(DEBUG_MAXIMUM, "CartCommSplit", "parallel clones, MyClone = "//TRIM(IntToChar(MyClone)))
 #endif
 
   END FUNCTION CartCommSplit
