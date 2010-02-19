@@ -193,7 +193,7 @@ CONTAINS
       ENDDO
       CALL MPI_BCAST(LocalChars,L,MPI_CHARACTER,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_STR',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_STR',IErr)
       ENDIF
       DO I=1,L
          A(I:I)=LocalChars(I)
@@ -217,7 +217,7 @@ CONTAINS
       I=0; IF(A)I=1
       CALL MPI_BCAST(I,1,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_STR',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_STR',IErr)
       ENDIF
       A=.FALSE.; IF(I==1)A=.TRUE.
    END SUBROUTINE Bcast_LOG_SCLR
@@ -235,7 +235,7 @@ CONTAINS
       ENDDO
       CALL MPI_BCAST(IA%I,N,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_LOG_VECT',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_LOG_VECT',IErr)
       ENDIF
       A%L=.FALSE.
       DO I=1,N
@@ -253,7 +253,7 @@ CONTAINS
       IF(PRESENT(Id_0))Id=Id_0
       CALL MPI_BCAST(D,1,MPI_DOUBLE_PRECISION,Id,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_DBL',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_DBL',IErr)
       ENDIF
    END SUBROUTINE Bcast_DBL_SCLR
 
@@ -265,7 +265,7 @@ CONTAINS
       L=SIZE(A%D); IF(PRESENT(N_O)) L=N_O
       CALL MPI_BCAST(A%D,L,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_DBL_VECT',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_DBL_VECT',IErr)
       ENDIF
    END SUBROUTINE Bcast_DBL_VECT
 
@@ -310,7 +310,7 @@ CONTAINS
          Id=ROOT; IF(PRESENT(Id_O))Id=Id_O
          CALL MPI_BCAST(A,1,MPI_INTEGER,Id,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) THEN
-            CALL HaltMPI(' MPI_BCAST failed in Bcast_INT',IErr)
+            CALL HaltMPI('MPI_BCAST failed in Bcast_INT',IErr)
          ENDIF
    END SUBROUTINE Bcast_INT_SCLR
 
@@ -322,7 +322,7 @@ CONTAINS
       N=SIZE(A%I); IF(PRESENT(N_O))N=N_O
       CALL MPI_BCAST(A%I,N,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed in Bcast_INT_VECT',IErr)
+         CALL HaltMPI('MPI_BCAST failed in Bcast_INT_VECT',IErr)
       ENDIF
    END SUBROUTINE Bcast_INT_VECT
 
@@ -360,7 +360,7 @@ CONTAINS
 
       CALL MPI_BCAST(A,L,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed for integer vector ',IErr)
+         CALL HaltMPI('MPI_BCAST failed for integer vector',IErr)
       ENDIF
    END SUBROUTINE CRNIAV
 
@@ -370,7 +370,7 @@ CONTAINS
 
       CALL MPI_BCAST(A,L,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
       IF(IErr/=MPI_SUCCESS) THEN
-         CALL HaltMPI(' MPI_BCAST failed for double vector ',IErr)
+         CALL HaltMPI('MPI_BCAST failed for double vector',IErr)
       ENDIF
    END SUBROUTINE CRNDAV
 
@@ -1265,9 +1265,9 @@ CONTAINS
       CHARACTER(LEN=*),PARAMETER      :: Sub='MWaitAll'
 
       IF(PRESENT(Mssg))THEN
-         WRITE(*,*)' WAITALL:'
+         WRITE(*,*)'WAITALL:'
          CALL PSpew(Mssg,Reqs)
-         WRITE(*,*)' ...aiting waiting waiting waiti... '
+         WRITE(*,*)'...aiting waiting waiting waiti...'
       ENDIF
       ! Check to see if all requests are NULL
       N=SIZE(Reqs%I)
@@ -1371,9 +1371,9 @@ CONTAINS
 
       IF(IErr/=MPI_SUCCESS)THEN
          IF(PRESENT(Seqnce_O))THEN
-            CALL HaltMPI('>>>MondoMPI error:  '//TRIM(Seqnce_O)//'$'//TRIM(Caller)//'.',IErr)
+            CALL HaltMPI('>>>MondoMPI error: '//TRIM(Seqnce_O)//'$'//TRIM(Caller)//'.',IErr)
          ELSE
-            CALL HaltMPI('>>>MondoMPI error:  '//TRIM(Caller)//'.',IErr)
+            CALL HaltMPI('>>>MondoMPI error: '//TRIM(Caller)//'.',IErr)
          ENDIF
       ENDIF
    END SUBROUTINE
@@ -1388,7 +1388,7 @@ CONTAINS
       DO I=0,NPrc-1
          CALL MPI_BARRIER(MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
-         IF(MyId==I)WRITE(*,*)' MyId = ',MyId,'$',TRIM(Mssg)
+         IF(MyId==I)WRITE(*,*)'MyId = ',MyId,'$',TRIM(Mssg)
          CALL MPI_BARRIER(MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       ENDDO
@@ -1403,7 +1403,7 @@ CONTAINS
          CALL AlignNodes()
          IF(MyId==I)WRITE(*,55)MyId,TRIM(Name),A%I
       ENDDO
-      55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(I20,', '))
+      55 FORMAT('MyId = ',I2,', ',A,' = ',1000(I20,', '))
    ENDSUBROUTINE PSpew_INT_VECT
 
    SUBROUTINE PSpew_DBL_VECT(Name,A)
@@ -1415,7 +1415,7 @@ CONTAINS
          CALL AlignNodes()
          IF(MyId==I)WRITE(*,55)MyId,TRIM(Name),A%D
       ENDDO
-      55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(D9.3,', '))
+      55 FORMAT('MyId = ',I2,', ',A,' = ',1000(D9.3,', '))
    ENDSUBROUTINE PSpew_DBL_VECT
 
    SUBROUTINE AlignFrontends()
