@@ -119,21 +119,11 @@ CONTAINS
     ! Each ROOT in each MONDO_COMM opens the HDF file --->FOR READ ONLY<---
     HDFFileID=OpenHDF(H5File)
     HDF_CurrentID=HDFFileID
-    ! Operate at the top level of the archive
-    ! Open a group that the ROOT of each clone accesses by default
+    ! Operate at the top level of the archive.  Open a group that the ROOT of
+    ! each clone accesses by default
     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
     ! Default is now the cloned group id rather than the HDF file id
     HDF_CurrentID=H5GroupID
-    !    WRITE(*,22)TRIM(Prog),MyId,MyClone
-    ! 22 format(A10,' IN MACROS, GETTING TAG',I3,", ",I3)
-    ! 23 format(A10,' IN MACROS, GOT     TAG',I3,", ",I3)
-    !    CALL GET(ITAG,"TAG")
-    !    WRITE(*,23)TRIM(Prog),MyId,MyClone
-    !    CALL GET(ETAG,'E_NuclearTotal',StatsToChar(Current))
-    !    CALL PUT(2*ITAG,"TAG")
-    !    CALL PUT(2D0*ETAG,'E_NuclearTotal',StatsToChar(Current))
-    !    IF(MyID==ROOT)WRITE(*,33),MyId,MyClone,iTAG,ETag,HDFFileID,HDF_CurrentID
-    !    33 FORMAT(' MyId = ',I2,', MyClone = ',I2,', iTAG = ',I6,' ETAG = ',D12.6,', FileID = ',I10,' CURRENTID = ',I10)
     ! Load variables global at the group (clone) level
     CALL LoadGroupGlobals(Args)
     ! Initialize memory statistics
@@ -221,10 +211,8 @@ CONTAINS
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
 
-    !    IF(MyID==ROOT)WRITE(*,33)Prog,MyId,MyClone,H5GroupID,HDFFileID
-    !    33 FORMAT(A10,'SHUTDOWN: MyId = ',I2,', MyClone = ',I2,', GroupID = ',I10,' FileID = ',I10)
-
-    ! Following is a bit of fancy HDF footwork, necessary for parallel-clones to work properly
+    ! Following is a bit of fancy HDF footwork, necessary for parallel-clones to
+    ! work properly
     !
     ! Close the clone directories
     CALL CloseHDFGroup(H5GroupID)
@@ -234,8 +222,6 @@ CONTAINS
     ! Revert back to global communicator, rank etc ...
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()
-    !CALL MondoLog(DEBUG_NONE, "ShutDown", "setting MyID = "//TRIM(IntToChar(MyID)) &
-    !  //", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
     ! and reopen the upper level HDF directory for just the world root node
     HDFFileID=OpenHDF(H5File)
 #endif
@@ -266,26 +252,18 @@ CONTAINS
       ENDIF
     ENDIF
 
-    ! OMG,this is anoying!!
-    ! Check MemStats.
-!    IF(MemStats%Allocs /= MemStats%DeAllocs) THEN
-!      CALL MondoLog(DEBUG_NONE, "ShutDown ("//TRIM(Prog)//")", "Possible memory leak. Allocs = " &
-!        //TRIM(IntToChar(MemStats%Allocs))//", DeAllocs = " &
-!        //TRIM(IntToChar(MemStats%DeAllocs)))
-      !CALL Halt("[FIXME]")
-!    ENDIF
-
     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
       CALL PPrint(MemStats,Prog)
     ENDIF
 
     ! Now mark success of this program ...
+    CALL MondoLog(DEBUG_NONE, "ShutDown", "[FIXME] should not put in parallel")
     CALL Put(.FALSE.,'ProgramFailed')
     ! ... and close the HDF file ...
     CALL CloseHDF(HDFFileID)
-    ! ... shutdown MPI and print a time stamp
+
+    ! Print a time stamp.
     IF(PrintFlags%Key>DEBUG_MEDIUM) THEN
-#if defined(PARALLEL) || defined(PARALLEL_CLONES)
 #if defined(PARALLEL)
       IF(MyId == ROOT) THEN
 #endif
@@ -293,13 +271,12 @@ CONTAINS
 #if defined(PARALLEL)
       ENDIF
 #endif
-
-      ! Shutdown MPI
-      CALL FiniMPI()
-#else
-      CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
-#endif
     ENDIF
+
+#if defined(PARALLEL) || defined(PARALLEL_CLONES)
+    ! Shutdown MPI
+    CALL FiniMPI()
+#endif
     STOP
   END SUBROUTINE ShutDown
 
@@ -308,8 +285,8 @@ CONTAINS
   !==============================================================
   SUBROUTINE LoadTopLevelGlobals(Args)
     TYPE(ARGMT) :: Args
-    INTEGER :: I,ChkNPrc
-    !-----------------------------------------------------------!
+    INTEGER     :: I,ChkNPrc
+
     IF(Args%NC>=2) THEN
       SCFActn=TRIM(Args%C%C(2))
     ENDIF
@@ -391,11 +368,11 @@ CONTAINS
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
         CALL New(OffSt,NPrc-1,0)
         CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
-        !             CALL Get(ChkNPrc,'chknprc')
-        !             IF(NPrc/=ChkNPrc) &
-        !                  CALL Halt('In StartUp() --- Inconsistency: NPrc = '  &
-        !                  //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
-        !                  //TRIM(IntToChar(ChkNPrc)))
+        !CALL Get(ChkNPrc,'chknprc')
+        !IF(NPrc/=ChkNPrc) &
+        !     CALL Halt('In StartUp() --- Inconsistency: NPrc = '  &
+        !     //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
+        !     //TRIM(IntToChar(ChkNPrc)))
         CALL New(Beg,NPrc-1,0)
         CALL New(End,NPrc-1,0)
         CALL Get(Beg,'beg',Tag_O=CurBase)
@@ -424,6 +401,7 @@ CONTAINS
     CALL Get(CS_OUT,'ovcells',Tag_O=CurGeom)
 
   END SUBROUTINE LoadGroupGlobals
+
   !=========================================================
   ! MARK FAILURE OF PROG
   !=========================================================
@@ -432,15 +410,14 @@ CONTAINS
     CALL Put(.TRUE.,'ProgramFailed')
     CALL Put(Prog  ,'FailedProgram')
   END SUBROUTINE MarkFailure
+
   !=========================================================
   ! MARK SUCCESS OF PROG
   !=========================================================
   SUBROUTINE MarkSuccess()
     CALL Put(.FALSE.,'ProgramFailed')
   END SUBROUTINE MarkSuccess
-  !-------------------------------------------------------------------------------
-  !
-  !-------------------------------------------------------------------------------
+
   SUBROUTINE Init_MEMS(A)
     TYPE(MEMS), INTENT(OUT) :: A
     A%Allocs=0
@@ -449,9 +426,7 @@ CONTAINS
     A%MaxMem=0
     A%MaxAlloc=0
   END SUBROUTINE Init_MEMS
-  !-------------------------------------------------------------------------------
-  !
-  !-------------------------------------------------------------------------------
+
   SUBROUTINE Init_TIME(A)
     TYPE(TIME),INTENT(OUT) :: A
 #if defined(PARALLEL)
@@ -463,9 +438,7 @@ CONTAINS
     A%CPUS=CPUSec()
     A%Wall=WallSec()
   END SUBROUTINE Init_TIME
-  !-------------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------------
   SUBROUTINE Init_DEBG(A,Prog)
     TYPE(DEBG), INTENT(OUT)      :: A
     CHARACTER(LEN=*), INTENT(IN) :: Prog
@@ -474,6 +447,7 @@ CONTAINS
     IF(MyId==ROOT)THEN
 #endif
       CALL OpenASCII(InpFile,Inp)
+
       IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_INTS))THEN
         A%Int=DEBUG_INTEGRAL
       ELSE
@@ -529,7 +503,7 @@ CONTAINS
       ENDIF
 #if defined(PARALLEL)
     ENDIF
-    IF(InParallel)CALL BCast(A)
+    IF(InParallel) CALL BCast(A)
 #endif
     CLOSE(Inp)
   END SUBROUTINE Init_DEBG

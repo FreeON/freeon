@@ -70,7 +70,7 @@ MODULE PrettyPrint
       MODULE PROCEDURE Print_CheckSum_DBCSR
 #endif
    END INTERFACE
-!
+
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
    CHARACTER(LEN=*),PARAMETER     :: CheckEq = ' CheckSum = '
    CONTAINS
@@ -90,11 +90,11 @@ MODULE PrettyPrint
          DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
          HMS=TTime(1:2)//':'//TTime(3:4)//':'//TTime(5:6)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-            CALL MondoLog(DEBUG_NONE, "TimeStamp", '(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)')
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '(*'//TRIM(Mssg)//' '//TRIM(DDay)//' @ '//TRIM(HMS)//'*)')
          ELSEIF(Enter)THEN
-            CALL MondoLog(DEBUG_NONE, "TimeStamp", '<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>')
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '<<'//TRIM(Mssg)//' '//TRIM(DDay)//' @ '//TRIM(HMS)//'>>')
          ELSE
-            CALL MondoLog(DEBUG_NONE, "TimeStamp", '>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<')
+            CALL MondoLog(DEBUG_NONE, "TimeStamp", '>-'//TRIM(Mssg)//' '//TRIM(DDay)//' @ '//TRIM(HMS)//'-<')
          ENDIF
 #ifdef PARALLEL
          ENDIF
