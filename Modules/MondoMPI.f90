@@ -153,26 +153,26 @@ CONTAINS
       CALL MPI_FINALIZE(IErr)
    END SUBROUTINE FiniMPI
 
-   FUNCTION MRank(communicator_O)
+   FUNCTION MRank(comm_O)
       INTEGER                     :: IErr,MRank
-      INTEGER, OPTIONAL           :: communicator_O
+      INTEGER, OPTIONAL           :: comm_O
       CHARACTER(LEN=*), PARAMETER :: Sub = 'MRank'
 
-      IF(PRESENT(communicator_O)) THEN
-         CALL MPI_COMM_RANK(communicator_O, MRank, IErr)
+      IF(PRESENT(comm_O)) THEN
+         CALL MPI_COMM_RANK(comm_O, MRank, IErr)
       ELSE
          CALL MPI_COMM_RANK(MONDO_COMM, MRank, IErr)
       ENDIF
       CALL ErrChk(IErr, Sub)
    END FUNCTION MRank
 
-   FUNCTION MSize(communicator_O)
+   FUNCTION MSize(comm_O)
       INTEGER                     :: IErr,MSize
-      INTEGER, OPTIONAL           :: communicator_O
+      INTEGER, OPTIONAL           :: comm_O
       CHARACTER(LEN=*), PARAMETER :: Sub = 'MSize'
 
-      IF(PRESENT(communicator_O)) THEN
-         CALL MPI_COMM_SIZE(communicator_O, MSize, IErr)
+      IF(PRESENT(comm_O)) THEN
+         CALL MPI_COMM_SIZE(comm_O, MSize, IErr)
       ELSE
          CALL MPI_COMM_SIZE(MONDO_COMM, MSize, IErr)
       ENDIF

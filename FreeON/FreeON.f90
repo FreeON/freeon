@@ -47,8 +47,6 @@ PROGRAM FreeON
 
   TYPE(Controls) :: C
 
-  LOGICAL :: debugThis
-
   CALL Init(PerfMon)
   CALL Init(MemStats)
 
@@ -63,13 +61,6 @@ PROGRAM FreeON
 
     ! Initialize controls
     CALL InitGlobal(C)
-
-    ! Debug.
-    CALL MondoLog(DEBUG_NONE, "FreeON", "debug...")
-    debugThis = .FALSE.
-    DO WHILE(debugThis)
-    ENDDO
-    CALL MondoLog(DEBUG_NONE, "FreeON", "past debug...")
 
     ! Much ado about gradients
     SELECT CASE(C%Opts%Grad)
