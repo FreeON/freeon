@@ -1404,6 +1404,11 @@ CONTAINS
     ELSE
       Bcast = .FALSE.
     ENDIF
+
+    IF(.NOT. inFrontend) THEN
+      CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
+
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
@@ -1592,19 +1597,12 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
-!!$    REAL(DOUBLE) :: Chk
-!!$    Chk=Zero
-!!$    DO I=1,A%NNon0
-!!$       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
-!!$    ENDDO
-!!$    Chk=SQRT(Chk)
-!!$    CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "getting BCSR from "//TRIM(Name)//" Check = "//TRIM(DblToChar(Chk)))
+    IF(.NOT. inFrontend) THEN
+      CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
+    ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
-      IF(.NOT. inFrontend) THEN
-        CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name))
-      ENDIF
 #endif
       IF(PRESENT(PFix_O))THEN
         FileName=TRIM(Name)//TRIM(PFix_O)

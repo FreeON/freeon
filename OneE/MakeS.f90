@@ -61,7 +61,7 @@ PROGRAM MakeS
   TYPE(ARGMT)                :: Args
   INTEGER                    :: P,R,AtA,AtB,NN,OldFileID                        
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeS'
-!----------------------------------------------
+
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !----------------------------------------------
@@ -138,10 +138,10 @@ PROGRAM MakeS
 #else  
            S%RowPt%I(AtA+1)=P        
            IF(R>MaxNon0.OR.P>MaxBlks) THEN
-              WRITE(*,*) 'MakeS: MaxNon0=',MaxNon0
-              WRITE(*,*) 'MakeS: R=',R
-              WRITE(*,*) 'MakeS: MaxBlks=',MaxBlks
-              WRITE(*,*) 'MakeS: P=',P
+              CALL MondoLog(DEBUG_NONE, Prog, "MaxNon0 = "//TRIM(IntToChar(MaxNon0)))
+              CALL MondoLog(DEBUG_NONE, Prog, "R = "//TRIM(IntToChar(R)))
+              CALL MondoLog(DEBUG_NONE, Prog, "MaxBlks = "//TRIM(IntToChar(MaxBlks)))
+              CALL MondoLog(DEBUG_NONE, Prog, "P = "//TRIM(IntToChar(P)))
               CALL Halt(' BCSR dimensions blown in MakeS ')
            ENDIF
 #endif
@@ -153,6 +153,7 @@ PROGRAM MakeS
 !------------------------------------------------------------
 ! Put S to disk
   Thresholds%Trix = Thresholds%Trix*1.D-2
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "S (before filter) checksum = "//TRIM(DblToChar(CheckSum(S))), "Clone "//TRIM(IntToChar(MyClone)), serialize_O = .TRUE.)
   CALL Filter(T1,S)
   Thresholds%Trix = Thresholds%Trix*1.D2
   IF(SCFActn=='RestartGeomSwitch') THEN
@@ -162,7 +163,8 @@ PROGRAM MakeS
   ENDIF
 !-----------------------------------------------------------
 ! Printing
-  CALL PChkSum(T1,'S',Prog)
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "S (after filter) checksum = "//TRIM(DblToChar(CheckSum(T1))), "Clone "//TRIM(IntToChar(MyClone)), serialize_O = .TRUE.)
+  CALL PChkSum(T1,'S Clone '//TRIM(IntToChar(MyClone)),Prog)
   CALL PPrint( T1,'S')
   CALL Plot(   T1,'S')
 !------------------------------------------------------------

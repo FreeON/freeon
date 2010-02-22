@@ -144,6 +144,8 @@ PROGRAM MakePFFT
     CALL Delete(TenS)
     CALL Delete(dTenC)
     CALL Delete(dTenS)
+  ELSE
+    CALL MondoLog(DEBUG_MAXIMUM, Prog, "no periodic boundary conditions")
   ENDIF
   ! Delete
   CALL Delete(GM)

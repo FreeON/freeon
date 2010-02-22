@@ -89,8 +89,7 @@ PROGRAM P2Use
   ! Select spin factor for R/U/G theory.
   SFac = 2D0
   IF(NSMat > 1) SFac = 1D0
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "CurBase = "//TRIM(IntToChar(Args%I%I(2)))// &
-    ", NSMat = "//TRIM(IntToChar(NSMat)))
+  CALL MondoLog(DEBUG_MAXIMUM, Prog, "CurBase = "//TRIM(IntToChar(Args%I%I(2)))//", NSMat = "//TRIM(IntToChar(NSMat)))
 
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
