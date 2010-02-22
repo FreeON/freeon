@@ -65,7 +65,6 @@ CONTAINS
     REAL(DOUBLE)                         :: ETag
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
-    LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc,iTAG
     CHARACTER(LEN=DCL)                   :: MONDO_HOST
 #endif
@@ -162,7 +161,7 @@ CONTAINS
       InParallel=.FALSE.
     ENDIF
 
-#if defined(PARALLEL)
+#if defined(PARALLEL) || (defined(PARALLEL_CLONES) && defined(CARTESIAN_COMMUNICATOR))
     ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
     IF(InParallel)THEN
       CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),(/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
@@ -182,7 +181,7 @@ CONTAINS
 
     ! Offset the actual clone
     MyClone=SpaceTime%I(3)+Local(2)
-    !CALL AlignNodes('MyClone = '//TRIM(IntToChar(MyClone)))
+    CALL AlignNodes("MyClone = "//TRIM(IntToChar(MyClone)))
 
     ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
     ! parallel in the spatial domain and using MONDO_COMM as their default
@@ -193,16 +192,20 @@ CONTAINS
     ! Reload local rank and PE number for the new MONDO_COMM
     IF(MyID /= MRank() .OR. NPrc /= MSize()) THEN
       CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
-        //" after MyID = "//TRIM(IntToChar(MRank()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
+        //" after MyID = "//TRIM(IntToChar(MRank()))//", NPrc = "//TRIM(IntToChar(NPrc)) &
+        //" after NPrc = "//TRIM(IntToChar(MSize()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)), &
+        "Clone "//TRIM(IntToChar(MyClone)))
     ENDIF
 
     MyID=MRank()
     NPrc=MSize()
 #else
     ! Figure out the clone.
-    MyClone = SpaceTime%I(3)+MRank()
+    MyClone = MRank()+1
+    CALL AlignNodes("MyClone = "//TRIM(IntToChar(MyClone)))
     MyID = ROOT
     NPrc = 1
+    CALL MondoLog(DEBUG_NONE, "CartCommSplit", "MyID = "//TRIM(IntToChar(MyID))//", NPrc = "//TRIM(IntToChar(NPrc)), "Clone "//TRIM(IntToChar(MyClone)))
 #endif
 
   END FUNCTION CartCommSplit
