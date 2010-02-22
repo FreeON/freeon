@@ -1014,6 +1014,20 @@ if test "${use_NEB_debug}" = "yes"; then
   AC_DEFINE(NEB_DEBUG, [1], [Print out additional debugging information in NEB])
 fi
 
+if test "${use_parallel_clones}" = "yes"; then
+  AC_MSG_CHECKING([whether to use Cartesian communicators])
+  AC_ARG_ENABLE([cartesian-communicator],
+    [AS_HELP_STRING([--disable-cartesian-communicator],
+    [Use Cartesian communicator in StartUp(). Use with caution, we saw random
+     hangs in the backend when this is turned on.])],
+    [use_cartesian_communicator="${enableval}"],
+    [use_cartesian_communicator="yes"])
+  AC_MSG_RESULT([${use_cartesian_communicator}])
+  if test "${use_cartesian_communicator}" = "yes"; then
+    AC_DEFINE(CARTESIAN_COMMUNICATOR, [1], [Use Cartesian communicator in StartUp()])
+  fi
+fi
+
 # Define location of temporary Mondo files.
 AC_MSG_CHECKING([where to put MONDO_SCRATCH])
 AC_ARG_WITH([MONDO_SCRATCH],
