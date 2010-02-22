@@ -1329,18 +1329,25 @@ CONTAINS
    END SUBROUTINE FreeType
 
    !===============================================================================
-   !     NODE ALLINGMENT FOR MONDO_COMM
+   !     Node alignment (barrier) for some communicator
    !===============================================================================
-   SUBROUTINE AlignNodes(String_O)
-      INTEGER                        :: IErr
+   SUBROUTINE AlignNodes(String_O, comm_O)
       CHARACTER(LEN=*),OPTIONAL      :: String_O
+      INTEGER, OPTIONAL              :: comm_O
+      INTEGER                        :: communicator
+      INTEGER                        :: IErr
       CHARACTER(LEN=*),PARAMETER     :: Sub='AlignNodes'
 
-      CALL MondoLog(DEBUG_NONE, "AlignNodes", "waiting at barrier, MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)))
-      CALL MPI_BARRIER(MONDO_COMM,IErr)
-      CALL ErrChk(IErr,Sub)
+      IF(PRESENT(comm_O)) THEN
+         communicator = comm_O
+      ELSE
+         communicator = MONDO_COMM
+      ENDIF
+      CALL MondoLog(DEBUG_MAXIMUM, "AlignNodes", "waiting at barrier, communicator = "//TRIM(IntToChar(communicator)))
+      CALL MPI_BARRIER(communicator, IErr)
+      CALL ErrChk(IErr, Sub)
       IF(PRESENT(String_O))THEN
-         CALL MondoLog(DEBUG_NONE, "FreeON", String_O, "Node # "//TRIM(IntToChar(MyId)))
+         CALL MondoLog(DEBUG_NONE, "FreeON", String_O, "rank "//TRIM(IntToChar(MyId)))
       ENDIF
    END SUBROUTINE AlignNodes
 
