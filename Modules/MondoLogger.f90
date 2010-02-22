@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,20 +20,28 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
-
 ! This module provides logger functions to print "stuff" into some log file or
 ! the console.
 !
 ! Author: Nicolas Bock <nbock@lanl.gov>
+
+#include "MondoConfig.h"
 
 MODULE MondoLogger
 
   USE GlobalCharacters
   USE GlobalObjects
   USE ParsingConstants
+
+#if defined(__PARALLEL_CLONES)
+  ! In order to serialize logging output we need to use MPI. We can not use
+  ! MondoMPI however, because that would create a circular dependence since we
+  ! are using MondoLogger in MondoMPI.
+  USE MPI
+#endif
 
   IMPLICIT NONE
   PRIVATE
@@ -42,14 +50,15 @@ MODULE MondoLogger
 
 CONTAINS
 
-  FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
-    CHARACTER(LEN=*), OPTIONAL :: Proc_O
-    CHARACTER(LEN=*), OPTIONAL :: Misc_O
-    CHARACTER(LEN=32)          :: Tag
-    CHARACTER(LEN=32)          :: Name
-    CHARACTER(LEN=32),PARAMETER:: Blks='                        '
-    CHARACTER(LEN=3), PARAMETER:: Colon =' : '
-    CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
+  FUNCTION ProcessName(Proc_O, Misc_O) RESULT (Tag)
+    CHARACTER(LEN=*), OPTIONAL  :: Proc_O
+    CHARACTER(LEN=*), OPTIONAL  :: Misc_O
+    CHARACTER(LEN=32)           :: Tag
+    CHARACTER(LEN=32)           :: Name
+    CHARACTER(LEN=32),PARAMETER :: Blks='                        '
+    CHARACTER(LEN=3), PARAMETER :: Colon =' : '
+    CHARACTER(LEN=4), PARAMETER :: Colons=' :: '
+
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
       Name(30:32)=":: "
@@ -124,20 +133,17 @@ CONTAINS
     !WRITE(*,"(A,I3)") "  IOS  = ", IOS
     !WRITE(*,"(A)")    "  file = "//TRIM(filename)
 13  RETURN
-
   END FUNCTION OpenLogfile
 
-  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O)
-
-    CHARACTER(LEN=*), INTENT(IN)            :: message
+  SUBROUTINE MondoLogBackend(logLevel, tag, message, file_O, line_O, NoIndent_O)
+    INTEGER, INTENT(IN)                     :: logLevel
     CHARACTER(LEN=*), INTENT(IN)            :: tag
+    CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
     INTEGER, OPTIONAL, INTENT(IN)           :: line_O
     LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
-
     CHARACTER(LEN=2048)                     :: output
     CHARACTER(LEN=2048)                     :: line_string
-    INTEGER                                 :: logLevel
     LOGICAL                                 :: fileOutput
 
     ! Check whether logLevel is sufficiently high.
@@ -185,15 +191,60 @@ CONTAINS
       IF(fileOutput) CLOSE(123)
 
     ENDIF
+  END SUBROUTINE MondoLogBackend
 
+#if defined(__PARALLEL_CLONES)
+  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O, serialize_O, comm_O)
+    LOGICAL, INTENT(IN), OPTIONAL           :: serialize_O
+    INTEGER, INTENT(IN), OPTIONAL           :: comm_O
+    INTEGER                                 :: rank, myRank, NRanks, communicator
+    INTEGER                                 :: IErr
+#else
+  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O)
+#endif
+    INTEGER, INTENT(IN)                     :: logLevel
+    CHARACTER(LEN=*), INTENT(IN)            :: tag
+    CHARACTER(LEN=*), INTENT(IN)            :: message
+    CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
+    INTEGER, OPTIONAL, INTENT(IN)           :: line_O
+    LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
+
+#if defined(__PARALLEL_CLONES)
+    IF(PRESENT(serialize_O)) THEN
+      IF(serialize_O) THEN
+        ! Serialize output by blocking at a barrier.
+        IF(PRESENT(comm_O)) THEN
+          communicator = comm_O
+        ELSE
+          WRITE(*, "(A)") "[MondoLog] missing comm_O with serialize_O"
+          CALL MPI_Abort(MPI_COMM_WORLD, 1, IErr)
+        ENDIF
+
+        ! Get number of ranks.
+        CALL MPI_Comm_rank(communicator, myRank, IErr)
+        CALL MPI_Comm_size(communicator, NRanks, IErr)
+
+        DO rank = 0, NRanks-1
+          CALL MPI_Barrier(communicator, IErr)
+          IF(rank == myRank) THEN
+            CALL MondoLogBackend(logLevel, tag, message, file_O = file_O, line_O = line_O, NoIndent_O = NoIndent_O)
+          ENDIF
+        ENDDO
+      ELSE
+        CALL MondoLogBackend(logLevel, tag, message, file_O = file_O, line_O = line_O, NoIndent_O = NoIndent_O)
+      ENDIF
+    ELSE
+      CALL MondoLogBackend(logLevel, tag, message, file_O = file_O, line_O = line_O, NoIndent_O = NoIndent_O)
+    ENDIF
+#else
+    CALL MondoLogBackend(logLevel, tag, message, file_O = file_O, line_O = line_O, NoIndent_O = NoIndent_O)
+#endif
   END SUBROUTINE MondoLog
 
   SUBROUTINE MondoLogPlain(message)
-
     CHARACTER(LEN=*), INTENT(IN) :: message
 
     CALL MondoLog(DEBUG_NONE, "",message, NoIndent_O=.TRUE.)
-
   END SUBROUTINE MondoLogPlain
 
 END MODULE MondoLogger
