@@ -59,7 +59,7 @@ PROGRAM SCFStatus
   LOGICAL                         :: HasECPs
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFMessage
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: SCFTag
-  CHARACTER(LEN=9),PARAMETER      :: Prog='SCF'
+  CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStats'
 #if defined(PARALLEL_CLONES)
   INTEGER                         :: oldClone, rank
 #endif
@@ -249,12 +249,12 @@ PROGRAM SCFStatus
   IF(Entropy > Zero) SCFMessage = TRIM(SCFMessage)//", Entropy = "//TRIM(DblToShrtChar(Entropy))//" hartree"
   IF(P%NSMat/=1.AND.Args%I%I(1)/=0)SCFMessage=TRIM(SCFMessage)//' <S^2> = '//TRIM(FltToShrtChar(S2))
   IF(TRIM(SCFMessage) /= "") &
-  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag, serialize_O = .TRUE.)
 
   SCFMessage='<T> = '//TRIM(DblToMedmChar(KinE))//', <V> = '//TRIM(DblToMedmChar(E_es_tot))//" hartree"
   IF(ExchE/=Zero)SCFMessage=TRIM(SCFMessage)//', <HF> = '//TRIM(DblToMedmChar(ExchE))//" hartree"
   IF(Exc/=Zero)SCFMessage=TRIM(SCFMessage)//', <DFT> = '//TRIM(DblToMedmChar(Exc))//" hartree"
-  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag)
+  CALL MondoLog(DEBUG_MAXIMUM,Prog,SCFMessage,SCFTag, serialize_O = .TRUE.)
 
   IF(SCFActn=='BasisSetSwitch')THEN
      SCFMessage='Basis set switch, MxD = '//TRIM(DblToShrtChar(DMax))
@@ -264,7 +264,7 @@ PROGRAM SCFStatus
 
   ! Add in DIIS error
   IF(DIISErr/=Zero)SCFMessage=TRIM(SCFMessage)//', DIIS = '//TRIM(DblToShrtChar(DIISErr))
-  CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag)
+  CALL MondoLog(DEBUG_NONE,Prog,SCFMessage,SCFTag, serialize_O = .TRUE.)
 
   CALL Delete(P)
   CALL Delete(Tmp1)
@@ -295,7 +295,7 @@ CONTAINS
       CALL New(D2,(/NBasF,NBasF/))
       SELECT CASE(P%NSMat)
       CASE(1)
-        !
+
       CASE(2)
         CALL DGEMM('N','N',NBasf,NBasF,NBasF,1D0,D1%D(1,1),NBasF, &
              D1%D(1,NBasF+1),NBasF,0D0,D2%D(1,1),NBasF)
@@ -304,7 +304,7 @@ CONTAINS
         ENDDO
         GetS2=0.25D0*(NAlph-NBeta)**2+0.5D0*(NAlph+NBeta)-GetS2
       CASE(4)
-        !
+
       CASE DEFAULT;CALL Halt('GetS2: Something is wrong there!')
       END SELECT
       CALL Delete(D1)

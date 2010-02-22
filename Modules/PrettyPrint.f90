@@ -46,7 +46,9 @@ MODULE PrettyPrint
 #ifdef PARALLEL
    USE MondoMPI
 #endif
+
    IMPLICIT NONE
+
    INTERFACE PPrint
       MODULE PROCEDURE Print_INT_SCLR,   Print_DBL_SCLR,  &
                        Print_CHR_SCLR,   Print_INT_VECT,  &
@@ -60,7 +62,7 @@ MODULE PrettyPrint
                        Print_MEMS,       Print_TIME,      &
                        Print_HGRho
    END INTERFACE
-!
+
    INTERFACE PChkSum
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
       MODULE PROCEDURE Print_CheckSum_DBL_RNK2
@@ -70,6 +72,10 @@ MODULE PrettyPrint
       MODULE PROCEDURE Print_CheckSum_DBCSR
 #endif
    END INTERFACE
+
+   INTERFACE CheckSum
+     MODULE PROCEDURE CheckSum_BCSR
+   END INTERFACE CheckSum
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
    CHARACTER(LEN=*),PARAMETER     :: CheckEq = ' CheckSum = '
@@ -1034,9 +1040,19 @@ MODULE PrettyPrint
         ENDIF
 #endif
       END SUBROUTINE Print_CheckSum_DBL_RNK2
-!----------------------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------------------
+
+      FUNCTION CheckSum_BCSR(A) RESULT(Chk)
+        TYPE(BCSR), INTENT(IN) :: A
+        REAL(DOUBLE)           :: Chk
+        INTEGER                :: I
+
+        Chk=Zero
+        DO I=1,A%NNon0
+           Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+        ENDDO
+        Chk=SQRT(Chk)
+      END FUNCTION CheckSum_BCSR
+
       SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
         REAL(DOUBLE)                         :: Chk
@@ -1054,21 +1070,11 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
 #endif
-        Chk=Zero
-        DO I=1,A%NNon0
-           Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
-        ENDDO
-        Chk=SQRT(Chk)
-!#ifdef PARALLEL
-!        IF(MyID==ROOT)THEN
-!#endif
-
-!          Create check string
+           Chk = CheckSum(A)
+           ! Create check string
            ChkStr=CheckSumString(Chk,Name,Proc_O)
-!          Write check string
-           PU=OpenPU(Unit_O=Unit_O)
-           WRITE(PU,'(A)')TRIM(ChkStr)
-           CALL ClosePU(PU)
+           ! Write check string
+           CALL MondoLog(DEBUG_MAXIMUM, "", ChkStr)
 #ifdef PARALLEL
         ENDIF
 #endif

@@ -257,7 +257,6 @@ CONTAINS
     ENDIF
 
     ! Now mark success of this program ...
-    CALL MondoLog(DEBUG_NONE, "ShutDown", "[FIXME] should not put in parallel")
     CALL Put(.FALSE.,'ProgramFailed')
     ! ... and close the HDF file ...
     CALL CloseHDF(HDFFileID)

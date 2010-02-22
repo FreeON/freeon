@@ -36,7 +36,7 @@ MODULE MondoLogger
   USE GlobalObjects
   USE ParsingConstants
 
-#if defined(__PARALLEL_CLONES)
+#if defined(PARALLEL_CLONES)
   ! In order to serialize logging output we need to use MPI. We can not use
   ! MondoMPI however, because that would create a circular dependence since we
   ! are using MondoLogger in MondoMPI.
@@ -193,31 +193,29 @@ CONTAINS
     ENDIF
   END SUBROUTINE MondoLogBackend
 
-#if defined(__PARALLEL_CLONES)
   SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O, serialize_O, comm_O)
-    LOGICAL, INTENT(IN), OPTIONAL           :: serialize_O
-    INTEGER, INTENT(IN), OPTIONAL           :: comm_O
-    INTEGER                                 :: rank, myRank, NRanks, communicator
-    INTEGER                                 :: IErr
-#else
-  SUBROUTINE MondoLog(logLevel, tag, message, file_O, line_O, NoIndent_O)
-#endif
     INTEGER, INTENT(IN)                     :: logLevel
     CHARACTER(LEN=*), INTENT(IN)            :: tag
     CHARACTER(LEN=*), INTENT(IN)            :: message
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN)  :: file_O
     INTEGER, OPTIONAL, INTENT(IN)           :: line_O
     LOGICAL, OPTIONAL, INTENT(IN)           :: NoIndent_O
+    LOGICAL, INTENT(IN), OPTIONAL           :: serialize_O
+    INTEGER, INTENT(IN), OPTIONAL           :: comm_O
 
-#if defined(__PARALLEL_CLONES)
+#if defined(PARALLEL_CLONES)
+    INTEGER                                 :: rank, myRank, NRanks, communicator
+    INTEGER                                 :: IErr
+#endif
+
+#if defined(PARALLEL_CLONES)
     IF(PRESENT(serialize_O)) THEN
       IF(serialize_O) THEN
         ! Serialize output by blocking at a barrier.
         IF(PRESENT(comm_O)) THEN
           communicator = comm_O
         ELSE
-          WRITE(*, "(A)") "[MondoLog] missing comm_O with serialize_O"
-          CALL MPI_Abort(MPI_COMM_WORLD, 1, IErr)
+          communicator = MPI_COMM_WORLD
         ENDIF
 
         ! Get number of ranks.
