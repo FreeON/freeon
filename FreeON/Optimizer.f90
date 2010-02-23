@@ -458,7 +458,7 @@ CONTAINS
       ENDDO
 
       CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "maxForce = "//TRIM(DblToChar(maxGrad*au2eV/AUToAngstroms))//" eV/A")
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSGrad = "//TRIM(DblToChar(RMSGrad*au2eV/AUToAngstroms))//" eV/A")
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSForce = "//TRIM(DblToChar(RMSGrad*au2eV/AUToAngstroms))//" eV/A")
 
       IF(RMSGrad < GTol(C%Opts%AccuracyLevels(iBAS)) .AND. maxGrad < GTol(C%Opts%AccuracyLevels(iBAS))) THEN
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "converged in gradients (tol = " &
