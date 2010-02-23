@@ -153,7 +153,6 @@ PROGRAM MakeS
 !------------------------------------------------------------
 ! Put S to disk
   Thresholds%Trix = Thresholds%Trix*1.D-2
-  CALL MondoLog(DEBUG_MAXIMUM, Prog, "S (before filter) checksum = "//TRIM(DblToChar(CheckSum(S))), "Clone "//TRIM(IntToChar(MyClone)), serialize_O = .TRUE.)
   CALL Filter(T1,S)
   Thresholds%Trix = Thresholds%Trix*1.D2
   IF(SCFActn=='RestartGeomSwitch') THEN
@@ -164,7 +163,7 @@ PROGRAM MakeS
 !-----------------------------------------------------------
 ! Printing
   CALL MondoLog(DEBUG_MAXIMUM, Prog, "S (after filter) checksum = "//TRIM(DblToChar(CheckSum(T1))), "Clone "//TRIM(IntToChar(MyClone)), serialize_O = .TRUE.)
-  CALL PChkSum(T1,'S Clone '//TRIM(IntToChar(MyClone)),Prog)
+  !CALL PChkSum(T1,'S Clone '//TRIM(IntToChar(MyClone)),Prog)
   CALL PPrint( T1,'S')
   CALL Plot(   T1,'S')
 !------------------------------------------------------------

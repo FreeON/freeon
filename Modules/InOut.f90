@@ -1405,9 +1405,9 @@ CONTAINS
       Bcast = .FALSE.
     ENDIF
 
-    IF(.NOT. inFrontend) THEN
-      CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
-    ENDIF
+    !IF(.NOT. inFrontend) THEN
+    !  CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "getting BCSR from "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
+    !ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
@@ -1597,9 +1597,9 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
-    IF(.NOT. inFrontend) THEN
-      CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
-    ENDIF
+    !IF(.NOT. inFrontend) THEN
+    !  CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
+    !ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
