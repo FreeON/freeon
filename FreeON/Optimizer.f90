@@ -232,12 +232,12 @@ CONTAINS
             C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) = C%Geos%Clone(iCLONE)%Carts%D(3, iAtom) + C%Opts%ConjugateGradientAlpha*direction(3, iAtom, iCLONE)
 
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dR["//TRIM(IntToChar(iAtom))//"] = "// &
-              TRIM(DblToMedmChar(stepsize*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(DblToMedmChar(stepsize*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
-              TRIM(DblToMedmChar(stepsize*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
-              TRIM(FltToChar(ABS(stepsize*SQRT(direction(1, iAtom, iCLONE)**2 &
-                                             + direction(2, iAtom, iCLONE)**2 &
-                                             + direction(3, iAtom, iCLONE)**2)*AUToAngstroms)))//" A", &
+              TRIM(DblToMedmChar(C%Opts%ConjugateGradientAlpha*direction(1, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToMedmChar(C%Opts%ConjugateGradientAlpha*direction(2, iAtom, iCLONE)*AUToAngstroms))//" "// &
+              TRIM(DblToMedmChar(C%Opts%ConjugateGradientAlpha*direction(3, iAtom, iCLONE)*AUToAngstroms))//" --> "//&
+              TRIM(FltToChar(ABS(C%Opts%ConjugateGradientAlpha*SQRT(direction(1, iAtom, iCLONE)**2 &
+                                                                  + direction(2, iAtom, iCLONE)**2 &
+                                                                  + direction(3, iAtom, iCLONE)**2)*AUToAngstroms)))//" A", &
               "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
