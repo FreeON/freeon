@@ -827,12 +827,13 @@ CONTAINS
     REAL(DOUBLE)          :: Temp,Kin,Mass,TVel,VX,VY,VZ
     INTEGER               :: iCLONE,iATS,I,J,Jmax
 
+    CALL MondoLog(DEBUG_MAXIMUM, "SetTempMaxBoltDist", "setting initial temperature to "//TRIM(FltToChar(Temp0))//" K")
     Jmax = 20
     DO iCLONE=1,C%Geos%Clones
       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
         IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS) == 0)THEN
-          Mass  = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-          TVel  = SQRT(Three*Temp0*KelvinToHartrees/Mass)
+          Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+          TVel = SQRT(Three*Temp0*KelvinToHartrees/Mass)
           VX = Zero
           VY = Zero
           VZ = Zero
