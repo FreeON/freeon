@@ -129,7 +129,7 @@ CONTAINS
         D%Initial_Temp = .TRUE.
       ELSE
         D%Initial_Temp = .FALSE.
-        D%TempInit     = Zero
+        D%TempInit = Zero
       ENDIF
 
       ! Parse for Temperature Scaling
