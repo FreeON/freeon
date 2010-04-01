@@ -433,21 +433,25 @@ CONTAINS
       CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
       ! Print out the energy.
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "barrier energy profile")
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
-        TRIM(DblToChar(C%Opts%NEBReactantEnergy))//" hartree = "// &
-        TRIM(DblToChar(C%Opts%NEBReactantEnergy*au2eV))//" eV", &
-        "Clone "//TRIM(IntToChar(0)))
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "barrier energy profile")
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
+          TRIM(DblToChar(C%Opts%NEBReactantEnergy))//" hartree = "// &
+          TRIM(DblToChar(C%Opts%NEBReactantEnergy*au2eV))//" eV", &
+          "Clone "//TRIM(IntToChar(0)))
+      ENDIF
       DO iCLONE = 1, C%Geos%Clones
         CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
           TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal))//" hartree = "// &
           TRIM(DblToChar(C%Geos%Clone(iCLONE)%ETotal*au2eV))//" eV", &
           "Clone "//TRIM(IntToChar(iCLONE)))
       ENDDO
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
-        TRIM(DblToChar(C%Opts%NEBProductEnergy))//" hartree = "// &
-        TRIM(DblToChar(C%Opts%NEBProductEnergy*au2eV))//" eV", &
-        "Clone "//TRIM(IntToChar(C%Geos%Clones+1)))
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<SCF> = "// &
+          TRIM(DblToChar(C%Opts%NEBProductEnergy))//" hartree = "// &
+          TRIM(DblToChar(C%Opts%NEBProductEnergy*au2eV))//" eV", &
+          "Clone "//TRIM(IntToChar(C%Geos%Clones+1)))
+      ENDIF
 
       ! Check for convergence.
       maxGrad = Zero
