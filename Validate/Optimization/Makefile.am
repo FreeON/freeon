@@ -32,4 +32,6 @@ EXTRA_DIST = \
   24-Vancomycin-internal.inp \
   25-Vancomycin-CG.inp \
   26-Vancomycin-CG.inp \
-  27-Vancomycin-CG.inp
+  27-Vancomycin-CG.inp \
+  28-BPA-2.inp \
+  29-BPA-3.inp
