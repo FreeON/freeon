@@ -93,6 +93,7 @@ CONTAINS
     REAL(DOUBLE)                                :: norm, directionNorm, beta, stepsize, stepRMSd, fPrime, f
     REAL(DOUBLE)                                :: maxGrad, RMSGrad, maxMove
     INTEGER                                     :: maxMoveClone, maxMoveAtom
+    CHARACTER(LEN=2)                            :: ConstraintString
 
     ! Set default behavior.
     IF(PRESENT(Global_O)) THEN
@@ -203,6 +204,31 @@ CONTAINS
             "Clone "//TRIM(IntToChar(iCLONE)))
         ENDDO
       ENDDO
+
+      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+        DO iCLONE = 0, C%Geos%Clones+1
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<BeginClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
+          DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+            SELECT CASE(C%Geos%Clone(iCLONE)%CConstrain%I(iAtom))
+            CASE(1)
+              ConstraintString = "C"
+            CASE(2)
+              ConstraintString = "R"
+            CASE DEFAULT
+              ConstraintString = ""
+            END SELECT
+
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iAtom))//" "// &
+              TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms))//" "// &
+              TRIM(ConstraintString), &
+              "Clone "//TRIM(IntToChar(iCLONE)))
+          ENDDO
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<EndClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "")
+        ENDDO
+      ENDIF
 
       ! Instead of a line search we will guess the step size based on a local
       ! approximation of the curvature.
