@@ -29,6 +29,9 @@ if len(arguments) == 0:
   sys.exit(1)
 
 for file in arguments:
+  if not os.path.isfile(file):
+    continue
+
   try:
     fd = open(file)
     lines = fd.readlines()
