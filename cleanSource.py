@@ -53,17 +53,23 @@ for file in arguments:
     if re.compile("^ +\t+").search(lines[lineNumber]):
       fileNeedsFixing = True
       print("indent SP followed by TAB in file " + file + " on line " + str(lineNumber+1) + ": " + lines[lineNumber].rstrip())
-      if not options.pretend:
-        tabInSpace = ""
-        for i in range(options.tab):
-          tabInSpace += " "
 
-        while True:
-          result = re.compile("^( +)\t").search(lines[lineNumber])
-          if result:
-            lines[lineNumber] = re.sub("^ +\t", result.group(1) + tabInSpace, lines[lineNumber])
-          else:
-            break
+      lineCopy = lines[lineNumber]
+      tabInSpace = ""
+      for i in range(options.tab):
+        tabInSpace += " "
+
+      while True:
+        result = re.compile("^( +)\t").search(lineCopy)
+        if result:
+          lineCopy = re.sub("^ +\t", result.group(1) + tabInSpace, lineCopy)
+        else:
+          break
+
+      print("fixed SP followed by TAB in file  " + file + " on line " + str(lineNumber+1) + ": " + lineCopy.rstrip())
+
+      if not options.pretend:
+        line[lineNumber] = lineCopy
 
   if not options.pretend and fileNeedsFixing:
     print("writing out fixed file " + file)
