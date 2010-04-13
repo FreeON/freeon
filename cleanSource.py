@@ -2,7 +2,7 @@
 #
 # Call this with a list of files to consider.
 
-import optparse, sys, re, tempfile
+import optparse, os, sys, re, tempfile
 
 parser = optparse.OptionParser(description = """This script cleans a source
 file. It does (1) remove trailing white space characters, and (2) replace a
