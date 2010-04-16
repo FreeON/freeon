@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [2010-02-26], [Matt Challacombe <mchalla@lanl.gov>])
+AC_INIT([freeon], [2010-04-16], [Matt Challacombe <mchalla@lanl.gov>])
 AC_COPYRIGHT([
 This code is part of the MondoSCF suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
