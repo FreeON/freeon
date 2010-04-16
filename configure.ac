@@ -557,17 +557,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-# Check whether the f90 and f77 compilers are the same. We currently need that
-# to make sure that FreeON is linked correctly. Right now automake thinks that
-# it needs to link with the f77 compiler. So we better have an f90 compiler
-# there, otherwise we can't link correctly.
-AC_MSG_CHECKING([whether F77 (${F77}) and F90 (${FC}) compilers are identical])
-if test "`$as_basename -- ${FC}`" != "`$as_basename -- ${F77}`"; then
-  AC_MSG_RESULT([no])
-  AC_MSG_FAILURE([F77 (${F77}) and F90 (${FC}) compilers are different. This is not going to work.])
-fi
-AC_MSG_RESULT([yes])
-
 # Set line-length limits.
 AC_MSG_CHECKING([how to set line length limits of f90 compiler])
 case ${FC_COMPILERNAME} in
