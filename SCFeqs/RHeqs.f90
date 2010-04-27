@@ -1,5 +1,5 @@
 !------------------------------------------------------------------------------
-!    This code is part of the MondoSCF suite of programs for linear scaling
+!    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
 !
 !    Copyright (2004). The Regents of the University of California. This
@@ -20,9 +20,11 @@
 !
 !    While you may do as you like with this software, the GNU license requires
 !    that you clearly mark derivative software.  In addition, you are encouraged
-!    to return derivative works to the MondoSCF group for review, and possible
-!    disemination in future releases.
+!    to return derivative works to the FreeON group for review, and possible
+!    dissemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
 
 PROGRAM RHEqs
   USE DerivedTypes
@@ -55,9 +57,11 @@ PROGRAM RHEqs
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
   LOGICAL                        :: Present,DensityArchive
   EXTERNAL :: DGEMM_NT
-  !--------------------------------------------------------------------
-  !
-  !
+#if defined(PARALLEL_CLONES)
+  INTEGER                        :: oldClone, rank
+  REAL(DOUBLE)                   :: HOMOLUMO
+#endif
+
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
 
   !--------------------------------------------------------------------
@@ -170,24 +174,14 @@ PROGRAM RHEqs
   Mu=(HOMO+LUMO)*0.5D0
   CALL MondoLog(DEBUG_MEDIUM, Prog, "Chemical potential Mu = "//TRIM(DblToChar(Mu)))
 
-  !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-    !Mssg=ProcessName(Prog)//'HOMO = '//TRIM(DblToMedmChar(HOMO)) &
-         !//', LUMO = '//TRIM(DblToMedmChar(LUMO))
-    !CALL OpenASCII(OutFile,Out)
-    !CALL PrintProtectL(Out)
-    !WRITE(Out,*)TRIM(Mssg)
-    !CALL PrintProtectR(Out)
-    !CLOSE(Out)
-  !ENDIF
   CALL MondoLog(DEBUG_MEDIUM, Prog, 'HOMO = '//TRIM(DblToMedmChar(HOMO))//', LUMO = '//TRIM(DblToMedmChar(LUMO)))
-  CALL Put(HOMO-LUMO,'HomoLumoGap')
-  !
+
   !--------------------------------------------------------------
   ! Make a new closed shell, orthogonal density matrix
   !
   CALL New(P,(/NRow,NCol/))
   CALL DBL_VECT_EQ_DBL_SCLR(NRow*NCol,P%D(1,1),Zero)
-  !
+
   SELECT CASE(Smearing)
   CASE('Methfessel-Paxton')
     Entropy=0.D0
@@ -213,16 +207,8 @@ PROGRAM RHEqs
         ENDDO
       ENDDO
     ENDDO
-    !IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-    !  Mssg=ProcessName(Prog)//'Sigma = '//TRIM(DblToShrtChar(Sigma)) &
-    !                       //', Entropic correction per atom = ' &
-    !                       //TRIM(DblToShrtChar(Entropy/DBLE(NAtoms)))
-    !  CALL OpenASCII(OutFile,Out)
-    !  CALL PrintProtectL(Out)
-    !  WRITE(Out,*)TRIM(Mssg)
-    !  CALL PrintProtectR(Out)
-    !  CLOSE(Out)
-    !ENDIF
+    CALL MondoLog(DEBUG_MEDIUM, Prog, "Sigma = "//TRIM(DblToShrtChar(Sigma))// &
+      ", Entropic correction per atom = "//TRIM(DblToShrtChar(Entropy/DBLE(NAtoms))))
   CASE('Fermi-Dirac')
     ! kB = 6.33366256E-06 ! Ry/K
     kB = 2.D0*6.33366256E-06 ! au/K
@@ -262,13 +248,13 @@ PROGRAM RHEqs
         ENDIF
         dOccdMu = dOccdMu + Beta*Fk*(1.D0-Fk)
       ENDDO
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Mu_fore = '//TRIM(DblToChar(Mu)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, "Mu_fore = "//TRIM(DblToChar(Mu)))
       Mu = Mu + (Ne - Occ)/dOccdMu
       OccErr = ABS(Occ-Ne)
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Mu = '//TRIM(DblToChar(Mu)))
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Occ = '//TRIM(DblToChar(Occ)))
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Ne = '//TRIM(DblToChar(Ne)))
-      CALL MondoLog(DEBUG_MEDIUM, Prog, 'Entropy = '//TRIM(DblToChar(Entropy))//" hartree")
+      CALL MondoLog(DEBUG_MEDIUM, Prog, "Mu = "//TRIM(DblToChar(Mu)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, "Occ = "//TRIM(DblToChar(Occ)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, "Ne = "//TRIM(DblToChar(Ne)))
+      CALL MondoLog(DEBUG_MEDIUM, Prog, "Entropy = "//TRIM(DblToChar(Entropy))//" hartree")
     ENDDO
     DO K=1,NBasF
       Ek=EigenV%D(K)
@@ -302,7 +288,7 @@ PROGRAM RHEqs
       !CALL DGEMM('N','T',2*NBasF,2*NBasF,Nel,1D0,F%D(1,1), &
       !           2*NBasF,F%D(1,1),2*NBasF,0D0,P%D(1,1),2*NBasF)
     CASE DEFAULT
-      CALL Halt(' RHeqs: NSMat doesn''t have an expected value! ')
+      CALL Halt('RHeqs: NSMat doesn''t have an expected value!')
     END SELECT
     !
   CASE DEFAULT
@@ -311,8 +297,40 @@ PROGRAM RHEqs
   !
   CALL Delete(EigenV)
 
-  ! Put entropy to hdf.
+  ! Put entropy and HOMO-LUMO gap to hdf.
+#if defined(PARALLEL_CLONES)
+  IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+    CALL Put(HOMO-LUMO, "HomoLumoGap")
+    CALL Put(Entropy, "Entropy")
+
+    oldClone = MyClone
+    DO rank = 1, MSize(MPI_COMM_WORLD)-1
+      CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(HOMOLUMO, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Recv(Entropy, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+
+      ! Put to correct HDFGroup.
+      CALL CloseHDFGroup(H5GroupID)
+      H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+      HDF_CurrentID = H5GroupID
+      CALL Put(HOMOLUMO, "HomoLumoGap")
+      CALL Put(Entropy, "Entropy")
+    ENDDO
+    MyClone = oldClone
+
+    ! Reopen old HDFGroup.
+    CALL CloseHDFGroup(H5GroupID)
+    H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+    HDF_CurrentID = H5GroupID
+  ELSE
+    CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(HOMO-LUMO, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    CALL Send(Entropy, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+  ENDIF
+#else
+  CALL Put(HOMO-LUMO, "HomoLumoGap")
   CALL Put(Entropy, "Entropy")
+#endif
 
   CALL SetEq(sX,P,nsmat_o=nsmat)          !  sX=P
   CALL New(sP,nsmat_o=nsmat)
