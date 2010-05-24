@@ -823,11 +823,11 @@ MODULE PrettyPrint
 !    Print a BCSR matrix
 !
      SUBROUTINE Print_BCSR(A,Name,FileName_O,Unit_O)
-       TYPE(BCSR)                           :: A
-       TYPE(DBL_RNK2)                       :: B
+       TYPE(BCSR), INTENT(IN)               :: A
        CHARACTER(LEN=*),INTENT(IN)          :: Name
-       INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
+       INTEGER, OPTIONAL,INTENT(IN)         :: Unit_O
+       TYPE(DBL_RNK2)                       :: B
 
        IF(PrintFlags%Mat/=DEBUG_MATRICES.AND.(.NOT.PRESENT(Unit_O)))RETURN
 #ifdef PARALLEL
@@ -896,10 +896,11 @@ MODULE PrettyPrint
 
      SUBROUTINE Print_DBL_Rank2A(A,Name,FileName_O,Unit_O)
         REAL(DOUBLE),DIMENSION(:,:),INTENT(IN) :: A
-        INTEGER                                :: I,J,K,L,M,N,Unit
         CHARACTER(LEN=*)                       :: Name
-        INTEGER, OPTIONAL                      :: Unit_O
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN)   :: FileName_O
+        INTEGER, OPTIONAL                      :: Unit_O
+        INTEGER                                :: I,J,K,L,M,N,Unit
+
         Unit=Out; IF(PRESENT(Unit_O))Unit=Unit_O
         IF(PRESENT(FileName_O).AND.Unit/=6)THEN
            CALL OpenASCII(FileName_O,Unit)
