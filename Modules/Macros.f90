@@ -497,6 +497,9 @@ CONTAINS
       IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MMA_STYLE).OR.     &
            OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
         A%Fmt=DEBUG_MMASTYLE
+      ELSEIF(OptKeyQ(Inp, TRIM(Prog), DBG_MM_STYLE).OR.     &
+           OptKeyQ(Inp, GLOBAL_DEBUG, DBG_MM_STYLE) )THEN
+        A%Fmt=DEBUG_MMSTYLE
       ELSEIF(OptKeyQ(Inp,TRIM(Prog),  DBG_FLT_STYLE).OR. &
            OptKeyQ(Inp,GLOBAL_DEBUG,DBG_FLT_STYLE) )THEN
         A%Fmt=DEBUG_FLTSTYLE
