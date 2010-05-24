@@ -1,5 +1,5 @@
 C------------------------------------------------------------------------------
-C    This code is part of the MondoSCF suite of programs for linear scaling
+C    This code is part of the FreeON suite of programs for linear scaling
 C    electronic structure theory and ab initio molecular dynamics.
 C
 C    Copyright (2004). The Regents of the University of California. This
@@ -20,9 +20,10 @@ C    PURPOSE. See the GNU General Public License at www.gnu.org for details.
 C
 C    While you may do as you like with this software, the GNU license requires
 C    that you clearly mark derivative software.  In addition, you are encouraged
-C    to return derivative works to the MondoSCF group for review, and possible
-C    disemination in future releases.
+C    to return derivative works to the FreeON group for review, and possible
+C    dissemination in future releases.
 C------------------------------------------------------------------------------
+
 C===================================================================
 C     Transform a BCSR matrix to a dense matrix
 C===================================================================
@@ -35,19 +36,19 @@ C===================================================================
      >        MSiz(NAtoms),OffS(NAtoms),
      >        I,J,K,L,P,S,II,JJ,II0,JJ0,JP,MA,NA,iS,iSMat
 
-c$$$      write(*,*) 'NRow',NRow
-c$$$      write(*,*) 'NCol',NCol
-c$$$      write(*,*) 'NBasF',NBasF
-c$$$      write(*,*) 'NSMat',NSMat
-c$$$      write(*,*) 'NAtoms',NAtoms
-c$$$      write(*,*) 'NBlks',NBlks
-c$$$      write(*,*) 'NNon0',NNon0
-c$$$      write(*,*) 'MSiz',MSiz
-c$$$      write(*,*) 'OffS',OffS
-c$$$      write(*,*) 'MTrix',MTrix
-c$$$      write(*,*) 'RowPt',RowPt
-c$$$      write(*,*) 'ColPt',ColPt
-c$$$      write(*,*) 'BlkPt',BlkPt
+      !write(*,*) 'NRow',NRow
+      !write(*,*) 'NCol',NCol
+      !write(*,*) 'NBasF',NBasF
+      !write(*,*) 'NSMat',NSMat
+      !write(*,*) 'NAtoms',NAtoms
+      !write(*,*) 'NBlks',NBlks
+      !write(*,*) 'NNon0',NNon0
+      !write(*,*) 'MSiz',MSiz
+      !write(*,*) 'OffS',OffS
+      !write(*,*) 'MTrix',MTrix
+      !write(*,*) 'RowPt',RowPt
+      !write(*,*) 'ColPt',ColPt
+      !write(*,*) 'BlkPt',BlkPt
 
       CALL DBL_VECT_EQ_DBL_SCLR(NRow*NCol,A(1,1),0.0D0)
 
