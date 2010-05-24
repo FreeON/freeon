@@ -52,6 +52,7 @@ MODULE ParsingConstants
   CHARACTER(LEN=*), PARAMETER :: DBG_PRT_RHO   = 'PrintRho'
   CHARACTER(LEN=*), PARAMETER :: PLT_MATRICES  = 'PlotMats'
   CHARACTER(LEN=*), PARAMETER :: DBG_MMA_STYLE = 'MmaStyle'
+  CHARACTER(LEN=*), PARAMETER :: DBG_MM_STYLE  = 'MMStyle'
   CHARACTER(LEN=*), PARAMETER :: DBG_DBL_STYLE = 'DblStyle'
   CHARACTER(LEN=*), PARAMETER :: DBG_FLT_STYLE = 'FltStyle'
   CHARACTER(LEN=*), PARAMETER :: DBG_GEOP_MIN  = 'MinGeOp'
@@ -78,6 +79,7 @@ MODULE ParsingConstants
   INTEGER, PARAMETER :: DEBUG_INTEGRAL = 585583  ! Print Integrals
   INTEGER, PARAMETER :: PLOT_MATRICES  = 608948  ! Plot Matrices
   INTEGER, PARAMETER :: DEBUG_MMASTYLE = 848423  ! Print in Mathematica style
+  INTEGER, PARAMETER :: DEBUG_MMSTYLE  = 848424  ! Print in MatrixMarket style
   INTEGER, PARAMETER :: DEBUG_FLTSTYLE = 480484  ! Print in float style
   INTEGER, PARAMETER :: DEBUG_DBLSTYLE = 504843  ! Print in scientific (D) style
   INTEGER, PARAMETER :: DEBUG_GEOP_MIN = 568356  ! Print geometry optimization data

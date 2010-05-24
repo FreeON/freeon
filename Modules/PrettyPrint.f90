@@ -936,9 +936,28 @@ MODULE PrettyPrint
            WRITE(Unit,103)N
            WRITE(Unit,104)TRIM(Name)
            WRITE(Unit,99)
+        ELSEIF(PrintFlags%Fmt == DEBUG_MMSTYLE) THEN
+           WRITE(Unit, 401) TRIM(Name)
+           WRITE(Unit, "(A)") "%%MatrixMarket matrix coordinate real general"
+           K = 0
+           DO I = 1, N
+              DO J = 1, M
+                 IF(A(I, J) /= 0.0D0) THEN
+                   K = K+1
+                 ENDIF
+              ENDDO
+           ENDDO
+           WRITE(Unit, "(I5,x,I5,x,I10)") M, N, K
+           DO I = 1, N
+              DO J = 1, M
+                 IF(A(I, J) /= 0.0D0) THEN
+                    WRITE(Unit, "(I5,1x,I5,1x,F16.8)") I, J, A(I, J)
+                 ENDIF
+              ENDDO
+           ENDDO
         ELSE
            WRITE(Unit,401)TRIM(Name)
-!
+
            DO I=1,N,10
               K=MIN(I+9,N)
               WRITE(Unit,501)(J,J=I,K)
@@ -946,11 +965,11 @@ MODULE PrettyPrint
                 WRITE(Unit,701) L,(A(L,J),J=I,K)
               ENDDO
            ENDDO
-!
+
         ENDIF
         IF(Out/=6) CLOSE(Out)
         RETURN
-!
+
    100  FORMAT(' (*',65('='),'*)')
     99  FORMAT(' mv[m_List]:=MatrixForm[ N[ Chop[m,0.001],4]]; ')
    101  FORMAT(1x,'Ap[x_List,y_List]:=Append[x,y];')
