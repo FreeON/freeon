@@ -318,6 +318,16 @@ CONTAINS
       CALL SCF(iBAS, iGEO+1, C)
       CALL Force(iBAS, iGEO+1, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
+      DO iCLONE = 1, C%Geos%Clones
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "dF["//TRIM(IntToChar(iAtom))//"] = "// &
+            TRIM(DblToMedmChar((C%Geos%Clone(iCLONE)%Gradients%D(1, iAtom)-oldGradient(1, iAtom, iCLONE))*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar((C%Geos%Clone(iCLONE)%Gradients%D(2, iAtom)-oldGradient(2, iAtom, iCLONE))*au2eV/AUToAngstroms))//" "// &
+            TRIM(DblToMedmChar((C%Geos%Clone(iCLONE)%Gradients%D(3, iAtom)-oldGradient(3, iAtom, iCLONE))*au2eV/AUToAngstroms)), &
+            "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+      ENDDO
+
       ! Calculate an approximate step towards the minimum using Newton's method.
       IF(Global) THEN
         f = Zero
