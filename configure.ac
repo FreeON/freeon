@@ -970,7 +970,11 @@ AC_ARG_ENABLE([delete-preprocessed-files],
   [AS_HELP_STRING([--disable-delete-preprocessed-files],
   [Disable the deleting of preprocessed files. This is useful for debugging...])],
   [remove_preprocessed_files="${enableval}"],
-  [remove_preprocessed_files="yes"])
+  [if test "${use_optimizations}" = "no"; then
+     remove_preprocessed_files="no"
+   else
+     remove_preprocessed_files="yes"
+   fi])
 AC_MSG_RESULT([${remove_preprocessed_files}])
 AC_SUBST(REMOVE_PREPROCESSED_FILES, ${remove_preprocessed_files})
 
@@ -1161,6 +1165,9 @@ if test "${use_internal_hdf5}" = "yes"; then
   AC_MSG_NOTICE([Using internal hdf5 (1.8.3)])
 else
   AC_MSG_NOTICE([Using external hdf5 library])
+fi
+if test "${use_optimizations}" = "no"; then
+  AC_MSG_NOTICE([I disabled compiler optimization flags])
 fi
 if test "${remove_preprocessed_files}" = "yes"; then
   AC_MSG_NOTICE([I will remove preprocessed files])
