@@ -68,27 +68,27 @@ CONTAINS
     TYPE(Geometries)                            :: G
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms)  :: ReactionVector
     REAL(DOUBLE)                                :: ImageFraction
-    INTEGER                                     :: iCLONE,j, RPBeginClone, RPEndClone
+    INTEGER                                     :: iCLONE, j, RPBeginClone, RPEndClone
 
     !Initialize each clone to initial state then interpolate Cartesian coordinates
 #if defined(NEB_DEBUG)
     CALL MondoLog(DEBUG_NONE, "NEBInit", "starting...")
 
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone 0 (in A)")
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Reactant Clone 0 (in input file units)")
     DO j=1, G%Clone(0)%NAtms
       CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(0)%AtNam%C(j))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(1,j)))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(2,j)))//" "// &
+        TRIM(DblToChar(G%Clone(0)%Carts%D(3,j)))//" "// &
         TRIM(IntToChar(G%Clone(0)%CConstrain%I(j))))
     ENDDO
 
-    CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(G%Clones+1))//" (in A)")
+    CALL MondoLog(DEBUG_NONE, "NEBInit", "Product Clone "//TRIM(IntToChar(G%Clones+1))//" (in input file units)")
     DO j=1, G%Clone(G%Clones+1)%NAtms
       CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(G%Clones+1)%AtNam%C(j))//" "// &
-        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(1,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(2,j)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(3,j)*AUToAngstroms))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(1,j)))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(2,j)))//" "// &
+        TRIM(DblToChar(G%Clone(G%Clones+1)%Carts%D(3,j)))//" "// &
         TRIM(IntToChar(G%Clone(G%Clones+1)%CConstrain%I(j))))
     ENDDO
 #endif
@@ -121,21 +121,21 @@ CONTAINS
           ENDIF
 
 #if defined(NEB_DEBUG)
-          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPBeginClone))//" (in A)")
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPBeginClone))//" (in input file units)")
           DO j=1, G%Clone(RPBeginClone)%NAtms
             CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(RPBeginClone)%AtNam%C(j))//" "// &
-              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(1,j)*AUToAngstroms))//" "// &
-              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(2,j)*AUToAngstroms))//" "// &
-              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(3,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(1,j)))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(2,j)))//" "// &
+              TRIM(DblToChar(G%Clone(RPBeginClone)%Carts%D(3,j)))//" "// &
               TRIM(IntToChar(G%Clone(RPBeginClone)%CConstrain%I(j))))
           ENDDO
 
-          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPEndClone))//" (in A)")
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(RPEndClone))//" (in input file units)")
           DO j=1, G%Clone(RPEndClone)%NAtms
             CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(RPEndClone)%AtNam%C(j))//" "// &
-              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(1,j)*AUToAngstroms))//" "// &
-              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(2,j)*AUToAngstroms))//" "// &
-              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(3,j)*AUToAngstroms))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(1,j)))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(2,j)))//" "// &
+              TRIM(DblToChar(G%Clone(RPEndClone)%Carts%D(3,j)))//" "// &
               TRIM(IntToChar(G%Clone(RPEndClone)%CConstrain%I(j))))
           ENDDO
 #endif
@@ -147,12 +147,12 @@ CONTAINS
       ReactionVector = G%Clone(RPEndClone)%Carts%D-G%Clone(RPBeginClone)%Carts%D
 
 #ifdef NEB_DEBUG
-      CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector (in A)")
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "Reaction vector (in input file units)")
       DO j=1, G%Clone(RPBeginClone)%NAtms
         CALL MondoLog(DEBUG_NONE, "NEBInit", "RV["//TRIM(IntToChar(j))//"] = [ "// &
-          TRIM(DblToChar(ReactionVector(1,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(ReactionVector(2,j)*AUToAngstroms))//" "// &
-          TRIM(DblToChar(ReactionVector(3,j)*AUToAngstroms))//" ]")
+          TRIM(DblToChar(ReactionVector(1,j)))//" "// &
+          TRIM(DblToChar(ReactionVector(2,j)))//" "// &
+          TRIM(DblToChar(ReactionVector(3,j)))//" ]")
       ENDDO
 #endif
 
@@ -181,12 +181,12 @@ CONTAINS
         G%Clone(iCLONE)%Gradients%D = Zero
 
 #ifdef NEB_DEBUG
-        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE))//" (in A)")
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone "//TRIM(IntToChar(iCLONE))//" (in input file units)")
         DO j=1, G%Clone(iCLONE)%NAtms
           CALL MondoLog(DEBUG_NONE, "NEBInit", TRIM(G%Clone(iCLONE)%AtNam%C(j))//" "// &
-            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)*AUToAngstroms))//" "// &
-            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)*AUToAngstroms))//" "// &
-            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)*AUToAngstroms))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(1,j)))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(2,j)))//" "// &
+            TRIM(DblToChar(G%Clone(iCLONE)%Carts%D(3,j)))//" "// &
             TRIM(IntToChar(G%Clone(iCLONE)%CConstrain%I(j))))
         ENDDO
 #endif
