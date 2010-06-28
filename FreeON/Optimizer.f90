@@ -124,33 +124,31 @@ CONTAINS
     ! Purify NEB images.
     IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
       CALL NEBPurify(C%Geos)
-    ENDIF
 
-    CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "Initial transition path (in A)")
-    DO iCLONE = 0, C%Geos%Clones+1
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<BeginClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
-      DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
-        SELECT CASE(C%Geos%Clone(iCLONE)%CConstrain%I(iAtom))
-        CASE(1)
-          ConstraintString = "C"
-        CASE(2)
-          ConstraintString = "R"
-        CASE DEFAULT
-          ConstraintString = ""
-        END SELECT
+      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "Initial transition path (in A)")
+      DO iCLONE = 0, C%Geos%Clones+1
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<BeginClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
+        DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
+          SELECT CASE(C%Geos%Clone(iCLONE)%CConstrain%I(iAtom))
+          CASE(1)
+            ConstraintString = "C"
+          CASE(2)
+            ConstraintString = "R"
+          CASE DEFAULT
+            ConstraintString = ""
+          END SELECT
 
-        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iAtom))//" "// &
-        TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
-        TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms))//" "// &
-        TRIM(ConstraintString), &
-        "Clone "//TRIM(IntToChar(iCLONE)))
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iAtom))//" "// &
+          TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(1, iAtom)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(2, iAtom)*AUToAngstroms))//" "// &
+          TRIM(DblToChar(C%Geos%Clone(iCLONE)%Carts%D(3, iAtom)*AUToAngstroms))//" "// &
+          TRIM(ConstraintString), &
+          "Clone "//TRIM(IntToChar(iCLONE)))
+        ENDDO
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<EndClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "")
       ENDDO
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "<EndClone_"//TRIM(IntToChar(iCLONE))//">", "Clone "//TRIM(IntToChar(iCLONE)))
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "")
-    ENDDO
 
-    IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB)THEN
       DO iCLONE = 0, C%Geos%Clones+1
         CALL PPrint(C%Geos%Clone(iCLONE), FileName_O = C%Nams%GFile, &
         Unit_O = Geo, PrintGeom_O = C%Opts%GeomPrint, Clone_O = iCLONE)
