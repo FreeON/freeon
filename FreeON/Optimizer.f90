@@ -366,6 +366,7 @@ CONTAINS
 
       ! Calculate an approximate step towards the minimum using Newton's method.
       IF(Global) THEN
+        CALL MondoLog(DEBUG_NONE, "finding optimal stepsize", "global")
         f = Zero
         fPrime = Zero
         DO iCLONE = 1, C%Geos%Clones
@@ -428,6 +429,7 @@ CONTAINS
           ENDDO
         ENDDO
       ELSE
+        CALL MondoLog(DEBUG_NONE, "finding optimal stepsize", "non-global")
         DO iCLONE = 1, C%Geos%Clones
           directionNorm = Zero
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
@@ -464,17 +466,17 @@ CONTAINS
           ENDDO
           stepRMSD = SQRT(stepRMSd/(C%Geos%Clone(iCLONE)%NAtms))/directionNorm
 
-          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize = "//TRIM(DblToMedmChar(stepsize*directionNorm*AUToAngstroms))//" A")
+          CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "stepsize = "//TRIM(DblToMedmChar(stepsize*directionNorm*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "max move of " &
                                     //TRIM(FltToChar(maxMove*AUToAngstroms))//" A in clone " &
                                     //TRIM(IntToChar(maxMoveClone))//" on atom " &
-                                    //TRIM(IntToChar(maxMoveAtom)))
+                                    //TRIM(IntToChar(maxMoveAtom)), "Clone "//TRIM(IntToChar(iCLONE)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(direction) = "//TRIM(FltToChar(stepRMSd*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "RMSd(stepsize*direction) = "//TRIM(FltToChar(stepRMSd*stepsize*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
 
           IF(maxMove > C%Opts%ConjugateGradientMaxMove) THEN
             stepsize = stepsize*C%Opts%ConjugateGradientMaxMove/maxMove
-            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(C%Opts%ConjugateGradientMaxMove*AUToAngstroms))//" A")
+            CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "reducing stepsize to "//TRIM(FltToChar(C%Opts%ConjugateGradientMaxMove*AUToAngstroms))//" A", "Clone "//TRIM(IntToChar(iCLONE)))
           ENDIF
 
           CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "step (in A)", "Clone "//TRIM(IntToChar(iCLONE)))
@@ -545,6 +547,7 @@ CONTAINS
 
       ! Calculate new search direction. We follow Polak-Ribi\`{e}re.
       IF(Global) THEN
+        CALL MondoLog(DEBUG_NONE, "finding new search direction", "global")
         IF(SteepestDescent) THEN
           beta = Zero
         ELSE
@@ -575,6 +578,7 @@ CONTAINS
           ENDDO
         ENDDO
       ELSE
+        CALL MondoLog(DEBUG_NONE, "finding new search direction", "non-global")
         DO iCLONE = 1, C%Geos%Clones
           IF(SteepestDescent) THEN
             beta = Zero
