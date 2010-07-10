@@ -53,19 +53,19 @@ CONTAINS
   FUNCTION ProcessName(Proc_O, Misc_O) RESULT (Tag)
     CHARACTER(LEN=*), OPTIONAL  :: Proc_O
     CHARACTER(LEN=*), OPTIONAL  :: Misc_O
-    CHARACTER(LEN=32)           :: Tag
-    CHARACTER(LEN=32)           :: Name
-    CHARACTER(LEN=32),PARAMETER :: Blks='                        '
+    CHARACTER(LEN=36)           :: Tag
+    CHARACTER(LEN=36)           :: Name
+    CHARACTER(LEN=36),PARAMETER :: Blks='                        '
     CHARACTER(LEN=3), PARAMETER :: Colon =' : '
     CHARACTER(LEN=4), PARAMETER :: Colons=' :: '
 
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
       Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
-      Name(30:32)=":: "
+      Name(34:36)=":: "
       Tag=Name
     ELSEIF(PRESENT(Proc_O))THEN
       Name=TRIM(ADJUSTL(TRIM(Proc_O)))
-      Name(30:32)=":: "
+      Name(34:36)=":: "
       Tag=Name
     ELSE
       Tag="" !Blks
