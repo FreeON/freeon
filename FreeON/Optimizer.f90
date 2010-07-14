@@ -511,6 +511,16 @@ CONTAINS
             ENDDO
           ENDDO
         ENDIF
+
+        ! Calculate the gradient for the final step.
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating final step force")
+        IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+          CALL NEBPurify(C%Geos)
+        ENDIF
+        CALL GeomArchive(iBAS, iGEO+2, C%Nams, C%Opts, C%Sets, C%Geos)
+        CALL SCF(iBAS, iGEO+2, C)
+        CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
       ELSE
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
@@ -640,16 +650,17 @@ CONTAINS
             ENDDO
           ENDDO
         ENDIF
-      ENDIF
 
-      ! Calculate the gradient for the final step.
-      CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating final step force")
-      IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
-        CALL NEBPurify(C%Geos)
+        ! Calculate the gradient for the final step.
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "calculating final step force")
+        IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
+          CALL NEBPurify(C%Geos)
+        ENDIF
+        CALL GeomArchive(iBAS, iGEO+1, C%Nams, C%Opts, C%Sets, C%Geos)
+        CALL SCF(iBAS, iGEO+1, C)
+        CALL Force(iBAS, iGEO+1, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
+
       ENDIF
-      CALL GeomArchive(iBAS, iGEO+2, C%Nams, C%Opts, C%Sets, C%Geos)
-      CALL SCF(iBAS, iGEO+2, C)
-      CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
       ! Print out the energy.
       IF(C%Opts%Grad == GRAD_TS_SEARCH_NEB) THEN
