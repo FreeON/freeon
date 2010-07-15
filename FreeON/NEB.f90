@@ -144,6 +144,11 @@ CONTAINS
         ENDIF
       ENDDO
 
+#ifdef NEB_DEBUG
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "RPBeginClone = "//TRIM(IntToChar(RPBeginClone)))
+      CALL MondoLog(DEBUG_NONE, "NEBInit", "RPEndClone = "//TRIM(IntToChar(RPEndClone)))
+#endif
+
       ReactionVector = G%Clone(RPEndClone)%Carts%D-G%Clone(RPBeginClone)%Carts%D
 
 #ifdef NEB_DEBUG
@@ -173,6 +178,9 @@ CONTAINS
 
         ! Linear interpolation of path.
         CALL MondoLog(DEBUG_NONE, "NEBInit", "linear interpolation for clone "//TRIM(IntToChar(iCLONE)))
+        CALL MondoLog(DEBUG_NONE, "NEBInit", "Clone["//TRIM(IntToChar(iCLONE))//"] = Clone[" &
+          //TRIM(IntToChar(RPBeginClone))//"] + "//TRIM(DblToChar(ImageFraction)) &
+          //" * (Clone["//TRIM(IntToChar(RPEndClone))//"]-Clone["//TRIM(IntToChar(RPBeginClone))//"])")
         G%Clone(iCLONE)%Carts%D = G%Clone(RPBeginClone)%Carts%D + ImageFraction*ReactionVector
 
         ! Set everything else to 0 in this clone.

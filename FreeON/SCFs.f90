@@ -1087,7 +1087,7 @@ CONTAINS
         ENDIF
       ENDDO
 
-      ! Calculate GrandMax and GrandRMS
+      ! Calculate GradMax and GradRMS
       G%Clone(iCLONE)%GradMax=Zero
       G%Clone(iCLONE)%GradRMS=Zero
       DO iATS=1,G%Clone(iCLONE)%NAtms
