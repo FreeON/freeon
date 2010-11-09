@@ -236,20 +236,22 @@ CONTAINS
 !H  Initialize the Property Options.
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
-    !-------------------------------------------------------------------
+
     TYPE(PropOpts) :: Prp
-    !-------------------------------------------------------------------
+
     ! Initialize the static polarizabilities.
     Prp%Resp%StcAlpha = .FALSE.
     Prp%Resp%StcBeta  = .FALSE.
     Prp%Resp%StcGamma = .FALSE.
+
     ! Initialize the polarizability axis.
     Prp%Resp%AlphaAxis(:) = .TRUE.
     Prp%Resp%BetaAxis (:) = .TRUE.
     Prp%Resp%GammaAxis(:) = .TRUE.
-    !
-    ! ...
-    !
+
+    ! TD-SCF initializations.
+    Prp%Resp%TD_SCF = .FALSE.
+
   END SUBROUTINE PPrp_Init
   !
   !
