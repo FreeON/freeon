@@ -93,14 +93,6 @@ CONTAINS
     ENDDO
 #endif
 
-    ! Check some things for internal consistency.
-    DO j = 1, G%Clone(0)%NAtms
-      IF(G%Clone(0)%CConstrain%I(j) /= G%Clone(G%Clones+1)%CConstrain%I(j)) THEN
-        CALL MondoLog(DEBUG_NONE, "NEBInit", "constrain on atom "//TRIM(IntToChar(j))//" is different between reactant and product")
-        CALL Halt("Constrain mismatch on input")
-      ENDIF
-    ENDDO
-
     ! Calculate reaction path vector. We might have alrady read some clone
     ! geometries from input. We will interpolate along the reaction path vector
     ! between clones given in input.
@@ -183,6 +175,17 @@ CONTAINS
           //" * (Clone["//TRIM(IntToChar(RPEndClone))//"]-Clone["//TRIM(IntToChar(RPBeginClone))//"])")
         G%Clone(iCLONE)%Carts%D = G%Clone(RPBeginClone)%Carts%D + ImageFraction*ReactionVector
 
+        ! Do not interpolate for constrained atoms (since we already did, reset
+        ! position to original one to make our sanity test further down work).
+        DO j = 1, G%Clone(iCLONE)%NAtms
+          IF(G%Clone(iCLONE)%CConstrain%I(j) == 1) THEN
+            !CALL MondoLog(DEBUG_NONE, "NEBInit", "atom "//TRIM(IntToChar(j)) &
+            !  //" is constrained, copying coordinates", &
+            !  "Clone "//TRIM(IntToChar(iCLONE)))
+            G%Clone(iCLONE)%Carts%D(:,j) = G%Clone(0)%Carts%D(:,j)
+          ENDIF
+        ENDDO
+
         ! Set everything else to 0 in this clone.
         G%Clone(iCLONE)%Velocity%D = Zero
         G%Clone(iCLONE)%Fext%D = Zero
@@ -203,6 +206,44 @@ CONTAINS
 
       RPBeginClone = RPEndClone
       RPEndClone = RPBeginClone+1
+    ENDDO
+
+    ! Check some things for internal consistency.
+    DO iCLONE = 0, G%Clones
+      DO j = 1, G%Clone(0)%NAtms
+        IF(G%Clone(iCLONE)%CConstrain%I(j) /= G%Clone(iCLONE+1)%CConstrain%I(j)) THEN
+          CALL MondoLog(DEBUG_NONE, "NEBInit", "constrain on atom "//TRIM(IntToChar(j)) &
+            //" is different between clone "//TRIM(IntToChar(iCLONE)) &
+            //" and clone "//TRIM(IntToChar(iCLONE+1)))
+          CALL Halt("Constrain mismatch on input")
+        ENDIF
+
+#define POSITION_TOLERANCE 1.0D-10
+
+        IF(G%Clone(iCLONE)%CConstrain%I(j) == 1) THEN
+          IF(ABS(G%Clone(0)%Carts%D(1,j)-G%Clone(iCLONE+1)%Carts%D(1,j)) > POSITION_TOLERANCE .OR.  &
+             ABS(G%Clone(0)%Carts%D(2,j)-G%Clone(iCLONE+1)%Carts%D(2,j)) > POSITION_TOLERANCE .OR.  &
+             ABS(G%Clone(0)%Carts%D(3,j)-G%Clone(iCLONE+1)%Carts%D(3,j)) > POSITION_TOLERANCE) THEN
+            CALL MondoLog(DEBUG_NONE, "NEBInit", "position of constrained atom " &
+              //TRIM(IntToChar(j))//" between clone "//TRIM(IntToChar(0)) &
+              //" and clone "//TRIM(IntToChar(iCLONE+1)) &
+              //" is different to within a tolerance of " &
+              //TRIM(FltToChar(POSITION_TOLERANCE)))
+            CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = " &
+              //TRIM(FltToChar(G%Clone(0)%Carts%D(1,j)))//" " &
+              //TRIM(FltToChar(G%Clone(0)%Carts%D(2,j)))//" " &
+              //TRIM(FltToChar(G%Clone(0)%Carts%D(3,j))), &
+              "Clone "//TRIM(IntToChar(0)))
+            CALL MondoLog(DEBUG_NONE, "NEBInit", "R["//TRIM(IntToChar(j))//"] = " &
+              //TRIM(FltToChar(G%Clone(iCLONE+1)%Carts%D(1,j)))//" " &
+              //TRIM(FltToChar(G%Clone(iCLONE+1)%Carts%D(2,j)))//" " &
+              //TRIM(FltToChar(G%Clone(iCLONE+1)%Carts%D(3,j))), &
+              "Clone "//TRIM(IntToChar(iCLONE+1)))
+            CALL Halt("Position mismatch of constrained atoms")
+            !G%Clone(iCLONE)%Carts%D(:,j) = G%Clone(0)%Carts%D(:,j)
+          ENDIF
+        ENDIF
+      ENDDO
     ENDDO
 
     CALL MondoLog(DEBUG_NONE, "NEBInit", "done NEBInit")

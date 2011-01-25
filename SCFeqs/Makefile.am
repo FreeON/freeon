@@ -66,7 +66,7 @@ tags :
 
 # Dependencies.
 IRInv.o          : DenMatMethods.o
-ODA.o            : DenMatMethods.o
+ODA.o            : $(top_builddir)/MondoConfig.h DenMatMethods.o
 TC2Response.o    : DenMatMethods.o DenMatResponse.o
 SP2.o            : $(top_builddir)/MondoConfig.h DenMatMethods.o
 TS4.o            : DenMatMethods.o

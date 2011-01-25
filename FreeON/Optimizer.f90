@@ -521,7 +521,8 @@ CONTAINS
         CALL SCF(iBAS, iGEO+2, C)
         CALL Force(iBAS, iGEO+2, C%Nams, C%Opts, C%Stat, C%Geos, C%Sets, C%MPIs)
 
-      ELSE
+      ELSE ! QuasiNewton == .FALSE.
+        CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "QuasiNewton == .FALSE.")
         DO iCLONE = 1, C%Geos%Clones
           DO iAtom = 1, C%Geos%Clone(iCLONE)%NAtms
             CALL MondoLog(DEBUG_NONE, "ConjugateGradient", "F["//TRIM(IntToChar(iAtom))//"] = "// &
@@ -804,6 +805,11 @@ CONTAINS
             "Clone "//TRIM(IntToChar(iCLONE)))
           ENDDO
         ENDDO
+      ENDIF
+
+      ! Clean out scratch.
+      IF(C%Stat%Current%I(3) > 2) THEN
+        CALL CleanScratch(C, iGEO-2)
       ENDIF
 
     ENDDO
@@ -1407,9 +1413,9 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
 
        ! Clean out scratch.
-       !IF(C%Stat%Current%I(3) > 2) THEN
-       !  CALL CleanScratch(C, iGEO-2)
-       !ENDIF
+       IF(C%Stat%Current%I(3) > 2) THEN
+         CALL CleanScratch(C, iGEO-2)
+       ENDIF
      ENDDO
      CALL Delete(Convgd)
 
