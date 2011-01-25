@@ -23,6 +23,9 @@
 !    to return derivative works to the MondoSCF group for review, and possible
 !    disemination in future releases.
 !------------------------------------------------------------------------------
+
+#include "MondoConfig.h"
+
 PROGRAM ODA
   USE DerivedTypes
   USE GlobalScalars
@@ -54,6 +57,9 @@ PROGRAM ODA
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
   REAL(DOUBLE)                   :: TrP0T,TrP1T,TrP0F0,TrP1F1,TrP0F1,TrP1F0, &
        TrP0K1,TrP0K0,TrP1K0,TrP1K1,IKPS_Error,IKPS_denom
+#if defined(PARALLEL_CLONES)
+  INTEGER                          :: oldClone, rank
+#endif
   !-------------------------------------------------------------------------
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -82,6 +88,7 @@ PROGRAM ODA
   ! Rescaling factor for R/U/G theory.
   SFac=1D0
   IF(P%NSMat.GT.1) SFac=0.5D0
+  !WRITE(*,*) "ODA, NSMat = ", P%NSMat, ", Sfac = ", SFac
   !---------------------------------------------
   CALL Get(F,TrixFile('F',Args,0))
   ! Get Kinectic Energy and ECPs
@@ -306,13 +313,11 @@ PROGRAM ODA
     CALL Multiply(T2,-One)
     CALL Add(T1,T2,T3)
     DIISErr=SQRT(Dot(T3,T3))/DBLE(NBasF)
-    CALL Put(DIISErr,'diiserr')
   ELSE
     DIISErr=One
-    CALL Put(DIISErr,'diiserr')
   ENDIF
-  ! Store Emin
-  CALL Put(EMin   ,'ODAEnergy')
+
+
   ! JTilde_N = (1-L)*JTilde_(N-1)+L*J_N
   CALL Get(PTilde,TrixFile('J',Args,-1))
   CALL Get(P,     TrixFile('J',Args,0))
@@ -331,7 +336,43 @@ PROGRAM ODA
   ENDIF
   ! ENucTotTilde_N = (1-L)*ENucTotTilde_(N-1)+L*ENucTotTilde_N
   ENucTotTilde=L*Enuc1+L1*Enuc0
-  CALL Put(ENucTotTilde,'E_NuclearTotal',Stats_O=Current)
+
+#if defined(PARALLEL_CLONES)
+    IF(MRank(MPI_COMM_WORLD) == ROOT) THEN
+       CALL Put(DIISErr,'diiserr')
+       CALL Put(EMin   ,'ODAEnergy')
+       CALL Put(ENucTotTilde,'E_NuclearTotal',Stats_O=Current)
+       oldClone = MyClone
+       DO rank = 1, MSize(MPI_COMM_WORLD)-1
+          CALL Recv(MyClone, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+          CALL Recv(DIISErr, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+          CALL Recv(EMin   , rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+          CALL Recv(ENucTotTilde, rank, PUT_TAG, comm_O = MPI_COMM_WORLD)
+          ! Put to correct HDFGroup.
+          CALL CloseHDFGroup(H5GroupID)
+          H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+          HDF_CurrentID = H5GroupID
+          CALL Put(DIISErr, 'diiserr')
+          CALL Put(EMin   ,'ODAEnergy')
+          CALL Put(ENucTotTilde,'E_NuclearTotal',Stats_O=Current)
+       ENDDO
+       MyClone = oldClone
+       ! Reopen old HDFGroup.
+       CALL CloseHDFGroup(H5GroupID)
+       H5GroupID = OpenHDFGroup(HDFFileID, "Clone #"//TRIM(IntToChar(MyClone)))
+       HDF_CurrentID = H5GroupID
+    ELSE
+      CALL Send(MyClone, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(DIISErr, ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(EMin,    ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+      CALL Send(ENucTotTilde,ROOT, PUT_TAG, comm_O = MPI_COMM_WORLD)
+    ENDIF
+#else
+    CALL Put(DIISErr,'diiserr')
+    CALL Put(EMin   ,'ODAEnergy')
+    CALL Put(ENucTotTilde,'E_NuclearTotal',Stats_O=Current)
+#endif
+
   ! Tidy up
   CALL Delete(P)
   CALL Delete(PTilde)

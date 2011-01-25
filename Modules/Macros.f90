@@ -191,7 +191,7 @@ CONTAINS
 
     ! Reload local rank and PE number for the new MONDO_COMM
     IF(MyID /= MRank() .OR. NPrc /= MSize()) THEN
-      CALL MondoLog(DEBUG_NONE, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
+      CALL MondoLog(DEBUG_MAXIMUM, "CartCommSplit", "before MyID = "//TRIM(IntToChar(MyID)) &
         //" after MyID = "//TRIM(IntToChar(MRank()))//", NPrc = "//TRIM(IntToChar(NPrc)) &
         //" after NPrc = "//TRIM(IntToChar(MSize()))//", MONDO_COMM = "//TRIM(IntToChar(MONDO_COMM)), &
         "Clone "//TRIM(IntToChar(MyClone)))
@@ -205,7 +205,7 @@ CONTAINS
     CALL AlignNodes("MyClone = "//TRIM(IntToChar(MyClone)))
     MyID = ROOT
     NPrc = 1
-    CALL MondoLog(DEBUG_NONE, "CartCommSplit", "MyID = "//TRIM(IntToChar(MyID))//", NPrc = "//TRIM(IntToChar(NPrc)), "Clone "//TRIM(IntToChar(MyClone)))
+    CALL MondoLog(DEBUG_MAXIMUM, "CartCommSplit", "MyID = "//TRIM(IntToChar(MyID))//", NPrc = "//TRIM(IntToChar(NPrc)), "Clone "//TRIM(IntToChar(MyClone)))
 #endif
 
   END FUNCTION CartCommSplit

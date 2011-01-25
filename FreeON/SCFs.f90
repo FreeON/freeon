@@ -297,7 +297,7 @@ CONTAINS
     INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE,MinMDGeo,iREMOVE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
                                    DETOT,ETOTA,ETOTB,ETOTQ,ETest, &
-                                   DDMAX,DMAXA,DMAXB,DMAXQ,DTest,ETOTO,ODAQ,DMaxMax
+                                   DDMAX,DMAXA,DMAXB,DMAXQ,DTest,ETotO,ODAQ,DMaxMax
     INTEGER,DIMENSION(G%Clones) :: Converged
     INTEGER                     :: ConvergedQ,iSCF,ConvergeKey,MinSCF,MaxSCF
     CHARACTER(LEN=DCL)          :: chGEO
@@ -415,7 +415,8 @@ CONTAINS
 
       DO iCLONE=1,G%Clones
 
-        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+        HDF_CurrentID = H5GroupID
         ! Determine SCF if restarting MD
         MinSCF = O%MinSCF
         MaxSCF = O%MaxSCF
@@ -1070,6 +1071,17 @@ CONTAINS
 
     ! Close up the HDF file
     CALL CloseHDF(HDFFileID)
+
+    DO iCLONE=1,G%Clones
+      ! Zero forces on constrained atoms
+      DO iATS=1,G%Clone(iCLONE)%NAtms
+        IF(G%Clone(iCLONE)%CConstrain%I(iATS)==1 .OR. G%Clone(iCLONE)%CConstrain%I(iATS)==2)THEN
+          !IF(O%Coordinates /= GRAD_INTS_OPT) THEN
+          G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
+          !ENDIF
+        ENDIF
+      ENDDO
+    ENDDO
 
     ! Now add in any NEB force projections
     IF(O%Grad == GRAD_TS_SEARCH_NEB) THEN
