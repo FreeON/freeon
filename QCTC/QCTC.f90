@@ -1,4 +1,3 @@
-! vim: tw=0:sw=3
 !------------------------------------------------------------------------------
 !    This code is part of the FreeON suite of programs for linear scaling
 !    electronic structure theory and ab initio molecular dynamics.
@@ -85,9 +84,8 @@ PROGRAM QCTC
 
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
-
-!.OR.SCFActn/='InkFok'.AND.SCFActn/='StartResponse'.AND.SCFActn/='DensityPrime')THEN
   NukesOn=.TRUE.
+  ElectronsOn=.TRUE.
 
   ! ---------------------------------------------------------------------------------
   ! Begin building a density
@@ -103,6 +101,7 @@ PROGRAM QCTC
      CALL Get(NBasF,'nbasf',PrvBase)
      CALL Get(Dmat,TrixFile('D',Args,-1))
      NukesOn=.TRUE.
+     ElectronsOn=.TRUE.
   ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
      ! Get the current geometry from the current HDF first
      CALL Get(GM,CurGeom)
@@ -141,12 +140,11 @@ PROGRAM QCTC
      CALL Get(Dmat,TrixFile('D',Args,0))
      !
      NukesOn=.TRUE.
+     ElectronsOn=.TRUE.
   ELSE
-
      ! Get the current information
      CALL Get(BS,CurBase)
      CALL Get(GM,CurGeom)
-
      IF(SCFActn=='InkFok')THEN ! Incremental Fock build
         ! Maybe the difference density build should go elswhere?
         CALL Get(D1,TrixFile('D',Args,-1))
@@ -161,18 +159,24 @@ PROGRAM QCTC
         CALL Delete(D2)
         !
         NukesOn=.FALSE.
+        ElectronsOn=.TRUE.
      ELSEIF(SCFActn=='FockPrimeBuild')THEN
         CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
         NukesOn=.FALSE.
+        ElectronsOn=.TRUE.
      ELSEIF(SCFActn=='TD-SCF')THEN
         CALL Get(Dmat,TrixFile(Args%C%C(3),Args,0))
         NukesOn=.FALSE.
-     ELSEIF(SCFActn/='Core')THEN
+        ElectronsOn=.TRUE.
+     ELSEIF(SCFActn=='GuessEqCore')THEN
+        ! No electrons, just the nukes
+        NukesOn=.TRUE.
+        ElectronsOn=.FALSE.
+     ELSE
         ! Default
         CALL Get(Dmat,TrixFile('D',Args,0))
         NukesOn=.TRUE.
-     ELSE
-        CALL Halt('No idea what is going on in QCTC with SCF Action = '//TRIM(SCFActn))
+        ElectronsOn=.TRUE.
      ENDIF
   ENDIF
   ! Set thresholds local to the density build
@@ -185,7 +189,9 @@ PROGRAM QCTC
   ALLOCATE(RhoHead)
   RhoHead%LNum=0
   ! Here, the LL is filled out
-  CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
+  IF(ElectronsOn)THEN
+     CALL MakeRhoList(GM,BS,DMat,NLink,RhoHead,'QCTC',NoWrap_O=NoWrap)
+  ENDIF
   ! Add in the nuclear charges only in certain cases
   IF(NukesOn)THEN
      CALL AddNukes(GM,RhoHead,NoWrap)

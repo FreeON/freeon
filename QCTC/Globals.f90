@@ -39,8 +39,9 @@ MODULE Globals
   INTEGER,PARAMETER ::   MaxCluster=2048
   ! At what do we stop recurring on the tree:
   INTEGER,PARAMETER ::   MinCluster=32
-  ! Logical variable to control "electrons" only option
-  ! Useful in case of RPA etc
+  ! Logical variables to control "electrons" only and
+  ! core hamiltonian options. Useful in case of RPA etc
   LOGICAL           :: NukesOn
+  LOGICAL           :: ElectronsOn
 END MODULE Globals
 
