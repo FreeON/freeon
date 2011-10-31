@@ -29,6 +29,7 @@ MODULE Density
   USE GlobalObjects
   USE ProcessControl
   USE QCTCThresholds
+  USE Globals
   USE Order
   USE Clock
   USE BraBloks
@@ -180,7 +181,7 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg
 
     REAL(DOUBLE),DIMENSION(3) :: TMP1
-   !
+    !
     HGLink=>RhoHead%Next
     !
     NExpt=1
@@ -190,8 +191,6 @@ CONTAINS
     Ze(1)=HGLink%Zeta
     !
     HGLink=>HGLink%Next
-
-!!    WRITE(*,*)' Fucked in collate (SEE BELOW COMMENTED OUT IF!!!!!!!!!!!! '
 
     DO WHILE(ASSOCIATED(HGLink))
        DO I=1,NExpt
@@ -365,12 +364,18 @@ CONTAINS
        NoWrap=.FALSE.
     ENDIF
 
-    ! Find the last link
-    HGLink=>RhoHead%Next
-    DO WHILE(ASSOCIATED(HGLink%Next))
-       HGLink=>HGLink%Next
-    ENDDO
-    NLink=HGLink%LNum
+    IF(ElectronsOn)THEN
+       ! Find the last link
+       HGLink=>RhoHead%Next
+       DO WHILE(ASSOCIATED(HGLink%Next))
+          HGLink=>HGLink%Next
+       ENDDO
+       NLink=HGLink%LNum
+    ELSE
+       HGLink=>RhoHead
+       NLink=0
+    ENDIF
+
     GSpike=(NuclearExpnt/Pi)**(ThreeHalves)
     ! Add nuclear charges to the density
     DO N=1,GM%NAtms
