@@ -1,0 +1,3 @@
+#!/bin/bash
+
+FreeON ${srcdir}/HeH+.inp | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/HeH+.reference
