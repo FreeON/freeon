@@ -10,8 +10,9 @@ TESTS = \
   CH3OH \
   H \
   H2 \
-  N2O \
+  HeH+ \
   N2 \
+  N2O \
   O2
 
 EXTRA_DIST = \
