@@ -36,6 +36,7 @@ EXTRA_DIST = \
   H2O-FD_Smearing.inp \
   H2O.inp \
   HeH+.inp \
+  HeH+.reference \
   H.inp \
   H.reference \
   N2O.inp \
