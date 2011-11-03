@@ -138,7 +138,7 @@ for line in lines:
 
   check = re.compile("\"(.*)\" *= *([0-9.DdEe+\-]*) *\((([0-9.DdEe+\-]*))\)").search(line)
   if check:
-    log.debug("found tag \"" + check.group(1) + "\", value = " + check.group(2) + ", error = " + check.group(3))
+    log.debug("read tag from reference \"" + check.group(1) + "\", value = " + check.group(2) + ", error = " + check.group(3))
 
     # Convert fortran exponential "D" to "E".
     value = check.group(2)
@@ -207,9 +207,9 @@ log.info("scratch directory: " + scratchDirectory)
 log.info("log file: " + os.path.join(os.getcwd(), "regressionTest.log"))
 
 log.info("found " + str(numberErrors) + " value errors, " \
-    + str(numberMatched) + " matched entries, " \
-    + str(numberUnmatched) + " unmatched entries, " \
-    + str(numberMissing) + " entries that were missing from the output")
+    + str(numberMatched)   + " matched entries, " \
+    + str(numberUnmatched) + " unmatched entries, i.e found tag in output but did not have reference for it, " \
+    + str(numberMissing)   + " entries in reference that were missing from the output")
 
 if successfullyTerminated:
   log.info("FreeON successfully terminated")

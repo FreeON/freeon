@@ -1,4 +1,4 @@
-SUBDIRS = Dynamics Optimization Response Restart SinglePoint NEB
+SUBDIRS = SinglePoint Optimization Dynamics Response Restart NEB
 
 # Install the validation suite scripts.
 noinst_SCRIPTS = runTests.py parseTestResults.py
