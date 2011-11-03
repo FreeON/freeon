@@ -1,19 +1,21 @@
 include $(srcdir)/../../validate.inc
 
-TESTS = \
-  C \
-  C2H2 \
-  C2H4 \
-  C2H6 \
-  CH4 \
-  CH3NH2 \
-  CH3OH \
-  H \
-  H2 \
-  HeH+ \
-  N2 \
-  N2O \
-  O2
+#TESTS = \
+#  C \
+#  C2H2 \
+#  C2H4 \
+#  C2H6 \
+#  CH4 \
+#  CH3NH2 \
+#  CH3OH \
+#  H \
+#  H2 \
+#  HeH+ \
+#  N2 \
+#  N2O \
+#  O2
+
+TESTS = HeH+
 
 EXTRA_DIST = \
   $(TESTS) \
