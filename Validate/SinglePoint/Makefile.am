@@ -1,1 +1,2 @@
-SUBDIRS = Restricted Unrestricted
+#SUBDIRS = Restricted Unrestricted
+SUBDIRS = Restricted
