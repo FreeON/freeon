@@ -33,10 +33,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/select.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
 
+#define MAX_BUFFER_LENGTH 2000
 int
 F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 {
@@ -50,6 +52,22 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
   int SGNL_ERROR=-674034;
   int MISC_ERROR=-843503;
   int ierr=MISC_ERROR;
+
+  /* Create a pipe to standard output and error so we can capture those in the
+   * main process. Otherwise we won't get any useful failure message from the
+   * front-end.
+   */
+  char pipe_buffer[MAX_BUFFER_LENGTH];
+  int child_pipe[2];
+
+  if ((status = pipe(child_pipe)) != 0)
+  {
+    printf("error creating pipe for standard output\n");
+    exit(status);
+  }
+
+  int pipe_read  = child_pipe[0];
+  int pipe_write = child_pipe[1];
 
   /* Allocate argument list. */
   argv = (char**) malloc(sizeof(char*)*(*nc+1));
@@ -74,7 +92,26 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
   if(pid == 0)
   {
     /* This is the child process. */
+    int stdout_file = fileno(stdout);
+    int stderr_file = fileno(stderr);
+
+    /* Replace stdout and stderr with pipe. */
+    if ((status = dup2(pipe_write, stdout_file)) < 0)
+    {
+      printf("error attaching pipe\n");
+      exit(status);
+    }
+
+    if ((status = dup2(pipe_write, stderr_file)) < 0)
+    {
+      printf("error attaching pipe\n");
+      exit(status);
+    }
+
+    /* Replace this process with backend. */
     status = execvp(argv[0], argv);
+
+    /* If we are here, then execvp could not start. */
     printf("error with execvp: %s\n", strerror(errno));
     exit(status);
   }
@@ -105,6 +142,42 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
     else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
 #endif
     else ierr = EXIT_ERROR;
+  }
+
+  /* Dump standard output and error from back-end process. */
+  fd_set read_set;
+  FD_ZERO(&read_set);
+  FD_SET(pipe_read, &read_set);
+  struct timeval timeout;
+  while (1)
+  {
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+    status = select(pipe_read+1, &read_set, NULL, NULL, &timeout);
+
+    if (status == 0)
+    {
+      /* We timed out. Since we already know that the backend process
+       * terminated, we are done.
+       */
+      break;
+    }
+
+    else if (status > 0)
+    {
+      /* There is something to read from the pipe. */
+      if (read(pipe_read, pipe_buffer, MAX_BUFFER_LENGTH) > 0)
+      {
+        printf("%s", pipe_buffer);
+      }
+      else { break; }
+    }
+
+    else {
+      /* An error occurred. */
+      printf("error on select()\n");
+      exit(status);
+    }
   }
 
   /* Free memory. */
