@@ -196,7 +196,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 
   if (WIFSIGNALED(status))
   {
-    printf("[Spawn] child terminated by signal %i (%s)\n", WTERMSIG(status), signal_name(WTERMSIG(status)));
+    printf("[Spawn] child (%s) terminated by signal %i (%s)\n", argv[0], WTERMSIG(status), signal_name(WTERMSIG(status)));
     ierr = SGNL_ERROR;
     if (WCOREDUMP(status))
     {
@@ -206,7 +206,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 
   else if (WIFSTOPPED(status))
   {
-    printf("[Spawn] child stopped by signal %i (%s)\n", WSTOPSIG(status), signal_name(WSTOPSIG(status)));
+    printf("[Spawn] child (%s) stopped by signal %i (%s)\n", argv[0], WSTOPSIG(status), signal_name(WSTOPSIG(status)));
     ierr = SGNL_ERROR;
   }
 
