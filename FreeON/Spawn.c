@@ -53,6 +53,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
   int MISC_ERROR=-843503;
   int ierr=MISC_ERROR;
 
+#ifdef DUMP_PIPE
   /* Create a pipe to standard output and error so we can capture those in the
    * main process. Otherwise we won't get any useful failure message from the
    * front-end.
@@ -68,6 +69,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 
   int pipe_read  = child_pipe[0];
   int pipe_write = child_pipe[1];
+#endif
 
   /* Allocate argument list. */
   argv = (char**) malloc(sizeof(char*)*(*nc+1));
@@ -91,6 +93,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 
   if(pid == 0)
   {
+#ifdef DUMP_PIPE
     /* This is the child process. */
     int stdout_file = fileno(stdout);
     int stderr_file = fileno(stderr);
@@ -107,6 +110,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
       printf("error attaching pipe\n");
       exit(status);
     }
+#endif
 
     /* Replace this process with backend. */
     status = execvp(argv[0], argv);
@@ -127,23 +131,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
     ierr = FORK_ERROR;
   }
 
-  /* This is the parent process. */
-  wpid = waitpid(pid, &status, 0);
-
-  if (WEXITSTATUS(status) == 0)
-  {
-    ierr = 0;
-  }
-
-  else
-  {
-    if(WSTOPSIG(status)!=0) ierr = SGNL_ERROR;
-#ifdef WCOREDUMP
-    else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
-#endif
-    else ierr = EXIT_ERROR;
-  }
-
+#ifdef DUMP_PIPE
   /* Dump standard output and error from back-end process. */
   fd_set read_set;
   FD_ZERO(&read_set);
@@ -157,9 +145,8 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 
     if (status == 0)
     {
-      /* We timed out. Since we already know that the backend process
-       * terminated, we are done.
-       */
+      /* We timed out. */
+      printf("pipe timed out\n");
       break;
     }
 
@@ -178,6 +165,24 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
       printf("error on select()\n");
       exit(status);
     }
+  }
+#endif
+
+  /* This is the parent process. */
+  wpid = waitpid(pid, &status, 0);
+
+  if (WEXITSTATUS(status) == 0)
+  {
+    ierr = 0;
+  }
+
+  else
+  {
+    if(WSTOPSIG(status)!=0) ierr = SGNL_ERROR;
+#ifdef WCOREDUMP
+    else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
+#endif
+    else ierr = EXIT_ERROR;
   }
 
   /* Free memory. */
