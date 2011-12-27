@@ -38,6 +38,29 @@
 #include <unistd.h>
 #include <errno.h>
 
+char *
+signal_name (int signal_number)
+{
+  char *name;
+
+  switch(signal_number)
+  {
+    case 9:
+      name = strdup("SIGKILL: Kill signal");
+      break;
+
+    case 11:
+      name = strdup("SIGSEGV: Invalid memory reference");
+      break;
+
+    default:
+      name = strdup("unknown signal");
+      break;
+  }
+
+  return name;
+}
+
 #define MAX_BUFFER_LENGTH 2000
 int
 F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
@@ -171,18 +194,30 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
   /* This is the parent process. */
   wpid = waitpid(pid, &status, 0);
 
-  if (WEXITSTATUS(status) == 0)
+  if (WIFSIGNALED(status))
   {
-    ierr = 0;
+    printf("[Spawn] child terminated by signal %i (%s)\n", WTERMSIG(status), signal_name(WTERMSIG(status)));
+    ierr = SGNL_ERROR;
+    if (WCOREDUMP(status))
+    {
+      ierr = DUMP_ERROR;
+    }
+  }
+
+  else if (WIFSTOPPED(status))
+  {
+    printf("[Spawn] child stopped by signal %i (%s)\n", WSTOPSIG(status), signal_name(WSTOPSIG(status)));
+    ierr = SGNL_ERROR;
   }
 
   else
   {
-    if(WSTOPSIG(status)!=0) ierr = SGNL_ERROR;
-#ifdef WCOREDUMP
-    else if(WCOREDUMP(status)!=0) ierr = DUMP_ERROR;
-#endif
-    else ierr = EXIT_ERROR;
+    ierr = EXIT_ERROR;
+
+    if (WEXITSTATUS(status) == 0)
+    {
+      ierr = 0;
+    }
   }
 
   /* Free memory. */
