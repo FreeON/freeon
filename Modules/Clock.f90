@@ -38,6 +38,11 @@ MODULE Clock
          REAL(DOUBLE) CPU_Seconds
       END FUNCTION CPU_Seconds
 
+      FUNCTION GetCPUTime()
+        USE DerivedTypes
+        REAL(DOUBLE) GetCPUTime
+      END FUNCTION GetCPUTime
+
       FUNCTION MondoTimer()
          USE DerivedTypes
          REAL(DOUBLE) MondoTimer
@@ -66,7 +71,7 @@ MODULE Clock
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
          CPUSec=0.0D0
 #else
-         CPUSec=CPU_Seconds()
+         CPUSec=getCPUTime()
 #endif
       END FUNCTION CPUSec
 

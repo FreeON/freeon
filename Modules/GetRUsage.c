@@ -34,6 +34,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <math.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 /* getmemoryusage:
  *
@@ -62,9 +64,17 @@ getmemoryusage_wrapper (int * size)
   {
     for (i = 0; i < 22; ++i)
     {
-      fscanf(file, "%s", & token[0]);
+      if (fscanf(file, "%s", & token[0]) <= 0)
+      {
+        printf("[getmemoryusage] error reading\n");
+        exit(1);
+      }
     }
-    fscanf(file, "%lu", & temp);
+    if (fscanf(file, "%lu", & temp) <= 0)
+    {
+      printf("[getmemoryusage] error reading\n");
+      exit(1);
+    }
     *size = (int) round(temp/1024.);
 
     /* Close file again. */
@@ -84,4 +94,30 @@ void
 getmemoryusage_wrapper__ (int * size)
 {
   getmemoryusage_wrapper(size);
+}
+
+double
+getcputime ()
+{
+  struct rusage current_time;
+
+  if (getrusage(RUSAGE_SELF, &current_time) < 0)
+  {
+    printf("[getCPUTime] error\n");
+    exit(1);
+  }
+
+  return current_time.ru_utime.tv_sec+current_time.ru_utime.tv_usec/(double) 1e6;
+}
+
+double
+getcputime_ ()
+{
+  return getcputime();
+}
+
+double
+getcputime__ ()
+{
+  return getcputime();
 }

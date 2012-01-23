@@ -1619,8 +1619,8 @@ MODULE PrettyPrint
 #endif
        Elapsed_CPUS=T%CPUS
        Elapsed_Wall=T%Wall
-       PU=OpenPU(FileName_O,Unit_O)
-       CALL PrintProtectL(PU)
+       !PU=OpenPU(FileName_O,Unit_O)
+       !CALL PrintProtectL(PU)
 #ifdef PARALLEL
     ENDIF
     IF(InParallel)THEN
@@ -1661,16 +1661,16 @@ MODULE PrettyPrint
        IF(MFlops(FLOPS,Elapsed_Wall)>Zero)THEN
           IF(Elapsed_CPUS/=Zero)THEN
 #ifdef PARALLEL
-             Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
-                  //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
+             Mssg='CPU (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
                   //'), WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &
-                  //TRIM(DblToShrtChar(Elapsed_CPUS))//', '     &
+             Mssg='CPU (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
                   //'), WALL(Sec,MFLOPS) = ('                  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '     &
@@ -1679,12 +1679,12 @@ MODULE PrettyPrint
 #endif
           ELSE
 #ifdef PARALLEL
-             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
+             Mssg='WALL (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec,MFLOPS) = (' &
+             Mssg='WALL (Sec,MFLOPS) = (' &
                   //TRIM(DblToShrtChar(Elapsed_Wall))//', '      &
                   //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
                   //')'
@@ -1693,31 +1693,32 @@ MODULE PrettyPrint
        ELSE
           IF(Elapsed_CPUS>Zero)THEN
 #ifdef PARALLEL
-             Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '   &
-                  //TRIM(DblToShrtChar(Elapsed_CPUS))   &
+             Mssg='CPU Sec = '   &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))   &
                   //', WALL (Sec) = '                   &
                   //TRIM(DblToShrtChar(Elapsed_Wall))   &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(TRIM(Proc))//'CPU Sec = '  &
-                  //TRIM(DblToShrtChar(Elapsed_CPUS))  &
+             Mssg='CPU Sec = '  &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))  &
                   //', WALL Sec = '                    &
                   //TRIM(DblToShrtChar(Elapsed_Wall))
 #endif
           ELSE
 #ifdef PARALLEL
-             Mssg=ProcessName(TRIM(Proc))//'WALL Sec = '  &
+             Mssg='WALL Sec = '  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))      &
                   //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-             Mssg=ProcessName(TRIM(Proc))//'WALL (Sec) = '  &
+             Mssg='WALL (Sec) = '  &
                   //TRIM(DblToShrtChar(Elapsed_Wall))
 #endif
           ENDIF
        ENDIF
-       WRITE(PU,"(A)")TRIM(Mssg)
-       CALL PrintProtectR(PU)
-       CLOSE(Out)
+       !WRITE(PU,"(A)")TRIM(Mssg)
+       !CALL PrintProtectR(PU)
+       CALL MondoLog(DEBUG_NONE, Proc, Mssg)
+       !CLOSE(PU)
 #ifdef PARALLEL
     ENDIF
 #endif
@@ -1798,18 +1799,18 @@ MODULE PrettyPrint
        ENDIF
     ELSE
 #endif
-       PU=OpenPU()
-       CALL PrintProtectL(PU)
-       Mssg=ProcessName(Proc)                             &
-            //'Allocs='//TRIM(IntToChar(A%Allocs))        &
+       !PU=OpenPU()
+       !CALL PrintProtectL(PU)
+       Mssg='Allocs='//TRIM(IntToChar(A%Allocs))        &
             //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs)) &
             //', '//TRIM(IntToChar(A%MemTab ))            &
             //' bytes are presently allocated. '          &
             //'A max of '//TRIM(IntToChar(A%MaxMem))      &
             //' bytes were allocated.'
-       WRITE(PU,"(A)")TRIM(Mssg)
-       CALL PrintProtectR(PU)
-       CLOSE(PU)
+       !WRITE(PU,"(A)")TRIM(Mssg)
+       !CALL PrintProtectR(PU)
+       CALL MondoLog(DEBUG_NONE, Proc, Mssg)
+       !CLOSE(PU)
 #ifdef PARALLEL
     ENDIF
 #endif
