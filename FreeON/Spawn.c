@@ -210,7 +210,7 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
     ierr = SGNL_ERROR;
   }
 
-  else
+  else if (WIFEXITED(status))
   {
     ierr = EXIT_ERROR;
 
@@ -218,6 +218,17 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
     {
       ierr = 0;
     }
+
+    else
+    {
+      printf("[Spawn] child (%s) exited due to general error (return code %i)\n", argv[0], WEXITSTATUS(status));
+    }
+  }
+
+  else
+  {
+    printf("[Spawn] FIXME\n");
+    exit(1);
   }
 
   /* Free memory. */
