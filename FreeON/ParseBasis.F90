@@ -245,7 +245,10 @@ CONTAINS
           KFound=KFound+1
           DO
             READ(BasU,DEFAULT_CHR_FMT,END=99)Line
-            IF(INDEX(Line,'<End')/=0)RETURN
+            IF(INDEX(Line,'<End')/=0) THEN
+              ! Found terminator in input file.
+              RETURN
+            ENDIF
             IF(KeyQ(TRIM(Line),Stars))GOTO 100
             NC=NC+1
             DO K=1,MaxLTyps
@@ -260,7 +263,11 @@ CONTAINS
                 ENDDO
               ENDIF
             ENDDO
+
+            ! The basis set file was not properly terminated with "Stars"
+            CALL MondoLog(DEBUG_NONE, "ParseBasis", "did not find terminating "//TRIM(Stars))
             RETURN
+
 101         CONTINUE
             BS%NCFnc%I(NK)=NC
             BS%NPFnc%I(NC,NK)=NP

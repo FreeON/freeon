@@ -119,12 +119,36 @@ MODULE BasisSetParameters
        'crystal98       ' , 'Crystal98       '    &  ! 45
        /), (/2,NSupSets/) )
   CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
-       (/'s    ','p    ','d    ','f    ','sp   ', &
-       'pd   ','spd  ','df   ','pdf  ','spdf '/)
+       (/'s    ', &
+         'p    ', &
+         'd    ', &
+         'f    ', &
+         'sp   ', &
+         'pd   ', &
+         'spd  ', &
+         'df   ', &
+         'pdf  ', &
+         'spdf '/)
   INTEGER,DIMENSION(2,MaxLTyps) ::  LTyps = &
-       RESHAPE( (/0,0,1,1,2,2,3,3,0,1 ,1,2 ,0,2  ,2,3 ,1,3  ,0,3/),(/2,MaxLTyps/))
+       RESHAPE( (/ 0, 0, &
+                   1, 1, &
+                   2, 2, &
+                   3, 3, &
+                   0, 1, &
+                   1, 2, &
+                   0, 2, &
+                   2, 3, &
+                   1, 3, &
+                   0, 3 /), (/2,MaxLTyps/))
   CHARACTER(LEN=5),DIMENSION(10)::ASymmTyps = &
        (/ 'S    ', &
-       'Px   ','Py   ','Pz   ', &
-       'Dxx  ','Dxy  ','Dyy  ','Dxz  ','Dyz  ','Dzz  '/)
+          'Px   ', &
+          'Py   ', &
+          'Pz   ', &
+          'Dxx  ', &
+          'Dxy  ', &
+          'Dyy  ', &
+          'Dxz  ', &
+          'Dyz  ', &
+          'Dzz  '/)
 END MODULE BasisSetParameters
