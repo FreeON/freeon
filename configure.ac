@@ -888,6 +888,7 @@ fi
 
 # Output all of it....
 AC_CONFIG_FILES([
+Doxyfile
 config_localversion.h
 Makefile
 FreeON/Makefile

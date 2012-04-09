@@ -13,12 +13,21 @@ DISTCLEANFILES = config.h MondoConfig.h MondoLocalVersion.h
 
 include_HEADERS = config.h MondoConfig.h MondoLocalVersion.h
 
-CONFIG_STATUS_DEPENDENCIES = $(top_srcdir)/localversion
+CONFIG_STATUS_DEPENDENCIES = \
+  $(top_srcdir)/Doxyfile.in \
+  $(top_srcdir)/localversion
+
+docs :
+	doxygen
+	$(MAKE) -C latex
+
+$(top_srcdir)/localversion : always
+	cd $(top_srcdir) && ./fix_localversion.sh
 
 #DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
 # Phony targets.
-.PHONY : validate tags
+.PHONY : validate tags always
 
 # Clean out everything except for things that are excrutiatingly long to
 # rebuild.
