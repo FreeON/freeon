@@ -12,3 +12,17 @@ Features
 --------
 
 [coming soon]
+
+Contact Us
+----------
+
+While you could e-mail one of the authors directly, we prefer if you used our mailing lists or our bug tracker instead. You will probably get a response quicker this way because your message will go to all of us as opposed to just one of us. We currently operate 2 mailing lists:
+
+-   [freeon-users](http://lists.nongnu.org/mailman/listinfo/freeon-users), our public mailing list for users of FreeON.
+-   [freeon-devel](http://lists.nongnu.org/mailman/listinfo/freeon-devel), our mailing list for developers of FreeON, and people who are interested in the development process of it.
+
+Alternatively you can file a bug report or feature request with our bug tracker system:
+
+-   [FreeON Bug Tracker](https://savannah.nongnu.org/bugs/?group=freeon)
+
+When you connect to our bug tracker for the first time you might get an error related to the SSL certificate used by savannah.nongnu.org. Please follow the instructions from savannah to fix this error.
