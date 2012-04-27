@@ -45,7 +45,9 @@ The FreeON source code is hosted by the [Free Software Foundation](http://www.fs
 Vision Statement
 ----------------
 
-**Transparency, Freedom, Economy and Scale** [1](http://www.acq.osd.mil/actd/articles/OTDRoadmapFinal.pdf) ![](OTDRoadmapFinal.png "fig:OTDRoadmapFinal.png") Transparency leads to publishable, repeatable verification of accuracy and performance, a cornerstone of scientific simulation. Transparency promotes scrutiny by many eyes, concentrating and amortizing development, validation and verification efforts.
+**Transparency, Freedom, Economy and Scale**
+
+[1](http://www.acq.osd.mil/actd/articles/OTDRoadmapFinal.pdf) ![](OTDRoadmapFinal.png "fig:OTDRoadmapFinal.png") Transparency leads to publishable, repeatable verification of accuracy and performance, a cornerstone of scientific simulation. Transparency promotes scrutiny by many eyes, concentrating and amortizing development, validation and verification efforts.
 
 Open source isn't just about low cost, its about the Freedom to innovate, collaborate andbuild the scientific commons. It means technological agility, and a pace of innovation that can only be achieved by distributed collaborative development and the open market of ideas. [2](http://www.wtec.org/sbes/workshop/FinalWS-20080425/SBES-allpresentations-30Apr08-lowres.pdf) ![](SBES-allpresentations-30Apr08.png "fig:SBES-allpresentations-30Apr08.png")
 
