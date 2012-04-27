@@ -42,6 +42,15 @@ The FreeON source code is hosted by the [Free Software Foundation](http://www.fs
 
 -   [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
 
+Vision Statement
+----------------
+
+**Transparency, Freedom, Economy and Scale** [1](http://www.acq.osd.mil/actd/articles/OTDRoadmapFinal.pdf) ![](OTDRoadmapFinal.png "fig:OTDRoadmapFinal.png") Transparency leads to publishable, repeatable verification of accuracy and performance, a cornerstone of scientific simulation. Transparency promotes scrutiny by many eyes, concentrating and amortizing development, validation and verification efforts.
+
+Open source isn't just about low cost, its about the Freedom to innovate, collaborate andbuild the scientific commons. It means technological agility, and a pace of innovation that can only be achieved by distributed collaborative development and the open market of ideas.<a href="http://www.wtec.org/sbes/workshop/FinalWS-20080425/SBES-allpresentations-30Apr08-lowres.pdf"><img src="SBES-allpresentations-30Apr08.png" width="401" height="299" /></a>
+
+<img src="gpu.jpg" width="387" height="318" align="right" />From the desktop to the exascale, reduced complexity algorithms may provide the greatest impact on the Economy and Scale of first principles simulation. The exponential increase in desktop compute power in combination with O(N) algorithms may provide capabilities to the individual that were only recently the exclusive domain of national supercomputer centers. At the extreme scale, it may be possible to parlay linear scaling techniques for exploiting quantum locality into methods for achieving computational locality.
+
 Related Electronic Structure Programs
 -------------------------------------
 
