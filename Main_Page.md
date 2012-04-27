@@ -14,6 +14,7 @@ Content of this wiki
 -   [API](API "wikilink") Documentation
 -   [Input File Syntax](Input File Syntax "wikilink")
 -   [Example Inputs](Example Inputs "wikilink")
+-   [Vision Statement](Vision Statement "wikilink")
 
 Features
 --------
