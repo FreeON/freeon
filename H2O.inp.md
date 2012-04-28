@@ -135,9 +135,10 @@ There are many ways to include comments in a FreeON configuration file (see othe
 
     DebugAll=(MaxDebug,CheckSums)
 
-MaxSCF=12
+This line tells FreeON to include in the output additional information. You will normally not use this. It is intended mainly for the developers of the software so they can track a calculation and spot where is any problem in the unlikely case that it went wrong, so they can fix the code. It may occasionally, though very unlikely, be useful for you to verify a calculation, but as mentioned, you will normally not use this option.
 
-</pre>
+    MaxSCF=12
+
 With this, we are telling FreeON to limit the number of SCF cycles to 12. This may come handy in complex calculations, where the system has trouble to converge, or where convergence is inherently difficult because the system oscillates between two similar energy configurations (e. g. in aromatic or resonance structures), or when we want to limit the time spend in calculation.
 
     Guess=SuperPos
