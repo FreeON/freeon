@@ -8,7 +8,7 @@ title: CH4.inp
 Calculation on methane CH<sub>4</sub>
 -------------------------------------
 
-This page will show you how to write a sample calculation on methane ground state.
+This page will show you how to write a sample calculation for methane ground state.
 
 ### The complete file
 
