@@ -67,4 +67,5 @@ The authors of FreeON, in alphabetical order:
 |C. J. Tymczak|\<[tymczakcj@tsu.edu](http://mailto:tymczakcj@tsu.edu)\>|Texas Southern University|
 |Valery Weber||Universität Zürich|
 
-
+Publications
+------------
