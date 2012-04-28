@@ -56,8 +56,8 @@ Authors
 The authors of FreeON, in alphabetical order:
 
 |---|---|---|
-|Nicolas Bock|\<[nbock@lanl.gov](http://mailto:nbock@lanl.gov)\>|Los Alamos National Laboratory, T-1|
-|Matt Challacombe|\<[mchalla@lanl.gov](http://mailto:mchalla@lanl.gov)\>|Los Alamos National Laboratory, T-1|
+|Nicolas Bock|\<[nicolasbock@freeon.org](http://mailto:nicolasbock@freeon.org)\>|Los Alamos National Laboratory, T-1|
+|Matt Challacombe|\<[matt.challacombe@freeon.org](http://mailto:matt.challacombe@freeon.org)\>|Los Alamos National Laboratory, T-1|
 |Chee Kwan Gan||Institute for High Performance Computing|
 |Graeme Henkelman||University of Texas at Austin|
 |Karoly Nemeth||Argonne National Laboratory|
