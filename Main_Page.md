@@ -103,3 +103,12 @@ Publications
 -   Linear scaling computation of the Hartree-Fock exchange matrix E. Schwegler and Matt Challacombe, Journal of Chemical Physics, 105 2726 (1996)
 -   Fast assembly of the Coulomb matrix: a quantum chemical tree code Matt Challacombe, E. Schwegler and J. Almlof, Journal of Chemical Physics, 104 4685 (1996
 
+Wikipedia
+---------
+
+We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)
+
+Download
+--------
+
+From time to time we produce a tar file (sort of a release) and place it here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
