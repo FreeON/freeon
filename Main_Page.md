@@ -50,3 +50,21 @@ Our group at Los Alamos National Laboratory is actively developing 3 independent
 -   [RSPt](http://www.rspt.net/) is an Open Source project and a code for band structure calculations. RSPt (Relativistic Spin Polarised (test)) is very robust and flexible and can be used to calculate the band structure and total energy for all elements, and combinations thereof, over a wide range of volumes and structures. The Full-Potential Linear Muffin-Tin Orbital (FP-LMTO) method allows for very small basis sets and fast calculations. Compared to LMTO-ASA there are no restrictions on the symmetry of the potential in FP-LMTO. RSPt allows for multiple energy sets (i.e. valence and semi-core states) with the same angular quantum numbers but different main quantum number.
 -   [LATTE](http://savannah.nongnu.org/projects/latte) (Los Alamos Transferable Tight-binding for Energetics) enables quantum-based molecular dynamics simulations on many-core architectures of materials with mixed covalent and ionic bonding.
 
+Authors
+-------
+
+The authors of FreeON, in alphabetical order:
+
+|---|---|---|
+|Nicolas Bock|\<[nbock@lanl.gov](http://mailto:nbock@lanl.gov)\>|Los Alamos National Laboratory, T-1|
+|Matt Challacombe|\<[mchalla@lanl.gov](http://mailto:mchalla@lanl.gov)\>|Los Alamos National Laboratory, T-1|
+|Chee Kwan Gan||Institute for High Performance Computing|
+|Graeme Henkelman||University of Texas at Austin|
+|Karoly Nemeth||Argonne National Laboratory|
+|Anders Niklasson|\<[amn@lanl.gov](http://mailto:amn@lanl.gov)\>|Los Alamos National Laboratory, T-1|
+|Anders Odell|\<[odell@mse.kth.se](http://mailto:odell@mse.kth.se)\>|KTH Stockholm|
+|Eric Schwegler||Lawrence Livermore National Laboratory|
+|C. J. Tymczak|\<[tymczakcj@tsu.edu](http://mailto:tymczakcj@tsu.edu)\>|Texas Southern University|
+|Valery Weber||Universität Zürich|
+
+
