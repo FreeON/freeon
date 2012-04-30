@@ -14,7 +14,7 @@ Most of these examples include directives to use the parallel MPI implementation
 -   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after Goto, A.;Hondoh, T.;Mae, S.(1990)
 -   [06-Sulfur.inp](06-Sulfur.inp "wikilink") - Monoclinic gamma sulfur, after Gallacher, A.C.;Pinkerton, A.A. (1992) Phase Transition 38, 127-220, CSD entry 66517ICS
 -   [07-WaterHexamer.inp](07-WaterHexamer.inp "wikilink") - Optimization of a water hexamer using STO-3G split basis set
--   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be comapred with reference in <http://cccbdb.nist.gov/>
+-   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be compared with reference in <http://cccbdb.nist.gov/>
 -   [09-TEMPO.inp](09-TEMPO.inp "wikilink") - Optimization of 2,2,6,6-tetramethyl-piperidine-1-oxyl (TEMPO)
 -   [10-Malonaldahyde.inp](10-Malonaldahyde.inp "wikilink") - Transition state optimization from reactants and products of malonaldehyde.
 -   [11-CO2.inp](11-CO2.inp "wikilink") - Solid CO\_2 C O Unit Cell, 83K, afetr J Phys Soc Japan, 53(3) 1176-1184 (1984)
