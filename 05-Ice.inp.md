@@ -1,0 +1,92 @@
+---
+layout: default
+title: 05-Ice.inp
+---
+
+    Ice 1h-H2O-[P63/MMC] Goto, A.;Hondoh, T.;Mae, S.(1990)
+
+    <BeginOptions>
+
+    MPIInvoke="mpirun"
+    MPIProcessors=4
+    MPIProcFlag="-np"
+    MPISpatialProc=4
+    MPIMachineFlag="--nper"
+    MPIMachineFile="2"
+
+    Charge=0
+    Multiplicity=1
+
+    Guess=Superpos
+    OutPut=XYZ
+    Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
+
+    DebugAll=(MaxDebug,CheckSums)
+
+    SCFMethod=(TC2,TRS4)
+    BasisSets=(STO-2G,Mod631Gss)
+    ModelChem=(Hartree,Hartree)
+    Accuracy =(Loose,Tight)
+    SCFConvergence=(ODA,DIIS)
+
+    PBC=(T,T,T)
+    Periodic=(FracCoord)
+    RatioABC 1.0 1.0 -1.0
+
+    <EndOptions>
+
+    <BeginPeriodic>
+    4.511 4.511 7.346 90.000000 90.000000 120.000000
+    <EndPeriodic>
+
+    <BeginGeometry>
+    o    0.33327867D+00   0.66655735D+00   0.43778927D+00
+    h    0.50004600D+00   0.91997201D-04   0.50000000D+00
+    h    0.50014241D+00   0.50017399D+00   0.50000000D+00
+    o    0.66675018D+00   0.33327867D+00   0.56221073D+00
+    h    0.31573043D-04   0.50017399D+00   0.50000000D+00
+    h    0.66675018D+00   0.33327867D+00   0.75006806D+00
+    o    0.66675018D+00   0.33327867D+00   0.93778927D+00
+    h    0.50014241D+00   0.50017399D+00   0.40010890D-14
+    h    0.31573043D-04   0.50017399D+00   0.40010890D-14
+    o    0.33327867D+00   0.66655735D+00   0.62210727D-01
+    h    0.33327867D+00   0.66655735D+00   0.25006806D+00
+    h    0.50004600D+00   0.91997201D-04   0.40010890D-14
+    <EndGeometry>
+
+    <Begin_Add_Internals>
+    Alpha 90.0
+    Beta  90.0
+    Gamma 120.0
+    <End_Add_Internals>
+
+    <BeginBasisSetMod631Gss>
+     ****
+     H   0
+     S   3  1.00
+            18.73113700        0.03349460
+             2.82539370        0.23472695
+             0.64012170        0.81375733
+     S   1  1.00
+             0.3               1.00000000
+     P   1  1.00
+             1.10000000        1.00000000
+     ****
+     O   0
+     S   6  1.00
+          5484.67170000        0.00183110
+           825.23495000        0.01395010
+           188.04696000        0.06844510
+            52.96450000        0.23271430
+            16.89757000        0.47019300
+             5.79963530        0.35852090
+     SP  3  1.00
+            15.53961600       -0.11077750        0.07087430
+             3.59993360       -0.14802630        0.33975280
+             1.01376180        1.13076700        0.72715860
+     SP  1  1.00
+             0.4               1.00000000        1.00000000
+     D   1  1.00
+             0.8000000        1.00000000
+     ****
+    <EndBasisSetMod631Gss>
