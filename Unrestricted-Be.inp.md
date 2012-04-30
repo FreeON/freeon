@@ -4,10 +4,7 @@ title: Unrestricted-Be.inp
 ---
 
 
-
-    GAMESS UPW91/3-21G  -0.9915542467
-    FreeON UPW91/3-21G   -.9915540919968984D+00 (VeryTight)
-    FreeON UPW91/3-21G   -.9915501733931975D+00 (Tight)
+    # NWChem: -37.846280 hartree
 
     <BeginOptions>
 
@@ -18,20 +15,22 @@ title: Unrestricted-Be.inp
     OutPut=XYZ
     DebugAll=(MaxDebug)
 
+    ##DIISDimension=0
+    ##DIISDamp=0.01
+
     #Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
 
-    SCFMethod=(RH,RH)
-    BasisSets=(STO-3G,3-21G)
-    SpinModel=(U,U)
-    ModelChem=(HF,PW91xc)
-    Accuracy=(Good,VeryTight)
-    SCFConvergence=(DIIS,DIIS)
+    SCFMethod=(RH)
+    BasisSets=(STO-6G)
+    SpinModel=(U)
+    ModelChem=(HF)
+    Accuracy=(VeryTight)
+    SCFConvergence=(DIIS)
 
     Geometry=InAngstrom
 
     <EndOptions>
 
     <BeginGeometry>
-    H 0.0 0.0 0.0
-    H 5.0 0.0 0.0
+    Be 0.0 0.0 0.0
     <EndGeometry>
