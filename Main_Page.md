@@ -15,6 +15,7 @@ Content of this wiki
 -   [Input File Syntax](Input File Syntax "wikilink")
 -   [Example Inputs](Example Inputs "wikilink")
 -   [Vision Statement](Vision Statement "wikilink")
+-   [Publications](Publications "wikilink")
 
 Features
 --------
