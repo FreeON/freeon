@@ -1,0 +1,66 @@
+---
+layout: default
+title: 12-BPA.inp
+---
+
+    # Bisphenol A
+
+    <BeginOptions>
+    Charge=0
+
+    Multiplicity=1
+    Guess=SuperPos
+    Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+    #Grad=(Optimize,Cartesian,SteepestDescent)
+    #Grad=(Optimize,Cartesian,CG)
+    DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+    #BasisSets=(STO-3G-SPLIT,6-31G**-SPLIT)
+    #SCFMethod=(RH,RH)
+    #SCFConvergence=(ODA,ODA)
+    #ModelChem=(HF,HF)
+    #Accuracy=(good,tight)
+    BasisSets=(STO-2G-SPLIT)
+    SCFMethod=(RH)
+    #SCFConvergence=(ODA)
+    SCFConvergence=(DIIS)
+    ModelChem=(HF)
+    Accuracy=(tight)
+    Geometry=(InAngstroms)
+
+    <EndOptions>
+
+    <BeginGeometry>
+    O         -0.07800        1.35400        0.01600
+    C         -0.04500       -0.00500        0.00700
+    C         -0.98900       -0.72800        0.72000
+    C         -0.95300       -2.10900        0.70900
+    C          0.02400       -2.77100       -0.01200
+    C          0.06100       -4.27700       -0.02100
+    C          1.38900       -4.75800        0.56800
+    C         -1.09600       -4.82100        0.81800
+    C         -0.06900       -4.77300       -1.43800
+    C          0.87900       -5.63500       -1.95700
+    C          0.76200       -6.09200       -3.25600
+    C         -0.30800       -5.68500       -4.03900
+    O         -0.42500       -6.13300       -5.31700
+    C         -1.25800       -4.82000       -3.51600
+    C         -1.13900       -4.37100       -2.21500
+    C          0.96600       -2.05200       -0.72400
+    C          0.93100       -0.67100       -0.72100
+    H          0.44100        1.75500        0.72700
+    H         -1.75200       -0.21200        1.28400
+    H         -1.68900       -2.67300        1.26500
+    H          1.48300       -4.39900        1.59200
+    H          1.41600       -5.84800        0.56000
+    H          2.21300       -4.37000       -0.03000
+    H         -2.04200       -4.47900        0.39800
+    H         -1.06900       -5.91100        0.81100
+    H         -1.00200       -4.46200        1.84300
+    H          1.71200       -5.95200       -1.34700
+    H          1.50400       -6.76500       -3.66100
+    H         -0.93100       -6.95300       -5.40100
+    H         -2.09200       -4.50200       -4.12400
+    H         -1.88100       -3.70100       -1.80600
+    H          1.72800       -2.57100       -1.28600
+    H          1.66500       -0.11000       -1.28100
+    <EndGeometry>
