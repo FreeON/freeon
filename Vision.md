@@ -5,13 +5,13 @@ title: Vision
 
 **Free *O*(*N*): Transparency and Freedom**
 
-![](OTDRoadmapFinal.png "fig:OTDRoadmapFinal.png") Transparency promotes scrutiny by many eyes, concentrating and amortizing development, validation and verification efforts. The credibility of *O*(*N*) methods lie at the margin, at the trade off between speed and precision -- only with an open and transparent code base can this trade off be established.
+Transparency promotes scrutiny by many eyes, concentrating and amortizing development, validation and verification efforts. The credibility of *O*(*N*) methods lie at the margin, at the trade off between speed and precision -- only with an open and transparent code base can this trade off be established.
 
-![](SBES-allpresentations-30Apr08.png "fig:SBES-allpresentations-30Apr08.png") OpenSource isn't just about no-cost, its about the freedom to innovate, collaborate and build a scientific commons. It means technological agility, and a pace of innovation that can only be achieved by distributed collaborative development.
+OpenSource isn't just about no-cost, its about the freedom to innovate, collaborate and build a scientific commons. It means technological agility, and a pace of innovation that can only be achieved by distributed collaborative development.
 
 **Free *O*(*N*): Economy and Democretization**
 
-![](Gpu.jpg "fig:Gpu.jpg") Reduced complexity algorithms can provide far more economical increases in simulation capability relative to simple parallelization of conventional algorithms. Together with ongoing increases in desktop power, *O*(*N*) algorithms may provide capabilities to the individual that were only recently the exclusive domain of national supercomputer centers.
+Reduced complexity algorithms can provide far more economical increases in simulation capability relative to simple parallelization of conventional algorithms. Together with ongoing increases in desktop power, *O*(*N*) algorithms may provide capabilities to the individual that were only recently the exclusive domain of national supercomputer centers.
 
 **Free *O*(*N*): A Unified Approach to fast Quantum Chemistry**
 
