@@ -3,6 +3,8 @@ layout: default
 title: Restricted-CH3OH.inp
 ---
 
+![This example will show you how to run an RHF calculation on [methanol](http://en.wikipedia.org/wiki/Methanol) (CH<sub>3</sub>OH) using [FreeON](http://freeon.org) ](CH3OH_HOMO.png "This example will show you how to run an RHF calculation on methanol (CH3OH) using FreeON ")
+
     <BeginOptions>
 
     Charge=0
