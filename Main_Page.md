@@ -16,6 +16,7 @@ Content of this wiki
 -   [Example Inputs](Example Inputs "wikilink")
 -   [Vision Statement](Vision Statement "wikilink")
 -   [Publications](Publications "wikilink")
+-   [Related Electronic Structure Programs](Related Electronic Structure Programs "wikilink")
 
 Features
 --------
