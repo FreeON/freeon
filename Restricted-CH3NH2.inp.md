@@ -3,6 +3,8 @@ layout: default
 title: Restricted-CH3NH2.inp
 ---
 
+![This example shows how to run an RHF calculation on [Methylamine](http://en.wikipedia.org/wiki/Methylamine) (CH<sub>3</sub>NH<sub>2</sub>) using [FreeON](http://freeon.org/) ](CH3NH2.png "This example shows how to run an RHF calculation on Methylamine (CH3NH2) using FreeON ")
+
     <BeginOptions>
 
     Charge=0
