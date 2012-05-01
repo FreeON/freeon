@@ -5,7 +5,7 @@ title: Restricted-CH3OH.inp
 
 ![This example will show you how to run an RHF calculation on [methanol](http://en.wikipedia.org/wiki/Methanol) (CH<sub>3</sub>OH) using [FreeON](http://freeon.org) ](CH3OH_HOMO.png "This example will show you how to run an RHF calculation on methanol (CH3OH) using FreeON ")
 
-Restricted Hartree-Fock calculation on Ethylene
+Restricted Hartree-Fock calculation on Methanol
 -----------------------------------------------
 
 This example will show you how to run a calculation on [methanol](http://en.wikipedia.org/wiki/Methanol) (CH<sub>3</sub>OH) using [FreeON](http://freeon.org).
