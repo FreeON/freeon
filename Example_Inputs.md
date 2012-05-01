@@ -11,9 +11,9 @@ Documented example inputs:
 
 FreeON comes with a large number of additional examples. In the **Validate** subdirectory of the FreeON source code distribution you will find many illustrative examples organized by major kinds of calculations:
 
--   [Single point calculations](Single point calculations "wikilink")
--   [Optimization](Optimization "wikilink")
--   Dynamics
+-   [Single point calculation examples](Single point calculation examples "wikilink")
+-   [Optimization examples](Optimization examples "wikilink")
+-   Dynamics examples
 -   Reaction paths using NEB, the "Nudged elastic band" method
--   Restarting a calculation
+-   Restarting a calculation examples
 
