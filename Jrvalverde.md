@@ -3,7 +3,7 @@ layout: default
 title: Jrvalverde
 ---
 
-Better known since the dawn of time as **JR**, **José** or simply **j**, José R. Valverde holds a PhD in Medicine and Surgery by [Universidad Autónoma de Madrid](http://www.uam.es), works as head of Scientific Computing Services in the [<http://www.cnb.csic.es> National Biotechnology Center[, [Spanish Research Council](http://www.csic.es) (CNB/CSIC) and is a member of the [Higher Body of Systems and Information Technology of the State Administration](http://www.astic.es) in Spain, EU.
+Better known since the dawn of time as **JR**, **José** or simply **j**, José R. Valverde has PhD in Medicine and Surgery by [Universidad Autónoma de Madrid](http://www.uam.es), works as head of Scientific Computing Services in the [<http://www.cnb.csic.es> National Biotechnology Center[, [Spanish Research Council](http://www.csic.es) (CNB/CSIC) and is a member of the [Higher Body of Systems and Information Technology of the State Administration](http://www.astic.es) in Spain, EU.
 
 José has been working on Bioinformatics and Biocomputing since he started his licensure thesis (1984) on Molecular Biology of Aging. He got his PhD sequencing the mitochondrial genome of *Artemia franciscana* at the Department of Biochemistry of University Autonoma and the Institute of Enzymology of the Spanish Research Council, which was to become the [Biomedical Research Institute](http://www.iib.csic.es). At the time, he also was involved in the first national program for in vitro fertilization with embryo transfer for humans at Hospital La Paz, Madrid, Forensic Medicine, Developmental Biology, and Exobiology working for the [European Space Agency, ESA](http://www.esa.int).
 
