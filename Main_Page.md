@@ -32,7 +32,6 @@ Social
 
 |---|
 |<googlePage/>|
-|<followTwitter/>|
 
 Contact Us
 ----------
