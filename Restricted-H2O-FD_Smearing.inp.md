@@ -3,7 +3,7 @@ layout: default
 title: Restricted-H2O-FD Smearing.inp
 ---
 
-![Calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using [FreeON](http://freeon.org) ](H2O_ESP.png "Calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using FreeON ")
+![This example drives a calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using [FreeON](http://freeon.org) ](H2O_ESP.png "This example drives a calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using FreeON ")
 
 Water
 -----
