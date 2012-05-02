@@ -30,7 +30,9 @@ Content of this wiki
 Social
 ------
 
--   <googlePage/>
+|---|
+|<googlePage/>|
+|Example|
 
 Contact Us
 ----------
