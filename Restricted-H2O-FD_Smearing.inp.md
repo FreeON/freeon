@@ -3,6 +3,16 @@ layout: default
 title: Restricted-H2O-FD Smearing.inp
 ---
 
+![Calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using [FreeON](http://freeon.org) ](H2O_ESP.png "Calculation on water using Fermi-Dirac smearing to simulate the canonical ensemble for electrons at 10000K using FreeON ")
+
+Water
+-----
+
+Simulation of the canonical ensemble for the electrons at nonzero temperature (Fermi-Dirac occupation numbers) using [FreeON](http://freeon.org). This calculation uses Fermi-Dirac occupation numbers to simulate a temperature of 10000 degrees Kelvin.
+
+### The complete input file
+
+You can find this file in the **Validate/SinglePoint/Restricted** subdirectory of FreeON source code distribution.
 
     <BeginOptions>
 
