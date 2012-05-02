@@ -3,4 +3,6 @@ layout: default
 title: Users Guide
 ---
 
-[Example Inputs](Example Inputs "wikilink")
+-   [Input File Syntax](Input File Syntax "wikilink")
+-   [Example Inputs](Example Inputs "wikilink")
+
