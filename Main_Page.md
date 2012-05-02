@@ -37,13 +37,6 @@ Alternatively you can file a bug report or feature request with our bug tracker 
 
 When you connect to our bug tracker for the first time you might get an error related to the SSL certificate used by savannah.nongnu.org. Please follow the [instructions from savannah](http://savannah.nongnu.org/tls/tutorial/) to fix this error.
 
-Developer Page
---------------
-
-The FreeON source code is hosted by the [Free Software Foundation](http://www.fsf.org/) at
-
--   [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
-
 Wikipedia
 ---------
 
