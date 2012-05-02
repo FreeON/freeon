@@ -32,7 +32,7 @@ Social
 
 |---|
 |<googlePage/>|
-|Example|
+|<followTwitter/>|
 
 Contact Us
 ----------
