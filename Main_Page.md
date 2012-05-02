@@ -22,6 +22,7 @@ Content of this wiki
 -   [Vision Statement](Vision Statement "wikilink")
 -   [Publications](Publications "wikilink")
 -   [Related Electronic Structure Programs](Related Electronic Structure Programs "wikilink")
+-   [Authors](Authors "wikilink")
 
 Contact Us
 ----------
