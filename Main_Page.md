@@ -11,7 +11,7 @@ FreeON is an experimental, open source (GPL) suite of programs for linear scalin
 Content of this wiki
 --------------------
 
--   [Vision Statement](Vision Statement "wikilink")
+-   [Vision](Vision "wikilink")
 -   [Users Guide](Users Guide "wikilink")
 -   [Developers Guide](Developers Guide "wikilink")
 -   [Publications](Publications "wikilink")
