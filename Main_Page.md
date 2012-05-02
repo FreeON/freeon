@@ -27,6 +27,11 @@ Content of this wiki
 -   [Related Electronic Structure Programs](Related Electronic Structure Programs "wikilink")
 -   [Authors](Authors "wikilink")
 
+Social
+------
+
+-   <googlePage/>
+
 Contact Us
 ----------
 
