@@ -18,8 +18,8 @@ Structure of the Archive
 
 HDF
 
-Generalized N-Body Solvers
---------------------------
+Generalized *N*-Body Solvers
+----------------------------
 
 Task Parallelism
 ----------------
