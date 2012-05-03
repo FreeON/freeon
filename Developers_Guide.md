@@ -56,7 +56,7 @@ will list all available branches (after a clone operation, there will only be on
 
     autoreconf -fis
 
-will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Guide\#Downloading and Building](Users Guide#Downloading_and_Building "wikilink").
+will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Guide\#Downloading and Building the code](Users Guide#Downloading_and_Building_the_code "wikilink").
 
 ### Validation
 
