@@ -26,8 +26,8 @@ Generalized *N*-Body Solvers
 Task Parallelism
 ----------------
 
-FreeON Code Base
-----------------
+Code Base
+---------
 
 FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
 
