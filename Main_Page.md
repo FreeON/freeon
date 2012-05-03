@@ -22,6 +22,13 @@ Contents
 -   [Publications](Publications "wikilink")
 -   [Authors](Authors "wikilink")
 
+Download
+--------
+
+We periodically produce new releases here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
+
+Here are a few recent versions:
+
 Contact Us
 ----------
 
@@ -41,15 +48,8 @@ Wikipedia
 
 We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)
 
-Download
---------
-
-We periodically produce new releases here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
-
-Here are a few recent versions:
-
-How to cite us
---------------
+Citing FreeON
+-------------
 
     @misc{FreeON,
       author = {Bock, Nicolas and Challacombe, Matt and Gan, Chee~Kwan
