@@ -54,6 +54,8 @@ The command
 
 will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah.
 
+### Hacking the code
+
 Let's assume for now that you want to build the master branch:
 
     autoreconf -fis
