@@ -33,8 +33,8 @@ Bamboo waterfall, ...
 
 Patches, running "make check" etc...
 
-Users and Developers Opportunities and Networking
--------------------------------------------------
+Opportunities and Networking
+----------------------------
 
 ### Applications Opportunities Matrix
 
