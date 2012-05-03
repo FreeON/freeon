@@ -3,6 +3,17 @@ layout: default
 title: Restricted-HeH+-inp
 ---
 
+![This example performs an RHF calculation on the [Helium hydride ion](http://en.wikipedia.org/wiki/Helium_hydride_ion) (HeH<sup>+\>) using [FreeON](http://freeon.org) ](HeH+_MO.png "This example performs an RHF calculation on the Helium hydride ion (HeH+>) using FreeON ")
+
+Helium Hydride Ion
+------------------
+
+This example performs an RHF calculation on the [Helium hydride ion](http://en.wikipedia.org/wiki/Helium_hydride_ion) (HeH<sup>+\>) using [FreeON](http://freeon.org). Referece results calculated with MonoSCF and GAMESS-US as well as the GAMESS-US configuration file used to run the equivalent calculation are provided as comments.
+
+### The complete input file
+
+You can find this example configuration file under directory **Validate/SinglePoint/Restricted** of the FreeON source code distribution.
+
 
     Mondo                         GAMESS VERSION = 24 MAR 2007 (R3)
 
