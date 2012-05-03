@@ -45,11 +45,6 @@ Alternatively you can file a bug report or feature request with our bug tracker 
 
 When you connect to our bug tracker for the first time you might get an error related to the SSL certificate used by savannah.nongnu.org. Please follow the [instructions from savannah](http://savannah.nongnu.org/tls/tutorial/) to fix this error.
 
-Wikipedia
----------
-
-We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)
-
 Citing FreeON
 -------------
 
@@ -64,3 +59,8 @@ Citing FreeON
         Copyright University of California.},
       url = {http://freeon.org/}
     }
+
+Wikipedia
+---------
+
+We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)
