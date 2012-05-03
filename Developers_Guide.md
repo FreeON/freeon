@@ -25,7 +25,12 @@ Data is passed on the argument line to back-end subprograms, and structures are 
 Generalized *N*-Body Solvers
 ----------------------------
 
-### [Generalized Solvers](Generalized Solvers "wikilink")
+### The Solvers Stack
+
+### Independent Solver Libraries
+
+-   [SpAMMPack](SpAMMPack "wikilink")
+-   Quantum Coulomb Tree Code
 
 Task Parallelism
 ----------------
