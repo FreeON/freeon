@@ -6,7 +6,9 @@ title: Developers Guide
 Structure of the Program Suite
 ------------------------------
 
-FreeON is split into front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication, and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems (ie. so you don't have to redo a month long calculation to debug). Perhaps the greatest strength of the front-end/back-end structure is that it enables rapid development and competition between algorithms.
+FreeON is split into front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems (ie. so you don't have to redo a month long calculation to debug). Perhaps the greatest strength of the front-end/back-end structure is that it enables rapid development and competition between algorithms.
+
+### [APIs](APIs "wikilink")
 
 Clones
 ------
@@ -33,7 +35,7 @@ FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<htt
 
 Git, ...
 
-### Validation and Verification
+### Validation
 
 Bamboo waterfall, ...
 
@@ -44,8 +46,10 @@ Patches, running "make check" etc...
 Social
 ------
 
-### Applications Opportunities Matrix
+### Applications
 
-### Development Opportunities Matrix
+### Development
+
+### Education
 
 ### Networking
