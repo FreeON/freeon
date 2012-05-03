@@ -12,6 +12,7 @@ Development
 ### Coding Style
 
 -   Eclipse editor settings
+-   Code reuse, integrating into the existing stack
 
 Education
 ---------
