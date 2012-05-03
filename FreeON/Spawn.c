@@ -198,10 +198,12 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
   {
     printf("[Spawn] child (%s) terminated by signal %i (%s)\n", argv[0], WTERMSIG(status), signal_name(WTERMSIG(status)));
     ierr = SGNL_ERROR;
+#ifdef WCOREDUMP
     if (WCOREDUMP(status))
     {
       ierr = DUMP_ERROR;
     }
+#endif
   }
 
   else if (WIFSTOPPED(status))
