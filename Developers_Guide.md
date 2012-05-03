@@ -42,11 +42,21 @@ FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<htt
 
 ### Downloading and Building
 
-We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow for downloading and building the sources using git could look like the following:
+We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
 
     git clone http://git.savannah.gnu.org/r/freeon.git
 
-which will copy the entire repository into \$PWD/freeon. This step has to be done only once.
+which will copy the entire repository into \$PWD/freeon. This step has to be done only once. Now `cd` into freeon.
+
+The command
+
+    git branch
+
+will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah. Let's assume for now that you want to build the master branch:
+
+    autoreconf -fis
+
+will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Manual](Users Manual "wikilink").
 
 ### Validation
 
