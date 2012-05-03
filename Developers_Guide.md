@@ -25,7 +25,7 @@ Data is passed on the argument line to back-end subprograms, and structures are 
 Generalized *N*-Body Solvers
 ----------------------------
 
-### The Solvers Stack
+### Solver Stack
 
 ### Independent Solver Libraries
 
