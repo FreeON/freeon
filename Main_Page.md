@@ -29,6 +29,8 @@ We periodically produce new releases here: [Savannah FreeON Download Area](http:
 
 Here are a few recent versions:
 
+-   [1](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-01.tar.bz2)
+
 Contact Us
 ----------
 
