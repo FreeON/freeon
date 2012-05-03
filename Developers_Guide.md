@@ -52,11 +52,21 @@ The command
 
     git branch
 
-will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah. Let's assume for now that you want to build the master branch:
+will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah.
+
+Let's assume for now that you want to build the master branch:
 
     autoreconf -fis
 
 will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Guide\#Downloading and Building the code](Users Guide#Downloading_and_Building_the_code "wikilink").
+
+Now let's describe a basic workflow for hacking the code. First you create a new branch (which is local to your machine and is not shared with anyone unless you decide to) with
+
+    git branch branchname
+
+and switch to this branch with
+
+    git checkout branchname
 
 ### Validation
 
