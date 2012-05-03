@@ -7,7 +7,7 @@ In the Optimization subdirectory you can find a large number of examples of opti
 
 Most of these examples include directives to use the parallel MPI implementation of FreeON if available. This means that if you compiled a version of FreeON with support for parallel computing using MPI, then the program will be able to use more resources in your computer to complete the calculation faster. If your version of FreeON does not support MPI parallel processing, these directives will be ignored and the calculation will proceed normally using only one CPU.
 
--   [01-Benzene.inp](01-Benzene.inp "wikilink") - reproduction of the optimization of benzenr published by G.A.Jeffrey, J.R.Ruble, R.K.McMullan, J.A.Pople (1987) Proc.R.Soc.London,Ser.A v414 p47, using DFT with STO3G and the BLYP exchange correlation functional
+-   [01-Benzene.inp](01-Benzene.inp "wikilink") - reproduction of the optimization of benzene published by G.A.Jeffrey, J.R.Ruble, R.K.McMullan, J.A.Pople (1987) Proc.R.Soc.London,Ser.A v414 p47, using DFT with STO3G and the BLYP exchange correlation functional
 -   [02-BNSheet.inp](02-BNSheet.inp "wikilink") - Optimization of a BN sheet using DFT with split STO-2G and B3LYP
 -   [03-Caffeine.inp](03-Caffeine.inp "wikilink") - Two step optimization of Caffeine, first using STO-2G, followed by DFT with 6-31G\*\* and BLYP
 -   [04-CH2Wire.inp](04-CH2Wire.inp "wikilink") - Polyacetilene geometry optimization with fixed lattice vectors in STO-3G basis
