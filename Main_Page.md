@@ -11,25 +11,27 @@ Main
 <h4>
 [History](History "wikilink")
 
-</h4
+</h4>
+-   [Vision](Vision "wikilink")
+-   [Users Guide](Users Guide "wikilink")
+-   [Developers Guide](Developers Guide "wikilink")
+-   [Generalized Solvers](Generalized Solvers "wikilink")
+-   [Publications](Publications "wikilink")
+-   [Authors](Authors "wikilink")
 
-* [[Vision]]
-* [[Users Guide]]
-* [[Developers Guide]]
-* [[Generalized Solvers]]
-* [[Publications]]
-* [[Authors]]
+Social
+------
 
-=Social=
-==Applications==
-==Development==
-==Education==
-==Networking==
+### Applications
 
-{|
-|-
-| <googlePage/>
-|}
+### Development
+
+### Education
+
+### Networking
+
+|---|
+|<googlePage/>|
 
 Contact Us
 ----------
