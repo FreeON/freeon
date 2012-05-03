@@ -115,7 +115,7 @@ It is advisable that you enter here as much information about the system being m
      VIB.      64.006    64.006    64.005     0.026     0.026     0.003
      TOTAL     71.443    73.922    15.717    24.969    33.283   195.220
 
-This file can be used to check the accuracy of FreeON calculations. The developers of the package included therefore the results of running a similar calculation using two other packages: MondoSCF (an earlier version of FreeON) and [GAMESS-US](http://www.msg.ameslab.gov/gamess/). This way, you can verify how well the results you obtained after running this calculation feared in comparion.
+This file can be used to check the accuracy of FreeON calculations. The developers of the package included therefore the results of running a similar calculation using two other packages: MondoSCF (an earlier version of FreeON) and [GAMESS-US](http://www.msg.ameslab.gov/gamess/). This way, you can verify how well the results you obtained after running this calculation performed in comparion.
 
 ### Calculation options
 
