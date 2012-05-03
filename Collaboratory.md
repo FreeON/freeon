@@ -11,6 +11,8 @@ Development
 
 ### Coding Style
 
+-   Eclipse editor settings
+
 Education
 ---------
 
