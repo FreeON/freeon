@@ -3,6 +3,8 @@ layout: default
 title: Restricted-Vancomycin.inp
 ---
 
+![This example runs a parallel calculation on [Vancomycin](http://en.wikipedia.org/wiki/Vancomycin) using [FreeON](http://freeon.org) ](Vancomycin.png "This example runs a parallel calculation on Vancomycin using FreeON ")
+
 
     <BeginOptions>
 
