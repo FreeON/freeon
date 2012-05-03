@@ -3,8 +3,8 @@ layout: default
 title: History
 ---
 
-Minnesota
----------
+Minnesota & Berkeley
+--------------------
 
 MondoSCF
 --------
