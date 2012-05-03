@@ -42,7 +42,7 @@ FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<htt
 
 ### Downloading and Building
 
-We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code yourself, we recommend you use git yourself. A basic workflow for downloading and building the sources using git could look like the following:
+We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow for downloading and building the sources using git could look like the following:
 
     git clone http://git.savannah.gnu.org/r/freeon.git
 
