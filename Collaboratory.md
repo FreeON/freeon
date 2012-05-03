@@ -3,13 +3,19 @@ layout: default
 title: Collaboratory
 ---
 
-### Applications
+Applications
+------------
 
-### Development
+Development
+-----------
 
-### Education
+### Coding Style
 
-### Networking
+Education
+---------
+
+Networking
+----------
 
 |---|
 |<googlePage/>|
