@@ -56,6 +56,8 @@ Download
 
 We periodically produce new releases here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
 
+Here are a few recent versions:
+
 How to cite us
 --------------
 
