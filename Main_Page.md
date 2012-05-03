@@ -54,7 +54,7 @@ We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)
 Download
 --------
 
-From time to time we produce a tar file (sort of a release) and place it here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
+We periodically produce new releases here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
 
 How to cite us
 --------------
