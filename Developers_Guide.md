@@ -25,6 +25,8 @@ Data is passed on the argument line to back-end subprograms, and structures are 
 Generalized *N*-Body Solvers
 ----------------------------
 
+### [Generalized Solvers](Generalized Solvers "wikilink")
+
 Task Parallelism
 ----------------
 
