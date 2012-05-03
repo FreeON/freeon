@@ -17,8 +17,8 @@ Clones
 
 NEB, parallel replica ..
 
-Structure of the Archive
-------------------------
+The HDF5 Archive
+----------------
 
 Data is passed on the argument line to back-end subprograms, and structures are communicated via an archived HDF file.
 
