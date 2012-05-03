@@ -6,7 +6,7 @@ title: Developers Guide
 Structure of the Program Suite
 ------------------------------
 
-FreeON is split into a front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems. In serial, the backend is spawned with calls to `execvp()`, and with parallel clones, through `MPI_COMM_SPAWN()`.
+FreeON is split into a front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems. In serial, the backend is spawned with calls to [`execvp()`](http://linux.die.net/man/3/execvp), and with parallel clones, through `MPI_COMM_SPAWN()`.
 
 This structure significantly simplifies the tuning and debugging of large calculations through access to the stand alone problem. Perhaps the greatest strength of this framework though, is that it enables rapid development and competition between algorithms.
 
