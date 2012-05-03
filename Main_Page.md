@@ -11,11 +11,11 @@ Contents
 -   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
 -   [Users Guide](Users Guide "wikilink")
+-   [Collaboratory](Collaboratory "wikilink")
 -   [Developers Guide](Developers Guide "wikilink")
 -   [Generalized Solvers](Generalized Solvers "wikilink")
 -   [Publications](Publications "wikilink")
 -   [Authors](Authors "wikilink")
--   [Collaboratory](Collaboratory "wikilink")
 
 Contact Us
 ----------
