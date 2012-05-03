@@ -8,3 +8,5 @@ title: Users Guide
 
 Downloading and Building the code
 ---------------------------------
+
+The location of the source code releases are described in [Main\_Page\#Download](Main_Page#Download "wikilink").
