@@ -51,14 +51,3 @@ Bamboo waterfall, ...
 ### Contributing
 
 Patches, running "make check" etc...
-
-Social
-------
-
-### Applications
-
-### Development
-
-### Education
-
-### Networking
