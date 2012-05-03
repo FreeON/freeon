@@ -48,6 +48,10 @@ Git, ...
 
 Bamboo waterfall, ...
 
+### Working with Git
+
+Simple commands. Building your own repository. Creating branches. Steal our code, please.
+
 ### Contributing
 
 Patches, running "make check" etc...
