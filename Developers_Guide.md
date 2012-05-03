@@ -29,7 +29,7 @@ Generalized *N*-Body Solvers
 
 ### Independent Solver Libraries
 
--   [SpAMMPack](SpAMMPack "wikilink")
+-   [SpAMMPACK](SpAMMPACK "wikilink")
 -   Quantum Coulomb Tree Code
 
 Task Parallelism
