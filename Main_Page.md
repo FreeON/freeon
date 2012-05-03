@@ -7,6 +7,10 @@ FreeON is an experimental, open source (GPL) suite of programs for linear scalin
 
 \_\_TOC\_\_
 
+<h4>
+[History](History "wikilink")
+
+</h4>
 |<h4>
 [History](History "wikilink")
 
