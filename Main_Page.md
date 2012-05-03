@@ -5,37 +5,18 @@ title: Main Page
 
 FreeON is an experimental, open source (GPL) suite of programs for linear scaling quantum chemistry, formerly known as MondoSCF. It is highly modular, and has been written from scratch for N-scaling SCF theory in Fortran95 and C. Platform independent I/O is supported with HDF5. FreeON should compile with most modern Linux distributions. FreeON performs Hartree-Fock, pure Density Functional, and hybrid HF/DFT calculations (e.g. B3LYP) in a Cartesian-Gaussian LCAO basis. All algorithms are *O(N)* or ''O(N *log* N)'' for non-metallic systems. Periodic boundary conditions in 1, 2 and 3 dimensions have been implemented through the Lorentz field (Γ-point), and an internal coordinate geometry optimizer allows full (atom+cell) relaxation using analytic derivatives. Effective core potentials for energies and forces have been implemented, but Effective Core Potential (ECP) lattice forces do not work yet. Advanced features include *O(N)* static and dynamic response, as well as time reversible Born Oppenheimer Molecular Dynamics (MD).
 
-\_\_TOC\_\_
+\_\_NOTOC\_\_
 
-|<h4>
-[History](History "wikilink")
+Contents
+--------
 
-</h4>|
-|-----------------------------|
-|<h4>
-[Vision](Vision "wikilink")
-
-</h4>|
-|<h4>
-[Users Guide](Users Guide "wikilink")
-
-</h4>|
-|<h4>
-[Developers Guide](Developers Guide "wikilink")
-
-</h4>|
-|<h4>
-[Generalized Solvers](Generalized Solvers "wikilink")
-
-</h4>|
-|<h4>
-[Publications](Publications "wikilink")
-
-</h4>|
-|<h4>
-[Authors](Authors "wikilink")
-
-</h4>|
+-   [History](History "wikilink")
+-   [Vision](Vision "wikilink")
+-   [Users Guide](Users Guide "wikilink")
+-   [Developers Guide](Developers Guide "wikilink")
+-   [Generalized Solvers](Generalized Solvers "wikilink")
+-   [Publications](Publications "wikilink")
+-   [Authors](Authors "wikilink")
 
 Social
 ------
