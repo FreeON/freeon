@@ -16,12 +16,22 @@ title: Main Page
 [Users Guide](Users Guide "wikilink")
 
 </h4>|
-|Contents about stuff here|
+|<h4>
+[Developers Guide](Developers Guide "wikilink")
 
--   [Developers Guide](Developers Guide "wikilink")
--   [Generalized Solvers](Generalized Solvers "wikilink")
--   [Publications](Publications "wikilink")
--   [Authors](Authors "wikilink")
+</h4>|
+|<h4>
+[Generalized Solvers](Generalized Solvers "wikilink")
+
+</h4>|
+|<h4>
+[Publications](Publications "wikilink")
+
+</h4>|
+|<h4>
+[Authors](Authors "wikilink")
+
+</h4>|
 
 \_\_TOC\_\_
 
