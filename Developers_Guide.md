@@ -6,7 +6,9 @@ title: Developers Guide
 Structure of the Program Suite
 ------------------------------
 
-FreeON is split into front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication, and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems (ie. so you don't have to redo a month long calculation to debug). Data is passed on the argument line to back-end subprograms, and structures are communicated via an archived HDF file.
+FreeON is split into front-end and a back-end. The back-end involves numerically challenging tasks like matrix-multiplication, and matrix-build operations. Back-end operations can always be run in stand-alone mode for tuning and debugging very large problems (ie. so you don't have to redo a month long calculation to debug).
+
+Perhaps the greatest strength of the front-end/back-end structure is that it enables rapid development and competition between algorithms.
 
 Clones
 ------
@@ -16,7 +18,7 @@ NEB, parallel replica ..
 Structure of the Archive
 ------------------------
 
-HDF
+Data is passed on the argument line to back-end subprograms, and structures are communicated via an archived HDF file.
 
 Generalized *N*-Body Solvers
 ----------------------------
@@ -41,11 +43,11 @@ Bamboo waterfall, ...
 
 Patches, running "make check" etc...
 
-Opportunities and Networking
-----------------------------
+Social
+------
 
 ### Applications Opportunities Matrix
 
 ### Development Opportunities Matrix
 
-### Social
+### Networking
