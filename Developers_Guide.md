@@ -76,9 +76,17 @@ Bamboo waterfall, ...
 
 ### Working with Git
 
+The version control system (VCS) git is designed to be decentralized and is in this respect very different from more traditional VCS such as CVS and subversion. The fact that we use a server is simply a matter of convenience. Once the repository is cloned it is copied in its entirety and the copy could act as a server.
+
+#### Cloning
+
 Cloning our repository from savannah.
 
     git clone http://git.savannah.gnu.org/r/freeon.git
+
+#### Creating a Branch
+
+    git branch branchname
 
 ### Contributing
 
