@@ -17,7 +17,11 @@ Change into the newly created directory (it will be named just like the tar file
 
     ./configure [options]
 
-The options are described in more detail using the `--help` command line option for configure. Once configured, the sources are built using
+The options are described in more detail using the `--help` command line option for configure. The only external library dependencies are BLAS/LAPACK and HDF5. We currently include [netlib/LAPACK](http://www.netlib.org/lapack/) and [HDF5](http://www.hdfgroup.org/HDF5/) 1.8.3 with the tar releases. To use these internal libraries, run
+
+    ./configure --enable-internal-lapack --enable-internal-hdf5
+
+Please note that by linking in a vendor tuned LAPACK library, substantial performance gains in the linear algebra parts of the code can be achieved. See [ATLAS](http://math-atlas.sourceforge.net/), [MKL](http://software.intel.com/en-us/articles/intel-mkl/), or [ACML](http://developer.amd.com/libraries/acml/pages/default.aspx) for instance. Once configured, the sources are built using
 
     make
 
