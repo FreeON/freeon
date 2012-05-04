@@ -76,7 +76,9 @@ Bamboo waterfall, ...
 
 ### Working with Git
 
-Simple commands. Building your own repository. Creating branches. Steal our code, please.
+Cloning our repository from savannah.
+
+    git clone http://git.savannah.gnu.org/r/freeon.git
 
 ### Contributing
 
