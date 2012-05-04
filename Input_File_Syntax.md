@@ -3,16 +3,12 @@ layout: default
 title: Input File Syntax
 ---
 
-The input file is a plain text file with the following structure:
+The input file is a plain text file with the following items:
 
-<BeginOptions> <EndOptions>
+\<[Options](Options "wikilink")\>
 
-<BeginGeometry> <EndGeometry>
+\<[Geometries](Geometries "wikilink")\>
 
-<BeginBasisSet> <EndBasisSet>
+\<[Basis Sets](Basis Sets "wikilink")\>
 
-<BeginGeometry> <EndGeometry>
-
-or
-
-<BeginReactants> <EndReactants> <BeginProducts> <EndProducts> <BeginClone_1> <EndClone_1> ... <BeginClone_n> <EndClone_n>
+\<[Coordinate Constraints](Coordinate Constraints "wikilink")\>
