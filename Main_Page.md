@@ -54,7 +54,7 @@ Citing FreeON
         and Odell, Anders and Schwegler, Eric and Tymczak, C.~J.
         and Weber, Valery},
       title = {{\\sc FreeON}},
-      year = 2011,
+      year = 2012,
       note = {\\mbox{L}os Alamos National Laboratory (LA-CC 01-2; LA-CC-04-086),
         Copyright University of California.},
       url = {http://freeon.org/}
