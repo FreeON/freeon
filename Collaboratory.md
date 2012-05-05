@@ -13,6 +13,7 @@ Development
 
 -   Fortran keywords are all capital.
 -   Subroutines and Functions use mixed case naming.
+-   Don't be afraid of long names, something like `i`, `ii`, `iii` is not acceptable.
 
 #### Eclipse editor settings
 
