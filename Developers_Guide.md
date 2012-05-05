@@ -94,7 +94,4 @@ Patches, running "make check" etc...
 
 ### Eclipse
 
-The [eclipse IDE](http://www.eclipse.org/) offers a powerful and convenient option for developing FreeON. The following plugins are recommended:
-
--   Mylyn
-
+The [eclipse IDE](http://www.eclipse.org/) offers a powerful and convenient option for developing FreeON. Recommended plugins and settings can be found [here](Eclipse Settings "wikilink").
