@@ -10,4 +10,4 @@ The input file is a sectioned plain text file. The sections are enclosed <BeginS
 -   [Basis Sets](Basis Sets "wikilink")
 -   [Coordinate Constraints](Coordinate Constraints "wikilink")
 
-[Category:Users Guide](Category:Users Guide "wikilink")
+[Category:Users Guide](Category:Users Guide "wikilink") [Category:Input File](Category:Input File "wikilink")
