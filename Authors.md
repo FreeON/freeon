@@ -3,7 +3,7 @@ layout: default
 title: Authors
 ---
 
-The authors of FreeON, in alphabetical order:
+The authors of FreeON
 
 |Name|email address|Affiliation|
 |----|-------------|-----------|
