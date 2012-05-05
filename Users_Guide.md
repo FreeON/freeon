@@ -3,4 +3,4 @@ layout: default
 title: Users Guide
 ---
 
-blabla
+Everything useful for a user of FreeON.
