@@ -5,7 +5,8 @@ title: Authors
 
 The authors of FreeON, in alphabetical order:
 
-|---|---|---|
+|Name|email address|Affiliation|
+|----|-------------|-----------|
 |Nicolas Bock|\<[nicolasbock@freeon.org](http://mailto:nicolasbock@freeon.org)\>|Los Alamos National Laboratory, T-1|
 |Matt Challacombe|\<[matt.challacombe@freeon.org](http://mailto:matt.challacombe@freeon.org)\>|Los Alamos National Laboratory, T-1|
 |Chee Kwan Gan||Institute for High Performance Computing|
