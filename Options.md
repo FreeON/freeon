@@ -26,4 +26,4 @@ The following option keys and values are known.
 |SCFConvergence|DIIS|Use the DIIS algorithm to speedup SCF convergence|
 |SCFMethod|RH|Use Roothan-Hall|
 
-
+[Category:Users Guide](Category:Users Guide "wikilink")
