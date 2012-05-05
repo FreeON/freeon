@@ -58,7 +58,7 @@ Citing FreeON
       year = 2012,
       note = {\\mbox{L}os Alamos National Laboratory (LA-CC 01-2; LA-CC-04-086),
         Copyright University of California.},
-      url = {http://freeon.org/}
+      url = {http://www.freeon.org/}
     }
 
 Wikipedia
