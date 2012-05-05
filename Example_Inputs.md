@@ -17,3 +17,4 @@ FreeON comes with a large number of additional examples. In the **Validate** sub
 -   Reaction paths using NEB, the "Nudged elastic band" method
 -   Restarting a calculation examples
 
+[Category:Users Guide](Category:Users Guide "wikilink") [Category:Input Files](Category:Input Files "wikilink")
