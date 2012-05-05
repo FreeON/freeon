@@ -3,8 +3,6 @@ layout: default
 title: Authors
 ---
 
-The authors of FreeON
-
 |Name|email address|Affiliation|
 |----|-------------|-----------|
 |Nicolas Bock|\<[nicolasbock@freeon.org](http://mailto:nicolasbock@freeon.org)\>|Los Alamos National Laboratory, T-1|
