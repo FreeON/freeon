@@ -91,3 +91,10 @@ Cloning our repository from savannah.
 ### Contributing
 
 Patches, running "make check" etc...
+
+### Eclipse
+
+The [eclipse IDE](http://www.eclipse.org/) offers a powerful and convenient option for developing FreeON. The following plugins are recommended:
+
+-   Mylyn
+
