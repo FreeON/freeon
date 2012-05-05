@@ -25,9 +25,9 @@ Contents
 Download
 --------
 
-We periodically release snapshots of the development tree here: [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
+We periodically release snapshots of the development tree in the [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
 
-Here are a few recent versions:
+Here are a few recent ones:
 
 -   [freeon-beta-2012-05-01.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-01.tar.bz2)
 -   [freeon-beta-2012-05-03.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-03.tar.bz2)
