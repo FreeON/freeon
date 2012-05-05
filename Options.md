@@ -9,8 +9,7 @@ The Options section is enclosed between
     ...
     <EndOptions>
 
-Options
--------
+The following option keys and values are known.
 
 |Option Key|Option Value|Action|
 |----------|------------|------|
