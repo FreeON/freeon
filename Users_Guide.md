@@ -28,3 +28,5 @@ Please note that by linking in a vendor tuned LAPACK library, substantial perfor
 and installed with
 
     make install
+
+[Category:Users Guide](Category:Users Guide "wikilink")
