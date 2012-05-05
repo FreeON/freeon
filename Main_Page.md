@@ -49,6 +49,8 @@ When you connect to our bug tracker for the first time you might get an error re
 Citing FreeON
 -------------
 
+TeX Format
+
     @misc{FreeON,
       author = {Bock, Nicolas and Challacombe, Matt and Gan, Chee~Kwan
         and Henkelman, Graeme and Nemeth, Karoly and Niklasson, A.~M.~N.
@@ -60,6 +62,8 @@ Citing FreeON
         Copyright University of California.},
       url = {http://www.freeon.org/}
     }
+
+EndNote/RIS
 
 Wikipedia
 ---------
