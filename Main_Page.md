@@ -3,7 +3,7 @@ layout: default
 title: Main Page
 ---
 
-\_\_NOTOC\_\_ \_\_NOTITLE\_\_
+\_\_NOTOC\_\_
 
 Introduction
 ------------
