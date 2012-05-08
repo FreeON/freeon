@@ -32,6 +32,13 @@ Here are a few recent ones:
 -   [freeon-beta-2012-05-01.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-01.tar.bz2)
 -   [freeon-beta-2012-05-03.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-03.tar.bz2)
 
+SSL certificate
+---------------
+
+We currently use a self-signed SSL certificate. Your browser will likely have complained that this certificate can not be trusted, but trust us, it can. You can verify that you are using the right one by comparing the certificat's fingerprint. It should be:
+
+...
+
 Contact Us
 ----------
 
