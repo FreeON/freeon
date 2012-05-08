@@ -37,7 +37,7 @@ SSL certificate
 
 We currently use a self-signed SSL certificate. Your browser will likely have complained that this certificate can not be trusted, but trust us, it can. You can verify that you are using the right one by comparing the certificat's fingerprint. It should be:
 
-...
+-   SHA-256 fingerprint: 44 4B 37 6E BA 1C BF A6 0E 1B 01 57 1C 82 9B 81 AB 7D 8B 5F EB CF D7 03 BD 46 6A 08 AC 70 8A 7F
 
 Contact Us
 ----------
