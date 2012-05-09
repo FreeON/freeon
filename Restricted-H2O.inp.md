@@ -13,7 +13,7 @@ title: Restricted-H2O.inp
 
     Guess=Superpos
     OutPut=XYZ
-    Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
+    #Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
     DebugAll=(MinDebug,CheckSums)
 
     SCFMethod=(TC2,TC2)
