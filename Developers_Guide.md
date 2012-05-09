@@ -72,7 +72,7 @@ and switch to this branch with
 
 ### Validation
 
-Bamboo waterfall, ...
+We continuously build and test FreeON for verification, validation, and regression testing. You can see for yourself how FreeON is doing right now. Go to our [buildbot](http://www.freeon.org:8010) webpage.
 
 ### Working with Git
 
