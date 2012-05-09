@@ -15,8 +15,8 @@ Contents
 
 -   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
--   [Users Guide](Users Guide "wikilink")
--   [Developers Guide](Developers Guide "wikilink")
+-   [Users](Users Guide "wikilink")
+-   [Developers](Developers Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
 -   [Generalized Solvers](Generalized Solvers "wikilink")
 -   [Publications](Publications "wikilink")
