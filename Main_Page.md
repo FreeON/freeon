@@ -20,7 +20,7 @@ Contents
 -   [Collaboratory](Collaboratory "wikilink")
 -   [Generalized Solvers](Generalized Solvers "wikilink")
 -   [Publications](Publications "wikilink")
--   [Citing FreeON](Citing FreeON "wikilink")
+-   [Citation](Citing FreeON "wikilink")
 -   [Authors](Authors "wikilink")
 
 Download
