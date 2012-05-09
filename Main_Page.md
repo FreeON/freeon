@@ -20,6 +20,7 @@ Contents
 -   [Collaboratory](Collaboratory "wikilink")
 -   [Generalized Solvers](Generalized Solvers "wikilink")
 -   [Publications](Publications "wikilink")
+-   [Citing FreeON](Citing FreeON "wikilink")
 -   [Authors](Authors "wikilink")
 
 Download
@@ -50,40 +51,6 @@ Alternatively you can file a bug report or feature request with our bug tracker 
 -   [FreeON Bug Tracker](https://savannah.nongnu.org/bugs/?group=freeon)
 
 When you connect to our bug tracker for the first time you might get an error related to the SSL certificate used by savannah.nongnu.org. Please follow the [instructions from savannah](http://savannah.nongnu.org/tls/tutorial/) to fix this error.
-
-Citing FreeON
--------------
-
-TeX Format
-
-    @misc{FreeON,
-      author = {Bock, Nicolas and Challacombe, Matt and Gan, Chee~Kwan
-        and Henkelman, Graeme and Nemeth, Karoly and Niklasson, A.~M.~N.
-        and Odell, Anders and Schwegler, Eric and Tymczak, C.~J.
-        and Weber, Valery},
-      title = {{\\sc FreeON}},
-      year = 2012,
-      note = {\\mbox{L}os Alamos National Laboratory (LA-CC 01-2; LA-CC-04-086),
-        Copyright University of California.},
-      url = {http://www.freeon.org/}
-    }
-
-EndNote/RIS
-
-    TY  - GEN
-    N1  - Los Alamos National Laboratory (LA-CC 01-2; LA-CC-04-086), Copyright University of California.
-    AU  - Bock, Nicolas
-    AU  - Challacombe, Matt
-    AU  - Gan, Chee Kwan
-    AU  - Henkelman, Graeme
-    AU  - Nemeth, Karoly
-    AU  - Niklasson, A. M. N.
-    AU  - Odell, Anders
-    AU  - Schwegler, Eric
-    AU  - Tymczak, C. J.
-    AU  - Weber, Valery
-    T1  - FreeON
-    PY  - 2012
 
 Wikipedia
 ---------
