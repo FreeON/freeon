@@ -32,6 +32,11 @@ Here are a few recent ones:
 -   [freeon-beta-2012-05-01.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-01.tar.bz2)
 -   [freeon-beta-2012-05-03.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-03.tar.bz2)
 
+Bildbot
+-------
+
+We continuously build and test FreeON for verification, validation, and regression testing. You can see for yourself how FreeON is doing right now. Go to our [buildbot](http://www.freeon.org:8010) webpage.
+
 SSL certificate
 ---------------
 
