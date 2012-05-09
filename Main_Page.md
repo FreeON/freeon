@@ -15,6 +15,7 @@ Contents
 
 -   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
+-   [Status](http://www.freeon.org:8010)
 -   [Users](Users Guide "wikilink")
 -   [Developers](Developers Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
