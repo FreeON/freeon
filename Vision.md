@@ -15,8 +15,16 @@ Reduced complexity algorithms can provide far more economical increases in simul
 
 **Free *O*(*N*): A Unified Approach to fast Quantum Chemistry**
 
-The litterature reveals a suprising commonality between reduced complexity methods across diverse problem domains. From data base theory to electronic structure, algorithms are emerging for problems like fast lookups, set intersection, machine learning, Coulomb summation and matrix multiplication with similar, "best of" data structures and programming models that are *N*-body like; so called Generalized *N*-Body Solvers. FreeON is being redeveloped with a unified *N*-body approach at all levels, based on recently developed methods for the multiplication of matrices with decay [1](http://arxiv.org/abs/1011.3534), [2](http://arxiv.org/abs/1011.3534).
+The litterature reveals a suprising commonality between reduced complexity methods across diverse problem domains. From data base theory to electronic structure, algorithms are emerging for problems like fast lookups, set intersection, machine learning, Coulomb summation and matrix multiplication with similar, "best of" data structures and programming models that are *N*-body like; so called Generalized *N*-Body Solvers. FreeON is being redeveloped with a unified *N*-body approach at all levels, based on recently developed methods for the multiplication of matrices with decay [1][2].
 
 **Free *O*(*N*): HPC**
 
 *N*-body methods involve irregular data access, which impacts HPC implementations from prefetch to the interconnect. A forefront area of research involves parallel irregular methods for Generalized *N*-Body Solvers that parley quantum locality into data locality.
+
+* * * * *
+
+<references/>
+
+[1] Matt Challacombe and Nicolas Bock, <em>Fast Multiplication of Matrices with Decay</em>, **arXiv:1011.3534 [cs.DS]** [1](http://arxiv.org/abs/1011.3534)
+
+[2] Nicolas Bock and Matt Challacombe, <em>An Optimized Sparse Approximate Matrix Multiply</em>, **arXiv:1203.1692 [cs.NA]** [2](http://arxiv.org/abs/1203.1692)
