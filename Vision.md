@@ -25,6 +25,6 @@ The litterature reveals a suprising commonality between reduced complexity metho
 
 <references/>
 
-[1] Matt Challacombe and Nicolas Bock, <em>Fast Multiplication of Matrices with Decay</em>, **arXiv:1011.3534 [cs.DS]** [1](http://arxiv.org/abs/1011.3534)
+[1] Matt Challacombe and Nicolas Bock, <em>Fast Multiplication of Matrices with Decay</em>, [**arXiv:1011.3534 cs.DS**](http://arxiv.org/abs/1011.3534)
 
-[2] Nicolas Bock and Matt Challacombe, <em>An Optimized Sparse Approximate Matrix Multiply</em>, **arXiv:1203.1692 [cs.NA]** [2](http://arxiv.org/abs/1203.1692)
+[2] Nicolas Bock and Matt Challacombe, <em>An Optimized Sparse Approximate Matrix Multiply</em>, [**arXiv:1203.1692 cs.NA**](http://arxiv.org/abs/1203.1692)
