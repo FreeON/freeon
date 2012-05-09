@@ -6,8 +6,11 @@ title: Collaboratory
 Applications
 ------------
 
-Development
------------
+Wiki Development
+----------------
+
+Code Development
+----------------
 
 ### Coding Style
 
