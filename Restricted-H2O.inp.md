@@ -3,6 +3,8 @@ layout: default
 title: Restricted-H2O.inp
 ---
 
+A calculation on water using Restricted quadratic Trace Correcting Purification (TC2)
+
 
     <BeginOptions>
 
