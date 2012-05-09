@@ -18,7 +18,7 @@ Contents
 -   [Users](Users Guide "wikilink")
 -   [Developers](Developers Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
--   [Generalized Solvers](Generalized Solvers "wikilink")
+-   [Solvers](Solvers "wikilink")
 -   [Publications](Publications "wikilink")
 -   [Citation](Citing FreeON "wikilink")
 -   [Authors](Authors "wikilink")
