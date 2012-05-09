@@ -8,7 +8,7 @@ title: Restricted-HeH+-inp
 Helium Hydride Ion
 ------------------
 
-This example performs an RHF calculation on the [Helium hydride ion](http://en.wikipedia.org/wiki/Helium_hydride_ion) (HeH<sup>+</sup>) using [FreeON](http://freeon.org). Referece results calculated with MonoSCF and GAMESS-US as well as the GAMESS-US configuration file used to run the equivalent calculation are provided as comments.
+This example performs an RHF calculation on the [Helium hydride ion](http://en.wikipedia.org/wiki/Helium_hydride_ion) (HeH<sup>+</sup>) using [FreeON](http://freeon.org). Referece results calculated with MondoSCF and GAMESS-US as well as the GAMESS-US configuration file used to run the equivalent calculation are provided as comments.
 
 ### The complete input file
 
