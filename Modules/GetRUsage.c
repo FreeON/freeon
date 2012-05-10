@@ -48,7 +48,6 @@ getmemoryusage_wrapper (int * size)
   pid_t our_pid;
   FILE * file = NULL;
   char path [2048];
-  char line [2048];
   char token [256];
   unsigned long temp;
   int i;

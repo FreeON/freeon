@@ -207,6 +207,7 @@ CONTAINS
     OptLC=Option
     !        CALL LowCase(OptLC)
     LD=LEN(Delimiters)-1 ! to avoid the blank!
+    OptCharQ = .FALSE.
     DO
       READ(Unit,DEFAULT_CHR_FMT,END=1)Line
       CALL RemoveComments(Line)

@@ -42,7 +42,6 @@ spawn_ (int *nc, int *maxlen, int *ichr)
   char** argv;
   pid_t pid, wpid;
 
-  int ZERO_ERROR=0;
   int EXIT_ERROR=-120384;
   int FORK_ERROR=-320498;
   int DUMP_ERROR=-580234;
