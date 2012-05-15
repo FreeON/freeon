@@ -41,6 +41,6 @@ Networking
 
 |---|
 |<googlePage/>|
-|![](FacebookButton.jpg "FacebookButton.jpg")|
+|![Follow us on Facebook](FacebookButton.jpg "Follow us on Facebook")|
 
 
