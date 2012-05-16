@@ -192,7 +192,11 @@ F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 #endif
 
   /* This is the parent process. */
-  wpid = waitpid(pid, &status, 0);
+  if ((wpid = waitpid(pid, &status, 0)) != pid)
+  {
+    printf("[Spawn] error calling wpid() (which returned %i)\n", wpid);
+    exit(1);
+  }
 
   if (WIFSIGNALED(status))
   {
