@@ -129,7 +129,7 @@ You can get more detailed information in the manual and, possibly, in other exam
     Charge=1
     Multiplicity=1
 
-In this case, the file starts by defining the electronic state of the system, which has a net charge of one. This would correspond to a bare proton, Since there are no singly occupied orbitals, the multiplicity is one.
+In this case, the file starts by defining the electronic state of the system, which has a net charge of one. This means that we only have the two electrons of He, and that it is coupled to a bare H atom that supplies a single positive charge. Since we only have two electrons the molecular orbital is doubly occupied, and the multiplicity therefore is 1.
 
     DebugAll=(MaxDebug,MatDebug,CheckSums)
 
