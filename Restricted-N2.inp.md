@@ -40,7 +40,7 @@ You can find this file in the **Validate/SinglePoint/Restricted** subdirectory o
 
 ### Options section
 
-Next comes the options section. Input to FreeON is divided in sections, each labeled by tags enclosed in less-than and greater-than signs. Every section in the file deals with a specific type of information: the options section allows you to enter your choices regarding the calculation and subsequent input:
+First comes the options section. Input to FreeON is divided in sections, each labeled by tags enclosed in less-than and greater-than signs. Every section in the file deals with a specific type of information: the options section allows you to enter your choices regarding the calculation and subsequent input:
 
     <BeginOptions>
 
