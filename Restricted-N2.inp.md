@@ -3,6 +3,8 @@ layout: default
 title: Restricted-N2.inp
 ---
 
+![This example will run an RHF calculation on the N<sub>2</sub> molecule using [FreeON](http://freeon.org) ](N2_ElDensPlane.png "This example will run an RHF calculation on the N2 molecule using FreeON ")
+
 Molecular Nitrogen (N<sub>2</sub>)
 ----------------------------------
 
