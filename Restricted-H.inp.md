@@ -8,7 +8,7 @@ title: Restricted-H.inp
 Hydrogen
 --------
 
-This example performs an RHF calculation on the [1](http://en.wikipedia.org/wiki/Hydrogen) atom (H) using [FreeON](http://freeon.org). Reference final energy obtained with NWchem is provided as a reference.
+This example performs an RHF calculation on the [Hydrogen](http://en.wikipedia.org/wiki/Hydrogen) atom (H) using [FreeON](http://freeon.org). Reference final energy obtained with NWchem is provided as a reference.
 
 ### The complete input file
 
