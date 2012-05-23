@@ -98,13 +98,11 @@ Cloning our repository from savannah.
 
     git branch branchname
 
-#### Updating your local repository with upstream changes
-
-    git pull --rebase master
-
 ### Contributing
 
-Patches, running "make check" etc...
+If you decide to work with git, then we suggest you do the following. You first clone the repository as described above and then create your own topic branch. You can call this branch anything you like, it will only exist locally. Checkout that new branch and change whatever you feel like. You should periodically update your local branch with changes committed on the repository's master branch by running
+
+    git pull --rebase master
 
 ### Eclipse
 
