@@ -102,7 +102,7 @@ Cloning our repository from savannah.
 
 If you decide to work with git, then we suggest you do the following. You first clone the repository as described above and then create your own topic branch. You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
 
-    git rebase master
+    git pull --rebase
 
 We also encourage you to come up with input files that test the feature you are implementing. Please add those input files to the git repository by running
 
@@ -110,7 +110,7 @@ We also encourage you to come up with input files that test the feature you are 
 
 on any new file you create. When you are done, you update your branch a final time with master and then prepare set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list. Run the following commands.
 
-    git rebase master
+    git pull --rebase
     git format-patch master
 
 Attach all produces patch files to your email to the developer list.
