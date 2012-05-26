@@ -3,6 +3,92 @@ layout: default
 title: Developers Guide
 ---
 
+Getting Started
+---------------
+
+FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
+
+### Downloading and Building
+
+We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
+
+    git clone http://git.savannah.gnu.org/r/freeon.git
+
+which will copy the entire repository into \$PWD/freeon. This step has to be done only once. Now `cd` into freeon.
+
+The command
+
+    git branch
+
+will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah.
+
+Let's assume for now that you want to build the master branch:
+
+    autoreconf -fis
+
+will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Guide\#Downloading and Building the code](Users Guide#Downloading_and_Building_the_code "wikilink").
+
+### Working with Git
+
+The version control system (VCS) git is designed to be decentralized and is in this respect very different from more traditional VCS such as CVS and subversion. The fact that we use a server is simply a matter of convenience. Once the repository is cloned it is copied in its entirety and the copy could act as a server.
+
+#### Cloning
+
+Cloning our repository from savannah.
+
+    git clone http://git.savannah.gnu.org/r/freeon.git
+
+#### Creating local branches
+
+Anyone is welcome to branch their own version of FreeON, and use it as they like within the GPL. To get started, we suggest the following. Clone the repository as described above and then create your own topic branch with
+
+    git branch branchname
+
+and switch to this branch with
+
+    git checkout branchname
+
+You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
+
+    git pull --rebase
+
+Once you are happy with your progress, you can add your changes or new files you create to your local branch with
+
+    git add filename
+
+and
+
+    git commit
+
+Commit and comment often, share with others.
+
+#### Contributing
+
+In addition, we encourage you to submit your new functionality to us for inclusion in the official branch, where we will continue to release and support it with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
+
+Once you are ready to contribute, you update your branch a final time with master and then prepare a set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list, using the following commands:
+
+    git pull --rebase
+    git format-patch master
+
+Kindly attach the resulting patches in your email to the developer list, with a brief description.
+
+### Validation
+
+#### Validating your local version
+
+After building your local version, we suggest you test that it works properly in your local environment. You can do this with the commands:
+
+    make check
+
+and
+
+    make validate
+
+#### Buildbot
+
+We continuously build and test FreeON for a variety of environments, enumerated on the buildbot page [buildbot](http://www.freeon.org:8010) webpage. Note that we can rapidly test patches and work with authors to improve their submissions.
+
 Structure of the Program Suite
 ------------------------------
 
@@ -34,94 +120,6 @@ Generalized *N*-Body Solvers
 
 Task Parallelism
 ----------------
-
-Code Base
----------
-
-FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
-
-### Downloading and Building
-
-We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
-
-    git clone http://git.savannah.gnu.org/r/freeon.git
-
-which will copy the entire repository into \$PWD/freeon. This step has to be done only once. Now `cd` into freeon.
-
-The command
-
-    git branch
-
-will list all available branches (after a clone operation, there will only be one, the master branch), with the current branch marked with a '\*'. It is good practice to create your own branch for development, so that the master branch stays in sync with the repository on savannah.
-
-Let's assume for now that you want to build the master branch:
-
-    autoreconf -fis
-
-will recreate the necessary autoconf/automake/libtool scripts. This step requires that you have those tools installed on your system, and will fail otherwise. After this step you can configure the sources as described in the [Users Guide\#Downloading and Building the code](Users Guide#Downloading_and_Building_the_code "wikilink").
-
-### Hacking the code
-
-Now let's describe a basic workflow for hacking the code. First you create a new branch (which is local to your machine and is not shared with anyone unless you decide to) with
-
-    git branch branchname
-
-and switch to this branch with
-
-    git checkout branchname
-
-### Validation
-
-#### Buildbot
-
-We continuously build and test FreeON for verification, validation, and regression testing. You can see for yourself how FreeON is doing right now. Go to our [buildbot](http://www.freeon.org:8010) webpage.
-
-#### Validating your local version
-
-    make check
-
-and
-
-    make validate
-
-### Working with Git
-
-The version control system (VCS) git is designed to be decentralized and is in this respect very different from more traditional VCS such as CVS and subversion. The fact that we use a server is simply a matter of convenience. Once the repository is cloned it is copied in its entirety and the copy could act as a server.
-
-#### Cloning
-
-Cloning our repository from savannah.
-
-    git clone http://git.savannah.gnu.org/r/freeon.git
-
-#### Creating a Branch
-
-    git branch branchname
-
-### Branching and contributing
-
-Anyone is welcome to branch their own version of FreeON, and use it as they like within the GPL. To get started, we suggest the following. Clone the repository as described above and then create your own topic branch. You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
-
-    git pull --rebase
-
-Once you are happy with your progress, you can add your changes or new files you create to your local branch with
-
-    git add filename
-
-and
-
-    git commit
-
-Commit and comment often, share with others.
-
-In addition, we encourage you to submit your new functionality to us for inclusion in the official branch, where we will continue to release and support it with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
-
-Once you are ready to contribute, you update your branch a final time with master and then prepare a set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list, using the following commands:
-
-    git pull --rebase
-    git format-patch master
-
-Kindly attach the resulting patches in your email to the developer list, with a brief description.
 
 ### Eclipse
 
