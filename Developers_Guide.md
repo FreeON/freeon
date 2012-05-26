@@ -66,7 +66,12 @@ to make sure you don't get too far out of synch with the progress of others.
 
 #### Contributing
 
-In addition, we encourage the submission of new functionality for inclusion in the official branch, with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
+In addition, we encourage the submission of new functionality for inclusion in the official branch, with the following stipulations:
+
+1.  The code is understandable and commented
+2.  The submitted code is properly derived (GPL'able or GPL'd with attribution)
+3.  The changes do not break validation
+4.  Example files for regression testing are provided.
 
 Once you are ready to contribute, update your branch a final time with master and then create patches with the following commands:
 
