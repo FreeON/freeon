@@ -40,7 +40,7 @@ Cloning our repository from savannah.
 
 #### Creating local branches
 
-Anyone is welcome to branch their own version of FreeON, and use it as they like within the GPL. To get started, we suggest the following. Clone the repository as described above and then create your own topic branch with
+Anyone is welcome to branch (fork) their own version of FreeON, and use it as they like within the GPL. To get started, we suggest the following. Clone the repository as described above and then create your own topic branch with
 
     git branch branchname
 
@@ -48,19 +48,21 @@ and switch to this branch with
 
     git checkout branchname
 
-You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
-
-    git pull --rebase
-
-Once you are happy with your progress, you can add your changes or new files you create to your local branch with
+You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Add your changes and new files to your local branch with
 
     git add filename
 
-and
+then commit them with
 
     git commit
 
-Commit and comment often, share with others.
+Commit often and include descriptive commit messages to document your progress.
+
+Also, you should periodically update your local branch with changes committed on the repository's master branch by running
+
+    git pull --rebase
+
+to make sure you don't get to far out of synch with the progress of others.
 
 #### Contributing
 
