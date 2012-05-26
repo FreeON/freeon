@@ -103,7 +103,9 @@ FreeON is split into a front-end and a back-end. The back-end involves numerical
 
 This structure significantly simplifies the tuning and debugging of large calculations through access to the stand alone problem. Perhaps the greatest strength of this framework though, is that it enables rapid development and competition between algorithms.
 
-### [FreeON API](http://www.freeon.org/FreeON_API)
+### API
+
+We have started to document the [FreeON API](http://www.freeon.org/FreeON_API) in detail. This is still at an early stage and most APIs are missing, but we are rapidly adding information.
 
 Clones
 ------
