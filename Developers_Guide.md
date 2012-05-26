@@ -62,7 +62,7 @@ Also, you should periodically update your local branch with changes committed on
 
     git pull --rebase
 
-to make sure you don't get to far out of synch with the progress of others.
+to make sure you don't get too far out of synch with the progress of others.
 
 #### Contributing
 
