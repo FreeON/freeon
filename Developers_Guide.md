@@ -64,14 +64,14 @@ Commit and comment often, share with others.
 
 #### Contributing
 
-In addition, we encourage you to submit your new functionality to us for inclusion in the official branch, where we will continue to release and support it with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
+In addition, we encourage the submission of new functionality for inclusion in the official branch, with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
 
-Once you are ready to contribute, you update your branch a final time with master and then prepare a set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list, using the following commands:
+Once you are ready to contribute, update your branch a final time with master and then create patches with the following commands:
 
     git pull --rebase
     git format-patch master
 
-Kindly attach the resulting patches in your email to the developer list, with a brief description.
+Then, kindly send a brief description along with the attached patches in an email to <freeon-devel@nongnu.org>.
 
 ### Validation
 
