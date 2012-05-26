@@ -98,22 +98,30 @@ Cloning our repository from savannah.
 
     git branch branchname
 
-### Contributing
+### Branching and contributing
 
-If you decide to work with git, then we suggest you do the following. You first clone the repository as described above and then create your own topic branch. You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
+Anyone is welcome to branch their own version of FreeON, and use it as they like within the GPL. To get started, we suggest the following. Clone the repository as described above and then create your own topic branch. You can call this branch anything you like, it will only exist locally on your machine. Checkout the new branch and change whatever you feel like. Commit often and add some descriptive commit messages. You should periodically update your local branch with changes committed on the repository's master branch by running
 
     git pull --rebase
 
-We also encourage you to come up with input files that test the feature you are implementing. Please add those input files to the git repository by running
+Once you are happy with your progress, you can add your changes or new files you create to your local branch with
 
     git add filename
 
-on any new file you create. When you are done, you update your branch a final time with master and then prepare set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list. Run the following commands.
+and
+
+    git commit
+
+Commit and comment often, share with others.
+
+In addition, we encourage you to submit your new functionality to us for inclusion in the official branch, where we will continue to release and support it with the following stipulations: (1) the code is understandable and commented (2) the submitted code is properly derived (GPL'able or GPL'd with attribution) (3) the changes do not break validation and (4) example files for regression testing are provided.
+
+Once you are ready to contribute, you update your branch a final time with master and then prepare a set of patches that you can email <freeon-devel@nongnu.org>, our developer mailing list, using the following commands:
 
     git pull --rebase
     git format-patch master
 
-Attach all produces patch files to your email to the developer list.
+Kindly attach the resulting patches in your email to the developer list, with a brief description.
 
 ### Eclipse
 
