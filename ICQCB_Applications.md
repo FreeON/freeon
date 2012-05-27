@@ -12,8 +12,6 @@ That is true, but so it is that every day we have bigger computers, and problems
 
 Basically, we use QM to model with accuracy and precision the structure and properties of small and middle size molecules. More recently, it has become feasible to approach even bigger problems, and now we can even treat macromolecules (like a full protein) using modern technologies.
 
-[[File:Example.jpg]]
-
 A big advantage of QM modeling is that we deal explicitly with electrons. Let us not forget that a molecule is not a "compoun" built by atoms (like a LEGO game), but rather, a cloud of electrons moving in a field of nuclei. This means that electrons do not move in orbitals spanning a single atom, but instead, they usually span many atoms.
 
 {|cellpadding="2" style ="width: 25%; align: right; border: 1px; float: right;" border="1"
