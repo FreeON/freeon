@@ -96,7 +96,7 @@ Finally, and before we jump into molecules, we need to understand a last concept
 
 ∫ Χ<sub>i</sub>Χ<sub>j</sub> dτ = 0 if i ≠ j
 
-However, since we normally use analytical functions to represente them, in practice there is certain degree of overlap between the orbital wave functions:
+However, since we normally use analytical functions to represent them, in practice there is certain degree of overlap between the orbital wave functions:
 
 ∫ ΧiΧj dτ = Sij
 
