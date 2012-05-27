@@ -8,7 +8,7 @@ An introduction to Computational Quantum Chemistry for Life and Health
 
 Original materials by: *José R. Valverde*, EMBnet/CNB, CSIC. Spain.
 
-**Note:** These are materials used in an introductory course in Madrid (Spain). They are based on materials for previous courses in Spanish by *José R. Valverde*. You are most welcome to contribute. If so, please, add yourself to the history below so proper recognition can be duly given.
+**Note:** These are materials used in an introductory course in Madrid (Spain). They are based on materials from previous courses in Spanish by *José R. Valverde*. You are most welcome to contribute. If so, please, add yourself to the history below so proper recognition can be duly given.
 
 |Author|Date|Changes|
 |------|----|-------|
@@ -22,6 +22,8 @@ The goal of these pages is not to provide an in-depth view of Computational Quan
 The goal of these pages is to provide a simple, understandable introduction to Computational Quantum Chemistry for the layman. You will learn just the basic concepts needed to understand how it works, why we have different methods, and why some are better than others for given problems. Hopefully, this will dissipate fears and get you interested in learning more and, even better yet, in trying a sample calculation, and seeing how easy it actuallly is to get started collecting great and interesting results.
 
 These contents are organized in a number of sections. Each section gives a quick, rough overview of some key element of Computational Quantum Chemistry (CQC). As a starter you likely want to read through all of them. Later, you may want to jump directly to a specific topic to refresh a basic concept. In due time, they will all become so familiar that you will look upon these pages critically and discover many pitfalls, That'll be the time for you to add your contribution and enhance them.
+
+The original materials were intended for a lightning-fast, two-hours introduction prior to practical sessions, so do not fear diving in, or finding heavy math.
 
 ### Table of Contents
 
