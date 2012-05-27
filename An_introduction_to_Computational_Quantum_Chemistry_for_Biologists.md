@@ -29,7 +29,7 @@ The original materials were intended for a lightning-fast, two-hours introductio
 
 -   [Introduction](ICQCB_Introduction "wikilink") This is a short introduction to the rest of the topics
 -   [Applications](ICQCB_Applications "wikilink") A *very short* summary of the applications of Quantum Chemistry, or why do you want to get involved with this.
--   [Wavefunction](ICQCB_Wavefunction "wikilink") The concept of wavefunction is introduced here
+-   [Wave function](ICQCB_Wavefunction "wikilink") The concept of wave function is introduced here
 -   [Atomic Orbitals](ICQCB_Orbitals "wikilink") An introduction to atomic orbitals
 -   [Molecular Orbitals](ICQCB_Molecular_Orbitals "wikilink") An introduction to molecular orbitals and the LCAO approach to computing them
 -   [SCF Theory](ICQCB_SCF_Theory "wikilink") A quick introduction to Self Consistent Field Theory and the Variational Principle
