@@ -79,3 +79,29 @@ For instance, for Berillium (with 4 electrons and a structure 1s<sup>α</sup>, 1
     | 2sβ(1) 2sβ(4) 2sβ(4) 2sβ(4) | 
 
 ### Defining the orbitals
+
+Our next problem lies in defining each X<sub>i</sub>: the functions for each spin-electron. Hartree defined several numerical functions that were rather precise. These were then adapted into an analytical form that was easier to compute by Slater. The last ones are commonly known as *Slater Type Orbitals (STO)*
+
+There are other approaches as we will see later, but for the time being, we can remain with this concept: orbitals are nothing but distributions that we can adjust mathematically.
+
+### Adjusting the oribitals
+
+When we have more than one electron, we may expect their behaviour to change: the H electron only interacts wth its nucleus. But as soon as there is another electron, they will also interact among themselves, repelling and damping the nuclear attractive force. In Litium, for instance, the s<sup>1</sup> cloud will slighly shield the nuclear attractive effect over the electron in s<sup>2</sup>.
+
+Atomic orbitals can be adjusted using the **variational principle**: the better the quallity of the function we chose, the lower its energy will be. Thanks to it, we now know rather well the orbitals in all the periodic system.
+
+We will see the method later, but basically, it consists in starting with an initial estimate and then adjusting progressively the calculations until we can no longer decrease the energy.
+
+### Orbital overlap
+
+Finally, and before we jump into molecules, we need to understand a last concept: atomic orbitals should be ortonormal.
+
+∫ Χ<sub>i</sub>Χ<sub>j</sub> dτ = 0 if i ≠ j
+
+However, since we normally use analytical functions to represente them, in practice there is certain degree of overlap between the orbital wave functions:
+
+∫ ΧiΧj dτ = Sij
+
+This is what we call overlap integral. We need to account for this property in order to correct the calculations properly by substracting the overlap of each orbital.
+
+Note that we are referring to the fact that the wave functions should be linearly independent (their product should be zero), we do not mean that orbitals cannot overlap in space.
