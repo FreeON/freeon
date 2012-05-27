@@ -27,7 +27,7 @@ Whether you look at only one, or to the sum of both of them, the electrons are d
 
 If you look at both of them together, their sum spans all the aromatic ring... in a shape that is similar to the lower energy PI orbital just below them. 
 
-Bottom line is: PI electrons in benzene are moving all around the [http://academics.keene.edu/rblatchly/OrgoCommon/hand/aromatic/AromaticMO.htmlaromatic ring]. 
+Bottom line is: PI electrons in benzene are moving all around the [http://academics.keene.edu/rblatchly/OrgoCommon/hand/aromatic/AromaticMO.html aromatic ring]. 
 |}
 
 
