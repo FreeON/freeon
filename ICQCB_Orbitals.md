@@ -54,8 +54,6 @@ We can define the electronic charge distribution of polielectronic atoms treatin
 
 Sadly for us, we know that things are not so simple: electrons have spin, and we can only have two electrons in each orbital, each of them with different spin. Using the standard notation, we add superindexes <sup>α</sup> and <sup>β</sup> to indicate the two possible sping values (1/2 and -1/2). This way we can describe Helium as 1s<sup>2</sup> and undertand it as an abbreviate notation for 1s<sup>α</sup> and 1s<sup>β</sup>, or, written as a wave function, Ψ = Χ<sup>α</sup> Χ<sup>β</sup>. It is also common to use a simplified notation where the orbital name as such is assumed as associated to an α spin electron and the orbital name covered by a macron as associated to a β spin electron.
 
-When all orbitals are fully occupied (e. g. in even-numbered atoms or molecules with an even number of electrons) we do not normally care. But that is not always the case.
-
 In order to include spin, we need to make things a little more complex in our system of equations: if we stick to the former formula Ψ = Χ<sup>α</sup> Χ<sup>β</sup>, we have a problem: we are considering both spin-electron wave functions as equals, but Pauli's exclusion principle forces the function to change sign when we exchange any pair of electrons (remember, it is an amplitude, it won't matter when we square it to get a probability, but it does affect the calculation).
 
 We need to rewrite our system of equations to extend it in such a way that it can accommodate any possible exchange of electrons.
