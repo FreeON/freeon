@@ -36,7 +36,7 @@ The [eclipse IDE](http://www.eclipse.org/) offers a powerful and convenient opti
 Education
 ---------
 
-An introduction to Computational Quantum Chemistry for Biologists (Madrid, 2012)
+[An introduction to Computational Quantum Chemistry for Biologists](An introduction to Computational Quantum Chemistry for Biologists "wikilink")
 
 Networking
 ----------
