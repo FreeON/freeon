@@ -82,7 +82,7 @@ Our next problem lies in defining each X<sub>i</sub>: the functions for each spi
 
 There are other approaches as we will see later, but for the time being, we can remain with this concept: orbitals are nothing but distributions that we can adjust mathematically.
 
-### Adjusting the oribitals
+### Adjusting the orbitals
 
 When we have more than one electron, we may expect their behaviour to change: the H electron only interacts wth its nucleus. But as soon as there is another electron, they will also interact among themselves, repelling and damping the nuclear attractive force. In Litium, for instance, the s<sup>1</sup> cloud will slighly shield the nuclear attractive effect over the electron in s<sup>2</sup>.
 
