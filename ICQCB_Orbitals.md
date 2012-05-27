@@ -84,7 +84,7 @@ There are other approaches as we will see later, but for the time being, we can 
 
 ### Adjusting the orbitals
 
-When we have more than one electron, we may expect their behaviour to change: the H electron only interacts wth its nucleus. But as soon as there is another electron, they will also interact among themselves, repelling and damping the nuclear attractive force. In Litium, for instance, the s<sup>1</sup> cloud will slighly shield the nuclear attractive effect over the electron in s<sup>2</sup>.
+When we have more than one electron, we may expect their behaviour to change: the H electron only interacts wth its nucleus. But as soon as there is another electron, they will also interact among themselves, repelling and damping the nuclear attractive force. In Litium, for instance, the s<sup>1</sup> cloud will slightly shield the nuclear attractive effect over the electron in s<sup>2</sup>.
 
 Atomic orbitals can be adjusted using the **variational principle**: the better the quallity of the function we chose, the lower its energy will be. Thanks to it, we now know rather well the orbitals in all the periodic system.
 
