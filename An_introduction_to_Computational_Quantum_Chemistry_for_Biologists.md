@@ -36,7 +36,7 @@ The original materials were intended for a lightning-fast, two-hours introductio
 -   [Relativity](ICQCB_Relativity "wikilink") Why and when should relativity be included in calculations
 -   [Basis Sets](ICQCB_Basis_Sets "wikilink") What they are and how they affect calculations
 -   [Popular Basis sets](ICQCB_Popular_Basis_Sets "wikilink") Which are the most commonly used basis sets (and the ones you want to know about)
--   [*Ab initio* methods](ICQCB_Ab_initio_methods "wikilink") A very short catalogue of the main *ab intio* calculations
+-   [*Ab initio* methods](ICQCB_Ab_initio_methods "wikilink") A very short catalogue of the main *ab intio* calculations and when to use each
 -   [Semiempirical methods](ICQCB_Semiempirical_methods "wikilink") How to speed up calculations with biomolecules using empirical knowledge
 -   [DFT](ICQCB_DFT "wikilink") Density Functional Theory provides an alternate formulation that is becoming very popular
 -   [Linear scaling methoids](ICQCB_Linear_Scaling "wikilink") How to deal with large problems and apply CQC to biological macromolecules
