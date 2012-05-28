@@ -24,7 +24,15 @@ Contents
 -   [Citation](Citing FreeON "wikilink")
 -   [Authors](Authors "wikilink")
 
-Another very useful and good idea by the plopee at Automatic. Congratulations to the team in advance because this product is going to be successful. I'm amazed at how the team at Automatic recognizes the needs of the users and come back with solutions. That is definately one of the biggest reasons for the success of WordPress as a CMS.I had another request. The signup form for Vaultpress is very impressive. How was it built? May I request someone to write a post about how the form was built? A plugin would be great.Keep up the good work.CheersPali Madra
+Download
+--------
+
+We periodically release snapshots of the development tree in the [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
+
+Here are a few recent ones:
+
+-   [freeon-beta-2012-05-01.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-01.tar.bz2)
+-   [freeon-beta-2012-05-03.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-03.tar.bz2)
 
 Contact Us
 ----------
