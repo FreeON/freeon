@@ -11,7 +11,7 @@ Comming soon ...
 Code Development
 ----------------
 
-[Working with Git](Working with Git "wikilink")
+[Developers Guide](Developers Guide "wikilink")
 
 Education
 ---------
