@@ -6,7 +6,7 @@ title: Collaboratory
 Collaborative Development
 -------------------------
 
-[Developers Guide\#Working with git](Developers Guide#Working_with_git "wikilink")
+[Developers Guide\#Working with git](Developers Guide#Working_with_git "wikilink") [git branching in collaborative development](http://nvie.com/posts/a-successful-git-branching-model/)
 
 Education
 ---------
