@@ -8,8 +8,8 @@ Applications
 
 Comming soon ...
 
-Code Development
-----------------
+Collaborative Development
+-------------------------
 
 [Developers Guide\#Working with git](Developers Guide#Working_with_git "wikilink")
 
