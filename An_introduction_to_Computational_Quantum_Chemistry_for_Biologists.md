@@ -8,3 +8,5 @@ Although off-topic, it is perhaps worth mentioning that these notes were written
 Of course, if there is any error, or if someone can lend a hand, I will mostly appreciate it (and even buy you a beer or a tea if we meet in any congress, meeting or workshop).
 
 Anyhow, expect to see this expand after its initial instance. BTW, ) already have materials for the full TOC, in Spanish. They will show up as I finish the translation. --[Jrvalverde](User:Jrvalverde "wikilink") ([talk](User talk:Jrvalverde "wikilink")) 10:35, 27 May 2012 (MDT)
+
+Thanks for posting your lecture notes! -- [Nicolas Bock](User:Nicolas Bock "wikilink") ([talk](User talk:Nicolas Bock "wikilink")) 10:20, 28 May 2012 (MDT)
