@@ -40,8 +40,6 @@ A final consideration is that MP is not variational, and can yield energies belo
 
 ### Configuration Interaction (CI)
 
-=
-
 Another approach to increase accuracy is to allow the interaction of various configurations. Formally this consists of adding a new linear combination to our process:
 
 Ψ<sub>enhanced</sub> = aΨ<sub>0</sub> + bΨ<sub>1</sub> + ...
