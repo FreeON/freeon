@@ -10,6 +10,8 @@ Collaborative Development
 
 -   [git branching in collaborative development](http://nvie.com/posts/a-successful-git-branching-model/)
 
+-   [more on git and decentralized collaboration](http://wwwhome.cs.utwente.nl/~michaelw/projects/git-setup.html)
+
 Education
 ---------
 
