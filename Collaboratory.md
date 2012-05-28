@@ -3,11 +3,6 @@ layout: default
 title: Collaboratory
 ---
 
-Applications
-------------
-
-Comming soon ...
-
 Collaborative Development
 -------------------------
 
