@@ -20,8 +20,8 @@ Networking
 |<googlePage/>|
 |![Follow us on Facebook](FacebookButton.jpg "Follow us on Facebook")|
 
-Wiki Development
-----------------
+Wiki
+----
 
 Everybody is welcome to edit and add information on this wiki, subject to modest editorial standards.
 
