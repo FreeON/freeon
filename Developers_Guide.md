@@ -68,7 +68,7 @@ to make sure you don't get too far out of synch with the progress of others.
 
 In addition, we encourage the submission of new functionality for inclusion in the official branch, with the following stipulations:
 
-1.  The code is understandable and commented
+1.  The code is understandable, commented and style conforming: (a) Fortran keywords are all capital. (b) Subroutines and Functions use mixed case naming. (c) Don't be afraid of long names, something like `i`, `ii`, `iii` is not acceptable.
 2.  The submitted code is properly derived (GPL'able or GPL'd with attribution)
 3.  The changes do not break validation
 4.  Example files for regression testing are provided.
