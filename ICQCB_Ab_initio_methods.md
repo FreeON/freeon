@@ -3,7 +3,7 @@ layout: default
 title: ICQCB Ab initio methods
 ---
 
-*An initio* methods
+*Ab initio* methods
 -------------------
 
 ### Hartree-Fock
