@@ -30,7 +30,7 @@ will recreate the necessary autoconf/automake/libtool scripts. This step require
 
 ### Working with git
 
-The version control system (VCS) git is designed to be decentralized and is in this respect very different from more traditional VCS such as CVS and subversion. The fact that we use a server is simply a matter of convenience. Once the repository is cloned it is copied in its entirety and the copy could act as a server.
+The version control system (VCS) git is designed to be decentralized and is in this respect very different from more traditional VCS such as CVS and subversion. The fact that we use a server is simply a matter of convenience. Once the repository is cloned it is stand alone and can be used independently as a server.
 
 #### Cloning
 
