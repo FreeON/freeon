@@ -72,6 +72,8 @@ As we have seen, generally the cost grows with N<sup>5</sup> to N<sup>8</sup> wi
 
 We will learn more about linear scaling approaches elsewhere.
 
+* * * * *
+
 As a general rule, as we add more terms, accuracy increases, but on the other hand, computation times also grow exponentially. We may expect usually cost/precision relationships to be as follows:
 
 HF \<\< MP2 \< CISD \< MP4(SDQ) \~ CCSD \< MP4 \< CCSD(T) \< CCSDT
