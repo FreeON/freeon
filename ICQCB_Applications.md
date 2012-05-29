@@ -3,8 +3,8 @@ layout: default
 title: ICQCB Applications
 ---
 
+[[Image:Benzene-homo-2.png|thumb|Where is Wally?]]
 =<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">Applications</div>=
-[[Image:Benzene-homo-2.png|thumb|Where is wally?]]
 ==Or, why should I learn about all this?==
 
 Quantum Mechanics requires a large amount of computing power and storage space, and therefore, as the problem size grows, we are forced to make bigger simplifications in order to be able to keep the problem technologically tractable.
