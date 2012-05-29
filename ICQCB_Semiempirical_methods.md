@@ -3,6 +3,8 @@ layout: default
 title: ICQCB Semiempirical methods
 ---
 
+![Aspirin EDM](Aspirin-elec_dens_map.png "Aspirin EDM")
+
 Semiempirical methods
 ---------------------
 
