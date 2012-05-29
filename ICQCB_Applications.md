@@ -4,6 +4,7 @@ title: ICQCB Applications
 ---
 
 =<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">Applications</div>=
+[[Image:Benzene-homo-2.png|thumb|Where is wally?]]
 ==Or, why should I learn about all this?==
 
 Quantum Mechanics requires a large amount of computing power and storage space, and therefore, as the problem size grows, we are forced to make bigger simplifications in order to be able to keep the problem technologically tractable.
@@ -25,7 +26,7 @@ Whether you look at only one, or to the sum of both of them, the electrons are d
 
 If you look at both of them together, their sum spans all the aromatic ring... in a shape that is similar to the lower energy PI orbital just below them. 
 
-Bottom line is: PI electrons in benzene are moving all around the [http://academics.keene.edu/rblatchly/OrgoCommon/hand/aromatic/AromaticMO.html aromatic ring]. 
+Bottom line is: PI electrons in benzene are moving all around the [http://academics.keene.edu/rblatchly/OrgoCommon/hand/aromatic/AromaticMO.html aromatic ring]. You cannot single out a unique atomic center.
 |}
 
 
