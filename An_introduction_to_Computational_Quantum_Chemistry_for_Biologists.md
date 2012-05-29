@@ -43,5 +43,5 @@ The original materials were intended for a lightning-fast, two-hours introductio
 -   [Practical applications|](ICQCB_Practical_Applications "wikilink") A very short list of some relevant applications of CQC in practice
 -   [CQC in practice](ICQCB_CQC_in_practice "wikilink") Minimal practical advice on applying CQC methods in real life problems
 -   [Available software](ICQCB_Available_software "wikilink") A minimal (certainly **not** exhaustive) catalog of Free and Open Source Software you can use to get started
--   [ICQCB\_FreeON\_intro](ICQCB_FreeON_intro "wikilink") A short introduction to electronic structure calculations with FreeON.
+-   [FreeON introduction](ICQCB_FreeON_intro "wikilink") A short introduction to electronic structure calculations with FreeON.
 
