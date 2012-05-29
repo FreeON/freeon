@@ -10,7 +10,7 @@ Semiempirical methods
 
 Quantum Chemical calculations from first principles (*ab initio*) are purely theoretical, but endure some limitations that make them sometimes less desirable. On top of these, the number of integrals to evaluate is tremendous and grows exponentially in the number of basis functions (usually as N<sup>4</sup> or more) so that even dealing with a small molecule can involve millions of integrals.
 
-There are approximations that can speed up computation taking advantage of the empirical knowledge we have gathered over time. Basically, what they do is substituting as many functions as possible by empirical valuies that have been measured or computed previously at highe precision levels, or by simple estimates derived from existing data.
+There are approximations that can speed up computation taking advantage of the empirical knowledge we have gathered over time. Basically, what they do is substituting as many functions as possible by empirical valuies that have been measured or computed previously at higher precision levels, or by simple estimates derived from existing data.
 
 All the methods commonly used rely on evaluating the valence bond electrons (VB), limiting the use of core electrons since their contribution to the chemical bond is minor. This approximation is specially interesting when the molecules to be studied contain a heavy atom (like metalloenzymes) as we can reduce significantly the number of functions to evaluate. The results are not too different from completely *ab initio* calculations, and we can obtain reductions in calculation times of about 50% or more.
 
