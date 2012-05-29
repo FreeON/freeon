@@ -24,7 +24,7 @@ In other words, we add all the constituent atomic orbitals, multiplying each of 
 
 Since we know well the atomic orbitals, our problem now resides in finding the appropriate values for the constants c<sub>ik</sub>. We use the *variational principle* to achieve this, which, states that as the wave function gets better (closer to the real solution), the energy will be lower.
 
-Since the can consider that the interaction energy of two particles separated by an infinite distance is nil (0), as they get closer, the energy of the system will become more negative. Therefore, in our calculations, **the energy has negative values, and the bigger its absolute value, the lower the energy**.
+Since we can consider that the interaction energy of two particles separated by an infinite distance is nil (0), as they get closer, the energy of the system will become more negative. Therefore, in our calculations, **the energy has negative values, and the bigger its absolute value, the lower the energy**.
 
 In summary, we have a molecular wave function Ψ = Φ<sub>1</sub>Φ<sub>2</sub>...Φ<sub>n</sub> computed in terms of molecular orbitals. Each molecular orbital wave function in turn is defined as Φ<sub>i</sub> = ∑<sub>k</sub> c<sub>ik</sub>Χ<sub>k</sub> with the respective X<sub>i</sub> known. Akl we need is to solve the equations for the constants c<sub>ik</sub> of each atomic orbital for each molecular orbital.
 
