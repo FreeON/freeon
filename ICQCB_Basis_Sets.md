@@ -18,7 +18,7 @@ However, we have a problem: the calculations we wabt to carry out depend on the 
 
 Indeed, it is like a game: as the basis functions get simpler, the result will be less precise but we will have it sooner. As they become more precise, the result will also become more accurate, but the calculation will proceed much slowlier (since the X<sub>k</sub> functions must be evaluated many times).
 
-We can pre-compute these functions, but then we will need to increase our storage needs and, even so, we will still need to compute all the different linear combinations of them. We can also try to pre-computer all the more frequent combinations for our molecule, at an even higher cost in storage needs (we are talking combinatorial quantities here).
+We can pre-compute these functions, but then we will need to increase our storage needs and, even so, we will still need to compute all the different linear combinations of them. We can also try to pre-compute all the more frequent combinations for our molecule, at an even higher cost in storage needs (we are talking combinatorial quantities here).
 
 Thus, we need to find an equilibrium between time spent doing calculations, storage and precision, depending on the basis functions we chose.
 
