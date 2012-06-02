@@ -12,7 +12,7 @@ Collaborative Development
 
 -   [More on git and decentralized collaboration](http://wwwhome.cs.utwente.nl/~michaelw/projects/git-setup.html)
 
--   [<http://arielwaldman.com/2012/05/29/democratized-science-instrumentation/>| Democratized Science and Instrumentation]]
+-   [| Democratized Science and Instrumentation](http://arielwaldman.com/2012/05/29/democratized-science-instrumentation/)]
 
 Education
 ---------
