@@ -8,9 +8,11 @@ Collaborative Development
 
 -   [Developers Guide\#Working with git](Developers Guide#Working_with_git "wikilink")
 
--   [git branching in collaborative development](http://nvie.com/posts/a-successful-git-branching-model/)
+-   [Git branching in collaborative development](http://nvie.com/posts/a-successful-git-branching-model/)
 
--   [more on git and decentralized collaboration](http://wwwhome.cs.utwente.nl/~michaelw/projects/git-setup.html)
+-   [More on git and decentralized collaboration](http://wwwhome.cs.utwente.nl/~michaelw/projects/git-setup.html)
+
+-   ![ Democratized Science and Instrumentation](P-7-2012-DemocratizedScienceInstrumentation-v1.pdf "fig: Democratized Science and Instrumentation")
 
 Education
 ---------
