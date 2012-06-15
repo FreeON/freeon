@@ -8,9 +8,9 @@ Available software
 
 ### But now, man, like, uh, really, in practice, how do we go about this stuff?
 
-Normally, you will rely on a graphical user interface to build your molecule or you system, and most often you will start by running a Molecular Mechanics or a Molecular Dynamics simulation to get an **educated** guess of the initial conformation of the system.
+Normally, you will rely on a graphical user interface to build your molecule or you system, and most often you will start by running a Molecular Mechanics or a Molecular Dynamics simulation to get an *educated* guess of the initial conformation of the system.
 
-As an alternative you can get a starting structure from a database when it is known (or can readily be predicted), like PDB, Zinc, Corina, and many others.
+As an alternative you can get a starting structure from a database when it is known (or can readily be predicted), like **PDB**, **Zinc**, **Corina**, and many others.
 
 Once we have our system set up (with its initial and final states if it is a reaction), the rest is a lot easier: there are many programs you can use to carry out the calculations, and all you need to do is specify what you want to do, letting the computer struggle with the problem. Often, you will be able to launch the calculation from a graphical user interface and to choose among several alternative programs (like with *Gabedit*, *Gdis* or *WebMO*).
 
