@@ -23,7 +23,7 @@ There are visualization programs that can show not only the optimized geometry, 
 |![](Aspirin-homo.png "Aspirin-homo.png")|![](Aspirin-lumo.png "Aspirin-lumo.png")|
 ||
 
-Let's take aspirin as an example: visit Wikipedia page on aspirin and read the section devoted to its synthesis and decomposition under high concentrations. Can you spot any correlation between the reactive region and either the HOMO or LUMO? Certainly the HOMO covers the union between the acetyl and salycilic groups.
+Let's take aspirin as an example: visit Wikipedia page on aspirin and read the section devoted to its synthesis and decomposition under high concentrations. Can you spot any correlation between the reactive region and either the HOMO or LUMO?
 
 ### Population analysis
 
