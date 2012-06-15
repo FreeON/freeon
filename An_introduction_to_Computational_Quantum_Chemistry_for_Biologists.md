@@ -40,7 +40,7 @@ The original materials were intended for a lightning-fast, two-hours introductio
 -   [Semiempirical methods](ICQCB_Semiempirical_methods "wikilink") How to speed up calculations with biomolecules using empirical knowledge
 -   [DFT](ICQCB_DFT "wikilink") Density Functional Theory provides an alternate formulation that is becoming very popular
 -   [Linear scaling methods](ICQCB_Linear_Scaling "wikilink") How to deal with large problems and apply CQC to biological macromolecules
--   [Practical applications|](ICQCB_Practical_Applications "wikilink") A very short list of some relevant applications of CQC in practice
+-   [Practical applications](ICQCB_Practical_Applications "wikilink") A very short list of some relevant applications of CQC in practice
 -   [CQC in practice](ICQCB_CQC_in_practice "wikilink") Minimal practical advice on applying CQC methods in real life problems
 -   [Available software](ICQCB_Available_software "wikilink") A minimal (certainly **not** exhaustive) catalog of Free and Open Source Software you can use to get started
 -   [FreeON introduction](ICQCB_FreeON_intro "wikilink") A short introduction to electronic structure calculations with FreeON.
