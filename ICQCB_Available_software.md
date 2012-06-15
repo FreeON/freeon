@@ -30,7 +30,7 @@ The list of available programs is growing very quickly. The increased interest i
 
 -   **Orca** is another popular, rather complete, program that can carry out a wide variety of *ab initio* calculations. It is distributed for free to academics in executable form.
 
--   **SIESTA** or Spanish Initiative for Electronic Structure for Electronic Simulations with Thousands of Atoms, was the first linear scaling DFT code to become widely popular. It can perform DFT calculations on the ground state, optimizations and Molecular Dynamics calculations. It is distributed for free, with source code, but requires registration.
+-   **SIESTA** or Spanish Initiative for for Electronic Simulations with Thousands of Atoms, was the first linear scaling DFT code to become widely popular. It can perform DFT calculations on the ground state, optimizations and Molecular Dynamics calculations. It is distributed for free, with source code, but requires registration.
 
 All of these programs work in a similar way: since calculations may potentially take a very long time to complete, you do not want to tie your computer screen to the program for weeks or more. Instead, you will normally want to run them in a remote computer without any kind of permanent link to your desktop. The idea is that you will connect to said remote server, specify the calculation, disconnect, and then later, once it is finished recover the results for inspection. This rules out graphical interfaces for performing advanced QM calculations (they are still OK for small problems, but may be inconvenient for serious, large work).
 
