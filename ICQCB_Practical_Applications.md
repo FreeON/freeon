@@ -67,7 +67,7 @@ The reason for using a proggressive approach is that normally we do not know *a 
 
 ### QM/MM y QM/MD
 
-`It is goof to remember that QM calculations are usually very expensive computationally speaking, and so it will often not be desirable (or reasonable) to model the whole macromolecular system using only QM. The solution most often sought consists in partitioning the system, and relegating QM only to the smaller chemically active region and modeling the rest of the system with classical Molecular Dynamics. But in so doing we face a new problem: we are no longer free to move around atoms in the QM region at our convenience since they are connected to the rest of the protein.`
+It is good to remember that QM calculations are usually very expensive computationally speaking, and so it will often not be desirable (or reasonable) to model the whole macromolecular system using only QM. The solution most often sought consists in partitioning the system, and relegating QM only to the smaller chemically active region and modeling the rest of the system with classical Molecular Dynamics. But in so doing we face a new problem: we are no longer free to move around atoms in the QM region at our convenience since they are connected to the rest of the protein.
 
 We are thus commonly confronted with deciding among two approaches to deal with this problem:
 
