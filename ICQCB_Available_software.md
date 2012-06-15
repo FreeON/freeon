@@ -117,7 +117,7 @@ Like the former file, the options and coordinates are separate. Options are dist
 
 #### Sample MOPAC input file
 
-This is a sample configuration file to optimize the calculation of a transition state (TS) for Diels-Adler reaction with MOPAC using the AM1 parameter set.
+This is a sample configuration file to optimize the calculation of a transition state (TS) for the Diels-Adler reaction with MOPAC using the AM1 parameter set.
 
 This is a simple format: the first line contains all options (may be extended using specially tagged, continuation lines), the second line is a comment and then come the atoms and coordinates for the system.
 
