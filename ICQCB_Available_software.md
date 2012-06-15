@@ -92,7 +92,7 @@ As you can see, the coordinates of composing atoms are stated in a separate sect
 
 This is a sample configuration file to minimize the energy of glycerin using RHF and PM3 with GAMESS-US
 
-Like the former file, there options and coordinates are separate. Options are distributed in sections (with a different delimiter convention).
+Like the former file, the options and coordinates are separate. Options are distributed in sections (with a different delimiter convention).
 
     $CONTRL SCFTYP=RHF RUNTYP=ENERGY ICHARG=0 MULT=1 COORD=ZMTMPC $END
      $BASIS GBASIS=PM3 $END
