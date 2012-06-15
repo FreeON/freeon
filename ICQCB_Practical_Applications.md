@@ -10,7 +10,7 @@ This is by no means any exhaustive list of Computational Quantum Chemistry appli
 
 ### Electronic Structure
 
-Obviously, the first application is the fine resolution of molecular structure. To achieve this we try to adjust the geometry until we obtain the lowest energy level. This is, in itself, interesting enough, but has a problem: for the most important biological molecules (macromolecules) we need to carry out very large computations that are unfeasible using traditional methods. We need to resort to modern, linear scaling methods to deal with these structures.
+Obviously, the first application that comes to mind is the fine resolution of molecular structure. To achieve this, we try to adjust the geometry until we obtain the lowest energy level. This is, in itself, interesting enough, but has a problem: for the most important biological molecules (macromolecules) we need to carry out very large computations that are unfeasible using traditional methods. We need to resort to modern, linear scaling methods to deal with these structures.
 
 In any case, the calculations we can easily perform, are very useful: on one hand we can analyze in great detail substrates, drugs and smaller molecules, and on the other hand, even if modeling a full macromolecule is hard, we can model a relevant part of it, such as a protein's active site.
 
