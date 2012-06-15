@@ -16,4 +16,13 @@ In any case, the calculations we can easily perform, are very useful: on one han
 
 When we resolve the electronic structure, we nor only find the best geometry, but also the electronic charge distribution, which allows us to determine dipole, quadrupole, etc.. moments, and specially, the charge distribution in specific molecular orbitals. This is more interesting as it allows us to identify the reactive areas of molecules: the 'HOMO' (Highest Occupied Molecular Orbital) is the outermost occupied orbital, the one that contains reactive electrons in electron donor molecules, while the 'LUMO' (Lowest Unoccupied Molecular Orbital) identifies the first orbital with free space to accommodate an electron in electronic acceptor molecules.
 
-There are visualization programs that can show not only the optimized geometry, but also the HOMO and LUMO distributions, enabling us to predict the reactive regions in a molecule........
+There are visualization programs that can show not only the optimized geometry, but also the HOMO and LUMO distributions, enabling us to predict the reactive regions in a molecule.
+
+|HOMO|LUMO|
+|----|----|
+|![](Aspirin-homo.png "Aspirin-homo.png")|![](Aspirin-lumo.png "Aspirin-lumo.png")|
+||
+
+Let's take aspirin as an example: visit Wikipedia page on aspirin and read the section devoted to its synthesis and decomposition under high concentrations. Can you spot any correlation between the reactive region and either the HOMO or LUMO? Certainly the HOMO covers the union between the acetyl and salycilic groups.
+
+### Population analysis
