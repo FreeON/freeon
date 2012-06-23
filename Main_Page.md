@@ -13,6 +13,9 @@ FreeON is an experimental, open source ([GPL](http://www.gnu.org/licenses/gpl.ht
 Contents
 --------
 
+<table width="100%">
+<tr>
+<td>
 -   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
 -   [Status](http://www.freeon.org:8010)
@@ -24,6 +27,13 @@ Contents
 -   [Citation](Citing FreeON "wikilink")
 -   [Authors](Authors "wikilink")
 
+</td>
+<td align="right">
+<ohlohStats/>
+
+</td>
+</tr>
+</table>
 Download
 --------
 
