@@ -6,7 +6,7 @@ title: Developers Guide
 Getting Started
 ---------------
 
-FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon).
+FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon) and by [github](http://github.com) at [<http://github.com/nicolasbock/FreeON>](http://github.com/nicolasbock/FreeON).
 
 ### Downloading and Building
 
