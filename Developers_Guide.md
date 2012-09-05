@@ -12,7 +12,7 @@ Note that due to a technical issue the savannah repository only contains the com
 
 ### Downloading and Building
 
-We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon) and . If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
+We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon) and by [github](http://github.com) at [<http://github.com/FreeON/FreeON>](http://github.com/FreeON/FreeON). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
 
     git clone https://github.com/FreeON/FreeON.git
 
