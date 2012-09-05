@@ -12,12 +12,12 @@ Most of these examples include directives to use the parallel MPI implementation
 -   [03-Caffeine.inp](03-Caffeine.inp "wikilink") - Two step optimization of Caffeine, first using STO-2G, followed by DFT with 6-31G\*\* and BLYP
 -   [04-CH2Wire.inp](04-CH2Wire.inp "wikilink") - Polyacetilene geometry optimization with fixed lattice vectors in STO-3G basis
 -   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after [Goto, A.;Hondoh, T.;Mae, S.(1990)](http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412_s1)
--   [06-Sulfur.inp](06-Sulfur.inp "wikilink") - Monoclinic gamma sulfur, after Gallacher, A.C.;Pinkerton, A.A. (1992) Phase Transition 38, 127-220, CSD entry 66517ICS
+-   [06-Sulfur.inp](06-Sulfur.inp "wikilink") - Monoclinic gamma sulfur, after [Gallacher, A.C.;Pinkerton, A.A. (1992)](http://scripts.iucr.org/cgi-bin/paper?S0108270192009661) Phase Transition 38, 127-220, CSD entry 66517ICS
 -   [07-WaterHexamer.inp](07-WaterHexamer.inp "wikilink") - Optimization of a water hexamer using STO-3G split basis set
--   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be compared with reference in <http://cccbdb.nist.gov/>
+-   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be compared with reference in [<http://cccbdb.nist.gov/>](http://cccbdb.nist.gov/)
 -   [09-TEMPO.inp](09-TEMPO.inp "wikilink") - Optimization of 2,2,6,6-tetramethyl-piperidine-1-oxyl (TEMPO)
 -   [10-Malonaldahyde.inp](10-Malonaldahyde.inp "wikilink") - Transition state optimization from reactants and products of malonaldehyde.
--   [11-CO2.inp](11-CO2.inp "wikilink") - Solid CO\_2 C O Unit Cell, 83K, afetr J Phys Soc Japan, 53(3) 1176-1184 (1984)
+-   [11-CO2.inp](11-CO2.inp "wikilink") - Solid CO\_2 C O Unit Cell, 83K, after [J Phys Soc Japan, 53(3) 1176-1184 (1984)](http://jpsj.ipap.jp/link?JPSJ/53/1176/)
 -   [12-BPA.inp](12-BPA.inp "wikilink") - Calculation on Bisphenol A using STO-2G split basis, with commented example for a more accurate optimization
 -   [13-PhyticAcid.inp](13-PhyticAcid.inp "wikilink") - Calculation on Phytic Acid using STO-3G split basis, with commented example for a more accurate optimization
 -   [14-LJ-2-SD.inp](14-LJ-2-SD.inp "wikilink") - Ar dimer with Lennard-Jones potential using Steepest Descent
@@ -29,7 +29,7 @@ Most of these examples include directives to use the parallel MPI implementation
 -   [20-LJ-5-SD.inp](20-LJ-5-SD.inp "wikilink") - Ar cluster (5 Ar) with Lennard-Jones potential using Steepest Descent
 -   [21-LJ-5-CG.inp](21-LJ-5-CG.inp "wikilink") - Ar cluster (5 Ar) with Lennard-Jones potential using Conjugate Gradients
 -   [22-LJ-100-SD.inp](22-LJ-100-SD.inp "wikilink") - 100 atom Lennard-Jones cluster using Steepest Descent. Structure taken from <http://physchem.ox.ac.uk/~doye/jon/structures/LJ/tables.150.html> and perturbed by ± 0.2 Å
--   [23-LJ-100-CG.inp](23-LJ-100-CG.inp "wikilink") - 100 atom Lennard-Jones cluster using Conjugate Gradients. Structure taken from <http://physchem.ox.ac.uk/~doye/jon/structures/LJ/tables.150.html> and perturbed by ± 0.2 Å
+-   [23-LJ-100-CG.inp](23-LJ-100-CG.inp "wikilink") - 100 atom Lennard-Jones cluster using Conjugate Gradients. Structure taken from [<http://physchem.ox.ac.uk/~doye/jon/structures/LJ/tables.150.html>](http://physchem.ox.ac.uk/~doye/jon/structures/LJ/tables.150.html) and perturbed by ± 0.2 Å
 -   [24-Vancomycin-internal.inp](24-Vancomycin-internal.inp "wikilink") - Vancomycin optimization using a split STO-2G basis and a maximum of 1000 optimization steps
 -   [25-Vancomycin-CG.inp](25-Vancomycin-CG.inp "wikilink") - Vancomycin optimization using a split STO-2G basis and coarse tuned conjugate gradients
 -   [26-Vancomycin-CG.inp](26-Vancomycin-CG.inp "wikilink") - Vancomycin optimization using a split STO-2G basis and medium tuned conjugate gradients
