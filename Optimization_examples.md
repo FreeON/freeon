@@ -11,7 +11,7 @@ Most of these examples include directives to use the parallel MPI implementation
 -   [02-BNSheet.inp](02-BNSheet.inp "wikilink") - Optimization of a BN sheet using DFT with split STO-2G and B3LYP
 -   [03-Caffeine.inp](03-Caffeine.inp "wikilink") - Two step optimization of Caffeine, first using STO-2G, followed by DFT with 6-31G\*\* and BLYP
 -   [04-CH2Wire.inp](04-CH2Wire.inp "wikilink") - Polyacetilene geometry optimization with fixed lattice vectors in STO-3G basis
--   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after Goto, A.;Hondoh, T.;Mae, S.(1990)
+-   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after [[http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412\_s1|Goto](http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412_s1|Goto), A.;Hondoh, T.;Mae, S.(1990)]
 -   [06-Sulfur.inp](06-Sulfur.inp "wikilink") - Monoclinic gamma sulfur, after Gallacher, A.C.;Pinkerton, A.A. (1992) Phase Transition 38, 127-220, CSD entry 66517ICS
 -   [07-WaterHexamer.inp](07-WaterHexamer.inp "wikilink") - Optimization of a water hexamer using STO-3G split basis set
 -   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be compared with reference in <http://cccbdb.nist.gov/>
