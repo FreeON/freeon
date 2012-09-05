@@ -38,7 +38,7 @@ The version control system (VCS) git is designed to be decentralized and is in t
 
 Cloning our repository from savannah.
 
-    git clone http://git.savannah.gnu.org/r/freeon.git
+    git clone https://github.com/FreeON/FreeON.git
 
 #### Creating local branches
 
