@@ -7,11 +7,11 @@ In the Optimization subdirectory you can find a large number of examples of opti
 
 Most of these examples include directives to use the parallel MPI implementation of FreeON if available. This means that if you compiled a version of FreeON with support for parallel computing using MPI, then the program will be able to use more resources in your computer to complete the calculation faster. If your version of FreeON does not support MPI parallel processing, these directives will be ignored and the calculation will proceed normally using only one CPU.
 
--   [01-Benzene.inp](01-Benzene.inp "wikilink") - reproduction of the optimization of benzene published by [[http://rspa.royalsocietypublishing.org/content/414/1846/47.short|G.A.Jeffrey](http://rspa.royalsocietypublishing.org/content/414/1846/47.short|G.A.Jeffrey), J.R.Ruble, R.K.McMullan, J.A.Pople (1987) Proc.R.Soc.London,Ser.A v414 p47], using DFT with STO3G and the BLYP exchange correlation functional
+-   [01-Benzene.inp](01-Benzene.inp "wikilink") - reproduction of the optimization of benzene published by [G.A.Jeffrey, J.R.Ruble, R.K.McMullan, J.A.Pople (1987) Proc.R.Soc.London,Ser.A v414 p47](http://rspa.royalsocietypublishing.org/content/414/1846/47.short), using DFT with STO3G and the BLYP exchange correlation functional
 -   [02-BNSheet.inp](02-BNSheet.inp "wikilink") - Optimization of a BN sheet using DFT with split STO-2G and B3LYP
 -   [03-Caffeine.inp](03-Caffeine.inp "wikilink") - Two step optimization of Caffeine, first using STO-2G, followed by DFT with 6-31G\*\* and BLYP
 -   [04-CH2Wire.inp](04-CH2Wire.inp "wikilink") - Polyacetilene geometry optimization with fixed lattice vectors in STO-3G basis
--   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after [[http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412\_s1|Goto](http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412_s1|Goto), A.;Hondoh, T.;Mae, S.(1990)]
+-   [05-Ice.inp](05-Ice.inp "wikilink") - Ice 1h-H2O-(P63/MMC) after [Goto, A.;Hondoh, T.;Mae, S.(1990)](http://jcp.aip.org/resource/1/jcpsa6/v93/i2/p1412_s1)
 -   [06-Sulfur.inp](06-Sulfur.inp "wikilink") - Monoclinic gamma sulfur, after Gallacher, A.C.;Pinkerton, A.A. (1992) Phase Transition 38, 127-220, CSD entry 66517ICS
 -   [07-WaterHexamer.inp](07-WaterHexamer.inp "wikilink") - Optimization of a water hexamer using STO-3G split basis set
 -   [08-Na2Cl2.inp](08-Na2Cl2.inp "wikilink") - Optimization of Na<sub>2</sub>Cl<sub>2</sub>. Results can be compared with reference in <http://cccbdb.nist.gov/>
