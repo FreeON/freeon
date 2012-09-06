@@ -15,6 +15,7 @@ Note that due to a technical issue the savannah repository only contains the com
 There are numerous tutorials on git on the web. Some we found useful are listed below:
 
 -   [Documentation and Tutorials from the git webpage](http://git-scm.com/documentation)
+-   [A visual Cheatsheet](http://ndpsoftware.com/git-cheatsheet.html)
 -   [Notes on git by Sitaram Chamarty](http://sitaramc.github.com/master-toc.html)
 
 ### Downloading and Building
