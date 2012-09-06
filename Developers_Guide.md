@@ -10,6 +10,10 @@ FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<htt
 
 Note that due to a technical issue the savannah repository only contains the commit history back to 2008, while the github repository contains the complete commit history back to 2000. Until savannah fixes this problem **we recommend using the github repository**.
 
+There are numerous tutorials on git on the web. Some we found useful are listed below:
+
+-   [Notes on git by Sitaram Chamarty](http://sitaramc.github.com/master-toc.html)
+
 ### Downloading and Building
 
 We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon) and by [github](http://github.com) at [<http://github.com/FreeON/FreeON>](http://github.com/FreeON/FreeON). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
