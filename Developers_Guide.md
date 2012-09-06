@@ -10,6 +10,8 @@ FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<htt
 
 Note that due to a technical issue the savannah repository only contains the commit history back to 2008, while the github repository contains the complete commit history back to 2000. Until savannah fixes this problem **we recommend using the github repository**.
 
+### Some more information on how to use git
+
 There are numerous tutorials on git on the web. Some we found useful are listed below:
 
 -   [Notes on git by Sitaram Chamarty](http://sitaramc.github.com/master-toc.html)
