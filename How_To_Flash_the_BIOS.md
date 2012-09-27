@@ -17,5 +17,6 @@ First we need to create a bootable USB stick running MS-DOS.
 
 -   [Rufus](http://rufus.akeo.ie/), which runs under Windows.
 -   [UNetbootin](http://unetbootin.sourceforge.net/), which runs under windows or linux.
+-   [Tutorial](http://www.sevenforums.com/tutorials/46707-ms-dos-bootable-flash-drive-create.html): Download the HP Flash Utility [hpflash1.zip](http://www.sevenforums.com/attachments/tutorials/42022d1260810265-ms-dos-bootable-flash-drive-create-hpflash1.zip) and also download the Windows 98 MS-DOS System Files [win98boot.zip](http://www.sevenforums.com/attachments/tutorials/42023d1260810265-ms-dos-bootable-flash-drive-create-win98boot.zip).
 
 Install [FreeDOS](http://www.freedos.org/).
