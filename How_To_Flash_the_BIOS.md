@@ -30,4 +30,6 @@ First we need to create a bootable USB stick running MS-DOS.
 
 -   [Yet another tutorial](http://honeypot.net/2011/10/11/making-dos-usb-images-on-a-mac/):
 
+So far USB either doesn't boot or I can't figure out how to add the BIOS files to the DOS live session.
+
 Install [FreeDOS](http://www.freedos.org/).
