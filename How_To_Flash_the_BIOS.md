@@ -15,6 +15,8 @@ Create a bootable USB stick
 
 First we need to create a bootable USB stick running MS-DOS.
 
+![ thumb](HP USB Utility.png  " thumb")
+
 -   [Rufus](http://rufus.akeo.ie/), which runs under Windows.
 -   [UNetbootin](http://unetbootin.sourceforge.net/), which runs under windows or linux.
 -   [Tutorial](http://www.sevenforums.com/tutorials/46707-ms-dos-bootable-flash-drive-create.html):
