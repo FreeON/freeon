@@ -8,7 +8,7 @@ We will boot from a bootable USB stick and then flash the BIOS with the appropri
 BIOS Updates
 ------------
 
--   [AMD servers, TYAN FT48B8812 (B8812F48W8HR)](http://www.tyan.com/support_download_bios.aspx?model=B.FT48B8812): [Version 1.06 released on 2011/12/13](ftp://ftp.tyan.com/bios/FT48-B8812_v106.rar)
+-   Our 10 AMD nodes are [TYAN FT48B8812 (B8812F48W8HR)](http://www.tyan.com/product_SKU_spec.aspx?ProductType=BB&pid=434&SKU=600000186). The BIOS is available at [FT48B8812 BIOS](http://www.tyan.com/support_download_bios.aspx?model=B.FT48B8812): [Version 1.06 released on 2011/12/13](ftp://ftp.tyan.com/bios/FT48-B8812_v106.rar)
 
 Creating a bootable USB stick
 -----------------------------
