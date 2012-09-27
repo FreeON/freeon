@@ -3,6 +3,9 @@ layout: default
 title: How To Flash the BIOS
 ---
 
+Create a bootable USB stick
+---------------------------
+
 First we need to create a bootable USB stick running MS-DOS.
 
 -   [Rufus](http://rufus.akeo.ie/), which runs under Windows.
