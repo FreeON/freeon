@@ -23,4 +23,9 @@ First we need to create a bootable USB stick running MS-DOS.
     -   Download the HP Flash Utility [hpflash1.zip](http://www.sevenforums.com/attachments/tutorials/42022d1260810265-ms-dos-bootable-flash-drive-create-hpflash1.zip) and also download the Windows 98 MS-DOS System Files [win98boot.zip](http://www.sevenforums.com/attachments/tutorials/42023d1260810265-ms-dos-bootable-flash-drive-create-win98boot.zip).
     -   Run the utility and select **"Create a DOS startup disk"** pointing to the files extracted from the second zip file (see screenshot).
 
+-   [Another tutorial](http://www.chavers.us/robs-place-mainmenu-42/17-ubuntu-notes/46-easiest-way-to-create-a-usb-dos-boot-disk-using-linux):
+    -   Partition USB stick.
+    -   Install FreeBSD on the stick using UNetbootin under linux.
+    -   Copy BIOS files into root of USB stick, will show up in drive B: or C: once running FreeDOS.
+
 Install [FreeDOS](http://www.freedos.org/).
