@@ -28,4 +28,6 @@ First we need to create a bootable USB stick running MS-DOS.
     -   Install FreeBSD on the stick using UNetbootin under linux.
     -   Copy BIOS files into root of USB stick, will show up in drive B: or C: once running FreeDOS.
 
+-   [Yet another tutorial](http://honeypot.net/2011/10/11/making-dos-usb-images-on-a-mac/):
+
 Install [FreeDOS](http://www.freedos.org/).
