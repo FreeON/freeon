@@ -18,7 +18,7 @@ First we need to create a bootable USB stick running MS-DOS.
 ![ thumb | Screenshot of the HP USB Disk Utility](HP USB Utility.png  " thumb | Screenshot of the HP USB Disk Utility")
 
 -   [Rufus](http://rufus.akeo.ie/), which runs under Windows.
--   [UNetbootin](http://unetbootin.sourceforge.net/), which runs under windows or linux.
+-   [UNetbootin](http://unetbootin.sourceforge.net/), which runs under Windows or Linux.
 -   [Tutorial](http://www.sevenforums.com/tutorials/46707-ms-dos-bootable-flash-drive-create.html):
     -   Download the HP Flash Utility [hpflash1.zip](http://www.sevenforums.com/attachments/tutorials/42022d1260810265-ms-dos-bootable-flash-drive-create-hpflash1.zip) and also download the Windows 98 MS-DOS System Files [win98boot.zip](http://www.sevenforums.com/attachments/tutorials/42023d1260810265-ms-dos-bootable-flash-drive-create-win98boot.zip).
     -   Run the utility and select **"Create a DOS startup disk"** pointing to the files extracted from the second zip file (see screenshot).
