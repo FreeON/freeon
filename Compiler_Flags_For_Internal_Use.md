@@ -6,7 +6,7 @@ title: Compiler Flags For Internal Use
 GNU gcc Compiler
 ----------------
 
-    ./configure
+    ./configure LIBS=-lblas\\ -llapack
 
 Lahey Compiler
 --------------
