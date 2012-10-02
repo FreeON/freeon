@@ -3,6 +3,11 @@ layout: default
 title: Compiler Flags For Internal Use
 ---
 
+GNU gcc Compiler
+----------------
+
+    ./configure
+
 Intel Compiler
 --------------
 
