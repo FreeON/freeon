@@ -18,6 +18,11 @@ NAG Compiler
 
     module load nag-5.3
 
+PGI Compiler
+------------
+
+    module load pgi-11.8
+
 Intel Compiler
 --------------
 
