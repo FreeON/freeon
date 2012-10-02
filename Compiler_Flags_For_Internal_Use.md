@@ -13,6 +13,11 @@ Lahey Compiler
 
     module load lahey-8.10b
 
+NAG Compiler
+------------
+
+    module load nag-5.3
+
 Intel Compiler
 --------------
 
