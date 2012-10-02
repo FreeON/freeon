@@ -8,6 +8,11 @@ GNU gcc Compiler
 
     ./configure
 
+Lahey Compiler
+--------------
+
+    module load lahey-8.10b
+
 Intel Compiler
 --------------
 
