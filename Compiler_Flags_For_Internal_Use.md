@@ -12,6 +12,7 @@ Lahey Compiler
 --------------
 
     module load lahey-8.10b
+    ./configure FC=lf95 F77=lf95 LIBS=-lblas\\ -llapack
 
 NAG Compiler
 ------------
