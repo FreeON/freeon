@@ -18,6 +18,7 @@ NAG Compiler
 ------------
 
     module load nag-5.3
+    ./configure FC=nagfor F77=nagfor LIBS=-lblas\\ -llapack
 
 PGI Compiler
 ------------
