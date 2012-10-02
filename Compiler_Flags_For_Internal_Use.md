@@ -24,6 +24,7 @@ PGI Compiler
 ------------
 
     module load pgi-11.8
+    ./configure CC=pgcc FC=pgf90 F77=pgf90 LIBS=-lblas\\ -llapack
 
 Intel Compiler
 --------------
