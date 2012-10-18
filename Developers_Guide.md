@@ -6,7 +6,7 @@ title: Developers Guide
 Getting Started
 ---------------
 
-FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon) and by **[github](http://github.com) at [<http://github.com/FreeON/FreeON>](http://github.com/FreeON/FreeON)**.
+FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon) and by **[github](http://github.com) at [<http://github.com/FreeON/freeon>](http://github.com/FreeON/freeon)**.
 
 Note that due to a technical issue the savannah repository only contains the commit history back to 2008, while the github repository contains the complete commit history back to 2000. Until savannah fixes this problem **we recommend using the github repository**.
 
@@ -20,9 +20,9 @@ There are numerous tutorials on git on the web. Some we found useful are listed 
 
 ### Downloading and Building
 
-We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon) and by [github](http://github.com) at [<http://github.com/FreeON/FreeON>](http://github.com/FreeON/FreeON). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
+We use the version control system [git](http://git-scm.com) to manage the FreeON source code. The master branch is hosted by the [Free Software Foundation](http://fsf.org) on [savanna.nongnu.org](http://savannah.nongnu.org/projects/freeon) and by [github](http://github.com) at [<http://github.com/FreeON/freeon>](http://github.com/FreeON/freeon). If you would like to keep your local sources up to date with our development and/or are considering hacking the code, we recommend you use git yourself. A basic workflow of downloading and building the sources using git could look like the following:
 
-    git clone https://github.com/FreeON/FreeON.git
+    git clone https://github.com/FreeON/freeon.git
 
 which will copy the entire repository into \$PWD/freeon. This step has to be done only once. Now `cd` into freeon.
 
@@ -46,7 +46,7 @@ The version control system (VCS) git is designed to be decentralized and is in t
 
 Cloning our repository from savannah.
 
-    git clone https://github.com/FreeON/FreeON.git
+    git clone https://github.com/FreeON/freeon.git
 
 #### Creating local branches
 
