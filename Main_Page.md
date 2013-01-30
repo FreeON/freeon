@@ -51,8 +51,6 @@ Alternatively you can file a bug report or feature request with our bug tracker 
 
 -   [Issue Tracker](https://github.com/FreeON/freeon/issues)
 
-When you connect to our bug tracker for the first time you might get an error related to the SSL certificate used by savannah.nongnu.org. Please follow the [instructions from savannah](http://savannah.nongnu.org/tls/tutorial/) to fix this error.
-
 Wikipedia
 ---------
 
