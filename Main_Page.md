@@ -47,7 +47,7 @@ While you could e-mail one of the authors directly, we prefer if you used our ma
 -   [freeon-users](http://lists.nongnu.org/mailman/listinfo/freeon-users), our public mailing list for users of FreeON.
 -   [freeon-devel](http://lists.nongnu.org/mailman/listinfo/freeon-devel), our mailing list for developers of FreeON, and people who are interested in the development process of it.
 
-Alternatively you can file a bug report or feature request with our bug tracker system:
+Alternatively you can file a bug report or feature request with our issue tracker system:
 
 -   [Issue Tracker](https://github.com/FreeON/freeon/issues)
 
