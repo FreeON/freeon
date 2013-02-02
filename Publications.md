@@ -3,14 +3,22 @@ layout: default
 title: Publications
 ---
 
+-   2013
+    -   An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay, Nicolas Bock, Matt Challacombe, [SIAM J. Sci. Comput., 35(1), C72–C98](http://dx.doi.org/10.1137/120870761)
+
+-   2012
+    -   An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay, Nicolas Bock, Matt Challacombe, [arXiv:1203.1692](http://arxiv.org/abs/1203.1692)
+
 -   2010
     -   Linear Scaling Solution of the Time-Dependent Self-Consistent-Field Equations. Matt Challacombe, [arXiv preprint 1001.2586](http://arxiv.org/abs/1001.2586)
+    -   Fast Multiplication of Matrices with Decay, Matt Challacombe, Nicolas Bock, [\\tarXiv:1011.3534](http://arxiv.org/abs/1011.3534)
 
 -   2009
     -   Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories. S. Tretiak, C. Isborn, AMN Niklasson and Matt Challacombe [Journal of Chemical Physics 130, 054111 (2009)](http://link.aip.org/link/?JCPSA6/130/054111/1)
 
 -   2008
     -   Molecular orbital free algorithm for excited states in time-dependent perturbation theory. M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, Journal of Chemical Physics, 129 064114 (2008)
+    -   Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication, Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [arXiv:0808.1108](http://arxiv.org/abs/0808.1108)
 
 -   2007
     -   Time-reversible ab initio molecular dynamics A. Niklasson, C.J. Tymczak and Matt Challacombe, Journal of Chemical Physics, 126 144103 (2007)
