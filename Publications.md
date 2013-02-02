@@ -21,8 +21,8 @@ title: Publications
     -   Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication, Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [arXiv:0808.1108](http://arxiv.org/abs/0808.1108)
 
 -   2007
-    -   Time-reversible ab initio molecular dynamics A. Niklasson, C.J. Tymczak and Matt Challacombe, Journal of Chemical Physics, 126 144103 (2007)
-    -   He conductivity in cool white dwarf atmospheres S. Mazevet, Matt Challacombe, P.M. Kowalski and D. Saumon Astrophysics and Space Science, 307 273 (2007)
+    -   Time-reversible ab initio molecular dynamics, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 126 144103 (2007)](http://link.aip.org/link/doi/10.1063/1.2715556)
+    -   He conductivity in cool white dwarf atmospheres, S. Mazevet, Matt Challacombe, D. Saumon and P.M. Kowalski [High Energy Density Laboratory Astrophysics, 273-277, Springer Netherlands](http://link.springer.com/chapter/10.1007%2F978-1-4020-6055-7_50)
 
 -   2006
     -   Time-reversible Born-Oppenheimer molecular dynamics A. Niklasson, C.J. Tymczak and Matt Challacombe, Physical Review Letters, 97 123001 (2006)
