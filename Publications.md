@@ -17,7 +17,7 @@ title: Publications
     -   Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories. S. Tretiak, C. Isborn, AMN Niklasson and Matt Challacombe [Journal of Chemical Physics 130, 054111 (2009)](http://link.aip.org/link/?JCPSA6/130/054111/1)
 
 -   2008
-    -   Molecular orbital free algorithm for excited states in time-dependent perturbation theory. M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, Journal of Chemical Physics, 129 064114 (2008)
+    -   Molecular orbital free algorithm for excited states in time-dependent perturbation theory. M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, [Journal of Chemical Physics, 129 064114 (2008)](http://link.aip.org/link/doi/10.1063/1.2965535)
     -   Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication, Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [arXiv:0808.1108](http://arxiv.org/abs/0808.1108)
 
 -   2007
