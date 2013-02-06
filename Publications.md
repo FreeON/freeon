@@ -25,7 +25,7 @@ title: Publications
     -   He conductivity in cool white dwarf atmospheres, S. Mazevet, Matt Challacombe, D. Saumon and P.M. Kowalski [High Energy Density Laboratory Astrophysics, 273-277, Springer Netherlands](http://link.springer.com/chapter/10.1007%2F978-1-4020-6055-7_50)
 
 -   2006
-    -   Time-reversible Born-Oppenheimer molecular dynamics A. Niklasson, C.J. Tymczak and Matt Challacombe, Physical Review Letters, 97 123001 (2006)
+    -   Time-reversible Born-Oppenheimer molecular dynamics, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Physical Review Letters, 97 123001 (2006)](http://link.aps.org/doi/10.1103/PhysRevLett.97.123001)
     -   Parallel algorithm for the computation of the Hartree-Fock exchange matrix: gas phase and periodic parallel ONX. V. Weber, Matt Challacombe, Journal of Chemical Physics, 125 104110 (2006)
     -   Energy gradients with respect to atomic positions and cell parameters for the Kohn-Sham density-functional theory at the Gamma point V. Weber, C.J. Tymczak and Matt Challacombe, Journal of Chemical Physics, 124 224107 (2006)
     -   Exchange energy gradients with respect to atomic positions and cell parameters within the Hartree-Fock {Gamma}-point approximation V. Weber, C. Daul and Matt Challacombe, Journal of Chemical Physics, 124 214105 (2006)
