@@ -22,7 +22,7 @@ title: Publications
 2009
 ----
 
--   Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories. S. Tretiak, C. Isborn, AMN Niklasson and Matt Challacombe [Journal of Chemical Physics 130, 054111 (2009)](http://link.aip.org/link/?JCPSA6/130/054111/1)
+-   Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories. S. Tretiak, C. Isborn, AMN Niklasson and Matt Challacombe [Journal of Chemical Physics 130, 054111 (2009)](http://dx.doi.org/10.1063/1.3068658)
 
 2008
 ----
