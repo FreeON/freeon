@@ -33,7 +33,7 @@ title: Publications
 2007
 ----
 
--   Time-reversible ab initio molecular dynamics, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 126 144103 (2007)](http://link.aip.org/link/doi/10.1063/1.2715556)
+-   Time-reversible ab initio molecular dynamics, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 126 144103 (2007)](http://dx.doi.org/10.1063/1.2715556)
 -   He conductivity in cool white dwarf atmospheres, S. Mazevet, Matt Challacombe, D. Saumon and P.M. Kowalski [High Energy Density Laboratory Astrophysics, 273-277, Springer Netherlands](http://link.springer.com/chapter/10.1007%2F978-1-4020-6055-7_50)
 
 2006
