@@ -27,7 +27,7 @@ title: Publications
 2008
 ----
 
--   Molecular orbital free algorithm for excited states in time-dependent perturbation theory. M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, [Journal of Chemical Physics, 129 064114 (2008)](http://link.aip.org/link/doi/10.1063/1.2965535)
+-   Molecular orbital free algorithm for excited states in time-dependent perturbation theory. M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, [Journal of Chemical Physics, 129 064114 (2008)](http://dx.doi.org/10.1063/1.2965535)
 -   Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication, Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [arXiv:0808.1108](http://arxiv.org/abs/0808.1108)
 
 2007
