@@ -41,7 +41,7 @@ title: Publications
 
 -   Time-reversible Born-Oppenheimer molecular dynamics, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Physical Review Letters, 97 123001 (2006)](http://dx.doi.org/10.1103/PhysRevLett.97.123001)
 -   Parallel algorithm for the computation of the Hartree-Fock exchange matrix: gas phase and periodic parallel ONX, V. Weber, Matt Challacombe, [Journal of Chemical Physics, 125 104110 (2006)](http://dx.doi.org/10.1063/1.2222359)
--   Energy gradients with respect to atomic positions and cell parameters for the Kohn-Sham density-functional theory at the Gamma point V. Weber, C.J. Tymczak and Matt Challacombe, Journal of Chemical Physics, 124 224107 (2006)
+-   Energy gradients with respect to atomic positions and cell parameters for the Kohn-Sham density-functional theory at the Gamma point, V. Weber, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 124 224107 (2006)](http://dx.doi.org/10.1063/1.2202105)
 -   Exchange energy gradients with respect to atomic positions and cell parameters within the Hartree-Fock {Gamma}-point approximation, V. Weber, C. Daul and Matt Challacombe, [Journal of Chemical Physics, 124 214105 (2006)](http://dx.doi.org/10.1063/1.2207625)
 
 2005
