@@ -47,11 +47,11 @@ title: Publications
 2005
 ----
 
--   **Nonorthogonal density-matrix perturbation theory**, A. Niklasson, V. Weber and Matt Challacombe, [Journal of Chemical Physics, 123 44107 (2005)](http://dx.doi.org/10.1063/1.1944725)
--   **Higher-order response in O(N) by perturbed projection**, V. Weber, A. Niklasson, Matt Challacombe, [Journal of Chemical Physics, 123 44106 (2005)](http://dx.doi.org/10.1063/1.1944724)
--   **Geometry optimization of crystals by the quasi-independent curvilinear coordinate approximation**, K. Nemeth and Matt Challacombe, [Journal of Chemical Physics, 123 1 (2005)](http://dx.doi.org/10.1063/1.2121569)
--   **Linear scaling computation of the Fock matrix. VIII. Periodic boundaries for exact exchange at the Gamma point**, C.J. Tymczak, V. Weber, E. Schwegler and Matt Challacombe, [Journal of Chemical Physics, 122 124105 (2005)](http://dx.doi.org/10.1063/1.1869470)
--   **Linear scaling computation of the Fock matrix. VII. Periodic density functional theory at the Gamma point**, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 122 134102 (2005)](http://dx.doi.org/10.1063/1.1853374)
+-   "Nonorthogonal density-matrix perturbation theory", A. Niklasson, V. Weber and Matt Challacombe, [*Journal of Chemical Physics* **123** 44107 (2005)](http://dx.doi.org/10.1063/1.1944725)
+-   "Higher-order response in O(N) by perturbed projection", V. Weber, A. Niklasson, Matt Challacombe, [*Journal of Chemical Physics* **123** 44106 (2005)](http://dx.doi.org/10.1063/1.1944724)
+-   "Geometry optimization of crystals by the quasi-independent curvilinear coordinate approximation", K. Nemeth and Matt Challacombe, [*Journal of Chemical Physics* **123** 194112 (2005)](http://dx.doi.org/10.1063/1.2121569)
+-   "Linear scaling computation of the Fock matrix. VIII. Periodic boundaries for exact exchange at the Gamma point", C.J. Tymczak, V. Weber, E. Schwegler and Matt Challacombe, [*Journal of Chemical Physics* **122** 124105 (2005)](http://dx.doi.org/10.1063/1.1869470)
+-   "Linear scaling computation of the Fock matrix. VII. Periodic density functional theory at the Gamma point", C.J. Tymczak and Matt Challacombe, [*Journal of Chemical Physics* **122** 134102 (2005)](http://dx.doi.org/10.1063/1.1853374)
 
 2004
 ----
