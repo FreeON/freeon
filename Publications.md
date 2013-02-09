@@ -65,7 +65,7 @@ title: Publications
 2003
 ----
 
--   Linear scaling computation of the Fock matrix. VI. Data parallel computation of the exchange-correlation matrix C.K. Gan and Matt Challacombe, Journal of Chemical Physics, 118 9128 (2003)
+-   "Linear scaling computation of the Fock matrix. VI. Data parallel computation of the exchange-correlation matrix", C.K. Gan and Matt Challacombe, [*Journal of Chemical Physics* **118** 9128 (2003)](http://dx.doi.org/10.1063/1.1568734)
 -   Trace resetting density matrix purification in O(N) self-consistent-field theory A. Niklasson, C.J. Tymczak and Matt Challacombe, Journal of Chemical Physics, 118 8611 (2003)
 
 2000
