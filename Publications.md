@@ -6,7 +6,7 @@ title: Publications
 2013
 ----
 
--   An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay, Nicolas Bock, Matt Challacombe, [SIAM J. Sci. Comput., 35(1), C72–C98](http://dx.doi.org/10.1137/120870761)
+-   **An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay**, Nicolas Bock, Matt Challacombe, [SIAM J. Sci. Comput., 35(1), C72–C98](http://dx.doi.org/10.1137/120870761)
 
 2012
 ----
