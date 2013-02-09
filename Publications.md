@@ -71,8 +71,8 @@ title: Publications
 2000
 ----
 
--   Linear scaling computation of the Fock matrix. V. Hierarchical Cubature for numerical integration of the exchange-correlation matrix Matt Challacombe, Journal of Chemical Physics, 113 10037 (2000)
--   Linear scaling computation of the Fock matrix. III. Formation of the exchange matrix with permutational symmetry E. Schwegler and Matt Challacombe, Theoretical Chemistry Accounts, 104 344 (2000)
+-   "Linear scaling computation of the Fock matrix. V. Hierarchical Cubature for numerical integration of the exchange-correlation matrix", Matt Challacombe, [Journal of Chemical Physics, 113 10037 (2000)](http://dx.doi.org/10.1063/1.1316012)
+-   "Linear scaling computation of the Fock matrix. III. Formation of the exchange matrix with permutational symmetry", E. Schwegler and Matt Challacombe, [*Theoretical Chemistry Accounts* **104** 344 (2000)](http://dx.doi.org/10.1007/s002140000127)
 -   General parallel sparse-blocked matrix multiply for linear scaling SCF theory Matt Challacombe, Computer Physics Communications, 128 93 (2000)
 
 1999
