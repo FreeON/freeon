@@ -6,43 +6,43 @@ title: Publications
 2013
 ----
 
--   **An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay**, Nicolas Bock, Matt Challacombe, [SIAM J. Sci. Comput., 35(1), C72–C98](http://dx.doi.org/10.1137/120870761)
+-   "An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay", Nicolas Bock, Matt Challacombe, [*SIAM J. Sci. Comput.* **35(1)** C72–C98](http://dx.doi.org/10.1137/120870761)
 
 2012
 ----
 
--   **An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay**, Nicolas Bock, Matt Challacombe, [arXiv:1203.1692](http://arxiv.org/abs/1203.1692)
+-   "An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay", Nicolas Bock, Matt Challacombe, [*arXiv*:**1203.1692**](http://arxiv.org/abs/1203.1692)
 
 2010
 ----
 
--   **Linear Scaling Solution of the Time-Dependent Self-Consistent-Field Equations**, Matt Challacombe, [arXiv preprint 1001.2586](http://arxiv.org/abs/1001.2586)
--   **Fast Multiplication of Matrices with Decay**, Matt Challacombe, Nicolas Bock, [\\tarXiv:1011.3534](http://arxiv.org/abs/1011.3534)
+-   "Linear Scaling Solution of the Time-Dependent Self-Consistent-Field Equations", Matt Challacombe, [*arXiv*:**1001.2586**](http://arxiv.org/abs/1001.2586)
+-   "Fast Multiplication of Matrices with Decay", Matt Challacombe, Nicolas Bock, [*arXiv*:**1011.3534**](http://arxiv.org/abs/1011.3534)
 
 2009
 ----
 
--   **Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories**, S. Tretiak, C. Isborn, AMN Niklasson and Matt Challacombe [Journal of Chemical Physics 130, 054111 (2009)](http://dx.doi.org/10.1063/1.3068658)
+-   "Representation independent algorithms for molecular response calculations in time-dependent self-consistent field theories", S. Tretiak, C. Isborn, A. M. N. Niklasson and Matt Challacombe [*Journal of Chemical Physics* **130** 054111 (2009)](http://dx.doi.org/10.1063/1.3068658)
 
 2008
 ----
 
--   **Molecular orbital free algorithm for excited states in time-dependent perturbation theory**, M. Lucero, AMN Niklasson, S. Tretiak and M. Challacombe, [Journal of Chemical Physics, 129 064114 (2008)](http://dx.doi.org/10.1063/1.2965535)
--   **Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication**, Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [arXiv:0808.1108](http://arxiv.org/abs/0808.1108)
+-   "Molecular orbital free algorithm for excited states in time-dependent perturbation theory", M. Lucero, A. M. N. Niklasson, S. Tretiak and M. Challacombe, [*Journal of Chemical Physics* **129** 064114 (2008)](http://dx.doi.org/10.1063/1.2965535)
+-   "Cache oblivious storage and access heuristics for blocked matrix-matrix multiplication", Nicolas Bock, Emanuel H. Rubensson, Paweł Sałek, Anders M. N. Niklasson, Matt Challacombe, [*arXiv*:**0808.1108**](http://arxiv.org/abs/0808.1108)
 
 2007
 ----
 
--   **Time-reversible ab initio molecular dynamics**, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 126 144103 (2007)](http://dx.doi.org/10.1063/1.2715556)
--   **He conductivity in cool white dwarf atmospheres**, S. Mazevet, Matt Challacombe, D. Saumon and P.M. Kowalski [High Energy Density Laboratory Astrophysics, 273-277, Springer Netherlands](http://dx.doi.org/10.1007/978-1-4020-6055-7_50)
+-   "Time-reversible ab initio molecular dynamics", A. M. N. Niklasson, C. J. Tymczak and Matt Challacombe, [*Journal of Chemical Physics* **126** 144103 (2007)](http://dx.doi.org/10.1063/1.2715556)
+-   "He conductivity in cool white dwarf atmospheres", S. Mazevet, Matt Challacombe, D. Saumon and P. M. Kowalski [*High Energy Density Laboratory Astrophysics* 273-277, Springer Netherlands](http://dx.doi.org/10.1007/978-1-4020-6055-7_50)
 
 2006
 ----
 
--   **Time-reversible Born-Oppenheimer molecular dynamics**, A. Niklasson, C.J. Tymczak and Matt Challacombe, [Physical Review Letters, 97 123001 (2006)](http://dx.doi.org/10.1103/PhysRevLett.97.123001)
--   **Parallel algorithm for the computation of the Hartree-Fock exchange matrix: gas phase and periodic parallel ONX**, V. Weber, Matt Challacombe, [Journal of Chemical Physics, 125 104110 (2006)](http://dx.doi.org/10.1063/1.2222359)
--   **Energy gradients with respect to atomic positions and cell parameters for the Kohn-Sham density-functional theory at the Γ-point**, V. Weber, C.J. Tymczak and Matt Challacombe, [Journal of Chemical Physics, 124 224107 (2006)](http://dx.doi.org/10.1063/1.2202105)
--   **Exchange energy gradients with respect to atomic positions and cell parameters within the Hartree-Fock Γ-point approximation**, V. Weber, C. Daul and Matt Challacombe, [Journal of Chemical Physics, 124 214105 (2006)](http://dx.doi.org/10.1063/1.2207625)
+-   "Time-reversible Born-Oppenheimer molecular dynamics", A. M. N. Niklasson, C. J. Tymczak and Matt Challacombe, [*Physical Review Letters* **97** 123001 (2006)](http://dx.doi.org/10.1103/PhysRevLett.97.123001)
+-   "Parallel algorithm for the computation of the Hartree-Fock exchange matrix: gas phase and periodic parallel ONX", V. Weber, Matt Challacombe, [*Journal of Chemical Physics* **125** 104110 (2006)](http://dx.doi.org/10.1063/1.2222359)
+-   "Energy gradients with respect to atomic positions and cell parameters for the Kohn-Sham density-functional theory at the Γ-point", V. Weber, C. J. Tymczak and Matt Challacombe, [*Journal of Chemical Physics* **124** 224107 (2006)](http://dx.doi.org/10.1063/1.2202105)
+-   "Exchange energy gradients with respect to atomic positions and cell parameters within the Hartree-Fock Γ-point approximation", V. Weber, C. Daul and Matt Challacombe, [*Journal of Chemical Physics* **124** 214105 (2006)](http://dx.doi.org/10.1063/1.2207625)
 
 2005
 ----
