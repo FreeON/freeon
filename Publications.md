@@ -90,8 +90,8 @@ title: Publications
 ----
 
 -   Periodic boundary conditions and the fast multipole method Matt Challacombe, C. White and M. Head-Gordon, Journal of Chemical Physics, 107 10131 (1997)
--   Linear scaling computation of the Fock matrix. II. Rigorous bounds on exchange integrals and incremental Fock build E. Schwegler, Matt Challacombe and M. Head-Gordon, Journal of Chemical Physics, 106 9708 (1997)
--   Linear scaling computation of the Fock matrix Matt Challacombe and E. Schwegler, Journal of Chemical Physics, 106 5526 (1997)
+-   "Linear scaling computation of the Fock matrix. II. Rigorous bounds on exchange integrals and incremental Fock build", E. Schwegler, Matt Challacombe and M. Head-Gordon, [*Journal of Chemical Physics* **106** 9708 (1997)](http://dx.doi.org/10.1063/1.473833)
+-   "Linear scaling computation of the Fock matrix", Matt Challacombe and E. Schwegler, [*Journal of Chemical Physics* **106** 5526 (1997)](http://dx.doi.org/10.1063/1.473575)
 
 1996
 ----
