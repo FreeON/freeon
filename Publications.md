@@ -60,7 +60,7 @@ title: Publications
 -   Ab initio linear scaling response theory: Electric polarizability by perturbed projection V. Weber, A. Niklasson and Matt Challacombe, Physical Review Letters, 92 193002 (2004)
 -   Density matrix perturbation theory A. Niklasson and Matt Challacombe, Physical Review Letters, 92 193001 (2004)
 -   All-electron density-functional studies of hydrostatic compression of pentaerythritol tetranitrate C(CH2ONO2)4 C.K. Gan, T. Sewell and Matt Challacombe, Physical Review B, 69 35116 (2004)
--   Linear scaling computation of Fock matrix. VII. Parallel computation of the Coulomb matrix , C. K. Gan, C. J. Tymczak, and Matt Challacombe, Journal of Chemical Physics, 121 (2004) 6608
+-   "Linear scaling computation of Fock matrix. VII. Parallel computation of the Coulomb matrix", C. K. Gan, C. J. Tymczak, and Matt Challacombe, [*Journal of Chemical Physics* **121** 6608 (2004)](http://dx.doi.org/10.1063/1.1790891)
 
 2003
 ----
