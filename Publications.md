@@ -79,7 +79,7 @@ title: Publications
 ----
 
 -   "Linear scaling computation of the Fock matrix. IV. Multipole accelerated formation of the exchange matrix", E. Schwegler and Matt Challacombe, [*Journal of Chemical Physics* **111** 6223 (1999)](http://dx.doi.org/10.1063/1.479926)
--   A simplified density matrix minimization for linear scaling self-consistent field theory Matt Challacombe, Journal of Chemical Physics, 110 2332 (1999)
+-   "A simplified density matrix minimization for linear scaling self-consistent field theory", Matt Challacombe, [*Journal of Chemical Physics* **110** 2332 (1999)](http://dx.doi.org/10.1063/1.477969)
 
 1998
 ----
