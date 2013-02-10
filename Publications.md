@@ -84,7 +84,7 @@ title: Publications
 1998
 ----
 
--   A multipole acceptability criterion for electronic structure theory E. Schwegler, Matt Challacombe and M. Head-Gordon, Journal of Chemical Physics, 109 8764 (1998)
+-   "A multipole acceptability criterion for electronic structure theory", E. Schwegler, Matt Challacombe and M. Head-Gordon, [*Journal of Chemical Physics* **109** 8764 (1998)](http://dx.doi.org/10.1063/1.477546)
 
 1997
 ----
