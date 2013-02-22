@@ -8,7 +8,7 @@ Getting Started
 
 FreeON is hosted by the [Free Software Foundation](http://www.fsf.org/) at [<http://savannah.nongnu.org/projects/freeon>](http://savannah.nongnu.org/projects/freeon) and by **[github](http://github.com) at [<http://github.com/FreeON/freeon>](http://github.com/FreeON/freeon)**.
 
-Note that due to a technical issue the savannah repository only contains the commit history back to 2008, while the github repository contains the complete commit history back to 2000. Until savannah fixes this problem **we will not update the savannah repository**, please use the github repository instead.
+Due to a technical issue outside our control the savannah repository only contains the commit history back to 2008, while the github repository contains the complete commit history back to 2000. Until savannah fixes this problem **we will not update the savannah repository**, please use the github repository instead.
 
 ### Some more information on how to use git
 
