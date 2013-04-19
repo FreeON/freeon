@@ -703,13 +703,44 @@ end program test
 AC_SUBST(NOOPT, [${NOOPT}])
 AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 
-AC_ARG_WITH([hdf5],
-  [AS_HELP_STRING([--with-hdf5=DIR],
-  [Specify non-standard directory for the hdf5 libraries.])],
-  [LDFLAGS="${LDFLAGS} -L${withval}/lib"
-  CPPFLAGS="${CPPFLAGS} -I${withval}/include"
-  AC_MSG_NOTICE([using ${withval}/lib and ${withval}/include])],
-  [])
+AC_ARG_VAR([H5CC], [h5cc compiler wrapper command])
+
+if test -z "${H5CC}"; then
+  H5CC=h5cc
+fi
+
+AC_MSG_CHECKING([for hdf5 version])
+HDF5_VERSION=$(eval $H5CC -showconfig | grep 'HDF5 Version:' | $AWK '{print $[]3}')
+AC_MSG_RESULT([${HDF5_VERSION}])
+AC_DEFINE_UNQUOTED(HDF5_VERSION, [${HDF5_VERSION}], [The hdf5 library version.])
+
+case "${HDF5_VERSION}" in
+  1.8.*) ;;
+  *) AC_MSG_FAILURE([unsupported hdf5 library version: ${HDF5_VERSION}])
+esac
+
+# Set language to C.
+AC_LANG(C)
+
+# Check for math library (ceil).
+AC_SEARCH_LIBS([ceil], [m],
+             [],
+             [AC_MSG_NOTICE([The external hdf5 library might require ceil()])])
+
+# Check for the pthread library.
+AC_CHECK_HEADERS(pthread.h)
+AC_SEARCH_LIBS([pthread_create], [pthread],
+             [],
+             [AC_MSG_NOTICE([The external hdf5 library might require the pthread library.])])
+
+# Check for HDF5 libraries.
+AC_CHECK_HEADER([hdf5.h],
+                [],
+                [AC_MSG_FAILURE([I need the hdf5.h header file])])
+AC_SEARCH_LIBS([H5get_libversion], [hdf5],
+               [],
+               [AC_MSG_FAILURE([I need the hdf5 library])])
+
 
 # Set language to C.
 AC_LANG(C)

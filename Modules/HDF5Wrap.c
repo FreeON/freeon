@@ -1,3 +1,6 @@
+/** @file
+ */
+
 /*
      This code is part of the MondoSCF suite of programs for linear scaling
      electronic structure theory and ab initio molecular dynamics.
@@ -23,10 +26,14 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
+
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*    F90 interface to the C HDF5 API                                        */
 /*    Author: Matt Challacombe and CK Gan                                    */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+
+#include <execinfo.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -43,16 +50,87 @@
 #include <sys/types.h>
 #include <regex.h>
 
-/*
-  THESE TURN ON VARIOUS LEVELS OF DEBUG
-  #define debug_interface
-  #define debug_all
-*/
+/* THESE TURN ON VARIOUS LEVELS OF DEBUG */
+//#define debug_interface
+//#define debug_all
 
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-char* IntToChar(int* NC, int* IntArray)
+#define HDF5ERROR(...) hdf5error(__FILE__, __LINE__, __VA_ARGS__)
+
+typedef struct op_data_t
+{
+  hid_t hdfID;
+  regex_t pattern;
+}
+op_data_t;
+
+/** Print an error message and exit.
+ *
+ * @param filename The filename the error occurred.
+ * @param line The linenumber the error occurred.
+ * @param format The format of the error message, see the man-page for
+ * printf() for details.
+ */
+void
+hdf5error (const char *const filename, const int line, ...)
+{
+  va_list va;
+  int format_length;
+
+  void *array[50];
+  size_t size;
+  char **strings;
+  size_t i;
+
+  char *old_format;
+  char *new_format;
+
+  /* Initialize variadic argument list. */
+  va_start(va, line);
+
+  /* Get format string. */
+  old_format = va_arg(va, char*);
+
+  format_length = 6+strlen(filename)+14+strlen(old_format);
+  new_format = calloc(format_length, sizeof(char));
+  snprintf(new_format, format_length, "[%s:%i] ", filename, line);
+  strncat(new_format, old_format, format_length);
+
+  /* Print error. */
+  vprintf(new_format, va);
+  va_end(va);
+
+  /* Cleanup. */
+  free(new_format);
+
+  /* Print backtrace. */
+  printf("\n");
+
+  size = backtrace(array, 50);
+  strings = backtrace_symbols(array, size);
+
+  printf("Obtained %zd stack frames.\n", size-2);
+
+  /* Omit the first 2 frames since we know those are the error handlers. */
+  for(i = 2; i < size; i++)
+  {
+    printf("%s\n", strings[i]);
+  }
+
+  free(strings);
+
+  /* Exit with signal so debuggers can produce a backtrace. */
+  abort();
+}
+
+/** Convert an integer array into a string. Necessary for Fortran/C interface.
+ *
+ * @param NC The number of characters.
+ * @param IntArray The integer array.
+ *
+ * @return A C-String. The string has to be free'ed by the caller.
+ */
+char *
+IntToChar (int* NC, int* IntArray)
 {
   int   j;
   char* VarName;
@@ -62,187 +140,217 @@ char* IntToChar(int* NC, int* IntArray)
   VarName[*NC] = '\0';
   return VarName;
 }
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5createfile_(int* NC, int* IChr)
+
+/* Wrapper for H5Fcreate().
+ *
+ * @param NC The number of characters in the filename string.
+ * @param IChar The filename string.
+ *
+ * @return The file descriptor of the created file.
+ */
+int
+F77_FUNC (hdf5createfile, HDF5CREATEFILE) (int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
-  int FileID;
 
   filename = IntToChar(NC, IChr);
 #ifdef debug_interface
   printf("IN CREATE_HDF5_FILE: Creating %s \n",filename);
 #endif
-  fid=H5Fcreate(filename,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  {
+    HDF5ERROR("failed to create hdf5 file\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN CREATE_HDF5_FILE: FileID = %d \n",fid);
 #endif
 #endif
-  FileID=fid;
   free(filename);
-  return FileID;
+  return fid;
 }
-int hdf5createfile(int* NC, int* IChr){return hdf5createfile_(NC,IChr);}
-int hdf5createfile__(int* NC, int* IChr){return hdf5createfile_(NC,IChr);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5openfile_(int* NC, int* IChr)
+
+/** Wrapper for H5FOpen().
+ *
+ * @param NC The number of characters in the filename string.
+ * @param IChar The filename string.
+ *
+ * @return The file descriptor of the created file.
+ */
+int
+F77_FUNC (hdf5openfile, HDF5OPENFILE) (int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
-  int   FileID;
 
   filename = IntToChar(NC,IChr);
 #ifdef debug_interface
   printf("IN OPEN_HDF5_FILE: Opening <%s> \n", filename);
 #endif
   H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-  fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
+  if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+  {
+    HDF5ERROR("failed to open hdf5 file\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN OPEN_HDF5_FILE: FileID = %d \n",fid);
 #endif
 #endif
-  FileID=fid;
   free(filename);
-  return FileID;
+  return fid;
 }
-int hdf5openfile(int* NC, int* IChr){return hdf5openfile_(NC,IChr);}
-int hdf5openfile__(int* NC, int* IChr){return hdf5openfile_(NC,IChr);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5closefile_(int* FileID)
+
+/** Wrapper for H5Fclose().
+ *
+ * @param NC The number of characters in the filename string.
+ * @param IChar The filename string.
+ *
+ * @return Returns a positive number on success, and a negative one on
+ * failure.
+ */
+int
+F77_FUNC (hdf5closefile, HDF5CLOSEFILE) (int* FileID)
 {
-  herr_t stat;
+  herr_t result;
   hid_t fid;
-  int   STATUS;
 
   fid=*FileID;
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_FILE: Flushing FileID= %d \n",FileID);
+  printf("IN CLOSE_HDF5_FILE: Flushing FileID= %d \n",*FileID);
 #endif
 #endif
-  stat=H5Fflush(fid,H5F_SCOPE_GLOBAL);
+  if ((result = H5Fflush(fid,H5F_SCOPE_GLOBAL)) < 0)
+  {
+    HDF5ERROR("error flushing hdf5 file\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_FILE: Closing  FileID= %d \n",FileID);
+  printf("IN CLOSE_HDF5_FILE: Closing  FileID= %d \n",*FileID);
 #endif
 #endif
-  stat=H5Fclose(fid);
-  if(stat==-1){STATUS=stat; return STATUS;}
-  /*printf("HDF5CloseFile: Could not close FileID= %d \n",*FileID);}*/
-  stat=H5close();
+  if((result = H5Fclose(fid)) < 0)
+  {
+    return result;
+  }
+  result = H5close();
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_FILE: STATUS = %d \n",stat);
+  printf("IN CLOSE_HDF5_FILE: STATUS = %d \n", result);
 #endif
 #endif
-  STATUS=stat;
-  return STATUS;
+  return result;
 }
-int hdf5closefile(int* FileID){return hdf5closefile_(FileID);}
-int hdf5closefile__(int* FileID){return hdf5closefile_(FileID);}
-/*=================================================================================*/
 
-
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5creategroup_(int* FileID, int* NC, int* IChr)
+/** Wrapper for H5Gcreate().
+ *
+ * @param NC The number of characters in the filename string.
+ * @param IChar The filename string.
+ *
+ * @return The group id.
+ */
+int
+F77_FUNC (hdf5creategroup, HDF5CREATEGROUP) (int* FileID, int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
   hid_t gid;
-  int GroupID;
 
   filename = IntToChar(NC,IChr);
 #ifdef debug_interface
   printf("IN CREATE_HDF5_GROUP: Creating %s \n",filename);
 #endif
   fid=*FileID;
-  gid=H5Gcreate1(fid,filename,0);
+  if((gid = H5Gcreate(fid, filename, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  {
+    HDF5ERROR("error created group\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN CREATE_HDF5_GROUP: FileID = %d, GroupID= %d \n",fid,gid);
 #endif
 #endif
-  GroupID=gid;
   free(filename);
-  return GroupID;
+  return gid;
 }
-int hdf5creategroup(int* FileID, int* NC, int* IChr){return hdf5creategroup_(FileID,NC,IChr);}
-int hdf5creategroup__(int* FileID, int* NC, int* IChr){return hdf5creategroup_(FileID,NC,IChr);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5opengroup_(int* FileID, int* NC, int* IChr)
+
+/** Wrapper for H5Gopen().
+ *
+ * @param NC The number of characters in the filename string.
+ * @param IChar The filename string.
+ *
+ * @return The group id.
+ */
+int
+F77_FUNC (hdf5opengroup, HDF5OPENGROUP) (int* FileID, int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
   hid_t gid;
-  int   GroupID;
 
   filename = IntToChar(NC,IChr);
 #ifdef debug_interface
   printf("IN OPEN_HDF5_GROUP: Opening <%s> \n",filename);
 #endif
   fid=*FileID;
-  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-  gid=H5Gopen1(fid,filename);
+  if(H5Eset_auto(H5E_DEFAULT, NULL, NULL) < 0)
+  {
+    HDF5ERROR("failed to turn off error printing\n");
+  }
+  if((gid = H5Gopen(fid, filename, H5P_DEFAULT)) < 0)
+  {
+    HDF5ERROR("error opening group\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN OPEN_HDF5_GROUP: FileID = %d, GroupID = %d \n",fid,gid);
 #endif
 #endif
-  GroupID=gid;
   free(filename);
-  return GroupID;
+  return gid;
 }
-int hdf5opengroup(int* FileID, int* NC, int* IChr){return hdf5opengroup_(FileID,NC,IChr);}
-int hdf5opengroup__(int* FileID, int* NC, int* IChr){return hdf5opengroup_(FileID,NC,IChr);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5closegroup_(int* GroupID)
+
+/** Wrapper for H5Gclose().
+ *
+ * @param GroupID The group ID.
+ *
+ * @return The return status of the close operation.
+ */
+int
+F77_FUNC (hdf5closegroup, HDF5CLOSEGROUP) (int* GroupID)
 {
-  herr_t stat;
-  int   STATUS;
+  herr_t result;
   hid_t gid;
+
   gid=*GroupID;
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_GROUP: Flushing GroupID= %d \n",GroupID);
+  printf("IN CLOSE_HDF5_GROUP: Flushing GroupID= %d \n",*GroupID);
 #endif
 #endif
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_GROUP: Closing  GroupID= %d \n",GroupID);
+  printf("IN CLOSE_HDF5_GROUP: Closing  GroupID= %d \n",*GroupID);
 #endif
 #endif
-  stat=H5Gclose(gid);
+  result = H5Gclose(gid);
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN CLOSE_HDF5_GROUP: STATUS = %d \n",stat);
+  printf("IN CLOSE_HDF5_GROUP: STATUS = %d \n", result);
 #endif
 #endif
-  STATUS=stat;
-  return STATUS;
+  return result;
 }
-int hdf5closegroup(int* GroupID){return hdf5closegroup_(GroupID);}
-int hdf5closegroup__(int* GroupID){return hdf5closegroup_(GroupID);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-void hdf5opendata_(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
+
+/** Wrapper for H5Dopen().
+ */
+void
+F77_FUNC (hdf5opendata, HDF5OPENDATA) (int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 {
   char* filename;
-  hid_t fid,did,dspc;
+  hid_t fid, did, dspc;
 
   fid=*FileID;
   filename = IntToChar(NC,IChr);
@@ -250,10 +358,22 @@ void hdf5opendata_(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 #ifdef debug_all
   printf("OPEN_HDF5_DATA:  FileID = %d \n",fid);
 #endif
-  printf("OPEN_HDF5_DATA:  VarName= <%s> \n",filename);
+  printf("OPEN_HDF5_DATA:  VarName = <%s> \n",filename);
 #endif
-  did=H5Dopen1(fid,filename);
-  dspc=H5Dget_space(did);
+  if((did = H5Dopen(fid, filename, H5P_DEFAULT)) < 0)
+  {
+    /* We will ignore this error. In InOut.F90 in the Put interface we will
+     * always go through the open -> write -> close pattern, where the open
+     * will sometimes fail since we haven't actually created the data yet. The
+     * write however, will create the entry in the hdf5 file so that
+     * subsequent reads will succeed. */
+
+    //HDF5ERROR("error opening dataset\n");
+  }
+  if((dspc = H5Dget_space(did)) < 0)
+  {
+    //HDF5ERROR("error getting space\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
   printf("OPEN_HDF5_DATA:  DataId = %d \n",did);
@@ -264,16 +384,13 @@ void hdf5opendata_(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
   *DataId=did;
   *DataSpc=dspc;
 }
-void hdf5opendata(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
-{hdf5opendata_(FileID,NC,IChr,DataId,DataSpc);}
-void hdf5opendata__(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
-{hdf5opendata_(FileID,NC,IChr,DataId,DataSpc);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-void hdf5extenddata_(int* DataId, int* DataSpc, int* N)
+
+/** Wrapper for H5Dextend().
+ */
+void
+F77_FUNC (hdf5extenddata, HDF5EXTENDDATA) (int* DataId, int* DataSpc, int* N)
 {
-  hid_t did,dspc;
+  hid_t did, dspc;
   hsize_t siz[1];
 
   siz[0]=*N;
@@ -281,47 +398,55 @@ void hdf5extenddata_(int* DataId, int* DataSpc, int* N)
   dspc=*DataSpc;
 #ifdef debug_interface
   printf("EXTEND_HDF5_DATA:  DataId = %d \n",did);
-  printf("EXTEND_HDF5_DATA:  NewSiz = %d \n",siz[0]);
+  printf("EXTEND_HDF5_DATA:  NewSiz = %lld \n",siz[0]);
 #endif
-  H5Dextend(did,siz);
-  H5Sclose(dspc);
-  dspc=H5Dget_space(did);
-  *DataSpc=dspc;
+  if(H5Dset_extent(did, siz) < 0)
+  {
+    HDF5ERROR("error setting data extent\n");
+  }
+  if(H5Sclose(dspc) < 0)
+  {
+    HDF5ERROR("error closing data set\n");
+  }
 #ifdef debug_interface
   printf("EXTEND_HDF5_DATA:  Old DataSpc = %d \n",dspc);
+#endif
+  if((dspc = H5Dget_space(did)) < 0)
+  {
+    HDF5ERROR("error getting space\n");
+  }
+  *DataSpc=dspc;
+#ifdef debug_interface
   printf("EXTEND_HDF5_DATA:  New DataSpc = %d \n",dspc);
 #endif
 }
-void hdf5extenddata(int* DataId, int* DataSpc, int* N)
-{hdf5extenddata_(DataId,DataSpc,N);}
-void hdf5extenddata__(int* DataId, int* DataSpc, int* N)
-{hdf5extenddata_(DataId,DataSpc,N);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-void hdf5selectdata_(int* DataId, int* DataSpc, int* NewSize)
+
+/** Wrapper for H5Sselect().
+ */
+void
+F77_FUNC (hdf5selectdata, HDF5SELECTDATA) (int* DataId, int* DataSpc, int* NewSize)
 {
-  hid_t did,dspc;
-  hsize_t      cnt[1];
-  hsize_t      off[1];
-  did=*DataId;
+  hid_t dspc;
+  hsize_t cnt[1];
+  hsize_t off[1];
+
   dspc=*DataSpc;
   off[0]=0;
   cnt[0]=*NewSize;
-  H5Sselect_hyperslab(dspc,H5S_SELECT_SET,off,NULL,cnt,NULL);
+  if(H5Sselect_hyperslab(dspc, H5S_SELECT_SET, off, NULL, cnt, NULL) < 0)
+  {
+    HDF5ERROR("error selecting hyperslab\n");
+  }
 }
-void hdf5selectdata(int* DataId, int* DataSpc, int* NewSize)
-{hdf5selectdata_(DataId,DataSpc,NewSize);}
-void hdf5selectdata__(int* DataId, int* DataSpc, int* NewSize)
-{hdf5selectdata_(DataId,DataSpc,NewSize);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5closedata_(int* DataId,int* DataSpc)
+
+/** Wrapper for H5Dclose().
+ */
+int
+F77_FUNC (hdf5closedata, HDF5CLOSEDATA) (int* DataId,int* DataSpc)
 {
-  hid_t did,dspc;
-  herr_t stat1,stat2;
-  int   STATUS;
+  hid_t did, dspc;
+  herr_t result;
+
   did=*DataId;
   dspc=*DataSpc;
 #ifdef debug_interface
@@ -330,21 +455,22 @@ int hdf5closedata_(int* DataId,int* DataSpc)
   printf("CLOSE_HDF5_DATA:  DataSpc= %d \n",dspc);
 #endif
 #endif
-  stat1=H5Dclose(did);
-  stat2=H5Sclose(dspc);
-  STATUS=stat1||stat2;
-  return STATUS;
+  if((result = H5Dclose(did)) < 0)
+  {
+    return result;
+  }
+  result = H5Sclose(dspc);
+  return result;
 }
-int hdf5closedata(int* DataId,int* DataSpc){return hdf5closedata_(DataId,DataSpc);}
-int hdf5closedata__(int* DataId,int* DataSpc){return hdf5closedata_(DataId,DataSpc);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
+
+/** Wrapper for H5Pcreate().
+ */
+void
+F77_FUNC (hdf5createdata, HDF5CREATEDATA) (int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
 {
   char* filename;
   hsize_t dms[1],mxdms[1],chnk[1];
-  hid_t fid,did,dtyp,dspc,dprp,stat;
+  hid_t fid,did,dtyp,dspc,dprp,result;
 
   filename = IntToChar(NC,IChr);
   fid=*FileID;
@@ -352,34 +478,56 @@ void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit,
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN CREATE_HDF5_DATA: FileID = %d \n",fid);
-  printf("IN CREATE_HDF5_DATA: N      = %d \n",dms[0]);
+  printf("IN CREATE_HDF5_DATA: N      = %lld \n",dms[0]);
 #endif
 #endif
-  if(*Type==24){dtyp=H5T_NATIVE_INT;}
-  else if(*Type==6){dtyp=H5T_NATIVE_DOUBLE;}
-  else{printf("Waring, unknown type = %d in HDF5DataId!",*Type); *DataId=-1; return;}
-  dprp=H5Pcreate(H5P_DATASET_CREATE);
-  if(*ULimit==1)
-    {
-      mxdms[0]=H5S_UNLIMITED;
-      dspc=H5Screate_simple(1,dms,mxdms);
-      chnk[0]=8192; /* 2048; */ /* 512; */
-      stat=H5Pset_chunk(dprp,1,chnk);
-#ifdef debug_interface
-      printf("IN CREATE_HDF5_DATA: UNLIMITED DIMENSION = %d\n",dms[0]);
-      printf("IN CREATE_HDF5_DATA: CHUNKING SIZE       = %d\n",chnk[0]);
-#endif
-      if(stat==-1){*DataId=-1; return;}
-    }
+  if(*Type == 24) dtyp = H5T_NATIVE_INT;
+  else if(*Type == 6) dtyp = H5T_NATIVE_DOUBLE;
   else
-    {dspc=H5Screate_simple(1,dms,NULL);
+  {
+    printf("Warning, unknown type = %d in HDF5DataId!",*Type);
+    *DataId=-1;
+    return;
+  }
+  if((dprp = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+  {
+    HDF5ERROR("error creating property list\n");
+  }
+  if(*ULimit==1)
+  {
+    mxdms[0]=H5S_UNLIMITED;
+    if((dspc = H5Screate_simple(1, dms, mxdms)) < 0)
+    {
+      HDF5ERROR("error creating simple dataspace\n");
+    }
+    chnk[0]=8192; /* 2048; */ /* 512; */
+    result = H5Pset_chunk(dprp, 1, chnk);
+#ifdef debug_interface
+    printf("IN CREATE_HDF5_DATA: UNLIMITED DIMENSION = %lld\n",dms[0]);
+    printf("IN CREATE_HDF5_DATA: CHUNKING SIZE       = %lld\n",chnk[0]);
+#endif
+    if(result < 0)
+    {
+      *DataId=-1;
+      return;
+    }
+  }
+  else
+  {
+    if((dspc = H5Screate_simple(1, dms, NULL)) < 0)
+    {
+      HDF5ERROR("error creating simple dataspace\n");
+    }
 #ifdef debug_interface
 #ifdef debug_all
-    printf("IN CREATE_HDF5_DATA: DIMENSIONS LIMITED TO %d\n",dms[0]);
+    printf("IN CREATE_HDF5_DATA: DIMENSIONS LIMITED TO %lld\n",dms[0]);
 #endif
 #endif
-    }
-  did=H5Dcreate1(fid,filename,dtyp,dspc,dprp);
+  }
+  if((did = H5Dcreate(fid, filename, dtyp, dspc, H5P_DEFAULT, dprp, H5P_DEFAULT)) < 0)
+  {
+    HDF5ERROR("error creating new dataset\n");
+  }
 #ifdef debug_interface
   printf("IN CREATE_HDF5_DATA: VarName =<%s> \n",filename);
   printf("IN CREATE_HDF5_DATA: DataId  = %d \n",did);
@@ -393,130 +541,110 @@ void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit,
   *DataSpc=dspc;
   free(filename);
 }
-void hdf5createdata(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
-{hdf5createdata_(FileID,Type,N,NC,IChr,ULimit,DataId,DataSpc);}
-void hdf5createdata__(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
-{hdf5createdata_(FileID,Type,N,NC,IChr,ULimit,DataId,DataSpc);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5sizeofdata_(int* DataSpc)
+
+/** Wrapper for H5Sget_simple_extent_npoints().
+ */
+int
+F77_FUNC (hdf5sizeofdata, HDF5SIZEOFDATA) (int* DataSpc)
 {
   hid_t dspc;
   hsize_t dsiz;
-  int DataSize;
+
   dspc=*DataSpc;
 #ifdef debug_interface
 #ifdef debug_all
   printf("IN SIZE_OF_DATA: DataSpc = %d \n",*DataSpc);
 #endif
 #endif
-  dsiz=H5Sget_simple_extent_npoints(dspc);
+  if((dsiz = H5Sget_simple_extent_npoints(dspc)) < 0)
+  {
+    HDF5ERROR("error getting simple extent\n");
+  }
 #ifdef debug_interface
 #ifdef debug_all
-  printf("IN SIZE_OF_DATA: DataSiz = %d \n",dsiz);
+  printf("IN SIZE_OF_DATA: DataSiz = %lld \n",dsiz);
 #endif
 #endif
-  DataSize=dsiz;
-  return DataSize;
+  return dsiz;
 }
-int hdf5sizeofdata(int* DataSpc)
-{return hdf5sizeofdata_(DataSpc);}
-int hdf5sizeofdata__(int* DataSpc)
-{return hdf5sizeofdata_(DataSpc);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5writeintegervector_(int* DataId, int* DataSpc, int* Data)
-{
-  hid_t did,dspc;
-  herr_t stat;
-  int STATUS;
-  did=*DataId;
-  dspc=*DataSpc;
-  stat=H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,dspc,H5P_DEFAULT,Data);
-  STATUS=stat;
-  return STATUS;
-}
-int hdf5writeintegervector(int* DataId, int* DataSpc, int* Data)
-{return hdf5writeintegervector_(DataId,DataSpc,Data);}
-int hdf5writeintegervector__(int* DataId, int* DataSpc, int* Data)
-{return hdf5writeintegervector_(DataId,DataSpc,Data);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5writedoublevector_(int* DataId, int* DataSpc, double* Data)
-{
-  hid_t did,dspc;
-  herr_t stat;
-  int STATUS;
-  did=*DataId;
-  dspc=*DataSpc;
-  stat=H5Dwrite(did,H5T_NATIVE_DOUBLE,H5S_ALL,dspc,H5P_DEFAULT,Data);
-  STATUS=stat;
-  return STATUS;
-}
-int hdf5writedoublevector(int* DataId, int* DataSpc, double* Data)
-{return hdf5writedoublevector_(DataId,DataSpc,Data);}
-int hdf5writedoublevector__(int* DataId, int* DataSpc, double* Data)
-{return hdf5writedoublevector_(DataId,DataSpc,Data);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5readintegervector_(int* DataId, int* DataSpc, int* Data)
-{
-  hid_t did,dspc;
-  herr_t stat;
-  int STATUS;
-  did=*DataId;
-  dspc=*DataSpc;
-  stat=H5Dread(did,H5T_NATIVE_INT,H5S_ALL,dspc,H5P_DEFAULT,Data);
-  STATUS=stat;
-  return STATUS;
-}
-int hdf5readintegervector(int* DataId, int* DataSpc, int* Data)
-{return hdf5readintegervector_(DataId,DataSpc,Data);}
-int hdf5readintegervector__(int* DataId, int* DataSpc, int* Data)
-{return hdf5readintegervector_(DataId,DataSpc,Data);}
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-/*                                                                           */
-/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-int hdf5readdoublevector_(int* DataId, int* DataSpc, double* Data)
-{
-  hid_t did,dspc;
-  herr_t stat;
-  int   STATUS;
-  did=*DataId;
-  dspc=*DataSpc;
-  stat=H5Dread(did,H5T_NATIVE_DOUBLE,H5S_ALL,dspc,H5P_DEFAULT,Data);
-  STATUS=stat;
-  return STATUS;
-}
-int hdf5readdoublevector(int* DataId, int* DataSpc, double* Data)
-{return hdf5readdoublevector_(DataId,DataSpc,Data);}
-int hdf5readdoublevector__(int* DataId, int* DataSpc, double* Data)
-{return hdf5readdoublevector_(DataId,DataSpc,Data);}
 
-/* Get the library version. */
+/** Wrapper for H5Dwrite().
+ */
 int
-hdf5version (unsigned *majnum, unsigned *minnum, unsigned *relnum)
+F77_FUNC (hdf5writeintegervector, HDF5WRITEINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
+{
+  hid_t did,dspc;
+  herr_t result;
+
+  did=*DataId;
+  dspc=*DataSpc;
+  if((result = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, dspc, H5P_DEFAULT,Data)) < 0)
+  {
+    HDF5ERROR("error writing data\n");
+  }
+  return result;
+}
+
+/** Wrapper for H5Dwrite().
+ */
+int
+F77_FUNC (hdf5writedoublevector, HDF5WRITEDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
+{
+  hid_t did,dspc;
+  herr_t result;
+
+  did=*DataId;
+  dspc=*DataSpc;
+  if((result = H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, dspc, H5P_DEFAULT, Data)) < 0)
+  {
+    HDF5ERROR("error writing data\n");
+  }
+  return result;
+}
+
+/** Wrapper for H5Dread().
+ */
+int
+F77_FUNC (hdf5readintegervector, HDF5READINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
+{
+  hid_t did,dspc;
+  herr_t result;
+
+  did=*DataId;
+  dspc=*DataSpc;
+  if((result = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, dspc, H5P_DEFAULT, Data)) < 0)
+  {
+    HDF5ERROR("error reading data\n");
+  }
+  return result;
+}
+
+/** Wrapper for H5Dread().
+ */
+int
+F77_FUNC (hdf5readdoublevector, HDF5READDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
+{
+  hid_t did,dspc;
+  herr_t result;
+
+  did=*DataId;
+  dspc=*DataSpc;
+  if((result = H5Dread(did, H5T_NATIVE_DOUBLE, H5S_ALL, dspc, H5P_DEFAULT, Data)) < 0)
+  {
+    HDF5ERROR("error reading data\n");
+  }
+  return result;
+}
+
+/** Get the library version. */
+int
+F77_FUNC (hdf5version, HDF5VERSION) (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return H5get_libversion(majnum, minnum, relnum);
 }
-int
-hdf5version_ (unsigned *majnum, unsigned *minnum, unsigned *relnum)
-{
-  return hdf5version(majnum, minnum, relnum);
-}
 
-typedef struct op_data_t
-{
-  hid_t hdfID;
-  regex_t pattern;
-}
-op_data_t;
-
-/* Deletes object from group given a name. The name can contain wildcards. */
+/** Delete object from group given a name. The name can contain wildcards.
+ */
 herr_t
 hdf5delete_op (hid_t groupID, const char *name, const H5L_info_t *info, void *op_data_arg)
 {
@@ -560,8 +688,10 @@ hdf5delete_op (hid_t groupID, const char *name, const H5L_info_t *info, void *op
   return -1;
 }
 
+/** Wrapper for H5LDelete().
+ */
 int
-hdf5delete (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
+F77_FUNC (hdf5delete, HDF5DELETE) (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
 {
   char *groupName = IntToChar(groupNameN, groupNameC);
   char *objectName = IntToChar(objectNameN, objectNameC);
@@ -584,9 +714,6 @@ hdf5delete (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* ob
     exit(1);
   }
 
-  /* More debugging. */
-  //fprintf(stderr, "[hdf5delete] pattern.allocated = %u\n", op_data.pattern.allocated);
-
   /* Start to search. */
   while ((result = H5Literate_by_name(*hdfID, groupName, H5_INDEX_NAME,
           H5_ITER_NATIVE, &index, hdf5delete_op, (void*) &op_data, H5P_DEFAULT)) >= 0)
@@ -600,10 +727,4 @@ hdf5delete (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* ob
 
   /* Return. */
   return 0;
-}
-
-int
-hdf5delete_ (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
-{
-  return hdf5delete(id, groupNameN, groupNameC, objectNameN, objectNameC);
 }
