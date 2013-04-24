@@ -29,6 +29,8 @@
  * Author: Nicolas Bock
  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -43,7 +45,7 @@
  * kBytes.
  */
 void
-getmemoryusage_wrapper (int * size)
+F77_FUNC(getmemoryusage_wrapper, GETMEMORYUSAGE_WRAPPER) (int * size)
 {
   pid_t our_pid;
   FILE * file = NULL;
@@ -83,20 +85,8 @@ getmemoryusage_wrapper (int * size)
   else { *size = -1; }
 }
 
-void
-getmemoryusage_wrapper_ (int * size)
-{
-  getmemoryusage_wrapper(size);
-}
-
-void
-getmemoryusage_wrapper__ (int * size)
-{
-  getmemoryusage_wrapper(size);
-}
-
 double
-getcputime ()
+F77_FUNC(getcputime, GETCPUTIME) ()
 {
   struct rusage current_time;
 
@@ -107,16 +97,4 @@ getcputime ()
   }
 
   return current_time.ru_utime.tv_sec+current_time.ru_utime.tv_usec/(double) 1e6;
-}
-
-double
-getcputime_ ()
-{
-  return getcputime();
-}
-
-double
-getcputime__ ()
-{
-  return getcputime();
 }

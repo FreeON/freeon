@@ -8,13 +8,13 @@
 #include <errno.h>
 
 void
-freeonsleep_single (float *sleeptime)
+freeonsleep (float sleeptime)
 {
   struct timespec nanoseconds;
 
   /* Split the sleeptime into seconds and nanoseconds. */
-  nanoseconds.tv_sec = (time_t) floor(*sleeptime);
-  nanoseconds.tv_nsec = (long) floor((*sleeptime-nanoseconds.tv_sec)*1e9);
+  nanoseconds.tv_sec = (time_t) floor(sleeptime);
+  nanoseconds.tv_nsec = (long) floor((sleeptime-nanoseconds.tv_sec)*1e9);
 
   if (nanosleep(&nanoseconds, NULL) != 0)
   {
@@ -24,32 +24,14 @@ freeonsleep_single (float *sleeptime)
 }
 
 void
-freeonsleep_single_ (float *sleeptime)
+F77_FUNC(freeonsleep_single, FREEONSLEEP_SINGLE) (float *sleeptime)
 {
-  freeonsleep_single(sleeptime);
+  freeonsleep(*sleeptime);
 }
 
 void
-freeonsleep_single__ (float *sleeptime)
-{
-  freeonsleep_single(sleeptime);
-}
-
-void
-freeonsleep_integer (int *sleeptime_int)
+F77_FUNC(freeonsleep_integer, FREEONSLEEP_INTEGER) (int *sleeptime_int)
 {
   float sleeptime = (float) *sleeptime_int;
-  freeonsleep_single(&sleeptime);
-}
-
-void
-freeonsleep_integer_ (int *sleeptime_int)
-{
-  freeonsleep_integer(sleeptime_int);
-}
-
-void
-freeonsleep_integer__ (int *sleeptime_int)
-{
-  freeonsleep_integer(sleeptime_int);
+  freeonsleep(sleeptime);
 }

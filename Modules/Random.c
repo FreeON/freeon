@@ -23,13 +23,16 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
+
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include "config.h"
 
 double
-random_wrapper ()
+F77_FUNC(random, random) ()
 {
   static int first_time = 1;
   static unsigned int seed = 0;
@@ -50,16 +53,4 @@ random_wrapper ()
   }
 
   return rand()/(double) RAND_MAX;
-}
-
-double
-random_ ()
-{
-  return random_wrapper();
-}
-
-double
-random__ ()
-{
-  return random_wrapper();
 }

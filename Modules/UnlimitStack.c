@@ -24,6 +24,8 @@
      disemination in future releases.
 */
 
+#include "config.h"
+
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,7 +33,7 @@
 #include <sys/resource.h>
 
 void
-unlimitstack ()
+F77_FUNC(unlimitstack, UNLIMITSTACK) ()
 {
   int result;
   struct rlimit rlim;
@@ -46,16 +48,4 @@ unlimitstack ()
   {
     printf("[unlimitstack] can not set stacksize limit: %s\n", strerror(errno));
   }
-}
-
-void
-unlimitstack_ ()
-{
-  unlimitstack();
-}
-
-void
-unlimitstack__ ()
-{
-  unlimitstack();
 }

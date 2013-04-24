@@ -149,7 +149,7 @@ IntToChar (int* NC, int* IntArray)
  * @return The file descriptor of the created file.
  */
 int
-F77_FUNC (hdf5createfile, HDF5CREATEFILE) (int* NC, int* IChr)
+F77_FUNC(hdf5createfile, HDF5CREATEFILE) (int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
@@ -179,7 +179,7 @@ F77_FUNC (hdf5createfile, HDF5CREATEFILE) (int* NC, int* IChr)
  * @return The file descriptor of the created file.
  */
 int
-F77_FUNC (hdf5openfile, HDF5OPENFILE) (int* NC, int* IChr)
+F77_FUNC(hdf5openfile, HDF5OPENFILE) (int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
@@ -211,7 +211,7 @@ F77_FUNC (hdf5openfile, HDF5OPENFILE) (int* NC, int* IChr)
  * failure.
  */
 int
-F77_FUNC (hdf5closefile, HDF5CLOSEFILE) (int* FileID)
+F77_FUNC(hdf5closefile, HDF5CLOSEFILE) (int* FileID)
 {
   herr_t result;
   hid_t fid;
@@ -252,7 +252,7 @@ F77_FUNC (hdf5closefile, HDF5CLOSEFILE) (int* FileID)
  * @return The group id.
  */
 int
-F77_FUNC (hdf5creategroup, HDF5CREATEGROUP) (int* FileID, int* NC, int* IChr)
+F77_FUNC(hdf5creategroup, HDF5CREATEGROUP) (int* FileID, int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
@@ -284,7 +284,7 @@ F77_FUNC (hdf5creategroup, HDF5CREATEGROUP) (int* FileID, int* NC, int* IChr)
  * @return The group id.
  */
 int
-F77_FUNC (hdf5opengroup, HDF5OPENGROUP) (int* FileID, int* NC, int* IChr)
+F77_FUNC(hdf5opengroup, HDF5OPENGROUP) (int* FileID, int* NC, int* IChr)
 {
   char* filename;
   hid_t fid;
@@ -319,7 +319,7 @@ F77_FUNC (hdf5opengroup, HDF5OPENGROUP) (int* FileID, int* NC, int* IChr)
  * @return The return status of the close operation.
  */
 int
-F77_FUNC (hdf5closegroup, HDF5CLOSEGROUP) (int* GroupID)
+F77_FUNC(hdf5closegroup, HDF5CLOSEGROUP) (int* GroupID)
 {
   herr_t result;
   hid_t gid;
@@ -347,7 +347,7 @@ F77_FUNC (hdf5closegroup, HDF5CLOSEGROUP) (int* GroupID)
 /** Wrapper for H5Dopen().
  */
 void
-F77_FUNC (hdf5opendata, HDF5OPENDATA) (int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
+F77_FUNC(hdf5opendata, HDF5OPENDATA) (int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 {
   char* filename;
   hid_t fid, did, dspc;
@@ -388,7 +388,7 @@ F77_FUNC (hdf5opendata, HDF5OPENDATA) (int* FileID, int* NC, int* IChr, int* Dat
 /** Wrapper for H5Dextend().
  */
 void
-F77_FUNC (hdf5extenddata, HDF5EXTENDDATA) (int* DataId, int* DataSpc, int* N)
+F77_FUNC(hdf5extenddata, HDF5EXTENDDATA) (int* DataId, int* DataSpc, int* N)
 {
   hid_t did, dspc;
   hsize_t siz[1];
@@ -424,7 +424,7 @@ F77_FUNC (hdf5extenddata, HDF5EXTENDDATA) (int* DataId, int* DataSpc, int* N)
 /** Wrapper for H5Sselect().
  */
 void
-F77_FUNC (hdf5selectdata, HDF5SELECTDATA) (int* DataId, int* DataSpc, int* NewSize)
+F77_FUNC(hdf5selectdata, HDF5SELECTDATA) (int* DataId, int* DataSpc, int* NewSize)
 {
   hid_t dspc;
   hsize_t cnt[1];
@@ -442,7 +442,7 @@ F77_FUNC (hdf5selectdata, HDF5SELECTDATA) (int* DataId, int* DataSpc, int* NewSi
 /** Wrapper for H5Dclose().
  */
 int
-F77_FUNC (hdf5closedata, HDF5CLOSEDATA) (int* DataId,int* DataSpc)
+F77_FUNC(hdf5closedata, HDF5CLOSEDATA) (int* DataId,int* DataSpc)
 {
   hid_t did, dspc;
   herr_t result;
@@ -466,7 +466,7 @@ F77_FUNC (hdf5closedata, HDF5CLOSEDATA) (int* DataId,int* DataSpc)
 /** Wrapper for H5Pcreate().
  */
 void
-F77_FUNC (hdf5createdata, HDF5CREATEDATA) (int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
+F77_FUNC(hdf5createdata, HDF5CREATEDATA) (int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
 {
   char* filename;
   hsize_t dms[1],mxdms[1],chnk[1];
@@ -545,7 +545,7 @@ F77_FUNC (hdf5createdata, HDF5CREATEDATA) (int* FileID,int* Type,int* N,int* NC,
 /** Wrapper for H5Sget_simple_extent_npoints().
  */
 int
-F77_FUNC (hdf5sizeofdata, HDF5SIZEOFDATA) (int* DataSpc)
+F77_FUNC(hdf5sizeofdata, HDF5SIZEOFDATA) (int* DataSpc)
 {
   hid_t dspc;
   hsize_t dsiz;
@@ -571,7 +571,7 @@ F77_FUNC (hdf5sizeofdata, HDF5SIZEOFDATA) (int* DataSpc)
 /** Wrapper for H5Dwrite().
  */
 int
-F77_FUNC (hdf5writeintegervector, HDF5WRITEINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
+F77_FUNC(hdf5writeintegervector, HDF5WRITEINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
 {
   hid_t did,dspc;
   herr_t result;
@@ -588,7 +588,7 @@ F77_FUNC (hdf5writeintegervector, HDF5WRITEINTEGERVECTOR) (int* DataId, int* Dat
 /** Wrapper for H5Dwrite().
  */
 int
-F77_FUNC (hdf5writedoublevector, HDF5WRITEDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
+F77_FUNC(hdf5writedoublevector, HDF5WRITEDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
 {
   hid_t did,dspc;
   herr_t result;
@@ -605,7 +605,7 @@ F77_FUNC (hdf5writedoublevector, HDF5WRITEDOUBLEVECTOR) (int* DataId, int* DataS
 /** Wrapper for H5Dread().
  */
 int
-F77_FUNC (hdf5readintegervector, HDF5READINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
+F77_FUNC(hdf5readintegervector, HDF5READINTEGERVECTOR) (int* DataId, int* DataSpc, int* Data)
 {
   hid_t did,dspc;
   herr_t result;
@@ -622,7 +622,7 @@ F77_FUNC (hdf5readintegervector, HDF5READINTEGERVECTOR) (int* DataId, int* DataS
 /** Wrapper for H5Dread().
  */
 int
-F77_FUNC (hdf5readdoublevector, HDF5READDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
+F77_FUNC(hdf5readdoublevector, HDF5READDOUBLEVECTOR) (int* DataId, int* DataSpc, double* Data)
 {
   hid_t did,dspc;
   herr_t result;
@@ -638,7 +638,7 @@ F77_FUNC (hdf5readdoublevector, HDF5READDOUBLEVECTOR) (int* DataId, int* DataSpc
 
 /** Get the library version. */
 int
-F77_FUNC (hdf5version, HDF5VERSION) (unsigned *majnum, unsigned *minnum, unsigned *relnum)
+F77_FUNC(hdf5version, HDF5VERSION) (unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
   return H5get_libversion(majnum, minnum, relnum);
 }
@@ -691,7 +691,7 @@ hdf5delete_op (hid_t groupID, const char *name, const H5L_info_t *info, void *op
 /** Wrapper for H5LDelete().
  */
 int
-F77_FUNC (hdf5delete, HDF5DELETE) (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
+F77_FUNC(hdf5delete, HDF5DELETE) (int* id, int* groupNameN, int* groupNameC, int* objectNameN, int* objectNameC)
 {
   char *groupName = IntToChar(groupNameN, groupNameC);
   char *objectName = IntToChar(objectNameN, objectNameC);

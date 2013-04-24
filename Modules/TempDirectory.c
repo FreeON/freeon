@@ -40,7 +40,7 @@
  */
 
 void
-temporarydirectory (char *path, int *length)
+F77_FUNC(temporarydirectory, TEMPORARYDIRECTORY) (char *path, int *length)
 {
   int i;
   int result = 0;
@@ -88,16 +88,4 @@ temporarydirectory (char *path, int *length)
 
   /* Free memory. */
   free(temp);
-}
-
-void
-temporarydirectory_ (char *path, int *max_length)
-{
-  temporarydirectory(path, max_length);
-}
-
-void
-temporarydirectory__ (char *path, int *max_length)
-{
-  temporarydirectory(path, max_length);
 }

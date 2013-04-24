@@ -24,6 +24,8 @@
      disemination in future releases.
 */
 
+#include "config.h"
+
 #include <stdio.h>
 
 /* Get the address of a pointer. Since fortran can not do that, we use a
@@ -31,20 +33,7 @@
  */
 
 unsigned int
-getaddress (void *x)
+F77_FUNC(getaddress, GETADDRESS) (void *x)
 {
-  //printf ("Address of object is 0x%x\n", x);
   return (unsigned long int) x;
-}
-
-unsigned int
-getaddress_ (void *x)
-{
-  return getaddress(x);
-}
-
-unsigned int
-getaddress__ (void *x)
-{
-  return getaddress(x);
 }

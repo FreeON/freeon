@@ -23,22 +23,40 @@
      to return derivative works to the MondoSCF group for review, and possible
      disemination in future releases.
 */
+
+#include "config.h"
+
 #ifdef IPM
+
 #include "IPM_timer.h"
-double mondotimer() { return IPM_timer_get_time();}
-double mondotimer_() { return IPM_timer_get_time();}
-double mondotimer__() { return IPM_timer_get_time();}
+
+double
+F77_FUNC(mondotimer, MONDOTIMER) ()
+{
+  return IPM_timer_get_time();
+}
+
 #else
+
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
+
 #include "mpi.h"
-double mondotimer() {return MPI_Wtime();}
-double mondotimer_() {return MPI_Wtime();}
-double mondotimer__() {return MPI_Wtime();}
+double
+F77_FUNC(mondotimer, MONDOTIMER) ()
+{
+  return MPI_Wtime();
+}
+
 #else
+
 double wall_seconds_(void);
 
-double mondotimer() {return wall_seconds_();}
-double mondotimer_() {return wall_seconds_();}
-double mondotimer__() {return wall_seconds_();}
+double
+F77_FUNC(mondotimer, MONDOTIMER) ()
+{
+  return wall_seconds_();
+}
+
 #endif 
+
 #endif

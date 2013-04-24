@@ -31,12 +31,14 @@
 
 #define __USE_BSD
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
 void
-gethostnamewrapper (char* hostname, int* maximum_length)
+F77_FUNC(gethostnamewrapper, GETHOSTNAMEWRAPPER) (char* hostname, int* maximum_length)
 {
   int i;
   int result;
@@ -50,16 +52,4 @@ gethostnamewrapper (char* hostname, int* maximum_length)
   {
     hostname[i] = ' ';
   }
-}
-
-void
-gethostnamewrapper_ (char* hostname, int* maximum_length)
-{
-  gethostnamewrapper(hostname, maximum_length);
-}
-
-void
-gethostnamewrapper__ (char* hostname, int* maximum_length)
-{
-  gethostnamewrapper(hostname, maximum_length);
 }

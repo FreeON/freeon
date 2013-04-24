@@ -27,9 +27,15 @@
     ROUTINE TO GENERATE A TRACE BACK
     Author:  Matt Challacombe
 */
+
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-void trap__(void){abort();}
-void trap_(void){abort();}
-void trap(void){trap_();}
+
+void
+F77_FUNC(trap, TRAP) (void)
+{
+  abort();
+}

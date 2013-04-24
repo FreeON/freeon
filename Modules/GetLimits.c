@@ -29,13 +29,15 @@
  * Author: Nicolas Bock
  */
 
+#include "config.h"
+
 #include <sys/time.h>
 #include <sys/resource.h>
 
 #include <stdio.h>
 
 void
-getstacksizelimit (int * current_limit, int * max_limit)
+F77_FUNC(getstacksizelimit, GETSTACKSIZELIMIT) (int * current_limit, int * max_limit)
 {
   struct rlimit limits;
 
@@ -59,16 +61,4 @@ getstacksizelimit (int * current_limit, int * max_limit)
   {
     *max_limit = limits.rlim_max;
   }
-}
-
-void
-getstacksizelimit_ (int * current_limit, int * max_limit)
-{
-  getstacksizelimit (current_limit, max_limit);
-}
-
-void
-getstacksizelimit__ (int * current_limit, int * max_limit)
-{
-  getstacksizelimit (current_limit, max_limit);
 }

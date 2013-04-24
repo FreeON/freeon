@@ -24,6 +24,8 @@
      disemination in future releases.
 */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,7 +41,7 @@
  */
 
 void
-filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
+F77_FUNC(filecopywrapper, FILECOPYWRAPPER) (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
 {
   char *buffer = NULL;
   char *fileA  = NULL;
@@ -129,16 +131,4 @@ filecopywrapper (int *lenA, char *fileA_arg, int *lenB, char *fileB_arg)
   /* Close files. */
   fclose(fdA);
   fclose(fdB);
-}
-
-void
-filecopywrapper_ (int *lenA, char *fileA, int *lenB, char *fileB)
-{
-  filecopywrapper(lenA, fileA, lenB, fileB);
-}
-
-void
-filecopywrapper__ (int *lenA, char *fileA, int *lenB, char *fileB)
-{
-  filecopywrapper(lenA, fileA, lenB, fileB);
 }

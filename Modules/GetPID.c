@@ -27,9 +27,13 @@
   GetPID from libc.
 */
 
+#include "config.h"
+
 #include <sys/types.h>
 #include <unistd.h>
 
-int getpidwrapper (void) {return getpid();}
-int getpidwrapper_ (void) {return getpidwrapper();}
-int getpidwrapper__ (void) {return getpidwrapper();}
+int
+F77_FUNC(getpidwrapper, GETPIDWRAPPER) (void)
+{
+  return getpid();
+}
