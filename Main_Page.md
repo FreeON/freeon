@@ -42,12 +42,12 @@ Project Stats
 Contact Us
 ----------
 
-While you could e-mail one of the authors directly, we prefer if you used our mailing lists or our bug tracker instead. You will probably get a response quicker this way because your message will go to all of us as opposed to just one of us. We currently operate 2 mailing lists:
+Please use our mailing lists or our bug tracker to ask questions or to report bugs. The mailing lists can be found here:
 
 -   [freeon-users](http://lists.nongnu.org/mailman/listinfo/freeon-users), our public mailing list for users of FreeON.
 -   [freeon-devel](http://lists.nongnu.org/mailman/listinfo/freeon-devel), our mailing list for developers of FreeON, and people who are interested in the development process of it.
 
-Alternatively you can file a bug report or feature request with our issue tracker system:
+You are encouraged to file bug reports or feature requests with our issue tracker system:
 
 -   [Issue Tracker](https://github.com/FreeON/freeon/issues)
 
