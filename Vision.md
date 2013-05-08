@@ -15,7 +15,7 @@ Reduced complexity algorithms can provide far more economical increases in simul
 
 **Free *O*(*N*): A Unified Approach to fast Quantum Chemistry**
 
-The literature reveals a surprising commonality between reduced complexity methods across diverse problem domains. From data base theory to electronic structure, algorithms are emerging for problems like fast lookups, set intersection, machine learning, Coulomb summation and matrix multiplication with similar, "best of" data structures and programming models that are *N*-body like; so called Generalized *N*-Body Solvers. FreeON is being redeveloped with a unified *N*-body approach at all levels, based on recently developed methods for the multiplication of matrices with decay [1] [2].
+The literature reveals a surprising commonality between reduced complexity methods across diverse problem domains. From data base theory to electronic structure, algorithms are emerging for problems like fast lookups, set intersection, machine learning, Coulomb summation and matrix multiplication with similar, "best of" data structures and programming models that are *N*-body like; so called Generalized *N*-Body Solvers. FreeON is being redeveloped with a unified *N*-body approach at all levels, based on recently developed methods for the multiplication of matrices with decay [1] [2] [3].
 
 **Free *O*(*N*): HPC**
 
@@ -28,3 +28,5 @@ The literature reveals a surprising commonality between reduced complexity metho
 [1] Matt Challacombe and Nicolas Bock, <em>Fast Multiplication of Matrices with Decay</em>, [**arXiv:1011.3534 cs.DS**](http://arxiv.org/abs/1011.3534)
 
 [2] Nicolas Bock and Matt Challacombe, <em>An Optimized Sparse Approximate Matrix Multiply</em>, [**arXiv:1203.1692 cs.NA**](http://arxiv.org/abs/1203.1692)
+
+[3] "An Optimized Sparse Approximate Matrix Multiply for Matrices with Decay", Nicolas Bock, Matt Challacombe, [*SIAM J. Sci. Comput.* **35(1)** C72–C98](http://dx.doi.org/10.1137/120870761)
