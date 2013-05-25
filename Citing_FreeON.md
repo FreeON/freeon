@@ -11,7 +11,7 @@ TeX Format
         and Odell, Anders and Schwegler, Eric and Tymczak, C.~J.
         and Weber, Valery},
       title = {{\\sc FreeON}},
-      year = 2012,
+      year = 2013,
       note = {\\mbox{L}os Alamos National Laboratory (LA-CC 01-2; LA-CC-04-086),
         Copyright University of California.},
       url = {http://www.freeon.org/}
@@ -32,4 +32,4 @@ EndNote/RIS
     AU  - Tymczak, C. J.
     AU  - Weber, Valery
     T1  - FreeON
-    PY  - 2012
+    PY  - 2013
