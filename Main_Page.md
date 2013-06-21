@@ -39,6 +39,11 @@ Project Stats
 
 <ohlohStats/>
 
+Support Us
+----------
+
+<cafepress/>
+
 Contact Us
 ----------
 
