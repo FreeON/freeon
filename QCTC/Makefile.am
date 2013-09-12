@@ -172,7 +172,8 @@ TreeWalk.o : \
   PoleTree.o
 
 Density.o : \
-  Thresholds.o
+  Thresholds.o \
+  Globals.o
 
 Thresholds.o : \
   PoleNodeType.o
