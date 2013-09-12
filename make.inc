@@ -9,17 +9,6 @@ AM_CPPFLAGS = @AM_CPPFLAGS@
 # Fix for bug in autoconf-2.59
 builddir = .
 
-if INTERNAL_LAPACK
-LDADD_INTERNAL_LAPACK = \
-  $(top_builddir)/Modules/lapack/lapack/libfreeonlapack.la \
-  $(top_builddir)/Modules/lapack/blas/libfreeonblas.la \
-  $(top_builddir)/Modules/lapack/install/libfreeonlapackextra.la
-endif
-
-if INTERNAL_HDF5
-LDADD_INTERNAL_HDF5 = $(top_builddir)/Modules/hdf5-1.8.3/src/libhdf5.la
-endif
-
 LDADD_MODULES = $(top_builddir)/Modules/libfreeonmodules.la
 
 # On filesystems which are case-insensitive (which really means HFS+ on OS X)
@@ -240,8 +229,6 @@ LIBRARY_DEPENDENCY_FILES_MODS = \
   $(top_builddir)/Modules/utilities.mod
 
 LIBRARY_DEPENDENCY_FILES_LIBS = \
-  $(LDADD_INTERNAL_LAPACK) \
-  $(LDADD_INTERNAL_HDF5) \
   $(LDADD_MODULES)
 
 $(top_builddir)/MondoLocalVersion.h : $(top_builddir)/config_localversion.h

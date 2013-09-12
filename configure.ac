@@ -365,14 +365,7 @@ if test "${use_optimizations}" = "yes"; then
 
     # Test whether these flags actually produce runnable code.
     AC_LANG(C)
-    AC_RUN_IFELSE([
-int
-main ()
-{
-  int i = 1;
-  return 0;
-}
-],
+    AC_RUN_IFELSE([AC_LANG_PROGRAM([], [int i = 1;])],
       [],
       [AC_MSG_NOTICE([resetting CFLAGS])
        CFLAGS="-O"])
@@ -417,13 +410,10 @@ main ()
 
     # Test whether these flags actually produce runnable code.
     AC_LANG(Fortran 77)
-    AC_RUN_IFELSE([
+    AC_RUN_IFELSE([AC_LANG_PROGRAM([], [
       INTEGER I
-
       I = 1
-      STOP
-      END
-],
+])],
       [],
       [AC_MSG_NOTICE([resetting FFLAGS])
        FFLAGS="-O"])
@@ -468,15 +458,10 @@ main ()
 
     # Test whether these flags actually produce runnable code.
     AC_LANG(Fortran)
-    AC_RUN_IFELSE([
-program runtest
-
-  integer :: i
-
-  i = 1
-
-end program runtest
-],
+    AC_RUN_IFELSE([AC_LANG_PROGRAM([], [
+      integer :: i
+      i = 1
+])],
       [],
       [AC_MSG_NOTICE([resetting FCFLAGS])
        FCFLAGS="-O"])
@@ -666,248 +651,90 @@ END PROGRAM test_compiler
 # Compile LinearAlgebraLibrary.
 AC_CONFIG_SUBDIRS([LinearAlgebraLibrary])
 
-# Check for internal LAPACK/BLAS.
-AC_MSG_CHECKING([for internal lapack/blas])
-AC_ARG_ENABLE([internal-lapack],
-  [AS_HELP_STRING([--disable-internal-lapack],
-  [Disable the internal lapack/blas (3.1.1) and use your own. You might have to
-  use the options --with-lapack=DIR or --with-blas=DIR to specify exactly where
-  your library is.])],
-  [use_internal_lapack="${enableval}"],
-  [use_internal_lapack="yes"])
-
-if test "${use_internal_lapack}" = "yes"; then
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([for whether to compile the internal lapack checks])
-AC_ARG_ENABLE([internal-lapack-checks],
-  [AS_HELP_STRING([--enable-internal-lapack-checks],
-  [Enable the checks in the internal lapack. Lapack can be checked by running
-   "make check".])],
-  [compile_internal_lapack_checks="${enableval}"],
-  [compile_internal_lapack_checks="no"])
-
-if test "${compile_internal_lapack_checks}" = "yes"; then
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-AM_CONDITIONAL(INTERNAL_LAPACK, [test "${use_internal_lapack}" = "yes"])
-AM_CONDITIONAL(INTERNAL_LAPACK_CHECKS, [test "${compile_internal_lapack_checks}" = "yes"])
-
 NOOPT=
 LAPACK_TIMER="NONE"
 
-if test "${use_internal_lapack}" = "yes"; then
+AC_ARG_WITH([lapack],
+  [AS_HELP_STRING([--with-lapack=DIR],
+  [Specify non-standard directory for the BLAS/LAPACK libraries.])],
+  [LDFLAGS="${LDFLAGS} -L${withval}/lib"
+  AC_MSG_NOTICE([using -L${withval}/lib])],
+  [])
 
-  # Check for naming convention for external etime().
-  AC_ARG_ENABLE([lapack-external-timer],
-    [AS_HELP_STRING([--enable-lapack-external-timer],
-    [Use an external timer in lapack. This setting should normally be
-     automatically detected by this script, but in some cases the
-     autodetection can fail and one has to set the use of an external timer
-     explicitly with this option.])],
-    [use_external_timer="${enableval}"],
-    [use_external_timer="unset"])
+AC_ARG_WITH([lapacklibs],
+  [AS_HELP_STRING([--with-lapacklibs=-lblas -llapack...],
+  [Specify the blas/lapack libraries as specified on the linker command line (default is -lblas -llapack)])],
+  [more_LIBS="${withval}"
+  AC_MSG_NOTICE([using ${withval}])],
+  [more_LIBS="-llapack -lblas"])
 
-  AC_MSG_CHECKING([for whether to use an external timer for lapack])
-  if test "${use_external_timer}" = "unset"; then
-    case ${F77_COMPILERNAME} in
-      GCC)   use_external_timer="no" ;;
-      Intel) use_external_timer="yes" ;;
-      PGI)   use_external_timer="yes" ;;
-      *)     use_external_timer="yes" ;;
-    esac
-    AC_MSG_RESULT([${use_external_timer}])
-  else
-    AC_MSG_RESULT([command line override: ${use_external_timer}])
-  fi
-
-  if test "${use_external_timer}" = "yes"; then
-    use_etime_underscore="no"
-    use_etime_without_underscore="no"
-
-    AC_LANG(Fortran 77)
-    AC_MSG_CHECKING([for naming convention for external etime()])
-
-    AC_LINK_IFELSE([
-      REAL T1
-      REAL TARRAY(2)
-      REAL etime
-      EXTERNAL etime
-
-      T1 = etime(TARRAY)
-
-      STOP
-      END
-],
-      [use_etime_without_underscore="yes"],
-      [])
-
-    AC_LINK_IFELSE([
-      REAL T1
-      REAL TARRAY(2)
-      REAL etime_
-      EXTERNAL etime_
-
-      T1 = etime_(TARRAY)
-
-      STOP
-      END
-],
-      [use_etime_underscore="yes"],
-      [])
-
-    if test "${use_etime_without_underscore}" = "yes"; then
-      use_EXT_ETIME="EXT_ETIME"
-      AC_MSG_RESULT([no underscore])
-    elif test "${use_etime_underscore}" = "yes"; then
-      use_EXT_ETIME="EXT_ETIME_"
-      AC_MSG_RESULT([with underscore])
-    else
-      AC_MSG_RESULT([can not determine])
-      AC_MSG_FAILURE([I do not know how to link to the external etime()])
-    fi
-
-  else
-    AC_MSG_NOTICE([not using external etime()])
-  fi
-
-  # Test for no-optimization compiler flag.
-  AC_MSG_CHECKING([for no-optmiziation flags])
-
-  case ${F77_COMPILERNAME} in
-    GCC)
-      NOOPT="-O0 -g"
-      LAPACK_TIMER="INT_ETIME"
-      AC_MSG_RESULT([identified gfortran compiler, using ${NOOPT} no-optimization flag])
-      ;;
-    Intel)
-      NOOPT="-O0 -fltconsistency -fp-port -g"
-      LAPACK_TIMER=${use_EXT_ETIME}
-      AC_MSG_RESULT([identified intel ifort compiler, using ${NOOPT} no-optimization flag])
-      ;;
-    PGI)
-      NOOPT="-O0 -g"
-      LAPACK_TIMER=${use_EXT_ETIME}
-      AC_MSG_RESULT([identified portland group pgf90 compiler, using ${NOOPT} no-optimization flag])
-      ;;
-    *)
-      NOOPT=
-      LAPACK_TIMER="NONE"
-      AC_MSG_RESULT([unknown compiler, no no-optimization flags found, using NONE timer])
-      ;;
-  esac
-
+if test -z "${LIBS}"; then
+  LIBS="${more_LIBS}"
 else
-  AC_ARG_WITH([lapack],
-    [AS_HELP_STRING([--with-lapack=DIR],
-    [Specify non-standard directory for the BLAS/LAPACK libraries.])],
-    [LDFLAGS="${LDFLAGS} -L${withval}/lib"
-    AC_MSG_NOTICE([using -L${withval}/lib])],
-    [])
-
-  AC_ARG_WITH([lapacklibs],
-    [AS_HELP_STRING([--with-lapacklibs=-lblas -llapack...],
-    [Specify the blas/lapack libraries as specified on the linker command line (default is -lblas -llapack)])],
-    [more_LIBS="${withval}"
-    AC_MSG_NOTICE([using ${withval}])],
-    [more_LIBS="-llapack -lblas"])
-
-  if test -z "${LIBS}"; then
-    LIBS="${more_LIBS}"
-  else
-    LIBS="${LIBS} ${more_LIBS}"
-  fi
-  unset more_LIBS
-
-  # Check for BLAS.
-  AC_MSG_CHECKING([for BLAS (dgemm)])
-  AC_LINK_IFELSE([
-  program test
-
-    call dgemm()
-
-  end program test
-  ],
-    [AC_MSG_RESULT([yes])],
-    [AC_MSG_FAILURE([no])])
-
-  # Check for LAPACK.
-  AC_MSG_CHECKING([for LAPACK (dsyev)])
-  AC_LINK_IFELSE([
-  program test
-
-    call dsyev()
-
-  end program test
-  ],
-    [AC_MSG_RESULT([yes])],
-    [AC_MSG_FAILURE([no])])
+  LIBS="${LIBS} ${more_LIBS}"
 fi
+unset more_LIBS
+
+# Check for BLAS.
+AC_MSG_CHECKING([for BLAS (dgemm)])
+AC_LINK_IFELSE([
+program test
+
+  call dgemm()
+
+end program test
+],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_FAILURE([no])])
+
+# Check for LAPACK.
+AC_MSG_CHECKING([for LAPACK (dsyev)])
+AC_LINK_IFELSE([
+program test
+
+  call dsyev()
+
+end program test
+],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_FAILURE([no])])
 
 # Set some variables.
 AC_SUBST(NOOPT, [${NOOPT}])
 AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
 
-# Check for internal hdf5.
-AC_MSG_CHECKING([for internal hdf5])
-AC_ARG_ENABLE([internal-hdf5],
-  [AS_HELP_STRING([--disable-internal-hdf5],
-  [Disable the internal hdf5 (1.8.3) and use your own. You might have to use
-   the option --with-hdf5=DIR to specify where exactly your hdf5 library
-   is.])],
-  [use_internal_hdf5="${enableval}"],
-  [use_internal_hdf5="yes"])
-AC_MSG_RESULT([${use_internal_hdf5}])
+AC_ARG_WITH([hdf5],
+  [AS_HELP_STRING([--with-hdf5=DIR],
+  [Specify non-standard directory for the hdf5 libraries.])],
+  [LDFLAGS="${LDFLAGS} -L${withval}/lib"
+  CPPFLAGS="${CPPFLAGS} -I${withval}/include"
+  AC_MSG_NOTICE([using ${withval}/lib and ${withval}/include])],
+  [])
 
-AM_CONDITIONAL(INTERNAL_HDF5, [test "${use_internal_hdf5}" = "yes"])
+# Set language to C.
+AC_LANG(C)
 
-if test "${use_internal_hdf5}" = "yes"; then
+# Check for math library (ceil).
+AC_CHECK_LIB([m],
+             [ceil],
+             [],
+             [AC_MSG_NOTICE([The external hdf5 library might require ceil()])])
 
-  AC_DEFINE(HAVE_INTERNAL_HDF5, 1, [Use the inernal hdf5 library.])
-  AC_CONFIG_SUBDIRS([Modules/hdf5-1.8.3])
+# Check for the pthread library.
+AC_CHECK_HEADERS(pthread.h)
+AC_CHECK_LIB([pthread],
+             [pthread_create],
+             [],
+             [AC_MSG_NOTICE([The external hdf5 library might require the pthread library.])])
 
-else
-
-  AC_ARG_WITH([hdf5],
-    [AS_HELP_STRING([--with-hdf5=DIR],
-    [Specify non-standard directory for the hdf5 libraries.])],
-    [LDFLAGS="${LDFLAGS} -L${withval}/lib"
-    CPPFLAGS="${CPPFLAGS} -I${withval}/include"
-    AC_MSG_NOTICE([using ${withval}/lib and ${withval}/include])],
-    [])
-
-  # Set language to C.
-  AC_LANG(C)
-
-  # Check for math library (ceil).
-  AC_CHECK_LIB([m],
-               [ceil],
-               [],
-               [AC_MSG_NOTICE([The external hdf5 library might require ceil()])])
-
-  # Check for the pthread library.
-  AC_CHECK_HEADERS(pthread.h)
-  AC_CHECK_LIB([pthread],
-               [pthread_create],
-               [],
-               [AC_MSG_NOTICE([The external hdf5 library might require the pthread library.])])
-
-  # Check for HDF5 libraries.
-  AC_CHECK_HEADER([hdf5.h],
-                  [],
-                  [AC_MSG_FAILURE([I need the hdf5.h header file])])
-  AC_CHECK_LIB([hdf5],
-               [H5get_libversion],
-               [],
-               [AC_MSG_FAILURE([I need the hdf5 library])])
-
-fi
+# Check for HDF5 libraries.
+AC_CHECK_HEADER([hdf5.h],
+                [],
+                [AC_MSG_FAILURE([I need the hdf5.h header file])])
+AC_CHECK_LIB([hdf5],
+             [H5get_libversion],
+             [],
+             [AC_MSG_FAILURE([I need the hdf5 library])])
 
 # Set language to C.
 AC_LANG(C)
@@ -916,22 +743,22 @@ AC_LANG(C)
 AC_CHECK_HEADERS([zlib.h])
 AC_CHECK_LIB([z], [compress2])
 AC_CHECK_FUNC([compress2])
-AC_LINK_IFELSE(AC_LANG_PROGRAM([char compress2 ();],
-  [return compress2 ();]),
+AC_LINK_IFELSE([AC_LANG_PROGRAM([char compress2 ();],
+  [return compress2 ();])],
   [],
   [AC_MSG_NOTICE([I do not have a working zlib installed.])])
 
 # Check for mkstemp or mkostemp.
 AC_MSG_CHECKING([whether we have mkstemp()])
-AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <stdlib.h>],
-  [int result = mkstemp("/tmp/testtemp");]),
+AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <stdlib.h>],
+  [int result = mkstemp("/tmp/testtemp");])],
   [AC_MSG_RESULT([yes])
    AC_DEFINE([HAVE_MKSTEMP], [1], [working mkstemp()])],
   [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([whether we have mkostemp()])
-AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <stdlib.h>],
-  [int result = mkostemp("/tmp/testtemp", 0);]),
+AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <stdlib.h>],
+  [int result = mkostemp("/tmp/testtemp", 0);])],
   [AC_MSG_RESULT([yes])
    AC_DEFINE([HAVE_MKOSTEMP], [1], [working mkostemp()])],
   [AC_MSG_RESULT([no])])
@@ -1069,15 +896,6 @@ config_localversion.h
 Makefile
 FreeON/Makefile
 Modules/Makefile
-Modules/lapack/Makefile
-Modules/lapack/install/Makefile
-Modules/lapack/blas/Makefile
-Modules/lapack/lapack/Makefile
-Modules/lapack/blas_testing/Makefile
-Modules/lapack/lapack_testing/Makefile
-Modules/lapack/lapack_testing/lin/Makefile
-Modules/lapack/lapack_testing/eig/Makefile
-Modules/lapack/lapack_testing/matgen/Makefile
 SCFeqs/Makefile
 OneE/Makefile
 QCTC/Makefile
@@ -1156,16 +974,8 @@ AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
 AC_MSG_NOTICE([MONDO_HOME               = ${MONDO_HOME}])
 AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
 AC_MSG_NOTICE([])
-if test "${use_internal_lapack}" = "yes"; then
-  AC_MSG_NOTICE([Using internal lapack])
-else
-  AC_MSG_NOTICE([Using external lapack library])
-fi
-if test "${use_internal_hdf5}" = "yes"; then
-  AC_MSG_NOTICE([Using internal hdf5 (1.8.3)])
-else
-  AC_MSG_NOTICE([Using external hdf5 library])
-fi
+AC_MSG_NOTICE([Using external lapack library])
+AC_MSG_NOTICE([Using external hdf5 library])
 if test "${use_optimizations}" = "no"; then
   AC_MSG_NOTICE([I disabled compiler optimization flags])
 fi
