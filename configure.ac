@@ -1,8 +1,8 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [2011-11-03], [Matt Challacombe <mchalla@lanl.gov>])
+AC_INIT([freeon], [2011-11-03], [freeon-users@nongnu.org])
 AC_COPYRIGHT([
-This code is part of the MondoSCF suite of programs for linear scaling
+This code is part of the FreeON suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
 
 Copyright (2004). The Regents of the University of California. This
@@ -23,7 +23,7 @@ PURPOSE. See the GNU General Public License at www.gnu.org for details.
 
 While you may do as you like with this software, the GNU license requires
 that you clearly mark derivative software.  In addition, you are encouraged
-to return derivative works to the MondoSCF group for review, and possible
+to return derivative works to the FreeON group for review, and possible
 disemination in future releases.
 ])
 
