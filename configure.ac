@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [2011-11-03], [freeon-users@nongnu.org])
+AC_INIT([freeon], [2013-09-12], [freeon-users@nongnu.org])
 AC_COPYRIGHT([
 This code is part of the FreeON suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
@@ -939,17 +939,8 @@ TwoE/MSC/Makefile
 TwoE/VRR/Makefile
 ONX/Makefile
 Validate/Makefile
-Validate/Dynamics/Makefile
-Validate/NEB/Makefile
-Validate/Optimization/Makefile
-Validate/Response/Frequencies/Makefile
-Validate/Response/Makefile
-Validate/Response/Static/Makefile
-Validate/Response/TDSCF/Makefile
-Validate/Restart/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
-Validate/SinglePoint/Unrestricted/Makefile
 PostProcessing/Makefile
 BasisSets/Makefile
 tests/Makefile
