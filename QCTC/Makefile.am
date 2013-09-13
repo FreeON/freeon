@@ -119,11 +119,12 @@ DivPFFTensor.o : \
   PFFTensor.o
 
 JForce.o : \
+  $(top_builddir)/MondoConfig.h \
+  libktrax.la \
   Globals.o \
   PoleTree.o \
   PBCFarField.o \
-  BlokTrPdJ.o \
-  $(top_builddir)/MondoConfig.h
+  BlokTrPdJ.o
 
 JGen.o : \
   Globals.o \
@@ -165,6 +166,7 @@ PoleTree.o : \
 
 QCTC.o : \
   $(top_builddir)/MondoConfig.h \
+  libktrax.la \
   PoleTree.o \
   Globals.o \
   PBCFarField.o \

@@ -9,9 +9,9 @@ bin_SCRIPTS = \
   parseMDO.py \
   velocityAutocorrelation.py
 
-bin_PROGRAMS = BCSRInfo
+bin_PROGRAMS = printBCSR
 
-BCSRInfo_SOURCES = BCSRInfo.F90
-BCSRInfo_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
+printBCSR_SOURCES = printBCSR.F90
+printBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
 
 EXTRA_DIST = $(bin_SCRIPTS)
