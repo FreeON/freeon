@@ -1,5 +1,11 @@
 include $(top_srcdir)/make.inc
 
+noinst_LTLIBRARIES = libktrax.la
+
+# Force moderate compiler optimization flags on KTrax.F
+libktrax_la_SOURCES = KTrax.F
+libktrax_la_FFLAGS = -O2 -g -pipe
+
 bin_PROGRAMS = QCTC JForce MakePFFT
 
 QCTC_SOURCES = \
@@ -17,7 +23,6 @@ QCTC_SOURCES = \
   Globals.F90 \
   Indexing.F90 \
   JGen.F90 \
-  KTrax.F \
   MD3TRR.F \
   MondoPoles77.F \
   MondoPoles.F90 \
@@ -47,7 +52,6 @@ JForce_SOURCES = \
   Globals.F90 \
   Indexing.F90 \
   JForce.F90 \
-  KTrax.F \
   MD3TRR.F \
   MondoPoles77.F \
   MondoPoles.F90 \
@@ -96,7 +100,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS2.Inc
 
 EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/Modules/MMA/LookUpTables_800_6x
-LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5) libktrax.la
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
