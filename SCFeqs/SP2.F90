@@ -60,10 +60,11 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   !-------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
   REAL(DOUBLE)                   :: Ne,Lambda, idempotency_error,Occ0,Occ1,Occ2,Occ3
-  INTEGER                        :: I, I2, MM, Imin
+  INTEGER                        :: I, J, MM, Imin
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
+  TYPE(DBL_RNK2)                 :: PDense
   !-------------------------------------------------------------------------------
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -101,6 +102,17 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CALL FockGuess(F,P,Ne,1)
 #endif
   CALL SetEq(Pold,P)
+
+#ifdef PRINT_MATRIX
+  CALL SetEq(PDense, P)
+  DO I = 1, SIZE(PDense%D, 1)
+    DO J = 1, SIZE(PDense%D, 2)
+      CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
+        //" "//TRIM(IntToChar(J)) &
+        //" "//TRIM(DblToChar(PDense%D(I, J))))
+    ENDDO
+  ENDDO
+#endif
 
   ! Do SP2 iterations
   Occ0 = 0.D0
