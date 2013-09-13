@@ -2,17 +2,17 @@ include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = Make1E MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce MForce THess
 
-Make1E_SOURCES  = Int1E.f90 Make1X.f90 Make1E.f90
-MakeM_SOURCES   = MBlok.f90 MakeM.f90
-MakeU_SOURCES   = UBlok.f90 MakeU.f90
-MakeS_SOURCES   = SBlok.f90 MakeS.f90
-MakeT_SOURCES   = TBlok.f90 MakeT.f90
-MakeRho_SOURCES = RhoTools.f90 RhoBlok.f90 MakeRho.f90
-SForce_SOURCES  = BlokTrWdS.f90 SForce.f90
-TForce_SOURCES  = BlokTrPdT.f90 TForce.f90
-MForce_SOURCES  = BlokTrPdM.f90 MForce.f90
-THess_SOURCES   = BlokTrPd2T.f90 THess.f90
-UForce_SOURCES  = UBlok.f90 UForce.f90
+Make1E_SOURCES  = Int1E.F90 Make1X.F90 Make1E.F90
+MakeM_SOURCES   = MBlok.F90 MakeM.F90
+MakeU_SOURCES   = UBlok.F90 MakeU.F90
+MakeS_SOURCES   = SBlok.F90 MakeS.F90
+MakeT_SOURCES   = TBlok.F90 MakeT.F90
+MakeRho_SOURCES = RhoTools.F90 RhoBlok.F90 MakeRho.F90
+SForce_SOURCES  = BlokTrWdS.F90 SForce.F90
+TForce_SOURCES  = BlokTrPdT.F90 TForce.F90
+MForce_SOURCES  = BlokTrPdM.F90 MForce.F90
+THess_SOURCES   = BlokTrPd2T.F90 THess.F90
+UForce_SOURCES  = UBlok.F90 UForce.F90
 
 Make1E_DEPENDENCIES  = $(LIBRARY_DEPENDENCY_FILES)
 MakeM_DEPENDENCIES   = $(LIBRARY_DEPENDENCY_FILES)
@@ -53,7 +53,7 @@ EXTRA_INCLUDES = -I$(srcdir)/MMA
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
 tags :
-	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.f90 ../Modules/*.{c,f,f90}
+	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.F90 ../Modules/*.{c,f,f90}
 
 # Dependencies.
 MakeU.o   : UBlok.o

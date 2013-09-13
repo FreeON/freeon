@@ -2,27 +2,27 @@ include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = IRInv ODA CPSCFStatus DDIIS FBuild TC2Response AInv LowdinO RHeqs SP2 TS4 SCFstats P2Use DIIS
 
-IRInv_SOURCES       = IRInv.f90 DenMatMethods.f90
-ODA_SOURCES         = ODA.f90 DenMatMethods.f90
-CPSCFStatus_SOURCES = CPSCFStatus.f90
-DDIIS_SOURCES       = DDIIS.f90
-FBuild_SOURCES      = FBuild.f90
-TC2Response_SOURCES = TC2Response.f90 DenMatMethods.f90 DenMatResponse.f90
-AInv_SOURCES        = BlokAInv.f90 DenMatMethods.f90
-LowdinO_SOURCES     = LowdinO.f90 DenMatMethods.f90
-RHeqs_SOURCES       = RHeqs.f90 DenMatMethods.f90
-SP2_SOURCES         = FillPBlok.f90 SP2.f90 DenMatMethods.f90
-TS4_SOURCES         = FillPBlok.f90 TS4.f90 DenMatMethods.f90
-SCFstats_SOURCES    = SCFStatus.f90
-P2Use_SOURCES       = FillPBlok.f90 P2Use.f90 DenMatMethods.f90
+IRInv_SOURCES       = IRInv.F90 DenMatMethods.F90
+ODA_SOURCES         = ODA.F90 DenMatMethods.F90
+CPSCFStatus_SOURCES = CPSCFStatus.F90
+DDIIS_SOURCES       = DDIIS.F90
+FBuild_SOURCES      = FBuild.F90
+TC2Response_SOURCES = TC2Response.F90 DenMatMethods.F90 DenMatResponse.F90
+AInv_SOURCES        = BlokAInv.F90 DenMatMethods.F90
+LowdinO_SOURCES     = LowdinO.F90 DenMatMethods.F90
+RHeqs_SOURCES       = RHeqs.F90 DenMatMethods.F90
+SP2_SOURCES         = FillPBlok.F90 SP2.F90 DenMatMethods.F90
+TS4_SOURCES         = FillPBlok.F90 TS4.F90 DenMatMethods.F90
+SCFstats_SOURCES    = SCFStatus.F90
+P2Use_SOURCES       = FillPBlok.F90 P2Use.F90 DenMatMethods.F90
 
 if REALLY_OLD_DIIS
-DIIS_SOURCES = DIIS_2004-01-16.f90
+DIIS_SOURCES = DIIS_2004-01-16.F90
 else
 if OLD_DIIS
-DIIS_SOURCES = DIIS_1.3.f90
+DIIS_SOURCES = DIIS_1.3.F90
 else
-DIIS_SOURCES = DIIS.f90
+DIIS_SOURCES = DIIS.F90
 endif
 endif
 
@@ -62,7 +62,7 @@ LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
 tags :
-	ctags --Fortran-kinds=+i+L *.f90 ../Modules/*.{c,f,f90}
+	ctags --Fortran-kinds=+i+L *.F90 ../Modules/*.{c,f,f90}
 
 # Dependencies.
 IRInv.o          : DenMatMethods.o

@@ -2,8 +2,8 @@ include $(top_srcdir)/make.inc
 
 bin_PROGRAMS = HiCu XCForce
 
-HiCu_SOURCES    = Grid.f90 Thresholds.f90 RhoTree.f90 CubeTree.f90 TreeWalk.f90 KxcGen.f90 ParaHiCu.f90 HiCu.f90
-XCForce_SOURCES = Grid.f90 Thresholds.f90 RhoTree.f90 CubeTree.f90 TreeWalk.f90 KxcGen.f90 ParaHiCu.f90 dXCBlok.f90 XCForce.f90
+HiCu_SOURCES    = Grid.F90 Thresholds.F90 RhoTree.F90 CubeTree.F90 TreeWalk.F90 KxcGen.F90 ParaHiCu.F90 HiCu.F90
+XCForce_SOURCES = Grid.F90 Thresholds.F90 RhoTree.F90 CubeTree.F90 TreeWalk.F90 KxcGen.F90 ParaHiCu.F90 dXCBlok.F90 XCForce.F90
 
 HiCu_DEPENDENCIES    = $(LIBRARY_DEPENDENCY_FILES)
 XCForce_DEPENDENCIES = $(LIBRARY_DEPENDENCY_FILES)

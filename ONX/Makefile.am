@@ -3,32 +3,32 @@ include $(top_srcdir)/make.inc
 bin_PROGRAMS = ONX GONX
 
 ONX_SOURCES = \
-  QSDis.f \
-  PartDrv.f90 \
-  ONXParameters.f90 \
-  ONXInit.f90 \
-  ONXGet.f90 \
-  ONXFillOut.f90 \
-  Stats.f90 \
-  ONXRng.f90 \
-  ONX2F77.f \
-  ONX2DataType.f90 \
-  ONXCtrSclg.f90 \
-  ONX2List.f90 \
-  ONX2ComputK.f90 \
-  ONX2.f90
+  QSDis.F \
+  PartDrv.F90 \
+  ONXParameters.F90 \
+  ONXInit.F90 \
+  ONXGet.F90 \
+  ONXFillOut.F90 \
+  Stats.F90 \
+  ONXRng.F90 \
+  ONX2F77.F \
+  ONX2DataType.F90 \
+  ONXCtrSclg.F90 \
+  ONX2List.F90 \
+  ONX2ComputK.F90 \
+  ONX2.F90
 
 GONX_SOURCES = \
-  QSDis.f \
-  PartDrv.f90 \
-  ONXParameters.f90 \
-  ONXGet.f90 \
-  ONX2F77.f \
-  ONX2DataType.f90 \
-  ONXCtrSclg.f90 \
-  GONX2ComputDK.f90 \
-  GONX2.f90 \
-  ONX2List.f90
+  QSDis.F \
+  PartDrv.F90 \
+  ONXParameters.F90 \
+  ONXGet.F90 \
+  ONX2F77.F \
+  ONX2DataType.F90 \
+  ONXCtrSclg.F90 \
+  GONX2ComputDK.F90 \
+  GONX2.F90 \
+  ONX2List.F90
 
 ONX_DEPENDENCIES  = \
   $(LIBRARY_DEPENDENCY_FILES) \

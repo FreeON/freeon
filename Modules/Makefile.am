@@ -7,68 +7,68 @@ noinst_LTLIBRARIES = libfreeonmodules.la
 endif
 
 libfreeonmodules_la_SOURCES = \
-  AInv.f90 \
-  Anneal.f90 \
-  AtomPairs.f90 \
-  BasisSetParameters.f90 \
-  BoundingBox.f90 \
-  BraBloks.f90 \
-  CholFact.f90 \
-  Clock.f90 \
-  D1Mach.f \
-  DCSEvl.f \
-  DErf.f \
-  DErfc.f \
-  DFRepository.f \
-  DMach.f \
-  DerivedTypes.f90 \
-  FastMat.f90 \
+  AInv.F90 \
+  Anneal.F90 \
+  AtomPairs.F90 \
+  BasisSetParameters.F90 \
+  BoundingBox.F90 \
+  BraBloks.F90 \
+  CholFact.F90 \
+  Clock.F90 \
+  D1Mach.F \
+  DCSEvl.F \
+  DErf.F \
+  DErfc.F \
+  DFRepository.F \
+  DMach.F \
+  DerivedTypes.F90 \
+  FastMat.F90 \
   FileCopy.c \
   FreeONSleep.c \
-  Functionals.f90 \
+  Functionals.F90 \
   GetAddress.c \
   GetHostname.c \
   GetLimits.c \
   GetPID.c \
   GetPWD.c \
   GetRUsage.c \
-  GlobalCharacters.f90 \
-  GlobalObjects.f90 \
-  GlobalScalars.f90 \
+  GlobalCharacters.F90 \
+  GlobalObjects.F90 \
+  GlobalScalars.F90 \
   HDF5Wrap.c \
-  InOut.f90 \
-  Indexing.f90 \
-  InitDS.f \
-  LinAlg.f90 \
-  LinAlg77.f \
-  Macros.f90 \
-  MatFunk.f90 \
-  McMurch.f90 \
-  Mechanics.f90 \
-  MemMan.f90 \
-  MondoLogger.f90 \
+  InOut.F90 \
+  Indexing.F90 \
+  InitDS.F \
+  LinAlg.F90 \
+  LinAlg77.F \
+  Macros.F90 \
+  MatFunk.F90 \
+  McMurch.F90 \
+  Mechanics.F90 \
+  MemMan.F90 \
+  MondoLogger.F90 \
   MondoLogger.h \
-  MondoMPI.f90 \
-  Order.f90 \
-  Order77.f \
-  PBC.f90 \
-  Parse.f90 \
-  ParsingConstants.f90 \
-  PrettyPrint.f90 \
-  ProcessControl.f90 \
+  MondoMPI.F90 \
+  Order.F90 \
+  Order77.F \
+  PBC.F90 \
+  Parse.F90 \
+  ParsingConstants.F90 \
+  PrettyPrint.F90 \
+  ProcessControl.F90 \
   Random.c \
   SMWrap.c \
   Seconds.c \
-  SetEq.f90 \
-  SetEq77.f \
-  Slatec.f90 \
-  SpecFun.f90 \
+  SetEq.F90 \
+  SetEq77.F \
+  Slatec.F90 \
+  SpecFun.F90 \
   TempDirectory.c \
-  Thresholding.f90 \
+  Thresholding.F90 \
   TimerWrapper.c \
   Trap.c \
   UnlimitStack.c \
-  Utilities.f90 \
+  Utilities.F90 \
   mm_double_NN_1.c \
   mm_double_NN_c.c \
   mm_double_NT_1.c \
