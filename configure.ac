@@ -31,7 +31,8 @@ disemination in future releases.
 AC_CANONICAL_TARGET
 
 # Initialize automake.
-AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip])
+AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip silent-rules])
+AM_SILENT_RULES([yes])
 
 # Define the aclocal macro directory.
 AC_CONFIG_MACRO_DIR([m4])
@@ -296,10 +297,25 @@ AC_MSG_NOTICE([FC compiler version:  ${fc_compiler_version_string}])
 AC_PROG_CC_STDC
 AC_GNU_SOURCE
 
+# Check for naming convention for Fortran-C interface.
+AC_F77_WRAPPERS()
+AC_FC_WRAPPERS()
+
+# Find OpenMP flags for C.
+AC_LANG_PUSH(C)
+AC_OPENMP
+AC_LANG_POP(C)
+
+# Find OpenMP flags for Fortran.
+AC_LANG_PUSH(Fortran)
+AC_OPENMP
+AC_LANG_POP(Fortran)
+
 # Put the F90-compiler into free form.
-AC_LANG(Fortran)
-AC_FC_SRCEXT(f90)
+AC_LANG_PUSH(Fortran)
+AC_FC_SRCEXT(F90)
 AC_FC_FREEFORM
+AC_LANG_POP(Fortran)
 
 # Switch back to C.
 AC_LANG(C)
@@ -797,10 +813,10 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <stdlib.h>],
 # Find flags for static linking.
 AC_MSG_CHECKING([whether to link binaries statically])
 AC_ARG_ENABLE([static-binaries],
-  [AS_HELP_STRING([--disable-static-binaries],
+  [AS_HELP_STRING([--enable-static-binaries],
   [Disable static linking of FreeON executables.])],
   [static_linking="${enableval}"],
-  [static_linking="yes"])
+  [static_linking="no"])
 
 AC_MSG_RESULT([${static_linking}])
 AM_CONDITIONAL(USE_DYNAMIC_LINKING, [test "${static_linking}" = "no"])
