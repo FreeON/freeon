@@ -1469,7 +1469,7 @@ CONTAINS
              FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
         OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+             FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
       ELSE
         CALL Halt('Get_BCSR could not find '//TRIM(FileName))
@@ -1643,7 +1643,7 @@ CONTAINS
              FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
         OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+             FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
       ELSE
 #if FORMATTED
@@ -1651,7 +1651,7 @@ CONTAINS
              FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
         OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+             FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
       ENDIF
 #ifdef FORMATTED
