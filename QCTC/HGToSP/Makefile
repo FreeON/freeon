@@ -5,7 +5,7 @@
 #     Copyright 2000, The University of California
 #
 #================================================================================
-include $(MONDO_HOME)/Includes/RemoveAll
+include $(FREEON_HOME)/Includes/RemoveAll
 #
 all:	
 	math<HGToSP.m

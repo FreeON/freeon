@@ -75,7 +75,7 @@ CONTAINS
     ALLOCATE(B%PrimPairThresh(1:G%Clones,1:B%NBSets))
 
     DO J=1,B%NBSets
-      BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
+      BaseFile=TRIM(N%M_BASISSETS)//"/"//TRIM(B%BName(J))//BasF
       CALL MondoLog(DEBUG_MAXIMUM, "FreeON", "trying to open basis set file: "//TRIM(BaseFile), "LoadBasisSets")
       INQUIRE(FILE=BaseFile,EXIST=Exists)
       IF(Exists)THEN

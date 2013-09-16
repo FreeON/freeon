@@ -52,6 +52,10 @@ SOURCES_DEPCHECK = $(FreeON_SOURCES)
 
 FreeON_LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
 
+AM_CPPFLAGS += \
+  -DFREEON_BASISSETS=\"$(datadir)/freeon/BasisSets\" \
+  -DFREEON_HOME=\"${prefix}\"
+
 CPPMISC = -DNEB2
 
 # Link rule for FreeON.

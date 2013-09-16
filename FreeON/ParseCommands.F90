@@ -62,12 +62,20 @@ CONTAINS
     CALL GetPWD(N%M_PWD)
 
     ! Get environmental variables
-    CALL GetEnv('MONDO_HOME',N%M_HOME)
+    CALL GetEnv('FREEON_HOME',N%M_HOME)
     IF(LEN(TRIM(N%M_HOME)) == 0) THEN
-      N%M_HOME = HAVE_MONDO_HOME
-      CALL MondoLog(DEBUG_NONE,"FreeON", "env variable $(MONDO_HOME) not set. Using "//trim(N%M_HOME), "LoadCommand")
+      N%M_HOME = FREEON_HOME
+      CALL MondoLog(DEBUG_NONE,"FreeON", "env variable $(FREEON_HOME) not set. Using "//trim(N%M_HOME), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_HOME) set to '//trim(N%M_HOME), "LoadCommand")
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_HOME) set to '//trim(N%M_HOME), "LoadCommand")
+    ENDIF
+
+    CALL GetEnv('FREEON_BASISSETS',N%M_BASISSETS)
+    IF(LEN(TRIM(N%M_BASISSETS)) == 0) THEN
+      N%M_BASISSETS = FREEON_BASISSETS
+      CALL MondoLog(DEBUG_NONE,"FreeON", "env variable $(FREEON_BASISSETS) not set. Using "//trim(N%M_BASISSETS), "LoadCommand")
+    ELSE
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_BASISSETS) set to '//trim(N%M_BASISSETS), "LoadCommand")
     ENDIF
 
     CALL GetEnv('MONDO_EXEC',N%M_EXEC)

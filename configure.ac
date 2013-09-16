@@ -137,10 +137,10 @@ if test -z "${F77}"; then
 fi
 
 # Identify compiler.
-AC_ARG_VAR([CC_COMPILERNAME], [Gives the configure script a hint as to what
-            kind of compiler the CC compiler is.  Normally this is
-            autodetected, but can sometimes fail. Possible values are GCC,
-            Intel, PGI.])
+AC_ARG_VAR([CC_COMPILERNAME],
+  [Gives the configure script a hint as to what kind of compiler the CC
+   compiler is.  Normally this is autodetected, but can sometimes fail.
+   Possible values are GCC, Intel, PGI.])
 
 if test -n "${CC_COMPILERNAME}"; then
   if test "${CC_COMPILERNAME}" = "GCC" -o \
@@ -178,10 +178,10 @@ else
   fi
 fi
 
-AC_ARG_VAR([F77_COMPILERNAME], [Gives the configure script a hint as to what
-            kind of compiler the F77 compiler is.  Normally this is
-            autodetected, but can sometimes fail. Possible values are GCC,
-            Intel, PGI.])
+AC_ARG_VAR([F77_COMPILERNAME],
+  [Gives the configure script a hint as to what kind of compiler the F77
+   compiler is.  Normally this is autodetected, but can sometimes fail.
+   Possible values are GCC, Intel, PGI.])
 
 if test -n "${F77_COMPILERNAME}"; then
   if test "${F77_COMPILERNAME}" = "GCC" -o \
@@ -219,10 +219,10 @@ else
   fi
 fi
 
-AC_ARG_VAR([FC_COMPILERNAME], [Gives the configure script a hint as to what
-            kind of compiler the FC compiler is.  Normally this is
-            autodetected, but can sometimes fail. Possible values are GCC,
-            Intel, PGI.])
+AC_ARG_VAR([FC_COMPILERNAME],
+  [Gives the configure script a hint as to what kind of compiler the FC
+   compiler is.  Normally this is autodetected, but can sometimes fail.
+   Possible values are GCC, Intel, PGI.])
 
 if test -n "${FC_COMPILERNAME}"; then
   if test "${FC_COMPILERNAME}" = "GCC" -o \
@@ -530,6 +530,8 @@ else
   fi
 fi
 
+AM_CONDITIONAL([AUTOMATIC_FFLAGS], [test -z "${user_FFLAGS}"])
+
 # Check whether to check for case differences in names (for debugging).
 AC_MSG_CHECKING([whether to check for case differences in names])
 AC_ARG_ENABLE([case-check],
@@ -667,57 +669,13 @@ END PROGRAM test_compiler
 # Compile LinearAlgebraLibrary.
 AC_CONFIG_SUBDIRS([LinearAlgebraLibrary])
 
-NOOPT=
-LAPACK_TIMER="NONE"
-
-AC_ARG_WITH([lapack],
-  [AS_HELP_STRING([--with-lapack=DIR],
-  [Specify non-standard directory for the BLAS/LAPACK libraries.])],
-  [LDFLAGS="${LDFLAGS} -L${withval}/lib"
-  AC_MSG_NOTICE([using -L${withval}/lib])],
-  [])
-
-AC_ARG_WITH([lapacklibs],
-  [AS_HELP_STRING([--with-lapacklibs=-lblas -llapack...],
-  [Specify the blas/lapack libraries as specified on the linker command line (default is -lblas -llapack)])],
-  [more_LIBS="${withval}"
-  AC_MSG_NOTICE([using ${withval}])],
-  [more_LIBS="-llapack -lblas"])
-
-if test -z "${LIBS}"; then
-  LIBS="${more_LIBS}"
-else
-  LIBS="${LIBS} ${more_LIBS}"
-fi
-unset more_LIBS
-
 # Check for BLAS.
-AC_MSG_CHECKING([for BLAS (dgemm)])
-AC_LINK_IFELSE([
-program test
-
-  call dgemm()
-
-end program test
-],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_FAILURE([no])])
+AC_SEARCH_LIBS([dgemm], [blas], [],
+  [AC_MSG_FAILURE([specify the location of dgemm()])])
 
 # Check for LAPACK.
-AC_MSG_CHECKING([for LAPACK (dsyev)])
-AC_LINK_IFELSE([
-program test
-
-  call dsyev()
-
-end program test
-],
-  [AC_MSG_RESULT([yes])],
-  [AC_MSG_FAILURE([no])])
-
-# Set some variables.
-AC_SUBST(NOOPT, [${NOOPT}])
-AC_SUBST(LAPACK_TIMER, [${LAPACK_TIMER}])
+AC_SEARCH_LIBS([dsyev], [lapack], [],
+  [AC_MSG_FAILURE([specify the library that contains dsyev()])])
 
 AC_ARG_VAR([H5CC], [h5cc compiler wrapper command])
 
@@ -895,14 +853,12 @@ if test "${use_parallel_clones}" = "yes"; then
   fi
 fi
 
-# Define location of temporary Mondo files.
-AC_MSG_CHECKING([where to put MONDO_SCRATCH])
-AC_ARG_WITH([MONDO_SCRATCH],
-  [AS_HELP_STRING([--with-MONDO_SCRATCH=DIR],
-  [Specify default MONDO_SCRATCH directory])],
-  [MONDO_SCRATCH="${withval}"],
-  [MONDO_SCRATCH="/tmp"])
-AC_MSG_RESULT([using ${MONDO_SCRATCH}])
+# Define location of temporary FreeON files.
+AC_ARG_VAR([MONDO_SCRATCH],
+  [Specify default MONDO_SCRATCH directory])
+if test -z "${MONDO_SCRATCH}"; then
+  MONDO_SCRATCH="/tmp"
+fi
 
 # Define FreeON variables.
 
@@ -915,15 +871,6 @@ AC_SUBST(CPP, ${CPP})
 AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
 AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
-
-# In case prefix was not set on command line.
-if test "${prefix}" = "NONE"; then
-  MONDO_HOME="${ac_default_prefix}"
-  AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${ac_default_prefix}"], [Define the main installation directory.])
-else
-  MONDO_HOME="${prefix}"
-  AC_DEFINE_UNQUOTED(HAVE_MONDO_HOME,    ["${prefix}"], [Define the main installation directory.])
-fi
 
 AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
 AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,    ["`hostname`"], [Define hostname.])
@@ -1012,14 +959,12 @@ AC_MSG_NOTICE([F77                      = ${F77}])
 AC_MSG_NOTICE([CFLAGS                   = ${CFLAGS}])
 AC_MSG_NOTICE([FCFLAGS                  = ${FCFLAGS}])
 AC_MSG_NOTICE([FFLAGS                   = ${FFLAGS}])
-AC_MSG_NOTICE([NOOPT                    = ${NOOPT}])
 AC_MSG_NOTICE([LDFLAGS                  = ${LDFLAGS}])
 AC_MSG_NOTICE([LIBS                     = ${LIBS}])
 AC_MSG_NOTICE([CPPFLAGS                 = ${CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
-AC_MSG_NOTICE([MONDO_HOME               = ${MONDO_HOME}])
 AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([Using external lapack library])

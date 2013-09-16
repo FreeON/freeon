@@ -34,9 +34,9 @@
 
 (* GET THE MAX ANGULAR SYMMETRY TO BE USED *)
 
-MondoHome=Environment["MONDO_HOME"];
+MondoHome=Environment["FREEON_HOME"];
 If[MondoHome==$FAILED,
-   Print["COULD NOT FIND $MONDO_HOME! CHECK YOUR .cshrc "];
+   Print["COULD NOT FIND $FREEON_HOME! CHECK YOUR .cshrc "];
    Abort[];
   ];
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];

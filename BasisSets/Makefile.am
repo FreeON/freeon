@@ -1,4 +1,4 @@
-datadir = ${prefix}/BasisSets
+datadir = ${datarootdir}/freeon/BasisSets
 data_DATA = $(BasisSets)
 
 EXTRA_DIST = $(data_DATA)

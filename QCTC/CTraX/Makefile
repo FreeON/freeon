@@ -26,8 +26,8 @@
 #    ab initio molecular dynamics", and given appropriate citation.  
 #------------------------------------------------------------------------------
 include $(MONDO_COMPILER)
-include $(MONDO_HOME)/Includes/Suffixes
-include $(MONDO_HOME)/Includes/RemoveAll
+include $(FREEON_HOME)/Includes/Suffixes
+include $(FREEON_HOME)/Includes/RemoveAll
 #
 all:	clean mma #move
 

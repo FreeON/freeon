@@ -25,7 +25,7 @@
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.  
 #------------------------------------------------------------------------------
-include $(MONDO_HOME)/Includes/RemoveAll
+include $(FREEON_HOME)/Includes/RemoveAll
 #
 all:	g i e
 #

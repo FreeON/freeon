@@ -2,9 +2,14 @@ include $(top_srcdir)/make.inc
 
 noinst_LTLIBRARIES = libktrax.la
 
-# Force moderate compiler optimization flags on KTrax.F
 libktrax_la_SOURCES = KTrax.F
+
+if AUTOMATIC_FFLAGS
+# Force moderate compiler optimization flags on KTrax.F
 libktrax_la_FFLAGS = -O2 -g -pipe
+else
+libktrax_la_FFLAGS = $(AM_FFLAGS)
+endif
 
 bin_PROGRAMS = QCTC JForce MakePFFT
 

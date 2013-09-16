@@ -33,9 +33,9 @@
 
 (* GET THE MONDO INFO *)
 
-MondoHome=Environment["MONDO_HOME"];
+MondoHome=Environment["FREEON_HOME"];
 If[MondoHome==$FAILED,
-   Print["COULD NOT FIND $MONDO_HOME! CHECK YOUR .cshrc "];
+   Print["COULD NOT FIND $FREEON_HOME! CHECK YOUR .cshrc "];
    Abort[];
   ];
 
