@@ -105,6 +105,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 
 #ifdef PRINT_MATRIX
   CALL SetEq(PDense, P)
+  CALL MondoLog(DEBUG_NONE, Prog, "Fock guess, " &
+    //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
+    //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
+    //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
   DO I = 1, SIZE(PDense%D, 1)
     DO J = 1, SIZE(PDense%D, 2)
       CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
@@ -132,6 +136,21 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
     Occ2 = Occ1
     Occ1 = Occ0
   ENDDO
+
+#ifdef PRINT_MATRIX
+  CALL SetEq(PDense, P)
+  CALL MondoLog(DEBUG_NONE, Prog, "Converged density, " &
+    //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
+    //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
+    //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
+  DO I = 1, SIZE(PDense%D, 1)
+    DO J = 1, SIZE(PDense%D, 2)
+      CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
+        //" "//TRIM(IntToChar(J)) &
+        //" "//TRIM(DblToChar(PDense%D(I, J))))
+    ENDDO
+  ENDDO
+#endif
 
   ! If we are called without the DIIS Fockian, consider a levelshift
   CALL OpenASCII(InpFile,Inp)
