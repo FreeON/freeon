@@ -54,6 +54,8 @@ CONTAINS
     INTEGER             :: i, indexBegin, indexEnd
     LOGICAL             :: Exists
 
+    CALL MondoLog(DEBUG_NONE, "FreeON", "Version "//TRIM(PACKAGE_VERSION)//" starting...")
+
     ! Get command line arguments
     CALL Get(Args)
     IF(Args%NC==0) CALL MondoHalt(PRSE_ERROR,' No arguments to FreeON !')!
