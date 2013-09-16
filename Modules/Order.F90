@@ -209,8 +209,7 @@ MODULE Order
         CALL IntSort77(N,X%I,Ordr)
     END SUBROUTINE Sort_INT_VECT
   END MODULE Order
-!--------------------------------------------------------------
-!--------------------------------------------------------------
+
   SUBROUTINE SFCOrder77(N,R,Point,Key,Hilbert)
     Use DerivedTypes
     IMPLICIT NONE
