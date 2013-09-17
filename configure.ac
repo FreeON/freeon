@@ -124,6 +124,8 @@ AC_PROG_CC([${C_COMPILERS}])
 AC_PROG_FC([${FC_COMPILERS}])
 AC_PROG_F77([${F77_COMPILERS}])
 
+AC_USE_SYSTEM_EXTENSIONS
+
 if test -z "${CC}"; then
   AC_MSG_FAILURE([no C compiler found: set the CC variable])
 fi
@@ -937,16 +939,6 @@ AC_DEFINE_UNQUOTED(FCFLAGS_STRING, ["${FCFLAGS}"], [The F90-compiler flags used]
 
 # Store information on how we were configured.
 AC_DEFINE_UNQUOTED(CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command line arguments to the configure script])
-
-# For debugging.
-AC_ARG_ENABLE([print-SP2],
-  [AS_HELP_STRING([--enable-print-SP2],
-                  [Print density matrix in SP2])],
-  [print_matrix="$enableval"],
-  [print_matrix="no"])
-if test "${print_matrix}" = "yes"; then
-  AC_DEFINE(PRINT_MATRIX, [1], [Print density matrix in SP2])
-fi
 
 # For AInv.
 #AC_DEFINE(SPATIAL_THRESHOLDING, [1], [Use spatial thresholding in AInv])

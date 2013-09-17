@@ -534,13 +534,14 @@ CONTAINS
     ELSE
       PFlags%Key=DEBUG_MINIMUM
     ENDIF
+
     ! And, by the way, set the global key for front end (FreeON)
     PrintFlags%Key=PFlags%Key
-    !
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MATRICES) )THEN
       PFlags%Mat=DEBUG_MATRICES
-    ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,PLT_MATRICES) )THEN
-      PFlags%Mat=PLOT_MATRICES
+    ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PLT_MATRICES) )THEN
+      PFlags%Mat=DEBUG_PLOT_MATRICES
     ELSE
       PFlags%Mat=DEBUG_NONE
     ENDIF
@@ -549,7 +550,7 @@ CONTAINS
     ELSE
       PFlags%Chk=DEBUG_NONE
     ENDIF
-    !
+
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MMA_STYLE) )THEN
       PFlags%Fmt=DEBUG_MMASTYLE
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_FLT_STYLE) )THEN
@@ -582,6 +583,8 @@ CONTAINS
       PFlags%MM=DEBUG_MM
     ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_FRC))THEN
       PFlags%MM=DEBUG_FRC
+    ELSEIF(OptKeyQ(Inp, GLOBAL_DEBUG, DBG_PRT_SP2)) THEN
+      PFlags%MM = DEBUG_PRT_SP2
     ELSE
       PFlags%MM=DEBUG_NONE
     ENDIF

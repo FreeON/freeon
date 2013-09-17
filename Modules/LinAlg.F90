@@ -3735,7 +3735,7 @@ CONTAINS
     TYPE(DBCSR) :: A
     CHARACTER(LEN=*) :: Name
     INTEGER :: I,K
-    IF(PrintFlags%Mat/=PLOT_MATRICES)RETURN
+    IF(PrintFlags%Mat/=DEBUG_PLOT_MATRICES)RETURN
     CALL LocalToGlobal(A)
     IF(MyID==ROOT)THEN
       CALL OpenASCII('PlotFile_1',Plt,NewFile_O=.TRUE.)
@@ -3775,9 +3775,7 @@ CONTAINS
 12  FORMAT("plot 'PlotFile_1' using 1:2 with points 4 ")
 13  FORMAT("plot 'PlotFile_1' using 1:2 with points 4 ")
   END SUBROUTINE Plot_DBCSR
-
 #endif
-
 
 #ifdef USE_METIS
   !===============================================================================
@@ -3835,6 +3833,7 @@ CONTAINS
     CALL Delete(IPerm)
   END SUBROUTINE MetisReorder
 #endif
+
   !===============================================================================
   !     Performs the symetric permutation P^T.A.P, where P is in vector form
   !===============================================================================
@@ -3883,8 +3882,6 @@ CONTAINS
     CALL Delete(BlkPt)
 
   END SUBROUTINE SymPe
-
-
 
   SUBROUTINE PlotDecay(A,GM,Name)
     TYPE(BCSR)     :: A
@@ -3943,7 +3940,7 @@ CONTAINS
     TYPE(BCSR) :: A
     CHARACTER(LEN=*) :: Name
     INTEGER :: I,K
-    IF(PrintFlags%Mat/=PLOT_MATRICES)RETURN
+    IF(PrintFlags%Mat/=DEBUG_PLOT_MATRICES)RETURN
     CALL OpenASCII(TRIM(Name)//'_PlotFile_1',Plt,NewFile_O=.TRUE.)
     DO I=1,NAtoms
       DO K=A%RowPt%I(I),A%RowPt%I(I+1)-1

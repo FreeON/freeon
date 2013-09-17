@@ -246,12 +246,10 @@ CONTAINS
     CHARACTER(LEN=*) :: TrixName,Prog
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
     REAL(DOUBLE)     :: Trix
-    !-------------------------------------------------------------------------------
+
     ! Check for thresholds overide
-    !WRITE(*,*) "[SussTrix] reading new threshold for keyword "//TRIM(TrixName)
     CALL OpenASCII(InpFile,Inp)
     IF(OptDblQ(Inp,TrixName,Trix))THEN
-      !WRITE(*,*) "[SussTrix] found "//TRIM(TrixName)//" keyword"
       Thresholds%Trix=Trix
       Mssg=TRIM(ProcessName(Prog))//' Trix = '  &
            //TRIM(DblToShrtChar(Thresholds%Trix))
@@ -260,7 +258,6 @@ CONTAINS
     CLOSE(Inp)
     CALL SetVarThresh()
   END SUBROUTINE SussTrix
-  !-------------------------------------------------------------------------------
 
 #ifdef PARALLEL
   !-------------------------------------------------------------------------------

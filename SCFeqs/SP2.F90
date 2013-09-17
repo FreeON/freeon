@@ -49,10 +49,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   IMPLICIT NONE
 
 #ifdef PARALLEL
-  TYPE(DBCSR)                     :: F,P,Pold,Tmp1,Tmp2
-  TYPE(BCSR)                      :: F_BCSR
+  TYPE(DBCSR) :: F,P,Pold,Tmp1,Tmp2
+  TYPE(BCSR)  :: F_BCSR
 #else
-  TYPE(BCSR)                     :: F,FT,P,PT,Pold,Tmp1,Tmp2
+  TYPE(BCSR)  :: F,FT,P,PT,Pold,Tmp1,Tmp2
 #endif
 
   !-------------------------------------------------------------------------------
@@ -103,20 +103,20 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #endif
   CALL SetEq(Pold,P)
 
-#ifdef PRINT_MATRIX
-  CALL SetEq(PDense, P)
-  CALL MondoLog(DEBUG_NONE, Prog, "Fock guess, " &
-    //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
-    //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
-    //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
-  DO I = 1, SIZE(PDense%D, 1)
-    DO J = 1, SIZE(PDense%D, 2)
-      CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
-        //" "//TRIM(IntToChar(J)) &
-        //" "//TRIM(DblToChar(PDense%D(I, J))))
+  IF(PrintFlags%MM == DEBUG_PRT_SP2) THEN
+    CALL SetEq(PDense, P)
+    CALL MondoLog(DEBUG_NONE, Prog, "Fock guess, " &
+      //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
+      //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
+      //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
+    DO I = 1, SIZE(PDense%D, 1)
+      DO J = 1, SIZE(PDense%D, 2)
+        CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
+          //" "//TRIM(IntToChar(J)) &
+          //" "//TRIM(DblToChar(PDense%D(I, J))))
+      ENDDO
     ENDDO
-  ENDDO
-#endif
+  ENDIF
 
   ! Do SP2 iterations
   Occ0 = 0.D0
@@ -137,20 +137,20 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
     Occ1 = Occ0
   ENDDO
 
-#ifdef PRINT_MATRIX
-  CALL SetEq(PDense, P)
-  CALL MondoLog(DEBUG_NONE, Prog, "Converged density, " &
-    //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
-    //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
-    //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
-  DO I = 1, SIZE(PDense%D, 1)
-    DO J = 1, SIZE(PDense%D, 2)
-      CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
-        //" "//TRIM(IntToChar(J)) &
-        //" "//TRIM(DblToChar(PDense%D(I, J))))
+  IF(PrintFlags%MM == DEBUG_PRT_SP2) THEN
+    CALL SetEq(PDense, P)
+    CALL MondoLog(DEBUG_NONE, Prog, "Converged density, " &
+      //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
+      //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
+      //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
+    DO I = 1, SIZE(PDense%D, 1)
+      DO J = 1, SIZE(PDense%D, 2)
+        CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
+          //" "//TRIM(IntToChar(J)) &
+          //" "//TRIM(DblToChar(PDense%D(I, J))))
+      ENDDO
     ENDDO
-  ENDDO
-#endif
+  ENDIF
 
   ! If we are called without the DIIS Fockian, consider a levelshift
   CALL OpenASCII(InpFile,Inp)

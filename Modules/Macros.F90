@@ -471,9 +471,9 @@ CONTAINS
       IF(OptKeyQ(Inp,TRIM(Prog),  DBG_MATRICES).OR. &
            OptKeyQ(Inp,GLOBAL_DEBUG,DBG_MATRICES) )THEN
         A%Mat=DEBUG_MATRICES
-      ELSEIF(OptKeyQ(Inp,TRIM(Prog),  PLT_MATRICES).OR. &
-           OptKeyQ(Inp,GLOBAL_DEBUG,PLT_MATRICES) )THEN
-        A%Mat=PLOT_MATRICES
+      ELSEIF(OptKeyQ(Inp,TRIM(Prog), DBG_PLT_MATRICES).OR. &
+           OptKeyQ(Inp,GLOBAL_DEBUG, DBG_PLT_MATRICES) )THEN
+        A%Mat=DEBUG_PLOT_MATRICES
       ELSE
         A%Mat=DEBUG_NONE
       ENDIF
@@ -484,6 +484,9 @@ CONTAINS
       ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_FRC) .OR. &
            OptKeyQ(Inp,TRIM(Prog)  ,DBG_PRT_FRC)) THEN
         A%MM=DEBUG_FRC
+      ELSEIF(OptKeyQ(Inp, GLOBAL_DEBUG, DBG_PRT_SP2) .OR. &
+           OptKeyQ(Inp,TRIM(Prog)  ,DBG_PRT_SP2)) THEN
+        A%MM = DEBUG_PRT_SP2
       ELSE
         A%MM=DEBUG_NONE
       ENDIF
