@@ -31,8 +31,6 @@ We periodically release snapshots of the development tree in the [Savannah FreeO
 
 Here are a few recent ones:
 
--   [freeon-beta-2012-05-03.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-beta-2012-05-03.tar.bz2)
--   [freeon-2013-09-16.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-2013-09-16.tar.bz2)
 -   [freeon-1.0.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.tar.bz2)
 
 Project Stats
