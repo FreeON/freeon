@@ -1,6 +1,11 @@
 AC_PREREQ(2.59)
 
-AC_INIT([freeon], [1.0], [freeon-users@nongnu.org])
+AC_INIT([FreeON],
+        [1.0],
+        [freeon-users@nongnu.org],
+        [],
+        [http://www.freeon.org])
+
 AC_COPYRIGHT([
 This code is part of the FreeON suite of programs for linear scaling
 electronic structure theory and ab initio molecular dynamics.
