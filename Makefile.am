@@ -21,13 +21,10 @@ docs :
 	doxygen
 	$(MAKE) -C latex
 
-$(top_srcdir)/localversion : always
-	cd $(top_srcdir) && ./fix_localversion.sh
-
 #DISTCHECK_CONFIGURE_FLAGS = --disable-optimizations --enable-internal-lapack-checks
 
 # Phony targets.
-.PHONY : validate tags always
+.PHONY : validate tags
 
 # Clean out everything except for things that are excrutiatingly long to
 # rebuild.
