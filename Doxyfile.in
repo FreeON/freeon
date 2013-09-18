@@ -26,7 +26,7 @@ DOXYFILE_ENCODING      = UTF-8
 # identify the project. Note that if you do not use Doxywizard you need
 # to put quotes around the project name if it contains spaces.
 
-PROJECT_NAME           = "FreeON"
+PROJECT_NAME           = "@PACKAGE_NAME@"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
@@ -351,12 +351,12 @@ EXTRACT_ALL            = NO
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class
 # will be included in the documentation.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_STATIC tag is set to YES all static members of a file
 # will be included in the documentation.
 
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 
 # If the EXTRACT_LOCAL_CLASSES tag is set to YES classes (and structs)
 # defined locally in source files will be included in the documentation.
@@ -458,7 +458,7 @@ SORT_MEMBER_DOCS       = YES
 # by member name. If set to NO (the default) the members will appear in
 # declaration order.
 
-SORT_BRIEF_DOCS        = NO
+SORT_BRIEF_DOCS        = YES
 
 # If the SORT_MEMBERS_CTORS_1ST tag is set to YES then doxygen
 # will sort the (brief and detailed) documentation of class members so that
@@ -648,7 +648,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = documentation
+INPUT                  = documentation FreeON SCFeqs OneE QCTC HiCu TwoE ONX Modules
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -672,7 +672,7 @@ FILE_PATTERNS          =
 # should be searched for input files as well. Possible values are YES and NO.
 # If left blank NO is used.
 
-RECURSIVE              = NO
+RECURSIVE              = YES
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -775,12 +775,12 @@ FILTER_SOURCE_PATTERNS =
 # Note: To get rid of all source code in the generated output, make sure also
 # VERBATIM_HEADERS is set to NO.
 
-SOURCE_BROWSER         = NO
+SOURCE_BROWSER         = YES
 
 # Setting the INLINE_SOURCES tag to YES will include the body
 # of functions and classes directly in the documentation.
 
-INLINE_SOURCES         = NO
+INLINE_SOURCES         = YES
 
 # Setting the STRIP_CODE_COMMENTS tag to YES (the default) will instruct
 # doxygen to hide any special comment blocks from generated source code
@@ -792,13 +792,13 @@ STRIP_CODE_COMMENTS    = YES
 # then for each documented function all documented
 # functions referencing it will be listed.
 
-REFERENCED_BY_RELATION = NO
+REFERENCED_BY_RELATION = YES
 
 # If the REFERENCES_RELATION tag is set to YES
 # then for each documented function all documented entities
 # called/used by that function will be listed.
 
-REFERENCES_RELATION    = NO
+REFERENCES_RELATION    = YES
 
 # If the REFERENCES_LINK_SOURCE tag is set to YES (the default)
 # and SOURCE_BROWSER tag is set to YES, then the hyperlinks from
@@ -1117,7 +1117,7 @@ DISABLE_INDEX          = NO
 # Since the tree basically has the same information as the tab index you
 # could consider to set DISABLE_INDEX to NO when enabling this option.
 
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 
 # The ENUM_VALUES_PER_LINE tag can be used to set the number of enum values
 # (range [0,1..20]) that doxygen will group on one line in the generated HTML
@@ -1281,7 +1281,7 @@ USE_PDFLATEX           = YES
 # running if errors occur, instead of asking the user for help.
 # This option is also used when generating formulas in HTML.
 
-LATEX_BATCHMODE        = NO
+LATEX_BATCHMODE        = YES
 
 # If LATEX_HIDE_INDICES is set to YES then doxygen will not
 # include the index chapters (such as File Index, Compound Index, etc.)
@@ -1294,7 +1294,7 @@ LATEX_HIDE_INDICES     = NO
 # Note that which sources are shown also depends on other settings
 # such as SOURCE_BROWSER.
 
-LATEX_SOURCE_CODE      = NO
+LATEX_SOURCE_CODE      = YES
 
 # The LATEX_BIB_STYLE tag can be used to specify the style to use for the
 # bibliography, e.g. plainnat, or ieeetr. The default style is "plain". See
