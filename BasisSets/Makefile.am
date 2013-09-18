@@ -1,4 +1,4 @@
-datadir = ${datarootdir}/freeon/BasisSets
+datadir = ${datarootdir}/$(PACKAGE_NAME)/BasisSets
 data_DATA = $(BasisSets)
 
 EXTRA_DIST = $(data_DATA)
