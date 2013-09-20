@@ -3,7 +3,21 @@ ACLOCAL_AMFLAGS = -I m4
 CPP = @CPP@
 AM_CPPFLAGS = @AM_CPPFLAGS@
 
-SUBDIRS = Modules tests LinearAlgebraLibrary FreeON SCFeqs OneE QCTC HiCu TwoE ONX Validate PostProcessing BasisSets
+SUBDIRS = \
+	Modules \
+	tests \
+	LinearAlgebraLibrary \
+	FreeON \
+	SCFeqs \
+	OneE \
+	QCTC \
+	HiCu \
+	TwoE \
+	ONX \
+	Validate \
+	PostProcessing \
+	BasisSets \
+	debian
 
 EXTRA_DIST = localversion FreeON.bibtex
 

@@ -924,6 +924,8 @@ Validate/SinglePoint/Restricted/Makefile
 PostProcessing/Makefile
 BasisSets/Makefile
 tests/Makefile
+debian/Makefile
+debian/source/Makefile
 ])
 
 AC_CONFIG_HEADERS([config.h])
