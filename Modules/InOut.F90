@@ -64,7 +64,7 @@ MODULE InOut
          Get_ARGMT,    Get_HGRho,                  &
          Get_CMPoles
 
-  END INTERFACE
+  END INTERFACE Get
   INTERFACE Put
     MODULE PROCEDURE Put_INT_SCLR, Put_INT_VECT, Put_INT_RNK2, &
          Put_INT_RNK3, Put_INT_RNK4, Put_DBL_SCLR, &
@@ -80,7 +80,7 @@ MODULE InOut
          Put_PBCInfo,  Put_CellSet,                &
          Put_TOLS,     Put_BCSR,     Put_HGRho,    &
          Put_CMPoles
-  END INTERFACE
+  END INTERFACE Put
 
   INTEGER, EXTERNAL  :: HDF5CreateFile,HDF5OpenFile,HDF5CloseFile,         &
        HDF5CreateGroup,HDF5OpenGroup,HDF5CloseGroup,      &
@@ -1399,6 +1399,11 @@ CONTAINS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
 
+#ifdef STANDALONE_BCSR_FILEFORMAT
+    INTEGER :: NRow, NCol, dummyNBasF
+    INTEGER, DIMENSION(:), ALLOCATABLE :: dummyBSiz, dummyOffS
+#endif
+
     IF(PRESENT(BCast_O)) THEN
       Bcast = BCast_O
     ELSE
@@ -1480,6 +1485,15 @@ CONTAINS
       INCLUDE 'Formats.Inc'
 #else
       READ(UNIT=Seq,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
+#ifdef STANDALONE_BCSR_FILEFORMAT
+      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) dummyNBasF, NRow, NCol
+      ALLOCATE(dummyBSiz(NAtms))
+      ALLOCATE(dummyOffS(NAtms))
+      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyBSiz(I), I = 1, NAtms)
+      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyOffS(I), I = 1, NAtms)
+      DEALLOCATE(dummyOffS)
+      DEALLOCATE(dummyBSiz)
+#endif
 #endif
       IF(AllocQ(A%Alloc))THEN
         IF(NSMat.GT.A%NSMat) THEN
@@ -1597,6 +1611,10 @@ CONTAINS
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
 
+#ifdef STANDALONE_BCSR_FILEFORMAT
+    INTEGER :: NRow, NCol
+#endif
+
     !IF(.NOT. inFrontend) THEN
     !  CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
     !ENDIF
@@ -1666,6 +1684,17 @@ CONTAINS
 #else
       !write(*,*) 'put',A%NSMat
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)A%NSMat,NAtoms,A%NNon0,A%NBlks
+#ifdef STANDALONE_BCSR_FILEFORMAT
+      SELECT CASE(A%NSMat)
+      CASE(1);NRow=  NBasF;NCol=  NBasF
+      CASE(2);NRow=  NBasF;NCol=2*NBasF
+      CASE(4);NRow=2*NBasF;NCol=2*NBasF
+      CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! ')
+      END SELECT
+      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) NBasF, NRow, NCol
+      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (BSiz%I(I), I = 1, NAtoms)
+      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (OffS%I(I), I = 1, NAtoms)
+#endif
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
       !WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks*A%NSMat)
