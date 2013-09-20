@@ -1,4 +1,4 @@
-datadir = ${datarootdir}/$(PACKAGE_NAME)/BasisSets
+datadir = ${datarootdir}/$(PACKAGE)/BasisSets
 data_DATA = $(BasisSets)
 
 EXTRA_DIST = $(data_DATA)
