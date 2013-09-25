@@ -1,5 +1,5 @@
-freeon (1.0.2-1) unstable; urgency=low
+freeon (1.0.3-1) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Initial release of freeon-1.0.3
 
  -- Nicolas Bock <nicolasbock@gmail.com>  Fri, 20 Sep 2013 13:54:37 -0600

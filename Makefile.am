@@ -23,9 +23,9 @@ EXTRA_DIST = localversion FreeON.bibtex
 
 CLEANFILES = *~
 
-DISTCLEANFILES = config.h MondoConfig.h MondoLocalVersion.h
+DISTCLEANFILES = MondoConfig.h MondoLocalVersion.h
 
-include_HEADERS = config.h MondoConfig.h MondoLocalVersion.h
+include_HEADERS = MondoLocalVersion.h
 
 CONFIG_STATUS_DEPENDENCIES = \
   $(top_srcdir)/Doxyfile.in \
