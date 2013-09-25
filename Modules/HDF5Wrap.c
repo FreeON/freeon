@@ -39,11 +39,10 @@
 
 #include "config.h"
 
-#if defined (HAVE_INTERNAL_HDF5)
-#include "hdf5.h"
-#else
+/* Force HDF5 API to conform for 1.8 */
+#define H5_NO_DEPRECATED_SYMBOLS
+
 #include <hdf5.h>
-#endif
 
 #include <string.h>
 

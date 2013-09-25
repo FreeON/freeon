@@ -57,7 +57,7 @@ SOURCES_DEPCHECK = \
   $(P2Use_SOURCES) \
   $(DIIS_SOURCES)
 
-LDADD = $(LDADD_MODULES) $(LDADD_INTERNAL_LAPACK) $(LDADD_INTERNAL_HDF5)
+LDADD = $(LDADD_MODULES)
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
