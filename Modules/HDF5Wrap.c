@@ -191,7 +191,7 @@ F77_FUNC(hdf5openfile, HDF5OPENFILE) (int* NC, int* IChr)
   H5Eset_auto(H5E_DEFAULT, NULL, NULL);
   if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
   {
-    HDF5ERROR("failed to open hdf5 file\n");
+    HDF5ERROR("failed to open hdf5 file %s\n", filename);
   }
 #ifdef debug_interface
 #ifdef debug_all
