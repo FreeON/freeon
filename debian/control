@@ -1,8 +1,8 @@
 Source: freeon
 Section: main
 Maintainer: Nicolas Bock <nicolasbock@freeon.org>
-Build-Depends: autotools-dev, libblas-dev, liblapack-dev, hdf5-tools, libhdf5-serial-dev
-Standards-Version: 3.9.2
+Build-Depends: autotools-dev, libblas-dev, liblapack-dev, hdf5-tools, libhdf5-serial-dev, debhelper (>= 8)
+Standards-Version: 3.9.3
 Homepage: http://www.freeon.org/
 
 Package: freeon
