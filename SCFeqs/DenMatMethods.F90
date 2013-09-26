@@ -1153,17 +1153,21 @@ CONTAINS
     CALL Delete(V2)
     !
   END SUBROUTINE EigenBounds
-  !-------------------------------------------------------------------------------
-  ! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
-  !-------------------------------------------------------------------------------
-  !   S(R) = Sum_R,C { ABS(F(R,C) }
-  !   F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
-  !   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
-  !-------------------------------------------------------------------------------
+
+  !> Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
+  !!
+  !! S(R) = Sum_R,C { ABS(F(R,C) }
+  !! F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
+  !! F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
+  !!
+  !! @param F The matrix.
+  !! @param F_min The lower spectral bound.
+  !! @param F_max The upper spectral bound.
   SUBROUTINE SpectralBounds(F,F_min,F_max)
     TYPE(BCSR)       :: F
     INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
-    REAL(DOUBLE)     :: F_min,F_max,Tmp_max,Tmp_min,Diag,Sum
+    REAL(DOUBLE), INTENT(OUT) :: F_min,F_max
+    REAL(DOUBLE)     :: Tmp_max,Tmp_min,Diag,Sum
 #ifdef EXACT_EIGEN_VALUES
     INTERFACE DSYEV
       SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
