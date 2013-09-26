@@ -6,7 +6,7 @@ libktrax_la_SOURCES = KTrax.F
 
 if AUTOMATIC_FFLAGS
 # Force moderate compiler optimization flags on KTrax.F
-libktrax_la_FFLAGS = -O2 -g -pipe
+libktrax_la_FFLAGS = $(shell echo $(AM_FFLAGS) | sed -e 's:\s*-ftree-vectorize\s*: :')
 else
 libktrax_la_FFLAGS = $(AM_FFLAGS)
 endif
