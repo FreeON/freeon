@@ -16,8 +16,7 @@ SUBDIRS = \
 	ONX \
 	Validate \
 	PostProcessing \
-	BasisSets \
-	debian
+	BasisSets
 
 EXTRA_DIST = localversion FreeON.bibtex
 
