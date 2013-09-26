@@ -87,8 +87,7 @@ debian-package :
 	tar xf $(PACKAGE_TARNAME)_$(PACKAGE_VERSION).orig.tar.bz2
 	rsync -a debian $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/
 	cd $(PACKAGE_TARNAME)-$(PACKAGE_VERSION); \
-	  debuild -us -uc -S; \
-	  debuild -us -uc
+	  debuild -us -uc -S
 
 # Validate.
 validate :
