@@ -108,6 +108,8 @@ else
   AC_MSG_RESULT([no])
 fi
 
+AM_CONDITIONAL(HAVE_MPIRUN, [test "${use_MPI}" = "yes" -o "${use_parallel_clones}" = "yes"])
+
 # Sanity check on parallelism.
 if test "${use_MPI}" = "yes" -a "${use_parallel_clones}" = "yes"; then
   AC_MSG_FAILURE([can not build with both MPI and parallel-clones enabled])

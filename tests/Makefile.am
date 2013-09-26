@@ -18,6 +18,10 @@ sendReceive_DBL_RNK2_LDADD = $(LDADD_MODULES)
 sendReceive_HGRho_SOURCES = sendReceive_HGRho.F90
 sendReceive_HGRho_LDADD = $(LDADD_MODULES)
 
-TESTS = sleepertest locktest
+if HAVE_MPIRUN
+MPI_TESTS = locktest
+endif
 
-EXTRA_DIST = $(TESTS)
+TESTS = sleepertest $(MPI_TESTS)
+
+EXTRA_DIST = sleepertest locktest
