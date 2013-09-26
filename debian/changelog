@@ -1,5 +1,5 @@
-freeon (1.0.3) unstable; urgency=low
+freeon (1.0.3-1) UNRELEASED; urgency=low
 
-  * Initial release of freeon-1.0.3
+  * Initial release.
 
- -- Nicolas Bock <nicolasbock@gmail.com>  Fri, 20 Sep 2013 13:54:37 -0600
+ -- Nicolas Bock <nicolasbock@gmail.com>  Thu, 26 Sep 2013 09:00:50 -0700
