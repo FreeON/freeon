@@ -342,11 +342,10 @@ optimization_flags=""
 # No optimizations?
 AC_MSG_CHECKING([whether to add compiler optimizations])
 AC_ARG_ENABLE([optimizations],
-  [AS_HELP_STRING([--disable-optimizations],
-    [Disables compiler optimizations and adds compiler options such as bounds
-     checking, etc.])],
+  [AS_HELP_STRING([--enable-optimizations],
+    [Enables default compiler optimizations.])],
   [use_optimizations="${enableval}"],
-  [use_optimizations="yes"])
+  [use_optimizations="no"])
 
 AM_CONDITIONAL(USE_COMPILER_OPTIMIZATIONS, [test "${use_optimizations}" = "yes"])
 
@@ -494,12 +493,20 @@ if test "${use_optimizations}" = "yes"; then
   else
     AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
   fi
-
 else
+  AC_MSG_RESULT([no])
+fi
 
-  AC_MSG_RESULT([no optimizations])
 
-  # Set the optimization flags.
+# Debugging flags?
+AC_ARG_ENABLE([debug-flags],
+  [AS_HELP_STRING([--enable-debug-flags],
+    [Enables default compiler optimizations.])],
+  [use_debug_flags="${enableval}"],
+  [use_debug_flags="no"])
+
+if test "${use_debug_flags}" = "yes"; then
+
   if test -z "${user_CFLAGS}"; then
     case ${CC_COMPILERNAME} in
       GCC)   CFLAGS="-O0 -g3 -ggdb3 -Wall -pipe" ;;
