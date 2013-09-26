@@ -1615,10 +1615,6 @@ CONTAINS
     INTEGER :: NRow, NCol
 #endif
 
-    !IF(.NOT. inFrontend) THEN
-    !  CALL MondoLog(DEBUG_MAXIMUM, "Put_BCSR", "putting BCSR to "//TRIM(Name), "Clone "//TRIM(IntToChar(MyClone)))
-    !ENDIF
-
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
 #endif
