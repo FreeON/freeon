@@ -34,6 +34,7 @@ Here are a few recent ones:
 -   [freeon-1.0.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.tar.bz2)
 -   [freeon-1.0.2.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.2.tar.bz2)
 -   [freeon-1.0.3.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.3.tar.bz2)
+-   [freeon-1.0.4.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.4.tar.bz2)
 
 Project Stats
 -------------
