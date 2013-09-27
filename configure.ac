@@ -42,12 +42,24 @@ AM_SILENT_RULES([yes])
 # Define the aclocal macro directory.
 AC_CONFIG_MACRO_DIR([m4])
 
-# Check for localversion.
-if test -f ${srcdir}/localversion; then
-  . ${srcdir}/localversion
+AC_ARG_ENABLE([--git-tag],
+  [AS_HELP_STRING([--enable-git-tag],
+  [Adds the HEAD git tag to the binary, which might be useful when using
+   FreeON directly from git.])],
+  [use_git_tag=$enableval],
+  [use_git_tag="no"])
+
+if test "${use_git_tag}" = "yes"; then
+  # Check for localversion.
+  if test -f ${srcdir}/localversion; then
+    . ${srcdir}/localversion
+  else
+    branch="unknown"
+    localversion="not_set"
+  fi
 else
-  branch="unknown"
-  localversion="not_set"
+  branch="master"
+  localversion="release"
 fi
 
 AC_SUBST([LOCAL_VERSION], [${branch}:${localversion}])
