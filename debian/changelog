@@ -1,3 +1,10 @@
+freeon (1.0.4-ubuntu1) lucid; urgency=low
+
+  * Downgrading target distro to lucid, assuming that this will catch all more
+  recent distributions as well.
+
+ -- Nicolas Bock <nicolasbock@gmail.com>  Fri, 27 Sep 2013 10:10:30 -0600
+
 freeon (1.0.4) precise; urgency=low
 
   * Bumped package version.
