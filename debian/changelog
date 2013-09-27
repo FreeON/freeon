@@ -1,4 +1,4 @@
-freeon (1.0.4-ubuntu2) precise; urgency=low
+freeon (1.0.5) precise; urgency=low
 
   * Disabled tests for now.
 
