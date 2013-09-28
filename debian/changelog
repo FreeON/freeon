@@ -1,3 +1,9 @@
+freeon (1.0.6) lucid; urgency=low
+
+  * Changed how the sources are configured. Enabled standalone BCSR.
+
+ -- Nicolas Bock <nicolasbock@gmail.com>  Sat, 28 Sep 2013 09:48:11 -0600
+
 freeon (1.0.5) precise; urgency=low
 
   * Disabled tests for now.

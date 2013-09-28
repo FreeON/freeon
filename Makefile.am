@@ -89,6 +89,16 @@ debian-package :
 	cd $(PACKAGE_TARNAME)-$(PACKAGE_VERSION); \
 	  debuild -S
 
+# Build a debian binary package.
+debian-binary-package :
+	$(MAKE) dist
+	mv $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 $(PACKAGE_TARNAME)_$(PACKAGE_VERSION).orig.tar.bz2
+	rm -rf $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
+	tar xf $(PACKAGE_TARNAME)_$(PACKAGE_VERSION).orig.tar.bz2
+	rsync -a debian $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)/
+	cd $(PACKAGE_TARNAME)-$(PACKAGE_VERSION); \
+	  debuild
+
 # Validate.
 validate :
 	$(MAKE) -C Validate validate
