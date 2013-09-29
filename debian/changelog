@@ -1,4 +1,10 @@
-freeon (1.0.6-ubuntu2) precise; urgency=low
+freeon (1.0.6-ubuntu3) lucid; urgency=low
+
+  * Building on lucid.
+
+ -- Nicolas Bock <nicolasbock@gmail.com>  Sun, 29 Sep 2013 13:14:41 -0700
+
+freeon (1.0.6-ubuntu2) lucid; urgency=low
 
   * Lucid is not building, going back to precise for now.
 
