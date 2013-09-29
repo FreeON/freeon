@@ -3,7 +3,7 @@ Section: science
 Priority: extra
 Maintainer: Nicolas Bock <nicolasbock@freeon.org>
 Build-Depends: autotools-dev, gfortran, libblas-dev, liblapack-dev, hdf5-tools,
-  libhdf5-serial-dev, debhelper (>= 8), python
+  libhdf5-serial-dev, debhelper (>= 7.0.50~), python
 Standards-Version: 3.9.3
 Homepage: http://www.freeon.org/
 

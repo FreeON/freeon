@@ -1,3 +1,15 @@
+freeon (1.0.6-ubuntu2) precise; urgency=low
+
+  * Lucid is not building, going back to precise for now.
+
+ -- Nicolas Bock <nicolasbock@gmail.com>  Sun, 29 Sep 2013 08:16:10 -0600
+
+freeon (1.0.6-ubuntu1) lucid; urgency=low
+
+  * Wrong debhelper version in debian/control for lucid.
+
+ -- Nicolas Bock <nicolasbock@gmail.com>  Sat, 28 Sep 2013 16:40:16 -0600
+
 freeon (1.0.6) lucid; urgency=low
 
   * Changed how the sources are configured. Enabled standalone BCSR.
