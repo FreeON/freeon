@@ -1156,16 +1156,23 @@ CONTAINS
 
   !> Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
   !!
-  !! S(R) = Sum_R,C { ABS(F(R,C) }
-  !! F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
-  !! F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
+  !! In detail:
+  !! @f[
+  !!   R_{i} = \sum_{j \neq i} \left| F_{ij} \right|
+  !! @f]
+  !! @f[
+  !!   F_{\mathrm{max}} = \max_{i} \left\{ F_{ii} + R_{i} \right\}
+  !! @f]
+  !! @f[
+  !!   F_{\mathrm{min}} = \min_{i} \left\{ F_{ii} - R_{i} \right\}
+  !! @f]
   !!
   !! @param F The matrix.
   !! @param F_min The lower spectral bound.
   !! @param F_max The upper spectral bound.
   SUBROUTINE SpectralBounds(F,F_min,F_max)
     TYPE(BCSR)       :: F
-    INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
+    INTEGER          :: I,J,M,Col,Blk,N,C,Check
     REAL(DOUBLE), INTENT(OUT) :: F_min,F_max
     REAL(DOUBLE)     :: Tmp_max,Tmp_min,Diag,Sum
 #ifdef EXACT_EIGEN_VALUES
@@ -1200,40 +1207,84 @@ CONTAINS
     CALL Delete(Work)
     CALL Delete(dF)
 #else
-    F_min =  1.0D10
-    F_max = -1.0D10
-    DO I = 1,F%NAtms                                   ! Step over row blocks
-      M = BSiz%I(I)
-      DO R = 0,M-1                                    ! Step over rows in each block
-        Sum = Zero
-        Check = 0
-        DO J = F%RowPt%I(I),F%RowPt%I(I+1)-1         ! Step over column blocks
-          Col = F%ColPt%I(J)
-          Blk = F%BlkPt%I(J)
-          N = BSiz%I(Col)
-          DO C = 0,N-1                              ! Step over colums in each block
-            Sum = Sum + ABS(F%MTrix%D(Blk+C*M+R))  ! Assume col by col storage?
-            IF(I.EQ.Col) THEN
-              IF(R.EQ.C) THEN
-                Diag = F%MTrix%D(Blk+C*M+R)      ! Diagonal elements
-                Check = 1
+    REAL(DOUBLE), DIMENSION(:), ALLOCATABLE :: R
+    REAL(DOUBLE), DIMENSION(:), ALLOCATABLE :: diagonal
+    INTEGER :: NRow, NCol, atom, MBlock, NBlock, rowOffset, columnOffset
+    INTEGER :: iBlock, jBlock, iSMat, p, iRow
+
+    SELECT CASE(F%NSMat)
+    CASE(1);NRow=  NBasF;NCol=  NBasF
+    CASE(2);NRow=  NBasF;NCol=2*NBasF
+    CASE(4);NRow=2*NBasF;NCol=2*NBasF
+    CASE DEFAULT;CALL Halt('F%NSMat doesn''t have an expected value!')
+    END SELECT
+
+    ALLOCATE(R(NRow))
+    ALLOCATE(diagonal(NRow))
+
+    R = 0
+
+    DO atom = 1, NAtoms
+      MBlock = BSiz%I(atom)
+      rowOffset = OffS%I(atom)
+
+      DO iRow = F%RowPt%I(atom), F%RowPt%I(atom+1)-1
+        NBlock = BSiz%I(F%ColPt%I(iRow))
+        columnOffset = OffS%I(F%ColPt%I(iRow))
+
+        DO iSMat = 1, NSMat
+          P = F%BlkPt%I(iRow)+(iSMat-1)*MBlock*NBlock
+
+          SELECT CASE(iSMat)
+          CASE(1)
+            iBlock = rowOffset
+            jBlock = columnOffset
+
+          CASE(2)
+            iBlock = rowOffset
+            jBlock = columnOffset+NBasF
+
+          CASE(3)
+            iBlock = rowOffset+NBasF
+            jBlock = columnOffset
+
+          CASE(4)
+            iBlock = rowOffset+NBasF
+            jBlock = columnOffset+NBasF
+          END SELECT
+
+          DO i = 0, MBlock-1
+            DO j = 0, NBlock-1
+              IF(i+iBlock == j+jBlock) THEN
+                diagonal(i+iBlock) = F%MTrix%D(P+i+j*MBlock)
+              ELSE
+                R(i+iBlock) = R(i+iBlock)+ABS(F%Mtrix%D(P+i+j*MBlock))
               ENDIF
-            ENDIF
+            ENDDO
           ENDDO
         ENDDO
-        IF (Check.EQ.0) THEN                         ! In case there wasn't a diagonal element
-          Diag = Zero
-        ENDIF
-        Tmp_max = Diag + Sum - ABS(Diag)             ! Upper bound of Grsg. circle
-        Tmp_min = Diag - Sum + ABS(Diag)             ! Lower bound of Grsg. circle
-        IF(F_max .LE.Tmp_max) THEN                   ! Check for the highest bound
-          F_max = Tmp_max
-        ENDIF
-        IF (F_min.GE.Tmp_min) THEN                   ! Check for the lowest bound
-          F_min = Tmp_min
-        ENDIF
       ENDDO
     ENDDO
+
+    F_min = diagonal(1)
+    F_max = diagonal(1)
+
+    DO i = 1, NRow
+      IF(F_min > diagonal(i)-R(i)) THEN
+        F_min = diagonal(i)-R(i)
+      ENDIF
+
+      IF(F_max < diagonal(i)+R(i)) THEN
+        F_max = diagonal(i)+R(i)
+      ENDIF
+    ENDDO
+
+    DEALLOCATE(R)
+    DEALLOCATE(diagonal)
+
+    CALL MondoLog(DEBUG_MAXIMUM, "SpectralBounds", "F = [ "//TRIM(DblToChar(F_min)) &
+      //", "//TRIM(DblToChar(F_max))//" ]")
+
 #endif
   END SUBROUTINE SpectralBounds
   !-------------------------------------------------------------------------------
