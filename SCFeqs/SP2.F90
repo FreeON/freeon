@@ -49,10 +49,10 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   IMPLICIT NONE
 
 #ifdef PARALLEL
-  TYPE(DBCSR) :: F,P,Pold,Tmp1,Tmp2
+  TYPE(DBCSR) :: F,P,POld,Tmp1,Tmp2
   TYPE(BCSR)  :: F_BCSR
 #else
-  TYPE(BCSR)  :: F,FT,P,PT,Pold,Tmp1,Tmp2
+  TYPE(BCSR)  :: F,FT,P,PT,POld,Tmp1,Tmp2
 #endif
 
   !-------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 
   ! Initialize
   CALL New(P)
-  CALL New(Pold)
+  CALL New(POld)
   CALL New(Tmp1)
   CALL New(Tmp2)
 
@@ -101,9 +101,21 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 #else
   CALL FockGuess(F,P,Ne,1)
 #endif
-  CALL SetEq(Pold,P)
 
   IF(PrintFlags%MM == DEBUG_PRT_SP2) THEN
+    CALL SetEq(PDense, F)
+    CALL MondoLog(DEBUG_NONE, Prog, "Fockian, " &
+      //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
+      //TRIM(IntToChar(size(PDense%D, 2)))//" matrix, " &
+      //TRIM(IntToChar(size(PDense%D, 1)*size(PDense%D, 2)))//" elements")
+    DO I = 1, SIZE(PDense%D, 1)
+      DO J = 1, SIZE(PDense%D, 2)
+        CALL MondoLog(DEBUG_NONE, Prog, TRIM(IntToChar(I)) &
+          //" "//TRIM(IntToChar(J)) &
+          //" "//TRIM(DblToChar(PDense%D(I, J))))
+      ENDDO
+    ENDDO
+
     CALL SetEq(PDense, P)
     CALL MondoLog(DEBUG_NONE, Prog, "Fock guess, " &
       //TRIM(IntToChar(size(PDense%D, 1)))//"x" &
@@ -180,7 +192,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
 
   CALL Delete(F)
   CALL Delete(P)
-  CALL Delete(Pold)
+  CALL Delete(POld)
   CALL Delete(Tmp1)
   CALL Delete(Tmp2)
 
