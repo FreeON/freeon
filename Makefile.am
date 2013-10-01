@@ -24,8 +24,6 @@ CLEANFILES = *~
 
 DISTCLEANFILES = MondoConfig.h MondoLocalVersion.h
 
-include_HEADERS = MondoLocalVersion.h
-
 CONFIG_STATUS_DEPENDENCIES = \
   $(top_srcdir)/Doxyfile.in \
   $(top_srcdir)/localversion
