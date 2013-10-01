@@ -1,6 +1,6 @@
 include $(top_srcdir)/make.inc
 
-noinst_LTLIBRARIES = libktrax.la
+noinst_LTLIBRARIES = libktrax.la libqctc.la
 
 libktrax_la_SOURCES = KTrax.F
 
@@ -11,78 +11,58 @@ else
 libktrax_la_FFLAGS = $(AM_FFLAGS)
 endif
 
+libqctc_la_LIBADD = libktrax.la
+libqctc_la_SOURCES = \
+  AA95c.F \
+  AA95.F \
+  CTraX10.F \
+  CTraX12.F \
+  CTraX14.F \
+  CTraX4.F \
+  CTraX6.F \
+  CTraX8.F \
+  CTraX.F \
+  Density.F90 \
+  Gamma.F \
+  Indexing.F90 \
+  MondoPoles77.F \
+  MondoPoles.F90 \
+  PoleNodeType.F90 \
+  PoleTree.F90 \
+  TreeWalk.F90 \
+  XLate.F
+
 bin_PROGRAMS = QCTC JForce MakePFFT
 
 QCTC_SOURCES = \
-  AA95c.F \
-  AA95.F \
-  CTraX10.F \
-  CTraX12.F \
-  CTraX14.F \
-  CTraX4.F \
-  CTraX6.F \
-  CTraX8.F \
-  CTraX.F \
-  Density.F90 \
-  Gamma.F \
   Globals.F90 \
-  Indexing.F90 \
   JGen.F90 \
   MD3TRR.F \
-  MondoPoles77.F \
-  MondoPoles.F90 \
   NukE.F90 \
   ParaQ.F90 \
   PBCFarField.F90 \
-  PoleNodeType.F90 \
-  PoleTree.F90 \
   QCTC.F90 \
-  Thresholds.F90 \
-  TreeWalk.F90 \
-  XLate.F
+  Thresholds.F90
 
 JForce_SOURCES = \
-  AA95c.F \
-  AA95.F \
   BlokTrPdJ.F90 \
-  CTraX10.F \
-  CTraX12.F \
-  CTraX14.F \
-  CTraX4.F \
-  CTraX6.F \
-  CTraX8.F \
-  CTraX.F \
-  Density.F90 \
-  Gamma.F \
   Globals.F90 \
-  Indexing.F90 \
   JForce.F90 \
   MD3TRR.F \
-  MondoPoles77.F \
-  MondoPoles.F90 \
   ParaQ.F90 \
   PBCFarField.F90 \
-  PoleNodeType.F90 \
-  PoleTree.F90 \
-  Thresholds.F90 \
-  TreeWalk.F90 \
-  XLate.F
+  Thresholds.F90
 
 MakePFFT_SOURCES = \
-  XLate.F \
-  CTraX.F \
-  Globals.F90 \
-  PoleNodeType.F90 \
-  Thresholds.F90 \
-  Indexing.F90 \
-  QSortI.F \
-  MondoPoles.F90 \
   DEI.F \
-  PlaneWise.F90 \
-  PFFTensor.F90 \
   DivPFFTensor.F90 \
+  Globals.F90 \
+  MakePFFT.F90 \
   ParaQ.F90 \
-  MakePFFT.F90
+  PFFTensor.F90 \
+  PlaneWise.F90 \
+  QSortI.F \
+  Thresholds.F90
 
 
 QCTC_DEPENDENCIES     = $(LIBRARY_DEPENDENCY_FILES)
@@ -105,7 +85,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS2.Inc
 
 EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/Modules/MMA/LookUpTables_800_6x
-LDADD = $(LDADD_MODULES) libktrax.la
+LDADD = $(LDADD_MODULES) libqctc.la
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
@@ -125,7 +105,7 @@ DivPFFTensor.o : \
 
 JForce.o : \
   $(top_builddir)/MondoConfig.h \
-  libktrax.la \
+  libqctc.la \
   Globals.o \
   PoleTree.o \
   PBCFarField.o \
@@ -139,7 +119,7 @@ JGen.o : \
   PlaneWise.o
 
 MakePFFT.o : \
-  libktrax.la \
+  libqctc.la \
   PFFTensor.o \
   DivPFFTensor.o
 
@@ -172,7 +152,7 @@ PoleTree.o : \
 
 QCTC.o : \
   $(top_builddir)/MondoConfig.h \
-  libktrax.la \
+  libqctc.la \
   PoleTree.o \
   Globals.o \
   PBCFarField.o \
