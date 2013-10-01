@@ -80,10 +80,10 @@ CONTAINS
     CALL Get(Args)
 
     ! Get SCRATCH directory from last argument.
-    MONDO_SCRATCH = Args%C%C(SIZE(Args%C%C, 1))
+    FREEON_SCRATCH = Args%C%C(SIZE(Args%C%C, 1))
 
     ! The HDF5 file name
-    H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
+    H5File=TRIM(FREEON_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
     InfFile=H5File
     ! Open the HDF file
     HDFFileID=OpenHDF(H5File)
@@ -314,7 +314,7 @@ CONTAINS
     ! Basis
     CurBase = TRIM(IntToChar(Args%I%I(2)))
     PrvBase = TRIM(IntToChar(Previous(2)))
-    ScrName = TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
+    ScrName = TRIM(FREEON_SCRATCH)//TRIM(Args%C%C(1))
     PWDName = TRIM("")
 
     ! Load global file names

@@ -58,10 +58,10 @@ F77_FUNC(temporarydirectory, TEMPORARYDIRECTORY) (char *path, int *length)
   result = -1;
   printf("[temporarydirectory] I have no working mkstemp() or mkostemp()\n");
   free(temp);
-  temp = (char*) malloc(sizeof(char)*(strlen(HAVE_MONDO_SCRATCH)+1));
-  if(strcpy(temp, HAVE_MONDO_SCRATCH) == NULL)
+  temp = (char*) malloc(sizeof(char)*(strlen(HAVE_FREEON_SCRATCH)+1));
+  if(strcpy(temp, HAVE_FREEON_SCRATCH) == NULL)
   {
-    printf("[temporarydirectory] error copying HAVE_MONDO_SCRATCH\n");
+    printf("[temporarydirectory] error copying HAVE_FREEON_SCRATCH\n");
     exit(1);
   }
 #endif

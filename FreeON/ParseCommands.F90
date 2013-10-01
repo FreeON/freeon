@@ -88,13 +88,13 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
     ENDIF
 
-    CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
+    CALL GetEnv('FREEON_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH)) == 0) THEN
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) not set. Using '//TRIM(HAVE_MONDO_SCRATCH), "LoadCommand")
-      N%M_SCRATCH = HAVE_MONDO_SCRATCH
-      MONDO_SCRATCH = HAVE_MONDO_SCRATCH
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_SCRATCH) not set. Using '//TRIM(HAVE_FREEON_SCRATCH), "LoadCommand")
+      N%M_SCRATCH = HAVE_FREEON_SCRATCH
+      FREEON_SCRATCH = HAVE_FREEON_SCRATCH
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_SCRATCH) set to '//trim(N%M_SCRATCH), "LoadCommand")
     ENDIF
 
     ! Set path names etc
@@ -124,7 +124,7 @@ CONTAINS
     N%SCF_NAME = TRIM(N%SCF_NAME(indexBegin:indexEnd))//'_'//TRIM(PROCESS_ID)
     CALL MondoLog(DEBUG_NONE, "FreeON", "SCF name "//TRIM(N%SCF_NAME), "LoadCommand")
 
-    ! Come up with random scratch directory based on MONDO_SCRATCH.
+    ! Come up with random scratch directory based on FREEON_SCRATCH.
     N%M_SCRATCH = TRIM(N%M_SCRATCH)//"/FreeON-scratch-"//TRIM(N%SCF_NAME)//"-XXXXXX"
     CALL TemporaryDirectory(N%M_SCRATCH, LEN(TRIM(N%M_SCRATCH)))
     N%M_SCRATCH=TRIM(N%M_SCRATCH)//'/'

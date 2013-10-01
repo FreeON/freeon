@@ -891,10 +891,10 @@ if test "${use_standalone_BCSR}" = "yes"; then
 fi
 
 # Define location of temporary FreeON files.
-AC_ARG_VAR([MONDO_SCRATCH],
-  [Specify default MONDO_SCRATCH directory])
-if test -z "${MONDO_SCRATCH}"; then
-  MONDO_SCRATCH="/tmp"
+AC_ARG_VAR([FREEON_SCRATCH],
+  [Specify default FREEON_SCRATCH directory])
+if test -z "${FREEON_SCRATCH}"; then
+  FREEON_SCRATCH="/tmp"
 fi
 
 # Define FreeON variables.
@@ -909,12 +909,12 @@ AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
 AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
 
-AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,    ["${build}"], [Define build platform.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,    ["`hostname`"], [Define hostname.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,    ["${build_cpu}"], [Define build cpu.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST,    ["${build_os}"], [Define build system (os).])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,    ["`uname -r`"], [Define build os version.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_SCRATCH, ["${MONDO_SCRATCH}"], [Define default MONDO_SCRATCH directory.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,     ["${build}"], [Define build platform.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,     ["`hostname`"], [Define hostname.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,     ["${build_cpu}"], [Define build cpu.])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST,     ["${build_os}"], [Define build system (os).])
+AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,     ["`uname -r`"], [Define build os version.])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_SCRATCH, ["${FREEON_SCRATCH}"], [Define default FREEON_SCRATCH directory.])
 
 # Enable fix for gfortran.
 if test "${FC_COMPILERNAME}" = "GCC"; then
@@ -993,7 +993,7 @@ AC_MSG_NOTICE([CPPFLAGS                 = ${CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_CPPFLAGS         = ${FORTRAN_CPPFLAGS}])
 AC_MSG_NOTICE([FORTRAN_DEFAULT_INCLUDES = ${FORTRAN_DEFAULT_INCLUDES}])
 AC_MSG_NOTICE([HDF5_CPPFLAGS            = ${HDF5_CPPFLAGS}])
-AC_MSG_NOTICE([MONDO_SCRATCH            = ${MONDO_SCRATCH}])
+AC_MSG_NOTICE([FREEON_SCRATCH           = ${FREEON_SCRATCH}])
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([Using external lapack library])
 AC_MSG_NOTICE([Using external hdf5 library])

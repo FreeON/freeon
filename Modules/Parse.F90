@@ -889,7 +889,7 @@ CONTAINS
       IF(PRESENT(PWD_O))THEN
         Name=TRIM(PWD_O)//Name_O
       ELSE
-        Name=TRIM(MONDO_SCRATCH)//Name_O
+        Name=TRIM(FREEON_SCRATCH)//Name_O
       ENDIF
     ELSEIF(PRESENT(Args_O) .OR. PRESENT(Stats_O))THEN
       IF(LEN(TRIM(PWDName)) > 0) THEN
