@@ -1,6 +1,6 @@
 include $(top_srcdir)/make.inc
 
-noinst_LTLIBRARIES = libktrax.la libqctc.la
+noinst_LTLIBRARIES = libktrax.la
 
 libktrax_la_SOURCES = KTrax.F
 
@@ -11,11 +11,11 @@ else
 libktrax_la_FFLAGS = $(AM_FFLAGS)
 endif
 
-libqctc_la_LIBADD = libktrax.la
-libqctc_la_SOURCES = \
+bin_PROGRAMS = QCTC JForce MakePFFT
+
+QCTC_SOURCES = \
   AA95c.F \
   AA95.F \
-  BlokTrPdJ.F90 \
   CTraX10.F \
   CTraX12.F \
   CTraX14.F \
@@ -23,9 +23,7 @@ libqctc_la_SOURCES = \
   CTraX6.F \
   CTraX8.F \
   CTraX.F \
-  DEI.F \
   Density.F90 \
-  DivPFFTensor.F90 \
   Gamma.F \
   Globals.F90 \
   Indexing.F90 \
@@ -36,27 +34,56 @@ libqctc_la_SOURCES = \
   NukE.F90 \
   ParaQ.F90 \
   PBCFarField.F90 \
-  PlaneWise.F90 \
-  PFFTensor.F90 \
   PoleNodeType.F90 \
   PoleTree.F90 \
-  QSortI.F \
+  QCTC.F90 \
+  Thresholds.F90 \
   TreeWalk.F90 \
   XLate.F
 
-bin_PROGRAMS = QCTC JForce MakePFFT
-
-QCTC_SOURCES = \
-  QCTC.F90 \
-  Thresholds.F90
-
 JForce_SOURCES = \
+  AA95c.F \
+  AA95.F \
+  BlokTrPdJ.F90 \
+  CTraX10.F \
+  CTraX12.F \
+  CTraX14.F \
+  CTraX4.F \
+  CTraX6.F \
+  CTraX8.F \
+  CTraX.F \
+  Density.F90 \
+  Gamma.F \
+  Globals.F90 \
+  Indexing.F90 \
   JForce.F90 \
-  Thresholds.F90
+  MD3TRR.F \
+  MondoPoles77.F \
+  MondoPoles.F90 \
+  ParaQ.F90 \
+  PBCFarField.F90 \
+  PoleNodeType.F90 \
+  PoleTree.F90 \
+  Thresholds.F90 \
+  TreeWalk.F90 \
+  XLate.F
 
 MakePFFT_SOURCES = \
-  MakePFFT.F90 \
-  Thresholds.F90
+  XLate.F \
+  CTraX.F \
+  Globals.F90 \
+  PoleNodeType.F90 \
+  Thresholds.F90 \
+  Indexing.F90 \
+  QSortI.F \
+  MondoPoles.F90 \
+  DEI.F \
+  PlaneWise.F90 \
+  PFFTensor.F90 \
+  DivPFFTensor.F90 \
+  ParaQ.F90 \
+  MakePFFT.F90
+
 
 QCTC_DEPENDENCIES     = $(LIBRARY_DEPENDENCY_FILES)
 JForce_DEPENDENCIES   = $(LIBRARY_DEPENDENCY_FILES)
@@ -78,7 +105,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS2.Inc
 
 EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/Modules/MMA/LookUpTables_800_6x
-LDADD = $(LDADD_MODULES) libqctc.la
+LDADD = $(LDADD_MODULES) libktrax.la
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags
@@ -86,78 +113,89 @@ tags :
 	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.{f,f90} ../Modules/*.{c,f,f90}
 
 # Dependencies.
-BlokTrPdJ.lo : \
-  PoleTree.lo \
-  TreeWalk.lo \
+BlokTrPdJ.o : \
+  PoleTree.o \
+  TreeWalk.o \
   Thresholds.o \
-  PBCFarField.lo
+  PBCFarField.o
 
-DivPFFTensor.lo : \
-  MondoPoles.lo \
-  PFFTensor.lo
+DivPFFTensor.o : \
+  MondoPoles.o \
+  PFFTensor.o
 
 JForce.o : \
   $(top_builddir)/MondoConfig.h \
-  libqctc.la
+  libktrax.la \
+  Globals.o \
+  PoleTree.o \
+  PBCFarField.o \
+  BlokTrPdJ.o
 
-JGen.lo : \
-  Globals.lo \
-  PoleTree.lo \
-  TreeWalk.lo \
-  PBCFarField.lo \
-  PlaneWise.lo
+JGen.o : \
+  Globals.o \
+  PoleTree.o \
+  TreeWalk.o \
+  PBCFarField.o \
+  PlaneWise.o
 
 MakePFFT.o : \
-  libqctc.la
+  libktrax.la \
+  PFFTensor.o \
+  DivPFFTensor.o
 
-NukE.lo : \
-  Globals.lo \
-  PoleTree.lo \
-  TreeWalk.lo \
-  PBCFarField.lo
+NukE.o : \
+  Globals.o \
+  PoleTree.o \
+  TreeWalk.o \
+  PBCFarField.o
 
-PBCFarField.lo : \
-  PFFTensor.lo \
-  PoleTree.lo \
-  MondoPoles.lo \
-  Globals.lo \
-  PFFTensor.lo
+PBCFarField.o : \
+  PFFTensor.o \
+  PoleTree.o \
+  MondoPoles.o \
+  Globals.o \
+  PFFTensor.o
 
-PFFTensor.lo : \
-  MondoPoles.lo \
-  PlaneWise.lo
+PFFTensor.o : \
+  MondoPoles.o \
+  PlaneWise.o
 
-ParaQ.lo : \
-  Globals.lo \
-  PoleTree.lo
+ParaQ.o : \
+  Globals.o \
+  PoleTree.o
 
-PoleTree.lo : \
+PoleTree.o : \
   Thresholds.o \
-  MondoPoles.lo \
-  Globals.lo \
-  Density.lo
+  MondoPoles.o \
+  Globals.o \
+  Density.o
 
 QCTC.o : \
   $(top_builddir)/MondoConfig.h \
-  libqctc.la
+  libktrax.la \
+  PoleTree.o \
+  Globals.o \
+  PBCFarField.o \
+  JGen.o \
+  NukE.o
 
-TreeWalk.lo : \
-  Globals.lo \
-  PoleTree.lo
+TreeWalk.o : \
+  Globals.o \
+  PoleTree.o
 
-Density.lo : \
+Density.o : \
   Thresholds.o \
-  Globals.lo
+  Globals.o
 
 Thresholds.o : \
-  PoleNodeType.lo
+  PoleNodeType.o
 
-Indexing.lo : \
-  PoleNodeType.lo
+Indexing.o : \
+  PoleNodeType.o
 
-MondoPoles.lo : \
-  Indexing.lo \
-  Globals.lo
+MondoPoles.o : \
+  Indexing.o \
+  Globals.o
 
-PlaneWise.lo : \
-  MondoPoles.lo
+PlaneWise.o : \
+  MondoPoles.o
