@@ -101,8 +101,6 @@ debian-binary-package :
 validate :
 	$(MAKE) -C Validate validate
 
-TESTS = /bin/true
-
 # dependency checks.
 depcheck :
 	$(MAKE) -C Modules depcheck-lib
