@@ -336,19 +336,19 @@ CONTAINS !
 #ifdef PARALLEL
       Open(UNIT=Seq,FILE=TrixFile('Rho'//IntToChar(MyID),Args,1),STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #else
-      CALL MondoLog(DEBUG_NONE, "InitRho", "Index Check: opening "//TRIM(TrixFile('Rho',Args,1)))
+      CALL MondoLog(DEBUG_MEDIUM, "InitRho", "Index Check: opening "//TRIM(TrixFile('Rho',Args,1)))
       Open(UNIT=Seq,FILE=TrixFile('Rho',Args,1),STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
     ELSE
 #ifdef PARALLEL
       Open(UNIT=Seq,FILE=TrixFile('Rho'//IntToChar(MyID),Args,0),STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #else
-      CALL MondoLog(DEBUG_NONE, "InitRho", "Index Check: opening "//TRIM(TrixFile('Rho',Args,0)))
+      CALL MondoLog(DEBUG_MEDIUM, "InitRho", "Index Check: opening "//TRIM(TrixFile('Rho',Args,0)))
       Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
 #endif
     ENDIF
     Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NSDen,Rho%NExpt,Rho%NDist,Rho%NCoef!<<< SPIN
-    CALL MondoLog(DEBUG_NONE, "InitRho", "Rho%NSDen = "//TRIM(IntToChar(Rho%NSDen))//", " &
+    CALL MondoLog(DEBUG_MAXIMUM, "InitRho", "Rho%NSDen = "//TRIM(IntToChar(Rho%NSDen))//", " &
       //"Rho%NExpt = "//TRIM(IntToChar(Rho%NExpt))//", " &
       //"Rho%NDist = "//TRIM(IntToChar(Rho%NDist))//", " &
       //"Rho%NCoef = "//TRIM(IntToChar(Rho%NCoef))//", " &
