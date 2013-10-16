@@ -44,6 +44,8 @@ Support Us
 
 <cafepress/>
 
+Our BitCoin Wallet: 128gM5xXkgeqtTz2WsYtqiq1zVS1CuyScz
+
 Contact Us
 ----------
 
