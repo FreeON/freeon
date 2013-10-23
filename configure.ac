@@ -942,7 +942,7 @@ ONX/Makefile
 Validate/Makefile
 Validate/SinglePoint/Makefile
 Validate/SinglePoint/Restricted/Makefile
-PostProcessing/Makefile
+tools/Makefile
 BasisSets/Makefile
 tests/Makefile
 ])

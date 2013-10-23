@@ -15,7 +15,7 @@ SUBDIRS = \
 	TwoE \
 	ONX \
 	Validate \
-	PostProcessing \
+	tools \
 	BasisSets
 
 EXTRA_DIST = localversion FreeON.bibtex
