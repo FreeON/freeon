@@ -86,19 +86,22 @@ CONTAINS
 #ifdef USE_METIS
     CALL MetisReorder(A)
 #endif
+
     ! Set global workspace for FunkOnSqMat
     CALL SetDSYEVWork(MaxBlkSize)
+
     ! Allocate intermediate blocks
-    IF(.NOT.AllocQ(Blk1%Alloc)) CALL New(Blk1,MaxBlkSize*MaxBlkSize)
-    IF(.NOT.AllocQ(Blk2%Alloc)) CALL New(Blk2,MaxBlkSize*MaxBlkSize)
+    CALL New(Blk1,MaxBlkSize*MaxBlkSize)
+    CALL New(Blk2,MaxBlkSize*MaxBlkSize)
     ! Allocate diagonal "pivot" blocks
-    IF(.NOT.AllocQ(P%Alloc)) CALL New(P,(/MaxBlkSize*MaxBlkSize,NAtoms/))
+    CALL New(P,(/MaxBlkSize*MaxBlkSize,NAtoms/))
     ! Allocate coloumn flags
-    IF(.NOT.AllocQ(AiFlg%Alloc)) CALL New(AiFlg,NAtoms); AiFlg%I=0
-    IF(.NOT.AllocQ(ZiFlg%Alloc)) CALL New(ZiFlg,NAtoms); ZiFlg%I=0
+    CALL New(AiFlg,NAtoms); AiFlg%I=0
+    CALL New(ZiFlg,NAtoms); ZiFlg%I=0
     ! Allocate temporaries for symbolic Z_I
-    IF(.NOT.AllocQ(ColPt%Alloc)) CALL New(ColPt,MaxBlks)
-    IF(.NOT.AllocQ(BlkPt%Alloc)) CALL New(BlkPt,MaxBlks)
+    CALL New(ColPt,MaxBlks)
+    CALL New(BlkPt,MaxBlks)
+
     ! Start with the identity; Z=I
     CALL SetToI(Z)
     ! Index for new Z bloks
@@ -249,9 +252,11 @@ CONTAINS
     Z%NAtms=NAtoms
     Z%NBlks=ZDex-1
     Z%NNon0=ZBlk-1
+
     ! Free some memory
     CALL Delete(ColPt)
     CALL Delete(BlkPt)
+
     ! Compute dimensions of DiagD and allocate it
     DiagD%NBlks=NAtoms
     DiagD%NNon0=0
@@ -268,11 +273,14 @@ CONTAINS
        P%D(1:N*N,I)=Blk1%D(1:N*N)
     ENDDO
     CALL SetToI(DiagD,P)
+
     ! Free some more memory
     CALL Delete(P)
     CALL Delete(Blk1)
     CALL Delete(Blk2)
+
     CALL UnSetDSYEVWork()
+
     ! This is workspace for Z^t
     IF(.NOT.AllocQ(Zt%Alloc)) &
     CALL New(Zt)
