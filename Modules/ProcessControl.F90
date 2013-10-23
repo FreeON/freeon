@@ -88,7 +88,7 @@ CONTAINS
     WRITE(*,*)' Would be life without meaning '
     WRITE(*,*)' No struggle, no joy '
     WRITE(*,*)' '
-    STOP 'Termination of MondoSCF'
+    STOP 'Termination of FreeON'
   END SUBROUTINE MondoHalt
 
   SUBROUTINE Halt(Strng)
