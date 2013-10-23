@@ -3061,7 +3061,7 @@ CONTAINS
   END SUBROUTINE XPose_Simple
 
   !===============================================================================
-  !     Max block of a DBCSR matrix
+  !     Max block of a BCSR matrix
   !===============================================================================
   SUBROUTINE XPose_BCSR(A,B)
     TYPE(BCSR)           :: A
@@ -3102,7 +3102,6 @@ CONTAINS
          BRowPt,BColPt,BBlkPt
     INTEGER                              :: ANSMat,I,J,K,MI,NJ,MN,MN1,P,Q,NEXT
     LOGICAL                              :: SymbolicOnly
-
 
     IF(PRESENT(AMTrix).AND.PRESENT(BMTrix))THEN
       SymbolicOnly=.FALSE.

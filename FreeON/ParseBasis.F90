@@ -36,7 +36,7 @@ MODULE ParseBasis
   CHARACTER(LEN=*), PARAMETER :: BASIS_SETS     = 'BasisSets'
 
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNON0S   = 'maxnon0s'
-  CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXNBLKS   = 'maxnblks'
+  CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXBLKS    = 'maxblks'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: BCSR_MAXDEFAULT = 'default'
 
 CONTAINS
@@ -485,8 +485,6 @@ CONTAINS
     ENDDO
   END SUBROUTINE BlockBuild2
 
-
-
   SUBROUTINE ReNormalizePrimitives(A)
     TYPE(BSET)       :: A
     TYPE(DBL_RNK2)   :: AuxCoef
@@ -669,9 +667,9 @@ CONTAINS
 
   !> SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
   !!
-  !! This routine look in the unit <Unit> for the keywords <MaxNon0s> and
-  !! <MaxNBlks>. The new value will replace the value of the estimate
-  !! dimension in <BCSRDimensions> if the key <Default> is not used.
+  !! This routine looks in the unit <Unit> for the keywords <MaxNon0s> and
+  !! <MaxNBlks>. The new value will replace the value of the estimate dimension
+  !! in <BCSRDimensions> if the key <Default> is not used.
   !!
   !!   e.g. MaxNon0s=(Default,Default,100000).
   !!        MaxNBlks=(Default,Default,   900).
@@ -717,7 +715,7 @@ CONTAINS
     ENDIF
 
     ! Look for MaxNBlks
-    IF(OptGetKeyArg(Unit,BCSR_MAXNBLKS,Arg)) THEN
+    IF(OptGetKeyArg(Unit,BCSR_MAXBLKS,Arg)) THEN
       IF(SIZE(Arg%C).NE.NBSets) &
            CALL Halt('The number of MaxNBlks arguments <'  //TRIM(IntToChar(SIZE(Arg%C)))// &
            '> must be the same as the number of BasisSets <'//TRIM(IntToChar(NBSets))//'>.')
