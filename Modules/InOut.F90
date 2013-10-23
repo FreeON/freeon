@@ -1599,9 +1599,7 @@ CONTAINS
   END SUBROUTINE BcastBCSR
 #endif
 
-  !-------------------------------------------------------------------------------
-  ! Put a BCSR matrix
-  !-------------------------------------------------------------------------------
+  !> Put a BCSR matrix
   SUBROUTINE Put_BCSR(A,Name,PFix_O,CheckPoint_O)
     TYPE(BCSR),               INTENT(IN) :: A
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O

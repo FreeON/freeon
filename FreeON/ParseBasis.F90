@@ -666,19 +666,23 @@ CONTAINS
     CALL Delete(ITmp)
     CALL Delete(IPnt)
   END SUBROUTINE PrimitiveReDistribution
-  !
-  !
+
+  !> SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
+  !!
+  !! This routine look in the unit <Unit> for the keywords <MaxNon0s> and
+  !! <MaxNBlks>. The new value will replace the value of the estimate
+  !! dimension in <BCSRDimensions> if the key <Default> is not used.
+  !!
+  !!   e.g. MaxNon0s=(Default,Default,100000).
+  !!        MaxNBlks=(Default,Default,   900).
+  !!        MaxNon0s=(100000) or MaxNon0s=100000.
+  !!        MaxNBlks=(   900) or MaxNBlks=   900.
+  !!
+  !! @params NBSets Number of basis sets.
+  !! @params Unit The file unit.
+  !! @params ArrMaxNon0s The array of MaxNon0s values.
+  !! @params ArrMaxNBlks The array of MaxNBlks values.
   SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
-    !H---------------------------------------------------------------------------------
-    !H SUBROUTINE ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)
-    !H  This routine look in the unit <Unit> for the keywords <MaxNon0s> and
-    !H  <MaxNBlks>. The new value will replace the value of the estimate
-    !H  dimension in <BCSRDimensions> if the key <Default> is not used.
-    !H   e.g. MaxNon0s=(Default,Default,100000).
-    !H        MaxNBlks=(Default,Default,   900).
-    !H        MaxNon0s=(100000) or MaxNon0s=100000.
-    !H        MaxNBlks=(   900) or MaxNBlks=   900.
-    !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
     INTEGER       , INTENT(IN   ) :: NBSets,Unit
