@@ -907,10 +907,10 @@ if test "${use_parallel_clones}" = "yes"; then
 fi
 
 AC_ARG_ENABLE([standalone-BCSR],
-  [AS_HELP_STRING([--enable-standalone-BCSR],
+  [AS_HELP_STRING([--disable-standalone-BCSR],
   [Write BCSR matrices into self contained file format.])],
   [use_standalone_BCSR="${enableval}"],
-  [use_standalone_BCSR="no"])
+  [use_standalone_BCSR="yes"])
 if test "${use_standalone_BCSR}" = "yes"; then
   AC_DEFINE(STANDALONE_BCSR_FILEFORMAT, [1], [Write BCSR matrices into self contained file format])
 fi
