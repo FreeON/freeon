@@ -130,16 +130,19 @@ fi
 # Define what compiler executable names to look for.
 if test "${use_MPI}" = "yes" -o "${use_parallel_clones}" = "yes"; then
   C_COMPILERS="mpicc"
+  CXX_COMPILERS="mpicxx"
   FC_COMPILERS="mpif90"
   F77_COMPILERS="mpif90"
 else
   C_COMPILERS="gcc icc pgc"
+  CXX_COMPILERS="g++ icc pgc"
   FC_COMPILERS="gfortran ifort pgf90"
   F77_COMPILERS="gfortran ifort pgf90"
 fi
 
 # Find compilers.
-AC_PROG_CC([${C_COMPILERS}])
+AC_PROG_CC_STDC([${C_COMPILERS}])
+AC_PROG_CXX([${CXX_COMPILERS}])
 AC_PROG_FC([${FC_COMPILERS}])
 AC_PROG_F77([${F77_COMPILERS}])
 
@@ -147,6 +150,10 @@ AC_USE_SYSTEM_EXTENSIONS
 
 if test -z "${CC}"; then
   AC_MSG_FAILURE([no C compiler found: set the CC variable])
+fi
+
+if test -z "${CXX}"; then
+  AC_MSG_FAILURE([no C++ compiler found: set the CXX variable])
 fi
 
 if test -z "${FC}"; then
@@ -315,7 +322,6 @@ AC_MSG_NOTICE([F77 compiler version: ${f77_compiler_version_string}])
 AC_MSG_NOTICE([FC compiler version:  ${fc_compiler_version_string}])
 
 # Put the C-compiler into standard C mode.
-AC_PROG_CC_STDC
 AC_GNU_SOURCE
 
 # Check for naming convention for Fortran-C interface.
@@ -674,6 +680,25 @@ AC_LANG(C)
 
 AC_CHECK_LIB([m], [round], [], [AC_MSG_FAILURE([we need the round() function])])
 
+AC_SEARCH_LIBS([clock_gettime], [rt],
+  [],
+  [AC_MSG_FAILURE([need clock_gettime()])])
+
+# Check for supported clocks. Thanks to Jonathan Lifflander
+# <jliffl2@illinois.edu> for suggesting this test.
+for CLOCKTYPE in \
+  CLOCK_MONOTONIC_RAW \
+  CLOCK_MONOTONIC \
+  CLOCK_REALTIME; do
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+    [[struct timespec p; clock_gettime(${CLOCKTYPE}, &p);]])],
+    [break], [CLOCKTYPE="unset"])
+done
+if test "${CLOCKTYPE}" = "unset"; then
+  AC_MSG_FAILURE([no known clock type])
+fi
+AC_DEFINE_UNQUOTED([CLOCKTYPE], [${CLOCKTYPE}], [The clock type to use with clock_gettime()])
+
 # Switch tests to fortran.
 AC_LANG(Fortran)
 
@@ -982,9 +1007,11 @@ AC_DEFINE_UNQUOTED(CONFIGURE_ARGUMENTS, ["${ac_configure_args}"], [The command l
 # Print out a summary of options used to compile.
 AC_MSG_NOTICE([***   Summary   ***])
 AC_MSG_NOTICE([CC                       = ${CC}])
+AC_MSG_NOTICE([CXX                      = ${CXX}])
 AC_MSG_NOTICE([FC                       = ${FC}])
 AC_MSG_NOTICE([F77                      = ${F77}])
 AC_MSG_NOTICE([CFLAGS                   = ${CFLAGS}])
+AC_MSG_NOTICE([CXXFLAGS                 = ${CXXFLAGS}])
 AC_MSG_NOTICE([FCFLAGS                  = ${FCFLAGS}])
 AC_MSG_NOTICE([FFLAGS                   = ${FFLAGS}])
 AC_MSG_NOTICE([LDFLAGS                  = ${LDFLAGS}])
