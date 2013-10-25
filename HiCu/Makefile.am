@@ -1,5 +1,7 @@
 include $(top_srcdir)/make.inc
 
+TAGS_FILES = $(top_srcdir)/Modules/*.F90
+
 bin_PROGRAMS = HiCu XCForce
 
 HiCu_SOURCES    = Grid.F90 Thresholds.F90 RhoTree.F90 CubeTree.F90 TreeWalk.F90 KxcGen.F90 ParaHiCu.F90 HiCu.F90
