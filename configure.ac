@@ -521,7 +521,7 @@ fi
 # Debugging flags?
 AC_ARG_ENABLE([debug-flags],
   [AS_HELP_STRING([--enable-debug-flags],
-    [Enables default compiler optimizations.])],
+    [Enables debug flag such as bounds checks])],
   [use_debug_flags="${enableval}"],
   [use_debug_flags="no"])
 
