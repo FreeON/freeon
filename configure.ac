@@ -84,6 +84,7 @@ AC_OUTPUT_COMMANDS([
 
 # Store user supplied compiler flags.
 user_CFLAGS=${CFLAGS}
+user_CXXFLAGS=${CXXFLAGS}
 user_FFLAGS=${FFLAGS}
 user_FCFLAGS=${FCFLAGS}
 
@@ -195,12 +196,53 @@ else
       CC_COMPILERNAME="PGI"
     else
       # Fall back to looking at the compiler executable name.
-      AC_MSG_NOTICE([CC: could not automatically detect compiler (${CC_RESULT})])
+      AC_MSG_NOTICE([CC:  could not automatically detect compiler (${CC_RESULT})])
       case ${CC} in
         *gcc*) CC_COMPILERNAME="GCC" ;;
         *icc*) CC_COMPILERNAME="Intel" ;;
         *pgc*) CC_COMPILERNAME="PGI" ;;
         *)     CC_COMPILERNAME="unknown" ;;
+      esac
+    fi
+  fi
+fi
+
+AC_ARG_VAR([CXX_COMPILERNAME],
+  [Gives the configure script a hint as to what kind of compiler the CXX
+   compiler is.  Normally this is autodetected, but can sometimes fail.
+   Possible values are GCC, Intel, PGI.])
+
+if test -n "${CXX_COMPILERNAME}"; then
+  if test "${CXX_COMPILERNAME}" = "GCC" -o \
+          "${CXX_COMPILERNAME}" = "Intel" -o \
+          "${CXX_COMPILERNAME}" = "PGI"; then
+    AC_MSG_NOTICE([using user-defined CXX_COMPILERNAME:  ${CXX_COMPILERNAME}])
+  else
+    AC_MSG_FAILURE([unknown CXX compiler: ${CXX_COMPILERNAME}])
+  fi
+else
+  # Try to find out what compiler this is.
+  CXX_RESULT=`(${CXX} --version 2> /dev/null) | head -n1 | awk '{print $1}' 2> /dev/null`
+  if test "`echo ${CXX_RESULT} | sed -e 's/^.*g++.*/g++/'`" = "g++"; then
+    AC_MSG_NOTICE([CXX: identified GNU gcc compiler])
+    CXX_COMPILERNAME="GCC"
+  elif test "${CXX_RESULT}" = "icc"; then
+    AC_MSG_NOTICE([CXX: identified Intel icc compiler])
+    CXX_COMPILERNAME="Intel"
+  else
+    # Check for Portland Group compiler.
+    CXX_RESULT=`(${CXX} -V 2> /dev/null) | grep pgcc | awk '{print $1}'`
+    if test "${CXX_RESULT}" = "pgcc"; then
+      AC_MSG_NOTICE([CXX: identified Portland Group pgcc compiler])
+      CXX_COMPILERNAME="PGI"
+    else
+      # Fall back to looking at the compiler executable name.
+      AC_MSG_NOTICE([CXX: could not automatically detect compiler (${CXX_RESULT})])
+      case ${CXX} in
+        *gcc*) CXX_COMPILERNAME="GCC" ;;
+        *icc*) CXX_COMPILERNAME="Intel" ;;
+        *pgc*) CXX_COMPILERNAME="PGI" ;;
+        *)     CXX_COMPILERNAME="unknown" ;;
       esac
     fi
   fi
@@ -277,7 +319,7 @@ else
       FC_COMPILERNAME="PGI"
     else
       # Fall back to looking at the compiler executable name.
-      AC_MSG_NOTICE([FC: could not automatically detect compiler (${FC_RESULT})])
+      AC_MSG_NOTICE([FC:  could not automatically detect compiler (${FC_RESULT})])
       case ${FC} in
         *gfortran*) FC_COMPILERNAME="GCC" ;;
         *ifort*)    FC_COMPILERNAME="Intel" ;;
@@ -288,14 +330,19 @@ else
   fi
 fi
 
-AC_MSG_NOTICE([identified C/F77/F90: ${CC_COMPILERNAME}/${F77_COMPILERNAME}/${FC_COMPILERNAME}])
-
 # Get compiler version.
 case "${CC_COMPILERNAME}" in
   GCC)   cc_compiler_version_string="`${CC} --version | head -n1`" ;;
   Intel) cc_compiler_version_string="`${CC} --version | head -n1`" ;;
   PGI)   cc_compiler_version_string="`${CC} -V | head -n2 | tail -n1`" ;;
   *)     cc_compiler_version_string="unset" ;;
+esac
+
+case "${CXX_COMPILERNAME}" in
+  GCC)   cxx_compiler_version_string="`${CXX} --version | head -n1`" ;;
+  Intel) cxx_compiler_version_string="`${CXX} --version | head -n1`" ;;
+  PGI)   cxx_compiler_version_string="`${CXX} -V | head -n2 | tail -n1`" ;;
+  *)     cxx_compiler_version_string="unset" ;;
 esac
 
 case "${F77_COMPILERNAME}" in
@@ -314,10 +361,12 @@ esac
 
 # Define compiler version strings.
 AC_DEFINE_UNQUOTED(CC_VERSION_STRING,  ["${cc_compiler_version_string}"],  [The C compiler version string])
+AC_DEFINE_UNQUOTED(CXX_VERSION_STRING, ["${cxx_compiler_version_string}"], [The CXX compiler version string])
 AC_DEFINE_UNQUOTED(F77_VERSION_STRING, ["${f77_compiler_version_string}"], [The f77 compiler version string])
 AC_DEFINE_UNQUOTED(FC_VERSION_STRING,  ["${fc_compiler_version_string}"],  [The f90 compiler version string])
 
 AC_MSG_NOTICE([C compiler version:   ${cc_compiler_version_string}])
+AC_MSG_NOTICE([CXX compiler version: ${cxx_compiler_version_string}])
 AC_MSG_NOTICE([F77 compiler version: ${f77_compiler_version_string}])
 AC_MSG_NOTICE([FC compiler version:  ${fc_compiler_version_string}])
 
@@ -533,10 +582,22 @@ if test "${use_debug_flags}" = "yes"; then
       Intel) CFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
       *)     CFLAGS="-O0 -g" ;;
     esac
-    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS  = ${CFLAGS}])
+    AC_MSG_NOTICE([Setting default optimization for ${CC_COMPILERNAME} compiler: CFLAGS   = ${CFLAGS}])
     optimization_flags="${optimization_flags} CFLAGS=\"${CFLAGS}\""
   else
-    AC_MSG_NOTICE([User supplied:  CFLAGS  = ${user_CFLAGS}])
+    AC_MSG_NOTICE([User supplied:  CFLAGS   = ${user_CFLAGS}])
+  fi
+
+  if test -z "${user_CXXFLAGS}"; then
+    case ${CXX_COMPILERNAME} in
+      GCC)   CXXFLAGS="-O0 -g3 -ggdb3 -Wall -pipe" ;;
+      Intel) CXXFLAGS="-O0 -fp-port -fno-omit-frame-pointer -g -debug" ;;
+      *)     CXXFLAGS="-O0 -g" ;;
+    esac
+    AC_MSG_NOTICE([Setting default optimization for ${CXX_COMPILERNAME} compiler: CXXFLAGS = ${CXXFLAGS}])
+    optimization_flags="${optimization_flags} CXXFLAGS=\"${CXXFLAGS}\""
+  else
+    AC_MSG_NOTICE([User supplied:  CXXFLAGS = ${user_CXXFLAGS}])
   fi
 
   if test -z "${user_FFLAGS}"; then
@@ -545,10 +606,10 @@ if test "${use_debug_flags}" = "yes"; then
       Intel) FFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FFLAGS="-O0 -g" ;;
     esac
-    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS  = ${FFLAGS}])
+    AC_MSG_NOTICE([Setting default optimization for ${F77_COMPILERNAME} compiler: FFLAGS   = ${FFLAGS}])
     optimization_flags="${optimization_flags} FFLAGS=\"${FFLAGS}\""
   else
-    AC_MSG_NOTICE([User supplied:  FFLAGS  = ${user_FFLAGS}])
+    AC_MSG_NOTICE([User supplied:  FFLAGS   = ${user_FFLAGS}])
   fi
 
   if test -z "${user_FCFLAGS}"; then
@@ -557,10 +618,10 @@ if test "${use_debug_flags}" = "yes"; then
       Intel) FCFLAGS="-O0 -fltconsistency -fp-port -fno-omit-frame-pointer -debug -debug-parameters all -check all -g -traceback" ;;
       *)     FCFLAGS="-O0 -g" ;;
     esac
-    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS = ${FCFLAGS}])
+    AC_MSG_NOTICE([Setting default optimization for ${FC_COMPILERNAME} compiler: FCFLAGS  = ${FCFLAGS}])
     optimization_flags="${optimization_flags} FCFLAGS=\"${FCFLAGS}\""
   else
-    AC_MSG_NOTICE([User supplied:  FCFLAGS = ${user_FCFLAGS}])
+    AC_MSG_NOTICE([User supplied:  FCFLAGS  = ${user_FCFLAGS}])
   fi
 fi
 
