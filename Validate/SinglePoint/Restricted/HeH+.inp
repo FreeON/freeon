@@ -59,8 +59,6 @@ HYDROGEN   1.0   1.4632 0.0  0.0
 Charge=1
 Multiplicity=1
 
-DebugAll=(MaxDebug,MatDebug,CheckSums)
-
 Guess=Core
 SCFMethod=(RH)
 BasisSets=(3-21G-SPLIT)

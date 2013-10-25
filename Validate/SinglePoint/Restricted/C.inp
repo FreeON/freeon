@@ -7,9 +7,6 @@ Multiplicity=3
 
 Guess=Superpos
 OutPut=XYZ
-DebugAll=(MaxDebug)
-
-#Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
 
 SCFMethod=(RH)
 BasisSets=(6-31G*)
