@@ -71,3 +71,5 @@ add_library( freeonmodules
   mm_double_TT_c.c
   phipac_dgemm.c
   )
+
+include_directories( ${CMAKE_BINARY_DIR} )
