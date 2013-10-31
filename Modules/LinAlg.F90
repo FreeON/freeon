@@ -282,7 +282,8 @@ CONTAINS
          DRowPt%I,  DColPt%I, DBlkPt%I,                 &
          BSiz%I,Flag%I)
     IF(Status==FAIL) THEN
-      CALL Halt('Dimensions in SymbolikMM_BCSR')
+      CALL Halt('Dimensions in SymbolikMM_BCSR: SIZE(C%ColPt) = ' &
+        //IntToChar(SIZE(C%ColPt%I))//' SIZE(C%MTrix) = '//IntToChar(SIZE(C%MTrix%D)))
     ENDIF
 
     CALL Delete(DRowPt)
@@ -375,7 +376,7 @@ CONTAINS
               T=T+1
               S=S+MA*BSiz77(KG)*NSMat !<<<SPIN
               IF(T.GT.MxBlks.OR.S.GT.MxNon0)THEN
-                SymbolikMM_Generic_77=-1
+                SymbolikMM_GENERIC_77=FAIL
                 RETURN
               ENDIF
             ENDIF
@@ -389,12 +390,12 @@ CONTAINS
     CNNon0=S-1
     CNBlks=T-1
     CRowPt(CNAtms+1)=T
-    SymbolikMM_Generic_77=0
+    SymbolikMM_GENERIC_77=SUCCEED
     DO IG=1,NAtoms77
       Flag77(IG)=0
     ENDDO
     RETURN
-  END FUNCTION SymbolikMM_Generic_77
+  END FUNCTION SymbolikMM_GENERIC_77
 #ifdef PARALLEL
   !===============================================================================
   !     Wrapper for generic F77 style DBCSR numeric matrix multiply: C=C+A.B
