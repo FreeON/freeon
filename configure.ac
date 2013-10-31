@@ -42,7 +42,7 @@ AM_SILENT_RULES([yes])
 # Define the aclocal macro directory.
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_ARG_ENABLE([--git-tag],
+AC_ARG_ENABLE([git-tag],
   [AS_HELP_STRING([--enable-git-tag],
   [Adds the HEAD git tag to the binary, which might be useful when using
    FreeON directly from git.])],
