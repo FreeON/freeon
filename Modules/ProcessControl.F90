@@ -58,6 +58,8 @@ CONTAINS
   SUBROUTINE MondoHalt(IErr,Mssg)
     CHARACTER (LEN=*) :: Mssg
     INTEGER           :: IErr
+    CHARACTER(LEN=10) :: stringIErr
+
     IF(IErr==EXIT_ERROR)THEN
       CALL MondoLogPlain(TRIM(Mssg)//' failed.')
     ELSEIF(IErr==DUMP_ERROR)THEN
@@ -81,7 +83,8 @@ CONTAINS
     ELSEIF(IErr==QMMM_ERROR)THEN
       CALL MondoLogPlain('Error in QMMM  : '//TRIM(Mssg))
     ELSE
-      CALL MondoLogPlain('Unknown error: '//TRIM(Mssg))
+      WRITE(stringIErr, *) IErr
+      CALL MondoLogPlain("Unknown error (error code "//TRIM(stringIErr)//"): "//TRIM(Mssg))
     ENDIF
     WRITE(*,*)' '
     WRITE(*,*)' To have no errors '
@@ -159,78 +162,5 @@ CONTAINS
     Warning='... ning Warning  Warning  Warning Wa ...'//Rtrn//TRIM(ADJUSTL(Strng))
     CALL MondoLogPlain(TRIM(Warning))
   END SUBROUTINE Warn
-
-!  SUBROUTINE Logger(Mssg,ToOutFile_O)
-!    CHARACTER(LEN=*) :: Mssg
-!    LOGICAL,OPTIONAL :: ToOutFile_O
-!    INTEGER          :: IOS
-!    LOGICAL          :: Opened, Exists, ToOutFile
-!
-!    ToOutFile=.FALSE.
-!    IF(PRESENT(ToOutFile_O))ToOutFile=ToOutFile_O
-!    !------------------------------------------------------------------
-!    !        Whats up with the log file?
-!    !
-!    INQUIRE(FILE=TRIM(LogFile),OPENED=Opened, &
-!         EXIST=Exists,ERR=11,IOSTAT=IOS)
-!    !------------------------------------------------------------------
-!    !        Open existing file and position at the bottom
-!    !
-!    IF(Exists.AND.(.NOT.Opened))THEN
-!      OPEN(UNIT=LgF,FILE=TRIM(LogFile), &
-!           ACCESS='SEQUENTIAL', FORM='FORMATTED', &
-!           POSITION='APPEND',ERR=11,IOSTAT=IOS,STATUS='OLD')
-!      !------------------------------------------------------------------
-!      !        Bad logic....
-!      !
-!    ELSEIF(Exists.AND.Opened)THEN
-!      WRITE(*,*)' File '//TRIM(LogFile)//' already open'
-!      !------------------------------------------------------------------
-!      !        Create a new file and open it
-!      !
-!    ELSE
-!      OPEN(UNIT=LgF,FILE=TRIM(LogFile), &
-!           ACCESS='SEQUENTIAL',FORM='FORMATTED', &
-!           ERR=11,IOSTAT=IOS,STATUS='NEW')
-!    ENDIF
-!    WRITE(LgF,*)TRIM(Mssg)
-!    CLOSE(UNIT=LgF,STATUS='KEEP')
-!
-!    IF(.NOT.ToOutFile)RETURN
-!    !------------------------------------------------------------------
-!    !        Whats up with the Out file?
-!    !
-!    INQUIRE(FILE=TRIM(OutFile),OPENED=Opened, &
-!         EXIST=Exists,ERR=12,IOSTAT=IOS)
-!    !------------------------------------------------------------------
-!    !        Open existing file and position at the bottom
-!    !
-!    IF(Exists.AND.(.NOT.Opened))THEN
-!      OPEN(UNIT=Out,FILE=TRIM(OutFile), &
-!           ACCESS='SEQUENTIAL', FORM='FORMATTED', &
-!           POSITION='APPEND',ERR=12,IOSTAT=IOS,STATUS='OLD')
-!      !------------------------------------------------------------------
-!      !        Bad Outic....
-!      !
-!    ELSEIF(Exists.AND.Opened)THEN
-!      WRITE(*,*)' File '//TRIM(OutFile)//' already open'
-!      !------------------------------------------------------------------
-!      !        Create a new file and open it
-!      !
-!    ELSE
-!      OPEN(UNIT=Out,FILE=TRIM(OutFile), &
-!           ACCESS='SEQUENTIAL',FORM='FORMATTED', &
-!           ERR=12,IOSTAT=IOS,STATUS='NEW')
-!    ENDIF
-!    WRITE(Out,*)TRIM(Mssg)
-!    CLOSE(UNIT=Out,STATUS='KEEP')
-!    RETURN
-!11  WRITE(*,*)TRIM(Mssg)
-!    WRITE(*,*)' Logging Error: IOS= ',IOS,' on file ',TRIM(LogFile)
-!    CALL Trap()
-!12  WRITE(*,*)TRIM(Mssg)
-!    WRITE(*,*)' Logging Error: IOS= ',IOS,' on file ',TRIM(OutFile)
-!    CALL Trap()
-!  END SUBROUTINE Logger
 
 END MODULE ProcessControl
