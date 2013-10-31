@@ -27,6 +27,8 @@
 /*   FORKS A CHILD PROCESS    */
 /*   Author: Matt Challacombe */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +38,7 @@
 #include <errno.h>
 
 int
-spawn_ (int *nc, int *maxlen, int *ichr)
+F77_FUNC(spawn, SPAWN) (int *nc, int *maxlen, int *ichr)
 {
   int i, j, k, status;
   char** argv;
@@ -110,10 +112,4 @@ spawn_ (int *nc, int *maxlen, int *ichr)
   free(argv);
 
   return ierr;
-}
-
-int
-spawn (int *nc, int *maxlen, int *ichr)
-{
-  return spawn_(nc, maxlen, ichr);
 }
