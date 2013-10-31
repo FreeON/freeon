@@ -124,7 +124,6 @@ PROGRAM BlokAInv
 
   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
     CALL PPrint(PerfMon,Prog)
-    CALL PPrint(PerfMon,Prog,Unit_O=6)
   ENDIF
   ! Consistency check
   IF(TEST_AINV)THEN
