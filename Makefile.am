@@ -6,7 +6,6 @@ AM_CPPFLAGS = @AM_CPPFLAGS@
 SUBDIRS = \
 	Modules \
 	tests \
-	LinearAlgebraLibrary \
 	FreeON \
 	SCFeqs \
 	OneE \

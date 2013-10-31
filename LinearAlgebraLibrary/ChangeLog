@@ -1,4 +1,0 @@
-2009-04-30  Nicolas Bock  <nbock@mujo>
-
-	* Starting to pull out matrix operations, e.g. involving sparse and dense
-	matrix types, from the main FreeON code into a separate library.

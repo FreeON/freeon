@@ -1,3 +1,0 @@
-CLEANFILES = *~
-
-SUBDIRS = f90

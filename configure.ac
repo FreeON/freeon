@@ -780,9 +780,6 @@ END PROGRAM test_compiler
                   inside a type definition. If you are using gcc, we suggest
                   you use a version >= 4.2.0])])
 
-# Compile LinearAlgebraLibrary.
-AC_CONFIG_SUBDIRS([LinearAlgebraLibrary])
-
 # Check for BLAS.
 AC_SEARCH_LIBS([dgemm], [blas], [],
   [AC_MSG_FAILURE([specify the location of dgemm()])])
