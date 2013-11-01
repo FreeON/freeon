@@ -376,6 +376,11 @@ CONTAINS
               T=T+1
               S=S+MA*BSiz77(KG)*NSMat !<<<SPIN
               IF(T.GT.MxBlks.OR.S.GT.MxNon0)THEN
+                CALL MondoLog(DEBUG_NONE, "SymbolikMM_GENERIC_77", &
+                  "T = "//TRIM(IntToChar(T))//", " &
+                  //"MxBlks = "//TRIM(IntToChar(MxBlks))//", " &
+                  //"S = "//TRIM(IntToChar(S))//", " &
+                  //"MxNon0 = "//TRIM(IntToChar(MxNon0)))
                 SymbolikMM_GENERIC_77=FAIL
                 RETURN
               ENDIF
