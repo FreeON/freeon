@@ -61,7 +61,7 @@ class BCSR
     int getNumberNonZero (void);
     double getElement (int i);
     void toDense (int *M, int *N, double **ADense);
-    void toStr (void);
+    void toStr (const bool verbose);
     void put (char *filename);
     void toMM (char *filename);
 };

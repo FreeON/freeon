@@ -12,18 +12,20 @@ int main (int argc, char **argv)
   char *MM_filename = NULL;
   bool linear_bin = false;
   bool log_bin = false;
+  bool verbose = false;
 
   int numberBins = 10;
   double bin_min = 0;
   double bin_max = 1;
 
   int c;
-  const char *short_options = "hw:bl";
+  const char *short_options = "hw:blv";
   const struct option long_options[] = {
     { "help",         no_argument,        NULL, 'h' },
     { "write-MM",     required_argument,  NULL, 'w' },
     { "linear-bin",   no_argument,        NULL, 'b' },
     { "log-bin",      no_argument,        NULL, 'l' },
+    { "verbose",      no_argument,        NULL, 'v' },
     { NULL, 0, NULL, 0 }
   };
 
@@ -39,8 +41,9 @@ int main (int argc, char **argv)
         printf("\n");
         printf("{ -h | --help }           This help\n");
         printf("{ -w | --write-MM } FILE  Write matrix in MatrixMarket format to FILE\n");
-        printf("{ -b | --linear-bin }     Bin the matrix elements by magnited (linear)\n");
         printf("{ -b | --log-bin }        Bin the matrix elements by magnited (log)\n");
+        printf("{ -l | --linear-bin }     Bin the matrix elements by magnited (linear)\n");
+        printf("{ -v | --verbose }        Print BCSR index lists\n");
         exit(0);
         break;
 
@@ -64,6 +67,10 @@ int main (int argc, char **argv)
         log_bin = true;
         break;
 
+      case 'v':
+        verbose = true;
+        break;
+
       default:
         ABORT("unknown command line option\n");
         break;
@@ -78,7 +85,7 @@ int main (int argc, char **argv)
     printf("spectral bounds Gershgorin: [ %e, %e ]\n", F_min, F_max);
     //A.getSpectralBounds(1, &F_min, &F_max);
     //printf("spectral bounds eigensolve: [ %e, %e ]\n", F_min, F_max);
-    A.toStr();
+    A.toStr(verbose);
 
     if(linear_bin || log_bin)
     {

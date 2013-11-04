@@ -365,43 +365,46 @@ void BCSR::toDense (int *M, int *N, double **ADense)
 
 /** Print some information on the BCSR matrix.
  */
-void BCSR::toStr (void)
+void BCSR::toStr (const bool verbose)
 {
   printf("BCSR: M             = %d\n", M);
   printf("BCSR: N             = %d\n", N);
   printf("BCSR: NBasF         = %d\n", numberBasisFunctions);
   printf("BCSR: NSMat         = %d\n", NSMat);
   printf("BCSR: NAtoms        = %d\n", NAtoms);
-  printf("BCSR: block sizes   = {");
-  for(int i = 0; i < NAtoms; i++)
+  if(verbose)
   {
-    printf(" %d", blockSize[i]);
+    printf("BCSR: block sizes   = {");
+    for(int i = 0; i < NAtoms; i++)
+    {
+      printf(" %d", blockSize[i]);
+    }
+    printf(" }\n");
+    printf("BCSR: offset        = {");
+    for(int i = 0; i < NAtoms; i++)
+    {
+      printf(" %d", offset[i]);
+    }
+    printf(" }\n");
+    printf("BCSR: rowPointer    = {");
+    for(int i = 0; i < NAtoms+1; i++)
+    {
+      printf(" %d", rowPointer[i]);
+    }
+    printf(" }\n");
+    printf("BCSR: columnPointer = {");
+    for(int i = 0; i < numberBlocks; i++)
+    {
+      printf(" %d", columnPointer[i]);
+    }
+    printf(" }\n");
+    printf("BCSR: blockPointer  = {");
+    for(int i = 0; i < numberBlocks; i++)
+    {
+      printf(" %d", blockPointer[i]);
+    }
+    printf(" }\n");
   }
-  printf(" }\n");
-  printf("BCSR: offset        = {");
-  for(int i = 0; i < NAtoms; i++)
-  {
-    printf(" %d", offset[i]);
-  }
-  printf(" }\n");
-  printf("BCSR: rowPointer    = {");
-  for(int i = 0; i < NAtoms+1; i++)
-  {
-    printf(" %d", rowPointer[i]);
-  }
-  printf(" }\n");
-  printf("BCSR: columnPointer = {");
-  for(int i = 0; i < numberBlocks; i++)
-  {
-    printf(" %d", columnPointer[i]);
-  }
-  printf(" }\n");
-  printf("BCSR: blockPointer  = {");
-  for(int i = 0; i < numberBlocks; i++)
-  {
-    printf(" %d", blockPointer[i]);
-  }
-  printf(" }\n");
   printf("BCSR: numberNonZero = %d\n", numberNonZero);
   printf("BCSR: numberBlocks  = %d\n", numberBlocks);
 }
