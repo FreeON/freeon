@@ -1,6 +1,6 @@
 SUBDIRS = MSC VRR HRR INT GRD
 
-lib_LTLIBRARIES = libfreeonTwoE.la
+noinst_LTLIBRARIES = libfreeonTwoE.la
 
 libfreeonTwoE_la_SOURCES =
 
