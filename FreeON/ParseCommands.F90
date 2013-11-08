@@ -80,12 +80,12 @@ CONTAINS
       CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_BASISSETS) set to '//trim(N%M_BASISSETS), "LoadCommand")
     ENDIF
 
-    CALL GetEnv('MONDO_EXEC',N%M_EXEC)
+    CALL GetEnv('FREEON_EXEC',N%M_EXEC)
     IF(LEN(TRIM(N%M_EXEC)) == 0) THEN
       N%M_EXEC = TRIM(N%M_HOME)//"/bin"
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) not set. Using '//TRIM(N%M_EXEC), "LoadCommand")
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_EXEC) not set. Using '//TRIM(N%M_EXEC), "LoadCommand")
     ELSE
-      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(MONDO_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
+      CALL MondoLog(DEBUG_NONE, "FreeON", 'env variable $(FREEON_EXEC) set to '//trim(N%M_EXEC), "LoadCommand")
     ENDIF
 
     CALL GetEnv('FREEON_SCRATCH',N%M_SCRATCH)

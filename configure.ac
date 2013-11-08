@@ -979,8 +979,7 @@ AC_ARG_VAR([FREEON_SCRATCH],
 if test -z "${FREEON_SCRATCH}"; then
   FREEON_SCRATCH="/tmp"
 fi
-
-# Define FreeON variables.
+AC_DEFINE_UNQUOTED(HAVE_FREEON_SCRATCH, ["${FREEON_SCRATCH}"], [Define default FREEON_SCRATCH directory.])
 
 # Set some preprocessor command line options.
 FORTRAN_CPPFLAGS="-P -C -xc -traditional -I\$(srcdir) -I\$(top_builddir)/Modules"
@@ -992,12 +991,11 @@ AC_SUBST(AM_CPPFLAGS, ${AM_CPPFLAGS})
 AC_SUBST(FORTRAN_CPPFLAGS, ${FORTRAN_CPPFLAGS})
 AC_SUBST(FORTRAN_DEFAULT_INCLUDES, ${FORTRAN_DEFAULT_INCLUDES})
 
-AC_DEFINE_UNQUOTED(HAVE_MONDO_PLAT,     ["${build}"], [Define build platform.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_HOST,     ["`hostname`"], [Define hostname.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_MACH,     ["${build_cpu}"], [Define build cpu.])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_SYST,     ["${build_os}"], [Define build system (os).])
-AC_DEFINE_UNQUOTED(HAVE_MONDO_VRSN,     ["`uname -r`"], [Define build os version.])
-AC_DEFINE_UNQUOTED(HAVE_FREEON_SCRATCH, ["${FREEON_SCRATCH}"], [Define default FREEON_SCRATCH directory.])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_PLAT,    ["${build}"], [Define build platform.])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_HOST,    ["`hostname`"], [Define hostname.])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_MACH,    ["${build_cpu}"], [Define build cpu.])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_SYST,    ["${build_os}"], [Define build system (os).])
+AC_DEFINE_UNQUOTED(HAVE_FREEON_VRSN,    ["`uname -r`"], [Define build os version.])
 
 # Enable fix for gfortran.
 if test "${FC_COMPILERNAME}" = "GCC"; then

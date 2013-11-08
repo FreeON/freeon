@@ -51,16 +51,16 @@ CONTAINS
     INTEGER            :: HDF5_majnum, HDF5_minnum, HDF5_relnum
     INTEGER            :: StackCurrent, StackMax
     !-----------------------------------------------------------------------------------------------
-    CALL GetEnv('MONDO_HOST',M_HOST)
-    IF(LEN(TRIM(M_HOST)) == 0) M_HOST = HAVE_MONDO_HOST
-    CALL GetEnv('MONDO_MACH',M_MACH)
-    IF(LEN(TRIM(M_MACH)) == 0) M_MACH = HAVE_MONDO_MACH
-    CALL GetEnv('MONDO_SYST',M_SYST)
-    IF(LEN(TRIM(M_SYST)) == 0) M_SYST = HAVE_MONDO_SYST
-    CALL GetEnv('MONDO_VRSN',M_VRSN)
-    IF(LEN(TRIM(M_VRSN)) == 0) M_VRSN = HAVE_MONDO_VRSN
-    CALL GetEnv('MONDO_PLAT',M_PLAT)
-    IF(LEN(TRIM(M_PLAT)) == 0) M_PLAT = HAVE_MONDO_PLAT
+    CALL GetEnv('FREEON_HOST',M_HOST)
+    IF(LEN(TRIM(M_HOST)) == 0) M_HOST = HAVE_FREEON_HOST
+    CALL GetEnv('FREEON_MACH',M_MACH)
+    IF(LEN(TRIM(M_MACH)) == 0) M_MACH = HAVE_FREEON_MACH
+    CALL GetEnv('FREEON_SYST',M_SYST)
+    IF(LEN(TRIM(M_SYST)) == 0) M_SYST = HAVE_FREEON_SYST
+    CALL GetEnv('FREEON_VRSN',M_VRSN)
+    IF(LEN(TRIM(M_VRSN)) == 0) M_VRSN = HAVE_FREEON_VRSN
+    CALL GetEnv('FREEON_PLAT',M_PLAT)
+    IF(LEN(TRIM(M_PLAT)) == 0) M_PLAT = HAVE_FREEON_PLAT
 
     ! Print the Input File to the Output File
     OPEN(UNIT=Inp,FILE=N%IFile,STATUS='Old')

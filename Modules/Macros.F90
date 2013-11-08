@@ -66,7 +66,7 @@ CONTAINS
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     INTEGER                              :: ChkNPrc,iTAG
-    CHARACTER(LEN=DCL)                   :: MONDO_HOST
+    CHARACTER(LEN=DCL)                   :: FREEON_HOST
 #endif
 
     ! We are in the back-end:
