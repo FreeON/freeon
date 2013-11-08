@@ -32,22 +32,14 @@ GONX_SOURCES = \
 
 ONX_DEPENDENCIES  = \
   $(LIBRARY_DEPENDENCY_FILES) \
-  $(top_builddir)/TwoE/GRD/libGRD.la \
-  $(top_builddir)/TwoE/INT/libINT.la \
-  $(top_builddir)/TwoE/VRR/libVRR.la \
-  $(top_builddir)/TwoE/HRR/libHRR.la \
-  $(top_builddir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_builddir)/TwoE/libfreeonTwoE.la \
   $(top_builddir)/TwoE/MSC/shellpairstruct.mod \
   $(top_builddir)/TwoE/MSC/vscratchb.mod \
   $(top_builddir)/TwoE/MSC/getatompairmod.mod
 
 GONX_DEPENDENCIES = \
   $(LIBRARY_DEPENDENCY_FILES) \
-  $(top_builddir)/TwoE/GRD/libGRD.la \
-  $(top_builddir)/TwoE/INT/libINT.la \
-  $(top_builddir)/TwoE/VRR/libVRR.la \
-  $(top_builddir)/TwoE/HRR/libHRR.la \
-  $(top_builddir)/TwoE/MSC/libTwoEMisc.la \
+  $(top_builddir)/TwoE/libfreeonTwoE.la \
   $(top_builddir)/TwoE/MSC/shellpairstruct.mod \
   $(top_builddir)/TwoE/MSC/vscratchb.mod \
   $(top_builddir)/TwoE/MSC/getatompairmod.mod
@@ -56,25 +48,18 @@ SOURCES_DEPCHECK = \
   $(ONX_SOURCES) \
   $(GONX_SOURCES)
 
-EXTRA_DIST = \
-  ERIMIC.Inc
+EXTRA_DIST = ERIMIC.Inc
 
 CPPMISC = -DONX2_PARALLEL -DGTRESH
 
 EXTRA_INCLUDES = \
-  -I$(top_builddir)/TwoE/INT \
-  -I$(top_srcdir)/TwoE/INT \
-  -I$(top_builddir)/TwoE/GRD \
-  -I$(top_srcdir)/TwoE/GRD \
-  -I$(top_builddir)/TwoE/MSC
+	-I$(top_builddir)/TwoE/GRD \
+	-I$(top_builddir)/TwoE/INT \
+	-I$(top_builddir)/TwoE/MSC
 
 LDADD = \
   $(LDADD_MODULES) \
-  $(builddir)/../TwoE/GRD/libGRD.la \
-  $(builddir)/../TwoE/INT/libINT.la \
-  $(builddir)/../TwoE/VRR/libVRR.la \
-  $(builddir)/../TwoE/HRR/libHRR.la \
-  $(builddir)/../TwoE/MSC/libTwoEMisc.la
+  $(builddir)/../TwoE/libfreeonTwoE.la
 
 # In case we have ctags installed, make the necessary tags files.
 .PHONY : tags

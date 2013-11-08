@@ -1,8 +1,8 @@
 include $(top_srcdir)/make.inc
 
-noinst_LTLIBRARIES = libTwoEMisc.la
+noinst_LTLIBRARIES = libMSC.la
 
-libTwoEMisc_la_SOURCES = \
+libMSC_la_SOURCES = \
   ShellPairStruct.F90 \
   ShellPrint.F90 \
   Scratch.F90 \
