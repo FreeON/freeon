@@ -55,7 +55,9 @@ CPPMISC = -DONX2_PARALLEL -DGTRESH
 EXTRA_INCLUDES = \
 	-I$(top_builddir)/TwoE/GRD \
 	-I$(top_builddir)/TwoE/INT \
-	-I$(top_builddir)/TwoE/MSC
+	-I$(top_builddir)/TwoE/MSC \
+	-I$(top_srcdir)/TwoE/GRD \
+	-I$(top_srcdir)/TwoE/INT
 
 LDADD = \
   $(LDADD_MODULES) \
