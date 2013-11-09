@@ -7,7 +7,7 @@ libbcsr_la_SOURCES = \
 
 include_HEADERS = bcsr.h
 
-bin_SCRIPTS = \
+python_PYTHON = \
   diffusionCoefficient.py \
   MDO2xyz.py \
   getFrame.py \
