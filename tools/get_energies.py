@@ -21,7 +21,7 @@ The output is written to standard output. There these columns:
 option, argument = parser.parse_args()
 
 if len(argument) == 0:
-  print >> sys.stderr, "reading from standard input"
+  print("reading from standard input", file = sys.stderr)
   argument.append("-")
 
 for file in argument:
@@ -86,7 +86,7 @@ for file in argument:
       Geometry = int(result.group(3))
 
       if Geometry > lastGeometry:
-        print MDTime, MDEtot, SCFEnergy, MDEkin, MDEpot, MDTemp, lastGeometry, lastSCFCycle, dD
+        print(MDTime, MDEtot, SCFEnergy, MDEkin, MDEpot, MDTemp, lastGeometry, lastSCFCycle, dD)
 
       SCFEnergy = result.group(4)
       dD = result.group(5)

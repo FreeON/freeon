@@ -41,19 +41,19 @@ position = []
 velocity = []
 
 for file in arguments:
-  print >> sys.stderr, "reading " + file
+  print("reading " + file, file = sys.stderr)
 
   try:
     fd = open(file)
     lines = fd.readlines()
     fd.close()
 
-  except IOError, e:
-    print >> sys.stderr, "error opening file: " + e.strerror
+  except IOError as e:
+    print("error opening file: " + e.strerror, file = sys.stderr)
     sys.exit(1)
 
   numberOfAtoms = int(lines[0].strip())
-  print >> sys.stderr, "file contains information on " + str(numberOfAtoms) + " atoms"
+  print("file contains information on " + str(numberOfAtoms) + " atoms", file = sys.stderr)
 
   lineNumber = 0
   while(lineNumber < len(lines)):
@@ -62,7 +62,7 @@ for file in arguments:
 
     N = int(lines[lineNumber].strip())
     if N != numberOfAtoms:
-      print >> sys.stderr, "line " + str(lineNumber+1) + ": number of atoms is different from previous values (" + str(N) + ")"
+      print("line " + str(lineNumber+1) + ": number of atoms is different from previous values (" + str(N) + ")", file = sys.stderr)
       sys.exit(1)
 
     lineNumber += 1
@@ -75,9 +75,9 @@ for file in arguments:
       try:
         time.append(float(timestring))
 
-      except ValueError, e:
-        print >> sys.stderr, "can not convert time value on line " + str(lineNumber+1) + ": " + comment
-        print >> sys.stderr, e.message
+      except ValueError as e:
+        print("can not convert time value on line " + str(lineNumber+1) + ": " + comment, file = sys.stderr)
+        print(e.message, file = sys.stderr)
         sys.exit(1)
 
     else:
@@ -88,16 +88,16 @@ for file in arguments:
     for i in range(numberOfAtoms):
       tokens = lines[lineNumber+i].split()
       if len(tokens) < 7:
-        print >> sys.stderr, str(lineNumber+i+1) + ": I need positions and velocities on each line"
+        print(str(lineNumber+i+1) + ": I need positions and velocities on each line", file = sys.stderr)
         sys.exit(1)
 
       try:
         pos = [ float(tokens[1]), float(tokens[2]), float(tokens[3]) ]
         vel = [ float(tokens[4]), float(tokens[5]), float(tokens[6]) ]
 
-      except ValueError, e:
-        print >> sys.stderr, "can not convert line " + str(lineNumber+i+1) + ": " + lines[lineNumber+i+1].strip()
-        print(e.message)
+      except ValueError as e:
+        print("can not convert line " + str(lineNumber+i+1) + ": " + lines[lineNumber+i+1].strip(), file = sys.stderr)
+        print((e.message))
         sys.exit(1)
 
       position[-1].append(pos)
@@ -105,7 +105,7 @@ for file in arguments:
 
     lineNumber += numberOfAtoms
 
-print >> sys.stderr, "read " + str(len(time)) + " configurations"
+print("read " + str(len(time)) + " configurations", file = sys.stderr)
 
 # Find index of t0.
 t0Index = len(time)
@@ -115,7 +115,7 @@ for i in range(len(time)):
     break
 
 if t0Index == len(time):
-  print >> sys.stderr, "t0 too large"
+  print("t0 too large", file = sys.stderr)
   sys.exit(1)
 
 # Find index of tf.
@@ -127,14 +127,14 @@ if options.tf:
       break
 
   if tfIndex == 0:
-    print >> sys.stderr, "tf too small"
+    print("tf too small", file = sys.stderr)
     sys.exit(1)
 
 else:
   tfIndex = len(time)
 
 if t0Index >= tfIndex:
-  print >> sys.stderr, "syntax error: tf <= t0, " + str(options.tf) + " <= " + str(options.t0)
+  print("syntax error: tf <= t0, " + str(options.tf) + " <= " + str(options.t0), file = sys.stderr)
   sys.exit(1)
 
 # Calculate correlation function.
@@ -147,14 +147,14 @@ for i in range(t0Index, tfIndex):
                 +  velocity[t0Index][n][1]*velocity[i][n][1] \
                 +  velocity[t0Index][n][2]*velocity[i][n][2]
 
-    except IndexError, e:
-      print >> sys.stderr, "index error: " + e.message
-      print >> sys.stderr, "i       = " + str(i)
-      print >> sys.stderr, "n       = " + str(n)
-      print >> sys.stderr, "t0Index = " + str(t0Index)
-      print >> sys.stderr, "tfIndex = " + str(tfIndex)
+    except IndexError as e:
+      print("index error: " + e.message, file = sys.stderr)
+      print("i       = " + str(i), file = sys.stderr)
+      print("n       = " + str(n), file = sys.stderr)
+      print("t0Index = " + str(t0Index), file = sys.stderr)
+      print("tfIndex = " + str(tfIndex), file = sys.stderr)
       sys.exit(1)
 
   C[-1][-1] /= float(len(velocity[i]))
 
-  print time[i], C[-1][-1]
+  print(time[i], C[-1][-1])

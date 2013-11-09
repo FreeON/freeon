@@ -7,7 +7,7 @@ parser = optparse.OptionParser()
 options, arguments = parser.parse_args()
 
 if len(arguments) != 1:
-  print >> sys.stderr, "what file?"
+  print("what file?", file = sys.stderr)
 
 fd = open(arguments[0])
 line = fd.readline()
@@ -22,11 +22,11 @@ while line:
   if result:
     clone = int(result.group(1))
     if clone < lastClone:
-      print geometry,
+      print(geometry, end = ' ')
       for i in range(len(fMax)):
-        print fMax[i],
+        print(fMax[i], end = ' ')
         if i == len(fMax)-1:
-          print
+          print()
       fMax = []
       geometry += 1
 

@@ -26,13 +26,13 @@ parser.add_option("--last",
 options, arguments = parser.parse_args()
 
 if len(arguments) == 0:
-  print "missing xyz file..."
-  print
+  print("missing xyz file...")
+  print()
   parser.print_help()
   sys.exit(1)
 
 if len(arguments) > 1:
-  print >> sys.stderr, "will only read from first file"
+  print("will only read from first file", file = sys.stderr)
 
 # Parse frame argument.
 frameIDs = []
@@ -41,19 +41,19 @@ if options.frameString:
   for comma in commas:
     # Check for a "-" or a "/".
     if re.compile("-").search(comma) and re.compile("/").search(comma):
-      print "syntax error in --frame argument, " + comma
+      print("syntax error in --frame argument, " + comma)
       sys.exit(1)
 
     if re.compile("-").search(comma):
       token = comma.split("-")
       if len(token) == 2:
         if int(token[0]) >= int(token[1]):
-          print "syntax error in --frame argument, " + comma
+          print("syntax error in --frame argument, " + comma)
           sys.exit(1)
         for i in range(int(token[0]), int(token[1])+1):
           frameIDs.append(i)
       else:
-        print "syntax error in --frame argument, " + comma
+        print("syntax error in --frame argument, " + comma)
         sys.exit(1)
 
     elif re.compile("/").search(comma):
@@ -62,16 +62,16 @@ if options.frameString:
         for i in range(int(token[0]), 1000, int(token[1])):
           frameIDs.append(i)
       else:
-        print "syntax error in --frame argument, " + comma
+        print("syntax error in --frame argument, " + comma)
         sys.exit(1)
 
     else:
       frameIDs.append(int(comma))
 
 if len(frameIDs) > 0:
-  print >> sys.stderr, "extracting frames " + str(frameIDs)
+  print("extracting frames " + str(frameIDs), file = sys.stderr)
 if options.last >= 0:
-  print >> sys.stderr, "extracting last " + str(options.last) + " frames"
+  print("extracting last " + str(options.last) + " frames", file = sys.stderr)
 
 # Read the xyz file.
 fd = open(arguments[0], "r")
@@ -94,7 +94,7 @@ while lineNumber < len(lines):
   # Advance in file to next frame.
   lineNumber += N
 
-print >> sys.stderr, "counted " + str(totalFrames) + " total frames"
+print("counted " + str(totalFrames) + " total frames", file = sys.stderr)
 
 frames = []
 frameNumber = 0
@@ -114,18 +114,18 @@ while lineNumber < len(lines):
     frames.append({})
     frames[-1]["comment"] = comment
     frames[-1]["coordinates"] = []
-    print >> sys.stderr, "reading frame " + str(frameNumber)
+    print("reading frame " + str(frameNumber), file = sys.stderr)
     for i in range(N):
       frames[-1]["coordinates"].append(lines[lineNumber].rstrip())
       lineNumber += 1
   else:
     lineNumber += N
 
-print >> sys.stderr, "parsed through " + str(frameNumber) + " frames"
+print("parsed through " + str(frameNumber) + " frames", file = sys.stderr)
 
 # Output frames.
 for frame in frames:
-  print len(frame["coordinates"])
-  print frame["comment"]
+  print(len(frame["coordinates"]))
+  print(frame["comment"])
   for line in frame["coordinates"]:
-    print line
+    print(line)

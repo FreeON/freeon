@@ -13,7 +13,7 @@ calculates the diffusion coefficient from the positions and velocities.""")
 option, argument = parser.parse_args()
 
 if len(argument) != 1:
-  print "I need exactly one MDO file"
+  print("I need exactly one MDO file")
   sys.exit(1)
 
 # Set up the logger.
