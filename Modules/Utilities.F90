@@ -39,8 +39,8 @@ MODULE Utilities
     END SUBROUTINE GetMemoryUsage_Wrapper
 
     SUBROUTINE GetHostnameWrapper (hostname, maximumLength)
-      CHARACTER(LEN=*) :: hostname
-      INTEGER          :: maximumLength
+      CHARACTER(LEN = *) :: hostname
+      INTEGER            :: maximumLength
     END SUBROUTINE GetHostnameWrapper
 
     SUBROUTINE GetStacksizeLimit (currentLimit, maximumLimit)
@@ -48,18 +48,18 @@ MODULE Utilities
     END SUBROUTINE GetStacksizeLimit
 
     SUBROUTINE FileCopyWrapper (lenA, fileA, lenB, fileB)
-      INTEGER          :: lenA, lenB
-      CHARACTER(LEN=*) :: fileA, fileB
+      INTEGER            :: lenA, lenB
+      CHARACTER(LEN = *) :: fileA, fileB
     END SUBROUTINE FileCopyWrapper
 
     SUBROUTINE GetPWDWrapper (pwd, max_length)
-      INTEGER          :: max_length
-      CHARACTER(LEN=*) :: pwd
+      INTEGER            :: max_length
+      CHARACTER(LEN = *) :: pwd
     END SUBROUTINE GetPWDWrapper
 
     SUBROUTINE TemporaryDirectory (path, length)
-      CHARACTER(LEN=*), INTENT(INOUT) :: path
-      INTEGER, INTENT(IN)             :: length
+      CHARACTER(LEN = *), INTENT(INOUT) :: path
+      INTEGER, INTENT(IN)               :: length
     END SUBROUTINE TemporaryDirectory
 
     FUNCTION GetPIDWrapper ()
@@ -103,19 +103,20 @@ CONTAINS
   END FUNCTION GetMemoryUsage
 
   SUBROUTINE FileCopy (fileA, fileB)
-    CHARACTER(LEN=*) :: fileA, fileB
+    CHARACTER(LEN = *) :: fileA, fileB
     CALL MondoLog(DEBUG_MAXIMUM, "FileCopy", "copying "//TRIM(fileA)//" --> "//TRIM(FileB))
     CALL FileCopyWrapper(LEN(TRIM(fileA)), TRIM(fileA), LEN(TRIM(fileB)), TRIM(fileB))
   END SUBROUTINE FileCopy
 
   SUBROUTINE FileRemove (filename)
-    CHARACTER(LEN=*), INTENT(IN) :: filename
-    CALL MondoLog(DEBUG_MAXIMUM, "FileRemove", "removing "//TRIM(filename)//" -> "//TRIM(EscapeFilename(filename)))
+    CHARACTER(LEN = *), INTENT(IN) :: filename
+    CALL MondoLog(DEBUG_MAXIMUM, "FileRemove", "removing "//TRIM(filename)// &
+      " -> "//TRIM(EscapeFilename(filename)))
     CALL SYSTEM("rm -f "//TRIM(EscapeFilename(filename)))
   END SUBROUTINE
 
   SUBROUTINE GetPWD (pwd)
-    CHARACTER(LEN=*) :: pwd
+    CHARACTER(LEN = *) :: pwd
     CALL GetPWDWrapper(pwd, LEN(pwd))
   END SUBROUTINE GetPWD
 

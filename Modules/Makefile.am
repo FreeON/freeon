@@ -17,11 +17,11 @@ libfreeonmodules_la_SOURCES = \
   Clock.F90 \
   D1Mach.F \
   DCSEvl.F \
-  DErf.F \
   DErfc.F \
+  DErf.F \
+  DerivedTypes.F90 \
   DFRepository.F \
   DMach.F \
-  DerivedTypes.F90 \
   FastMat.F90 \
   FileCopy.c \
   FreeONSleep.c \
@@ -36,32 +36,36 @@ libfreeonmodules_la_SOURCES = \
   GlobalObjects.F90 \
   GlobalScalars.F90 \
   HDF5Wrap.c \
-  InOut.F90 \
   Indexing.F90 \
   InitDS.F \
-  LinAlg.F90 \
+  InOut.F90 \
   LinAlg77.F \
+  LinAlg.F90 \
   Macros.F90 \
   MatFunk.F90 \
   McMurch.F90 \
   Mechanics.F90 \
   MemMan.F90 \
+  mm_double_NN_1.c \
+  mm_double_NN_c.c \
+  mm_double_NT_1.c \
+  mm_double_NT_c.c \
   MondoLogger.F90 \
   MondoLogger.h \
   MondoMPI.F90 \
-  Order.F90 \
   Order77.F \
-  PBC.F90 \
+  Order.F90 \
   Parse.F90 \
   ParsingConstants.F90 \
+  PBC.F90 \
   PrettyPrint.F90 \
   ProcessControl.F90 \
   Random.c \
-  SMWrap.c \
   Seconds.c \
-  SetEq.F90 \
   SetEq77.F \
+  SetEq.F90 \
   Slatec.F90 \
+  SMWrap.c \
   SpecFun.F90 \
   TempDirectory.c \
   Thresholding.F90 \
@@ -69,10 +73,6 @@ libfreeonmodules_la_SOURCES = \
   Trap.c \
   UnlimitStack.c \
   Utilities.F90 \
-  mm_double_NN_1.c \
-  mm_double_NN_c.c \
-  mm_double_NT_1.c \
-  mm_double_NT_c.c \
   mm_double_TN_1.c \
   mm_double_TN_c.c \
   mm_double_TT_1.c \
