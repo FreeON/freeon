@@ -8,4 +8,4 @@ TESTS_ENVIRONMENT = \
   FREEON_SCRATCH=$(builddir) \
 	PATH=$(top_builddir)/FreeON:$(top_builddir)/SCFeqs:$(top_builddir)/OneE:$(top_builddir)/QCTC:$(top_builddir)/HiCu:$(top_builddir)/ONX:${PATH}
 
-DISTCLEANFILES = *.out
+DISTCLEANFILES = *.out FreeON-scratch*/* regressionTest.log

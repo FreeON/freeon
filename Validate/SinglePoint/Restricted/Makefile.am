@@ -15,7 +15,7 @@ include $(srcdir)/../../validate.inc
 #  N2O \
 #  O2
 
-TESTS = C HeH+
+TESTS = HeH+ C
 
 EXTRA_DIST = \
   $(TESTS) \
