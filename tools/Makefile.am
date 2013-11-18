@@ -8,13 +8,13 @@ libbcsr_la_SOURCES = \
 include_HEADERS = bcsr.h
 
 bin_SCRIPTS = \
-  diffusionCoefficient.py \
-  MDO2xyz.py \
-  getFrame.py \
-  get_energies.py \
-  get_fMax.py \
-  parseMDO.py \
-  velocityAutocorrelation.py
+  diffusionCoefficient \
+  MDO2xyz \
+  getFrame \
+  get_energies \
+  get_fMax \
+  parseMDO \
+  velocityAutocorrelation
 
 bin_PROGRAMS = printBCSR convertBCSR
 
