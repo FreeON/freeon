@@ -377,9 +377,6 @@ AC_GNU_SOURCE
 AC_F77_WRAPPERS()
 AC_FC_WRAPPERS()
 
-# Find python.
-AM_PATH_PYTHON
-
 # Find OpenMP flags for C.
 AC_LANG_PUSH(C)
 AC_OPENMP
