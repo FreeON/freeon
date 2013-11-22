@@ -37,7 +37,9 @@ int main (int argc, char **argv)
     switch(c)
     {
       case 'h':
-        printf("Usage:\n");
+        printf("Usage: convertBCSR [options] FILE\n");
+        printf("\n");
+        printf("FILE is a matrix stored in BCSR binary format.\n");
         printf("\n");
         printf("{ -h | --help }           This help\n");
         printf("{ -w | --write-MM } FILE  Write matrix in MatrixMarket format to FILE\n");
