@@ -495,11 +495,7 @@ void BCSR::toMM (char *filename)
           for(int i = 0; i < MBlock; i++) {
             for(int j = 0; j < NBlock; j++)
             {
-              double Aij = matrix[pointer+i+j*MBlock];
-              if(Aij != 0)
-              {
-                fprintf(fstream, "%d %d % e\n", 1+i+i_block, 1+j+j_block, Aij);
-              }
+              fprintf(fstream, "%d %d % e\n", 1+i+i_block, 1+j+j_block, Aij);
             }
           }
         }
