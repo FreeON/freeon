@@ -107,10 +107,12 @@ EXTRA_DIST = \
 EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/Modules/MMA/LookUpTables_800_6x
 LDADD = $(LDADD_MODULES) libktrax.la
 
-# In case we have ctags installed, make the necessary tags files.
-.PHONY : tags
-tags :
-	ctags --Fortran-kinds=+i+L --exclude="*-preprocessed*" *.{f,f90} ../Modules/*.{c,f,f90}
+TAGS_FILES = \
+	$(top_srcdir)/Modules/*.c
+	$(top_srcdir)/Modules/*.F
+	$(top_srcdir)/Modules/*.F90
+
+AM_CTAGSFLAGS = --Fortran-kinds=+i+L
 
 # Dependencies.
 BlokTrPdJ.o : \

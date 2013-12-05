@@ -30,7 +30,15 @@ EXTRA_DIST = \
 LDADD = $(LDADD_MODULES)
 
 EXTRA_INCLUDES = -I$(top_srcdir)/Modules/MMA/Functionals
+
 AM_CPPFLAGS += -DRULE7 -DEXPLICIT_SOURCE
+
+TAGS_FILES = \
+	$(top_srcdir)/Modules/*.c
+	$(top_srcdir)/Modules/*.F
+	$(top_srcdir)/Modules/*.F90
+
+AM_CTAGSFLAGS = --Fortran-kinds=+i+L
 
 # Dependencies.
 CubeTree.o : \
