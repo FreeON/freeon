@@ -1,3 +1,3 @@
 #!/bin/bash
 
-FreeON ${srcdir}/C.inp | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/C.reference
+FreeON ${srcdir}/C.inp C.out | ${srcdir}/../../parseTestResults.py --reference ${srcdir}/C.reference
