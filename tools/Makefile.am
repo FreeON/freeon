@@ -16,10 +16,16 @@ bin_SCRIPTS = \
   parseMDO \
   velocityAutocorrelation
 
-bin_PROGRAMS = printBCSR convertBCSR
+bin_PROGRAMS = \
+	printBCSR \
+	convertBCSR \
+	standaloneBCSR
 
 printBCSR_SOURCES = printBCSR.F90
 printBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
+
+standaloneBCSR_SOURCES = standaloneBCSR.F90
+standaloneBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
 
 convertBCSR_SOURCES = \
   convertBCSR.cc \
