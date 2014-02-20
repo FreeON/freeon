@@ -1387,27 +1387,33 @@ CONTAINS
   !-------------------------------------------------------------------------------
   ! Get a BCSR matrix
   !-------------------------------------------------------------------------------
-  SUBROUTINE Get_BCSR(A,Name,PFix_O,CheckPoint_O,BCast_O)
+  SUBROUTINE Get_BCSR(A,Name,PFix_O,CheckPoint_O,BCast_O,standalone_O)
     TYPE(BCSR),               INTENT(INOUT) :: A
     CHARACTER(LEN=*),         INTENT(IN)    :: Name
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
     LOGICAL,         OPTIONAL,INTENT(IN)    :: BCast_O
+    LOGICAL, OPTIONAL, INTENT(IN)           :: standalone_O
     REAL(DOUBLE)                            :: Dummy,Chk
     CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName
     INTEGER                                 :: I,NSMat,NAtms,NBlks,NNon0,IOS
     LOGICAL                                 :: Exists,LimitsQ
     LOGICAL                                 :: Bcast
-
-#ifdef STANDALONE_BCSR_FILEFORMAT
-    INTEGER :: NRow, NCol, dummyNBasF
-    INTEGER, DIMENSION(:), ALLOCATABLE :: dummyBSiz, dummyOffS
-#endif
+    INTEGER                                 :: NRow, NCol, dummyNBasF
+    INTEGER, DIMENSION(:), ALLOCATABLE      :: dummyBSiz, dummyOffS
+    LOGICAL                                 :: standalone
 
     IF(PRESENT(BCast_O)) THEN
       Bcast = BCast_O
     ELSE
       Bcast = .FALSE.
+    ENDIF
+
+    ! We use the standalone format by default.
+    IF(PRESENT(standalone_O)) THEN
+      standalone = standalone_O
+    ELSE
+      standalone = .TRUE.
     ENDIF
 
     !IF(.NOT. inFrontend) THEN
@@ -1485,15 +1491,15 @@ CONTAINS
       INCLUDE 'Formats.Inc'
 #else
       READ(UNIT=Seq,Err=1,IOSTAT=IOS)NSMat,NAtms,NNon0,NBlks
-#ifdef STANDALONE_BCSR_FILEFORMAT
-      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) dummyNBasF, NRow, NCol
-      ALLOCATE(dummyBSiz(NAtms))
-      ALLOCATE(dummyOffS(NAtms))
-      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyBSiz(I), I = 1, NAtms)
-      READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyOffS(I), I = 1, NAtms)
-      DEALLOCATE(dummyOffS)
-      DEALLOCATE(dummyBSiz)
-#endif
+      IF(standalone) THEN
+        READ(UNIT = Seq, Err = 1, IOSTAT = IOS) dummyNBasF, NRow, NCol
+        ALLOCATE(dummyBSiz(NAtms))
+        ALLOCATE(dummyOffS(NAtms))
+        READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyBSiz(I), I = 1, NAtms)
+        READ(UNIT = Seq, Err = 1, IOSTAT = IOS) (dummyOffS(I), I = 1, NAtms)
+        DEALLOCATE(dummyOffS)
+        DEALLOCATE(dummyBSiz)
+      ENDIF
 #endif
       IF(AllocQ(A%Alloc))THEN
         IF(NSMat.GT.A%NSMat) THEN
@@ -1600,18 +1606,24 @@ CONTAINS
 #endif
 
   !> Put a BCSR matrix
-  SUBROUTINE Put_BCSR(A,Name,PFix_O,CheckPoint_O)
+  SUBROUTINE Put_BCSR(A,Name,PFix_O,CheckPoint_O,standalone_O)
     TYPE(BCSR),               INTENT(IN) :: A
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
     CHARACTER(LEN=*),         INTENT(IN) :: Name
     LOGICAL,         OPTIONAL,INTENT(IN) :: CheckPoint_O
+    LOGICAL, OPTIONAL, INTENT(IN)        :: standalone_O
     CHARACTER(LEN=DEFAULT_CHR_LEN)       :: FileName
     LOGICAL                              :: Exists
     INTEGER                              :: I,IOS
+    LOGICAL                              :: standalone
+    INTEGER                              :: NRow, NCol
 
-#ifdef STANDALONE_BCSR_FILEFORMAT
-    INTEGER :: NRow, NCol
-#endif
+    ! We use the standalone format by default.
+    IF(PRESENT(standalone_O)) THEN
+      standalone = standalone_O
+    ELSE
+      standalone = .TRUE.
+    ENDIF
 
 #if defined(PARALLEL) || defined(PARALLEL_CLONES)
     IF(MyID == ROOT) THEN
@@ -1678,17 +1690,17 @@ CONTAINS
 #else
       !write(*,*) 'put',A%NSMat
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)A%NSMat,NAtoms,A%NNon0,A%NBlks
-#ifdef STANDALONE_BCSR_FILEFORMAT
-      SELECT CASE(A%NSMat)
-      CASE(1);NRow=  NBasF;NCol=  NBasF
-      CASE(2);NRow=  NBasF;NCol=2*NBasF
-      CASE(4);NRow=2*NBasF;NCol=2*NBasF
-      CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! ')
-      END SELECT
-      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) NBasF, NRow, NCol
-      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (BSiz%I(I), I = 1, NAtoms)
-      WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (OffS%I(I), I = 1, NAtoms)
-#endif
+      IF(standalone) THEN
+        SELECT CASE(A%NSMat)
+        CASE(1);NRow=  NBasF;NCol=  NBasF
+        CASE(2);NRow=  NBasF;NCol=2*NBasF
+        CASE(4);NRow=2*NBasF;NCol=2*NBasF
+        CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! ')
+        END SELECT
+        WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) NBasF, NRow, NCol
+        WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (BSiz%I(I), I = 1, NAtoms)
+        WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (OffS%I(I), I = 1, NAtoms)
+      ENDIF
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%RowPt%I(I),I=1,NAtoms+1)
       WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%ColPt%I(I),I=1,A%NBlks)
       !WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%BlkPt%I(I),I=1,A%NBlks*A%NSMat)

@@ -964,15 +964,6 @@ if test "${use_parallel_clones}" = "yes"; then
   fi
 fi
 
-AC_ARG_ENABLE([standalone-BCSR],
-  [AS_HELP_STRING([--disable-standalone-BCSR],
-  [Write BCSR matrices into self contained file format.])],
-  [use_standalone_BCSR="${enableval}"],
-  [use_standalone_BCSR="yes"])
-if test "${use_standalone_BCSR}" = "yes"; then
-  AC_DEFINE(STANDALONE_BCSR_FILEFORMAT, [1], [Write BCSR matrices into self contained file format])
-fi
-
 # Define location of temporary FreeON files.
 AC_ARG_VAR([FREEON_SCRATCH],
   [Specify default FREEON_SCRATCH directory])
