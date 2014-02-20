@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 AC_INIT([FreeON],
-        [1.0.8],
+        [1.0.9],
         [freeon-users@nongnu.org],
         [],
         [http://www.freeon.org])
