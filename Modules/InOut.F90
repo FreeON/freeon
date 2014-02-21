@@ -1477,10 +1477,15 @@ CONTAINS
       IF(Exists)THEN
 #ifdef FORMATTED
         OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
-             FORM='FORMATTED',ACCESS='STREAM')
+             FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
-        OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+        IF(standalone) THEN
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
+            FORM='UNFORMATTED',ACCESS='STREAM')
+        ELSE
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD', &
+            FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        ENDIF
 #endif
       ELSE
         CALL Halt('Get_BCSR could not find '//TRIM(FileName))
@@ -1503,6 +1508,7 @@ CONTAINS
 #endif
       IF(AllocQ(A%Alloc))THEN
         IF(NSMat.GT.A%NSMat) THEN
+          CALL MondoLog(DEBUG_MAXIMUM, "Get_BCSR", "NSMat > A%NSMat")
           CALL Delete(A)
           CALL New(A,NSMat_O=NSMat)
         ENDIF
@@ -1664,18 +1670,28 @@ CONTAINS
       IF(Exists)THEN
 #if FORMATTED
         OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
-             FORM='FORMATTED',ACCESS='STREAM')
+             FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
-        OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+        IF(standalone) THEN
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
+            FORM='UNFORMATTED',ACCESS='STREAM')
+        ELSE
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE', &
+            FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        ENDIF
 #endif
       ELSE
 #if FORMATTED
         OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
-             FORM='FORMATTED',ACCESS='STREAM')
+             FORM='FORMATTED',ACCESS='SEQUENTIAL')
 #else
-        OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
-             FORM='UNFORMATTED',ACCESS='STREAM')
+        IF(standalone) THEN
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
+            FORM='UNFORMATTED',ACCESS='STREAM')
+        ELSE
+          OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW', &
+            FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+        ENDIF
 #endif
       ENDIF
 #ifdef FORMATTED
@@ -1695,7 +1711,7 @@ CONTAINS
         CASE(1);NRow=  NBasF;NCol=  NBasF
         CASE(2);NRow=  NBasF;NCol=2*NBasF
         CASE(4);NRow=2*NBasF;NCol=2*NBasF
-        CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! ')
+        CASE DEFAULT;CALL Halt(' Set_RNK2_EQ_BCSR: A%NSMat doesn''t have an expected value! '//TRIM(IntToChar(A%NSMat)))
         END SELECT
         WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) NBasF, NRow, NCol
         WRITE(UNIT = Seq, Err = 1, IOSTAT = IOS) (BSiz%I(I), I = 1, NAtoms)
