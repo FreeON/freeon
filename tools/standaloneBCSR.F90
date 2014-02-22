@@ -15,13 +15,18 @@ program standaloneBCSR
   implicit none
 
   type(ARGMT) :: Args
-  type(BCSR)  :: A
+  type(BCSR)  :: F, P
 
   call StartUp(Args, "standalone")
 
-  call New(A)
-  call Get(A, TrixFile("OrthoF", Args, 0), standalone_O = .false.)
-  call Put(A, TrixFile("OrthoF-standalone", Args, 0), standalone_O = .true.)
-  call Delete(A)
+  call New(F)
+  call Get(F, TrixFile("OrthoF", Args, 0), standalone_O = .false.)
+  call Put(F, TrixFile("OrthoF-standalone", Args, 0), standalone_O = .true.)
+  call Delete(F)
+
+  call New(P)
+  call Get(P, TrixFile("OrthoD", Args, 1), standalone_O = .false.)
+  call Put(P, TrixFile("OrthoD-standalone", Args, 1), standalone_O = .true.)
+  call Delete(P)
 
 end program standaloneBCSR
