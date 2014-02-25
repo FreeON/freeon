@@ -14,18 +14,20 @@ int main (int argc, char **argv)
   bool log_bin = false;
   bool verbose = false;
 
+  int spectral_bounds_method = 0;
   int numberBins = 10;
   double bin_min = 0;
   double bin_max = 1;
 
   int c;
-  const char *short_options = "hw:blv";
+  const char *short_options = "hw:blvm:";
   const struct option long_options[] = {
     { "help",         no_argument,        NULL, 'h' },
     { "write-MM",     required_argument,  NULL, 'w' },
     { "linear-bin",   no_argument,        NULL, 'b' },
     { "log-bin",      no_argument,        NULL, 'l' },
     { "verbose",      no_argument,        NULL, 'v' },
+    { "method",       required_argument,  NULL, 'm' },
     { NULL, 0, NULL, 0 }
   };
 
@@ -46,6 +48,7 @@ int main (int argc, char **argv)
         printf("{ -b | --log-bin }        Bin the matrix elements by magnited (log)\n");
         printf("{ -l | --linear-bin }     Bin the matrix elements by magnited (linear)\n");
         printf("{ -v | --verbose }        Print BCSR index lists\n");
+        printf("{ -m | --method } N       Use method N for spectral bounds\n");
         exit(0);
         break;
 
@@ -73,6 +76,10 @@ int main (int argc, char **argv)
         verbose = true;
         break;
 
+      case 'm':
+        spectral_bounds_method = strtol(optarg, NULL, 10);
+        break;
+
       default:
         ABORT("unknown command line option\n");
         break;
@@ -83,10 +90,9 @@ int main (int argc, char **argv)
   {
     BCSR A(argv[optind]);
     double F_min, F_max;
-    A.getSpectralBounds(0, &F_min, &F_max);
-    printf("spectral bounds Gershgorin: [ %e, %e ]\n", F_min, F_max);
-    //A.getSpectralBounds(1, &F_min, &F_max);
-    //printf("spectral bounds eigensolve: [ %e, %e ]\n", F_min, F_max);
+    A.getSpectralBounds(spectral_bounds_method, &F_min, &F_max);
+    printf("spectral bounds, method %d: [ %e, %e ]\n",
+        spectral_bounds_method, F_min, F_max);
     A.toStr(verbose);
 
     if(linear_bin || log_bin)
