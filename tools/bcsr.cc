@@ -417,8 +417,6 @@ void BCSR::put (char *filename)
 /** Write a BCSR matrix into MatrixMarket format.
  *
  * @param filename The filename to write to.
- *
- * @return A string that contains the matrix in MatrixMarket format.
  */
 void BCSR::toMM (char *filename)
 {
