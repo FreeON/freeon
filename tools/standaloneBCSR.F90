@@ -16,6 +16,7 @@ program standaloneBCSR
 
   type(ARGMT) :: Args
   type(BCSR)  :: F, P
+  logical :: F_DIIS_exists
 
   call StartUp(Args, "standalone")
 
@@ -23,6 +24,14 @@ program standaloneBCSR
   call Get(F, TrixFile("OrthoF", Args, 0), standalone_O = .false.)
   call Put(F, TrixFile("OrthoF-standalone", Args, 0), standalone_O = .true.)
   call Delete(F)
+
+  inquire(file = TrixFile("F_DIIS", Args, 0), exist = F_DIIS_exists)
+  if(F_DIIS_exists) then
+    call New(F)
+    call Get(F, TrixFile("F_DIIS", Args, 0), standalone_O = .false.)
+    call Put(F, TrixFile("F_DIIS-standalone", Args, 0), standalone_O = .true.)
+    call Delete(F)
+  endif
 
   call New(P)
   call Get(P, TrixFile("OrthoD", Args, 1), standalone_O = .false.)
