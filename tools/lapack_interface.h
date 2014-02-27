@@ -11,7 +11,6 @@
 
 #include "config.h"
 
-#ifdef DGEMM
 /** The dgemm() interface. We are assuming that the dgemm function is using a
  * Fortran style interface, hence all the pointers in the argument list.
  *
@@ -96,15 +95,13 @@
  *            max( 1, m ).
  */
 extern "C"
-void DGEMM (const char *const TRANSA, const char *const TRANSB,
-    const int *const M, const int *const N, const int *const K,
-    const double *const ALPHA, const double *const A,
+void F77_FUNC(dgemm, DGEMM) (const char *const TRANSA,
+    const char *const TRANSB, const int *const M, const int *const N,
+    const int *const K, const double *const ALPHA, const double *const A,
     const int *const LDA, const double *const B,
     const int *const LDB, const double *const BETA,
     double *const C, const int *const LDC);
-#endif
 
-#ifdef DSYEV
 /** DSYEV computes all eigenvalues and, optionally, eigenvectors of a
  *  real symmetric matrix A.
  *
@@ -158,10 +155,9 @@ void DGEMM (const char *const TRANSA, const char *const TRANSB,
  *                 form did not converge to zero.
  */
 extern "C"
-void DSYEV (const char *const JOBZ, const char *const UPLO,
+void F77_FUNC(dsyev, DSYEV) (const char *const JOBZ, const char *const UPLO,
     const int *const N, double *const A, const int *const LDA,
     double *const W, double *const WORK, const int *const LWORK,
     int *const INFO);
-#endif
 
 #endif
