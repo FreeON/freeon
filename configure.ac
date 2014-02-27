@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 AC_INIT([FreeON],
-        [1.0.8],
+        [1.0.9],
         [freeon-users@nongnu.org],
         [],
         [http://www.freeon.org])
@@ -962,15 +962,6 @@ if test "${use_parallel_clones}" = "yes"; then
   if test "${use_cartesian_communicator}" = "yes"; then
     AC_DEFINE(CARTESIAN_COMMUNICATOR, [1], [Use Cartesian communicator in StartUp()])
   fi
-fi
-
-AC_ARG_ENABLE([standalone-BCSR],
-  [AS_HELP_STRING([--disable-standalone-BCSR],
-  [Write BCSR matrices into self contained file format.])],
-  [use_standalone_BCSR="${enableval}"],
-  [use_standalone_BCSR="yes"])
-if test "${use_standalone_BCSR}" = "yes"; then
-  AC_DEFINE(STANDALONE_BCSR_FILEFORMAT, [1], [Write BCSR matrices into self contained file format])
 fi
 
 # Define location of temporary FreeON files.
