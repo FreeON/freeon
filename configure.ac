@@ -418,7 +418,7 @@ AC_ARG_ENABLE([optimizations],
 
 AM_CONDITIONAL(USE_COMPILER_OPTIMIZATIONS, [test "${use_optimizations}" = "yes"])
 
-if test "${use_optimizations}" = "yes"; then
+if [[ "${use_optimizations}" = "yes" ]]; then
   AC_MSG_RESULT([adding compiler optimizations for build_cpu ${build_cpu}])
 
   # Set the optimization flags.
