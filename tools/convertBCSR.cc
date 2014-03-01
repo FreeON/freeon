@@ -1,15 +1,20 @@
 #include "bcsr.h"
 #include "logger.h"
 
+#include <errno.h>
+#include <fcntl.h>
 #include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 int main (int argc, char **argv)
 {
   char *MM_filename = NULL;
+  char *matlab_filename = NULL;
   bool linear_bin = false;
   bool log_bin = false;
   bool verbose = false;
@@ -20,10 +25,11 @@ int main (int argc, char **argv)
   double bin_max = 1;
 
   int c;
-  const char *short_options = "hw:blvm:";
+  const char *short_options = "hw:d:blvm:";
   const struct option long_options[] = {
     { "help",         no_argument,        NULL, 'h' },
     { "write-MM",     required_argument,  NULL, 'w' },
+    { "write-matlab", required_argument,  NULL, 'd' },
     { "linear-bin",   no_argument,        NULL, 'b' },
     { "log-bin",      no_argument,        NULL, 'l' },
     { "verbose",      no_argument,        NULL, 'v' },
@@ -43,17 +49,22 @@ int main (int argc, char **argv)
         printf("\n");
         printf("FILE is a matrix stored in BCSR binary format.\n");
         printf("\n");
-        printf("{ -h | --help }           This help\n");
-        printf("{ -w | --write-MM } FILE  Write matrix in MatrixMarket format to FILE\n");
-        printf("{ -b | --log-bin }        Bin the matrix elements by magnited (log)\n");
-        printf("{ -l | --linear-bin }     Bin the matrix elements by magnited (linear)\n");
-        printf("{ -v | --verbose }        Print BCSR index lists\n");
-        printf("{ -m | --method } N       Use method N for spectral bounds\n");
+        printf("{ -h | --help }               This help\n");
+        printf("{ -w | --write-MM } FILE      Write matrix in MatrixMarket format to FILE\n");
+        printf("{ -d | --write-matlab } FILE  Write matrix in matlab format to FILE\n");
+        printf("{ -b | --log-bin }            Bin the matrix elements by magnited (log)\n");
+        printf("{ -l | --linear-bin }         Bin the matrix elements by magnited (linear)\n");
+        printf("{ -v | --verbose }            Print BCSR index lists\n");
+        printf("{ -m | --method } N           Use method N for spectral bounds\n");
         exit(0);
         break;
 
       case 'w':
         MM_filename = strdup(optarg);
+        break;
+
+      case 'd':
+        matlab_filename = strdup(optarg);
         break;
 
       case 'b':
@@ -183,6 +194,50 @@ int main (int argc, char **argv)
     if(MM_filename != NULL)
     {
       A.toMM(MM_filename);
+    }
+
+    if(matlab_filename != NULL)
+    {
+      int fd = open(matlab_filename, O_CREAT | O_EXCL | O_WRONLY, 00644);
+
+      if(fd == -1)
+      {
+        if(errno == EEXIST)
+        {
+          ABORT("file \"%s\" already exists\n", matlab_filename);
+        }
+
+        else
+        {
+          ABORT("error accessing file: %s\n", strerror(errno));
+        }
+      }
+
+      else
+      {
+        int M, N;
+        double *ADense;
+        A.toDense(&M, &N, &ADense);
+
+        FILE *fstream = fdopen(fd, "w");
+
+        fprintf(fstream, "%% %dx%d matrix\n", M, N);
+        fprintf(fstream, "A = [\n");
+        for(int i = 0; i < M; i++)
+        {
+          for(int j = 0; j < N; j++)
+          {
+            fprintf(fstream, " % e", ADense[i*N+j]);
+          }
+          fprintf(fstream, "\n");
+        }
+        fprintf(fstream, "];\n");
+
+        if(fclose(fstream) != 0)
+        {
+          ABORT("error closing file\n");
+        }
+      }
     }
 
     exit(0);
