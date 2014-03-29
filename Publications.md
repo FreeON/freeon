@@ -3,6 +3,11 @@ layout: default
 title: Publications
 ---
 
+2014
+----
+
+-   "An N-body solution to the problem of Fock exchange", Matt Challacombe and Nicolas Bock, [*J. Chem. Phys.*, **140**, 111101 (2014)](http://dx.doi.org/10.1063/1.4868636)
+
 2013
 ----
 
