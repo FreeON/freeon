@@ -439,7 +439,7 @@ void BCSR::toMM (char *filename)
   {
     FILE *fstream = fdopen(fd, "w");
 
-    fprintf(fstream, "%%%%MatrixMarket matrix coordinate double general\n");
+    fprintf(fstream, "%%%%MatrixMarket matrix coordinate real general\n");
     fprintf(fstream, "%% %d x %d --> %d elements\n", M, N, M*N);
     fprintf(fstream, "%d %d %d\n", M, N, numberNonZero);
 
