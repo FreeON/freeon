@@ -78,6 +78,7 @@ CONTAINS
       CALL PeriodicXLate(G%Clone(I))
       CALL SuperCellMe(G%Clone(I))
       CALL PeriodicXLate(G%Clone(I))
+      CALL ReorderCoordinates(G%Clone(I))
     ENDDO
   END SUBROUTINE MassageCoordinates
 
