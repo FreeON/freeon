@@ -31,6 +31,7 @@ MODULE Order
    USE GlobalScalars
    USE GlobalObjects
    USE ProcessControl
+   USE MondoLogger
    USE MemMan
    USE Opt_Trav_Band ; USE AnnealMap
    USE Parse
@@ -121,6 +122,7 @@ MODULE Order
         REAL(DOUBLE)::Gamma,Alpha,NLFac
 
         IF(SFC_KEY==SFC_RANDOM)THEN
+           CALL MondoLog(DEBUG_NONE, "Order", "Random order")
            CALL New(RKey,N)
            DO I=1,N
               Point%I(I)=I
@@ -129,14 +131,17 @@ MODULE Order
            CALL Sort_DBL_INT(RKey,Point,N)
            CALL Delete(RKey)
         ELSEIF(SFC_KEY==SFC_PEANO)THEN
+           CALL MondoLog(DEBUG_NONE, "Order", "Peano order")
            ALLOCATE(IKey(N))
            CALL SFCOrder77(N,R%D,Point%I,IKey,.FALSE.)
            DEALLOCATE(IKey)
         ELSEIF(SFC_KEY==SFC_HILBERT)THEN
+           CALL MondoLog(DEBUG_NONE, "Order", "Hilbert order")
            ALLOCATE(IKey(N))
            CALL SFCOrder77(N,R%D,Point%I,IKey,.TRUE.)
            DEALLOCATE(IKey)
         ELSEIF(SFC_KEY==SFC_TRAVEL)THEN
+           CALL MondoLog(DEBUG_NONE, "Order", "Travel order")
           CALL OpenASCII(InpFile,Inp)
           IF(.NOT.OptDblQ(Inp,'Gamma',Gamma)) THEN
             WRITE(*,*) 'Cannot find Gamma in ',InpFile
