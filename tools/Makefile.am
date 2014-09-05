@@ -17,8 +17,9 @@ bin_SCRIPTS = \
   velocityAutocorrelation
 
 bin_PROGRAMS = \
-	printBCSR \
 	convertBCSR \
+	plotDecay \
+	printBCSR \
 	standaloneBCSR
 
 printBCSR_SOURCES = printBCSR.F90
@@ -26,6 +27,9 @@ printBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
 
 standaloneBCSR_SOURCES = standaloneBCSR.F90
 standaloneBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
+
+plotDecay_SOURCES = plotDecay.F90
+plotDecay_LDADD = $(top_builddir)/Modules/libfreeonmodules.la
 
 convertBCSR_SOURCES = \
   convertBCSR.cc \
@@ -37,3 +41,6 @@ convertBCSR_SOURCES = \
 convertBCSR_LDADD = libbcsr.la
 
 EXTRA_DIST = $(bin_SCRIPTS)
+
+TAGS_FILES = *F90 *.h *.cc ../Modules/*F90
+CTAGSFLAGS = --sort=foldcase

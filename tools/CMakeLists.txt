@@ -7,3 +7,4 @@ add_executable( convertBCSR
   lapack_interface.h
   logger.cc
   logger.h )
+add_executable( plotDecay plotDecay.F90 )

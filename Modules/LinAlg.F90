@@ -3927,9 +3927,9 @@ CONTAINS
     WRITE(Plt,2)
     WRITE(Plt,3)TRIM(Name)//'.eps'
     WRITE(Plt,6)
-    WRITE(Plt,*)'set pointsize 0.1'
-    WRITE(Plt,*)'set logscale y'
-    WRITE(Plt,*)"plot '"//TRIM(Name)//"_MatrixDecayData' using 1:2 notitle with points 1 "
+    WRITE(Plt,"(A)")'set pointsize 0.1'
+    WRITE(Plt,"(A)")'set logscale y'
+    WRITE(Plt,"(A)")"plot '"//TRIM(Name)//"_MatrixDecayData' using 1:2 notitle with points"
     CLOSE(Plt)
 
     CALL Delete(ISort)
