@@ -5,7 +5,7 @@ title: Authors
 
 |Name|email address|Affiliation|
 |----|-------------|-----------|
-|Nicolas Bock|\<<nicolas.bock@freeon.org>\>|Los Alamos National Laboratory, T-1|
+|Nicolas Bock|\<[nicolas.bock@freeon.org](mailto:nicolasbock@freeon.org)\>|Los Alamos National Laboratory, T-1|
 |Matt Challacombe|\<<matt.challacombe@freeon.org>\>|Los Alamos National Laboratory, T-1|
 |Chee Kwan Gan||Institute for High Performance Computing|
 |Graeme Henkelman||University of Texas at Austin|
