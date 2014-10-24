@@ -5,6 +5,7 @@ before_install:
   - sudo apt-get install -y gfortran
 
 script:
+  - ./autogen.sh
   - ./configure FC=gfortran CC=gfortran
   - make
   - make test
