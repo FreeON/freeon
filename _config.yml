@@ -1,0 +1,7 @@
+gems:
+  - jekyll-mentions
+
+footer-links:
+  github: nicolasbock
+
+baseurl: "/freeon"
