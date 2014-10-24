@@ -1,0 +1,10 @@
+language: C
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y gfortran
+
+script:
+  - ./configure FC=gfortran CC=gfortran
+  - make
+  - make test
