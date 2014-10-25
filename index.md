@@ -6,6 +6,11 @@ title: FreeON
 FreeON
 ------
 
+Spammpack
+---------
+
+Please visit the [Spammpack Project](http://freeon.github.io/spammpack).
+
 Authors
 -------
 
