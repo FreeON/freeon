@@ -2,10 +2,10 @@ language: C
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y gfortran liblapack3gf hdf5-tools
+  - sudo apt-get install -y gfortran liblapack3gf hdf5-tools libhdf5-serial-dev
 
 script:
   - ./autogen.sh
-  - ./configure FC=gfortran CC=gfortran LIBS="-l:liblapack.so.3gf -l:libblas.so.3gf"
+  - ./configure F77=gfortran FC=gfortran CC=gfortran LIBS="-l:liblapack.so.3gf -l:libblas.so.3gf" --disable-openmp
   - make
   - make test
