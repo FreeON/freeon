@@ -2,7 +2,7 @@ language: C
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y gfortran liblapack3gf
+  - sudo apt-get install -y gfortran liblapack3gf libhdf5-serial-1.8.4
 
 script:
   - ./autogen.sh
