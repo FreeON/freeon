@@ -3,4 +3,4 @@ freeon
 
 Linear Scaling Electronic Structure
 
-http://freeon.github.io/freeon/
+http://freeon.github.io/freeon
