@@ -22,6 +22,11 @@ have been implemented.  Advanced features include $$\mathcal{O}(N)$$ static
 and dynamic response, as well as time reversible Born Oppenheimer Molecular
 Dynamics (MD).
 
+Project Statistics
+------------------
+
+{% include openhub.html %}
+
 Spammpack
 ---------
 
