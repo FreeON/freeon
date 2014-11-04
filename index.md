@@ -50,11 +50,6 @@ Project Stats
 
 {% include openhub.html %}
 
-Support Us
-----------
-
-{% include cafepress.html %}
-
 Contact Us
 ----------
 
