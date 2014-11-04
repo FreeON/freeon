@@ -5,3 +5,6 @@ footer-links:
   github: nicolasbock
 
 baseurl: "/freeon"
+
+pages_list:
+  Main: "/freeon"
