@@ -5,7 +5,3 @@ footer-links:
   github: nicolasbock
 
 baseurl: "/freeon"
-
-collections:
-  pages:
-    output: true
