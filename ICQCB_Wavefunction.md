@@ -8,11 +8,12 @@ The wavefunction
 
 All Quantum Mechanics methodology relies on Schrödinger's wave function:
 
-<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">
-HΨ = EΨ
+$$H \Psi = E \Psi$$
 
-</div>
-In this equation, H is an *operator* that we apply on Ψ, a *function*. and E is the energy of the system. It is worth noting that Ψ is nothing but a norma mathematic function, just like any other, and the fact we denote it with a Greek letter has no bearing or special meaning.
+In this equation, H is an *operator* that we apply on Ψ, a *function*. and E
+is the energy of the system. It is worth noting that Ψ is nothing but a norma
+mathematic function, just like any other, and the fact we denote it with a
+Greek letter has no bearing or special meaning.
 
 The only thing that makes Ψ special is that it describes a natural system, and therefore it is a continuous function defined in three dimensions (X, Y and Z). This has an important consequence: when we want to evaluate it, we need to do it in three dimensions, multiplying the space of values to compute. To get an idea: if it were a discrete function of X with values between 0 and N, we would have to evaluate N values. For a three-dimensional (X, Y, Z) function, with values between 0 and N, we need to evaluate N · N · N = N<sup>2</sup>. But in our case, we need to evaluate Ψ as a continuous function (using integrals) and, if that's not enough, it is defined over all the space.
 

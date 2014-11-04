@@ -8,25 +8,60 @@ title: ICQCB Ab initio methods
 
 ### Hartree-Fock
 
-The basic elements of this calculation are the use of the variational principle to adjust iteratively the value of the coefficients required by the orbital combinations. The method consists in using the self-consistent field theory to refine the values of the constants we need to compute the molecular orbitals using LCAO. The basic method is therefore referred to as SCF. As a rule, HF scales as N<sup>4</sup> where N is the number of basis functions (a calculation on a system twice as large requires 16 times longer).
+The basic elements of this calculation are the use of the variational
+principle to adjust iteratively the value of the coefficients required by the
+orbital combinations. The method consists in using the self-consistent field
+theory to refine the values of the constants we need to compute the molecular
+orbitals using LCAO. The basic method is therefore referred to as SCF. As a
+rule, HF scales as $$N_4$$ where $$N$$ is the number of basis functions (a
+calculation on a system twice as large requires 16 times longer).
 
-When we apply the Hartree-Fock method, usually we use the same orbitals to define electrons with different spin, a method known as **Restricted Hartree-Fock (RHF)**. This implies that we use the same shape for both electrons (with different spin) in an orbital. As can be expected, this method works well as long as we have all orbitals fully occupied.
+When we apply the Hartree-Fock method, usually we use the same orbitals to
+define electrons with different spin, a method known as **Restricted
+Hartree-Fock (RHF)**. This implies that we use the same shape for both
+electrons (with different spin) in an orbital. As can be expected, this method
+works well as long as we have all orbitals fully occupied.
 
-If we release this restriction (that is, we allow that each electron having a different spin uses an orbital with a different shape), we obtain the **Unrestricted Hartree-Fock (UHF)** method. The proble now is that paired electrons need not have the same spatial distribution, inducing an error known as *spin contamination*.
+If we release this restriction (that is, we allow that each electron having a
+different spin uses an orbital with a different shape), we obtain the
+**Unrestricted Hartree-Fock (UHF)** method. The proble now is that paired
+electrons need not have the same spatial distribution, inducing an error known
+as *spin contamination*.
 
-The alternative is to use the **Restricted Open Shell Hartree-Fock (ROHF)** approach: in this case we uncouple paired electrons considering their spin, but force them to share the same spatial orbital.
+The alternative is to use the **Restricted Open Shell Hartree-Fock (ROHF)**
+approach: in this case we uncouple paired electrons considering their spin,
+but force them to share the same spatial orbital.
 
-RHF is a good approximation for *closed shell* situations, i. e., when every orbital is fully occupied, and is faster than UHF, so we prefer it in these cases. However, when a system has orbitals which are not fully occupied (they have only one electron), the behaviour is different due to a polarization effect. In these *open shell* cases we can also use ROHF, but UHF is normally preferred.
+RHF is a good approximation for *closed shell* situations, i. e., when every
+orbital is fully occupied, and is faster than UHF, so we prefer it in these
+cases. However, when a system has orbitals which are not fully occupied (they
+have only one electron), the behaviour is different due to a polarization
+effect. In these *open shell* cases we can also use ROHF, but UHF is normally
+preferred.
 
-On the other hand, UHF is less adequate for *singlet* situations (full orbital occupancy) since it may include contributions from states with a higher energy.
+On the other hand, UHF is less adequate for *singlet* situations (full orbital
+occupancy) since it may include contributions from states with a higher
+energy.
 
-HF can account for up to 99% of the energy, but there is 1% that remains unaccounted for. The energy deficit in HF is known as *Electronic Correlation Energy*. This energy difference is due to the fact that electrons do not move independently.
+HF can account for up to 99% of the energy, but there is 1% that remains
+unaccounted for. The energy deficit in HF is known as *Electronic Correlation
+Energy*. This energy difference is due to the fact that electrons do not move
+independently.
 
-We can visualize it imagining that we calculate the probability of each electron being in a given voxel: in principle, there is a probability that both are in the same voxel, but we know they have a strong repulstion, and so we do not expect both to be at the same place simultaneously. In other words, there are interactions among them that correlate their movement.
+We can visualize it imagining that we calculate the probability of each
+electron being in a given voxel: in principle, there is a probability that
+both are in the same voxel, but we know they have a strong repulstion, and so
+we do not expect both to be at the same place simultaneously. In other words,
+there are interactions among them that correlate their movement.
 
 ### Correlation
 
-A way to increase accuracy is to account for these correlations in electron movement. Some of the methods that take it into account are those of **Moeller-Plesset (MPn)** (where N is a number indicating the level or precision), **General Valence Bond (GVB)**, **Multiconfigurational Self-Consistent Field (MCSCF)**, **Configuration Interaction (CI)** and **Coupled Cluster (CC)**.
+A way to increase accuracy is to account for these correlations in electron
+movement. Some of the methods that take it into account are those of
+**Moeller-Plesset (MPn)** (where N is a number indicating the level or
+precision), **General Valence Bond (GVB)**, **Multiconfigurational
+Self-Consistent Field (MCSCF)**, **Configuration Interaction (CI)** and
+**Coupled Cluster (CC)**.
 
 Including correlation gives higher precision in our calculations. In general, it is not very important to consider it in biological problems, where we are more interested in cualitative aspects than in a high precision result. The exception are transition elements, where this effect becomes very important.
 
