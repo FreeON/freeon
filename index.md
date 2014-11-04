@@ -28,7 +28,7 @@ Contents
 -   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
 -   [Status](https://travis-ci.org/FreeON/freeon)
--   [Users](Users Guide "wikilink")
+-   [Users](Users_Guide "wikilink")
 -   [Developers](Developers_Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
 -   [Solvers](Solvers "wikilink")
