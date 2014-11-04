@@ -9,17 +9,18 @@ Introduction
 FreeON is an experimental, open source
 ([GPL](http://www.gnu.org/licenses/gpl.html)) suite of programs for linear
 scaling quantum chemistry. It is highly modular, and has been written from
-scratch for *N*-scaling SCF theory in Fortran95 and C. Platform independent
+scratch for $$N$$-scaling SCF theory in Fortran and C. Platform independent
 I/O is supported with [HDF5](http://www.hdfgroup.org/HDF5/). FreeON should
 compile with most modern Linux distributions and OS X. FreeON performs
 Hartree-Fock, pure Density Functional, and hybrid HF/DFT calculations (e.g.
-B3LYP) in a Cartesian-Gaussian LCAO basis. All algorithms are *O(N)* or ''O(N
-*log* N)'' for non-metallic systems. Periodic boundary conditions in 1, 2 and
-3 dimensions have been implemented through the Lorentz field (Γ-point), and an
-internal coordinate geometry optimizer allows full (atom+cell) relaxation
-using analytic derivatives. Effective core potentials for energies and forces
-have been implemented. Advanced features include *O(N)* static and dynamic
-response, as well as time reversible Born Oppenheimer Molecular Dynamics (MD).
+B3LYP) in a Cartesian-Gaussian LCAO basis. All algorithms are $$O(N)$$ or
+$$O(N \lg N)$$ for non-metallic systems. Periodic boundary conditions in 1, 2
+and 3 dimensions have been implemented through the Lorentz field
+($$\Gamma$$-point), and an internal coordinate geometry optimizer allows full
+(atom+cell) relaxation using analytic derivatives. Effective core potentials
+for energies and forces have been implemented. Advanced features include
+$$O(N)$$ static and dynamic response, as well as time reversible Born
+Oppenheimer Molecular Dynamics (MD).
 
 Contents
 --------
