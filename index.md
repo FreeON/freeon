@@ -38,7 +38,8 @@ Contents
 Download
 --------
 
-We periodically release snapshots of the development tree in the [Savannah FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
+We periodically release snapshots of the development tree in the [Savannah
+FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
 
 Here are a few recent ones:
 
@@ -47,22 +48,27 @@ Here are a few recent ones:
 Project Stats
 -------------
 
-<ohlohStats/>
+{% include openhub.html %}
 
 Support Us
 ----------
 
-<cafepress/>
+{% include cafepress.html %}
 
 Contact Us
 ----------
 
-Please use our mailing lists or our bug tracker to ask questions or to report bugs. The mailing lists can be found here:
+Please use our mailing lists or our bug tracker to ask questions or to report
+bugs. The mailing lists can be found here:
 
--   [freeon-users](http://lists.nongnu.org/mailman/listinfo/freeon-users), our public mailing list for users of FreeON.
--   [freeon-devel](http://lists.nongnu.org/mailman/listinfo/freeon-devel), our mailing list for developers of FreeON, and people who are interested in the development process of it.
+-   [freeon-users](http://lists.nongnu.org/mailman/listinfo/freeon-users), our
+    public mailing list for users of FreeON.
+-   [freeon-devel](http://lists.nongnu.org/mailman/listinfo/freeon-devel), our
+    mailing list for developers of FreeON, and people who are interested in
+    the development process of it.
 
-You are encouraged to file bug reports or feature requests with our issue tracker system:
+You are encouraged to file bug reports or feature requests with our issue
+tracker system:
 
 -   [Issue Tracker](https://github.com/FreeON/freeon/issues)
 
