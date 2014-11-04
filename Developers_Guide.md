@@ -194,4 +194,4 @@ Task Parallelism
 
 The [eclipse IDE](http://www.eclipse.org/) offers a powerful and convenient
 option for developing FreeON. Recommended plugins and settings can be found
-[here](Eclipse Settings "wikilink").
+[here](Eclipse_Settings "wikilink").
