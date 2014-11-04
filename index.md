@@ -24,9 +24,9 @@ response, as well as time reversible Born Oppenheimer Molecular Dynamics (MD).
 Contents
 --------
 
--   [History](pages/History "wikilink")
+-   [History](History "wikilink")
 -   [Vision](Vision "wikilink")
--   [Status](http://www.freeon.org:8010)
+-   [Status](https://travis-ci.org/FreeON/freeon)
 -   [Users](Users Guide "wikilink")
 -   [Developers](Developers Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
