@@ -10,12 +10,21 @@ All Quantum Mechanics methodology relies on Schrödinger's wave function:
 
 $$H \Psi = E \Psi$$
 
-In this equation, H is an *operator* that we apply on Ψ, a *function*. and E
-is the energy of the system. It is worth noting that Ψ is nothing but a norma
-mathematic function, just like any other, and the fact we denote it with a
-Greek letter has no bearing or special meaning.
+In this equation, H is an *operator* that we apply on $$\Psi$$, a *function*.
+and $$E$$ is the energy of the system. It is worth noting that $$\Psi$$ is
+nothing but a norma mathematic function, just like any other, and the fact we
+denote it with a Greek letter has no bearing or special meaning.
 
-The only thing that makes Ψ special is that it describes a natural system, and therefore it is a continuous function defined in three dimensions (X, Y and Z). This has an important consequence: when we want to evaluate it, we need to do it in three dimensions, multiplying the space of values to compute. To get an idea: if it were a discrete function of X with values between 0 and N, we would have to evaluate N values. For a three-dimensional (X, Y, Z) function, with values between 0 and N, we need to evaluate N · N · N = N<sup>2</sup>. But in our case, we need to evaluate Ψ as a continuous function (using integrals) and, if that's not enough, it is defined over all the space.
+The only thing that makes $$\Psi$$ special is that it describes a natural
+system, and therefore it is a continuous function defined in three dimensions
+($$X$$, $$Y$$ and $$Z$$). This has an important consequence: when we want to
+evaluate it, we need to do it in three dimensions, multiplying the space of
+values to compute. To get an idea: if it were a discrete function of $$X$$
+with values between 0 and $$N$$, we would have to evaluate $$N$$ values. For a
+three-dimensional $$(X, Y, Z)$$ function, with values between 0 and $$N$$, we
+need to evaluate $$N \dot N \dot N = N^2$$. But in our case, we need to
+evaluate $$\Psi$$ as a continuous function (using integrals) and, if that's
+not enough, it is defined over all the space.
 
 In practice, the above is not the full truth: the above is usually implemented as a system of equations, where we have a function Ψ<sub>n</sub> for each energy level E<sub>n</sub>. Each of these functions will denote an energy level, i. e. a different excitation state of the system. However, this only implies that to solve the equation we need to use standard methods to solve systems of equations: more explicitly, we can (and usually do) define the system as a determinant to use the classical methods we learnt in the school.
 
