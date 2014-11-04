@@ -29,11 +29,11 @@ Contents
 -   [Vision](Vision "wikilink")
 -   [Status](https://travis-ci.org/FreeON/freeon)
 -   [Users](Users Guide "wikilink")
--   [Developers](Developers Guide "wikilink")
+-   [Developers](Developers_Guide "wikilink")
 -   [Collaboratory](Collaboratory "wikilink")
 -   [Solvers](Solvers "wikilink")
 -   [Publications](Publications "wikilink")
--   [Citation](Citing FreeON "wikilink")
+-   [Citation](Citing_FreeON "wikilink")
 -   [Authors](Authors "wikilink")
 
 Download
