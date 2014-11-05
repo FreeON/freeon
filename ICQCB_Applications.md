@@ -3,7 +3,7 @@ layout: default
 title: ICQCB Applications
 ---
 
-![Where is Wally?](Benzene-homo-2.png "fig:Where is Wally?") =
+![Where is Wally?](images/Benzene-homo-2.png "fig:Where is Wally?") =
 
 Applications
 ------------
