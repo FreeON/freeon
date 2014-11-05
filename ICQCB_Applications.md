@@ -5,11 +5,8 @@ title: ICQCB Applications
 
 ![Where is Wally?](Benzene-homo-2.png "fig:Where is Wally?") =
 
-<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">
 Applications
-
-</div>
-=
+------------
 
 ### Or, why should I learn about all this?
 
