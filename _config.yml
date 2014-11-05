@@ -8,3 +8,4 @@ baseurl: "/freeon"
 
 pages_list:
   Main: "/freeon"
+  "An Introduction": "/freeon/An_introduction_to_Computational_Quantum_Chemistry_for_Biologists"
