@@ -51,6 +51,11 @@ Project Stats
 
 {% include openhub.html %}
 
+Education
+---------
+
+[An introduction to Computational Quantum Chemistry for Biologists](An_introduction_to_Computational_Quantum_Chemistry_for_Biologists "wikilink")
+
 Contact Us
 ----------
 

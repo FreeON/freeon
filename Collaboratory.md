@@ -12,11 +12,6 @@ Collaborative Development
 -   [Democratized Science and Instrumentation](http://arielwaldman.com/2012/05/29/democratized-science-instrumentation/)
 -   Source code statistics at [ohloh](http://www.ohloh.net/p/freeon)
 
-Education
----------
-
-[An introduction to Computational Quantum Chemistry for Biologists](An_introduction_to_Computational_Quantum_Chemistry_for_Biologists "wikilink")
-
 Wiki
 ----
 
