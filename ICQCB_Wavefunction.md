@@ -27,7 +27,7 @@ evaluate $$\Psi$$ as a continuous function (using integrals) and, if that's
 not enough, it is defined over all the space.
 
 In practice, the above is not the full truth: the above is usually implemented
-as a system of equations, where we have a function Ψ<sub>n</sub> for each
+as a system of equations, where we have a function $$\Psi_{n}$$ for each
 energy level $$E_{n}$$. Each of these functions will denote an energy level,
 *i.e.* a different excitation state of the system. However, this only implies
 that to solve the equation we need to use standard methods to solve systems of
@@ -51,9 +51,10 @@ each of them) the appropriate operator:
 
 $$ \frac{\int \Psi^{*} A \Psi d\tau}{\int \Psi^{*} \Psi d\tau} $$
 
-Where $$\Psi^{*}$$ is the complex conjugate of the function, and thus Ψ\* Ψ
-corresponds to the square of the function modulus, and where $$d\tau$$
-represents ($$dx dy dz$$), *i.e.* we need to integrate over all space.
+Where $$\Psi^{*}$$ is the complex conjugate of the function, and thus
+$$\Psi^{*} \Psi$$ corresponds to the square of the function modulus, and where
+$$d\tau$$ represents ($$dx dy dz$$), *i.e.* we need to integrate over all
+space.
 
 For energy, whose operator is $$H$$, the function would become
 
