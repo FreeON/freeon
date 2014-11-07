@@ -25,16 +25,16 @@ Oppenheimer Molecular Dynamics (MD).
 Contents
 --------
 
--   [History](History "wikilink")
--   [Vision](Vision "wikilink")
+-   [History](History.html "wikilink")
+-   [Vision](Vision.html "wikilink")
 -   [Status](https://travis-ci.org/FreeON/freeon)
--   [Users](Users_Guide "wikilink")
--   [Developers](Developers_Guide "wikilink")
--   [Collaboratory](Collaboratory "wikilink")
--   [Solvers](Solvers "wikilink")
--   [Publications](Publications "wikilink")
--   [Citation](Citing_FreeON "wikilink")
--   [Authors](Authors "wikilink")
+-   [Users](Users_Guide.html "wikilink")
+-   [Developers](Developers_Guide.html "wikilink")
+-   [Collaboratory](Collaboratory.html "wikilink")
+-   [Solvers](Solvers.html "wikilink")
+-   [Publications](Publications.html "wikilink")
+-   [Citation](Citing_FreeON.html "wikilink")
+-   [Authors](Authors.html "wikilink")
 
 Download
 --------
@@ -54,7 +54,7 @@ Project Stats
 Education
 ---------
 
-[An introduction to Computational Quantum Chemistry for Biologists](An_introduction_to_Computational_Quantum_Chemistry_for_Biologists "wikilink")
+[An introduction to Computational Quantum Chemistry for Biologists](An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html "wikilink")
 
 Contact Us
 ----------
