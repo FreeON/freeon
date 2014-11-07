@@ -48,39 +48,39 @@ heavy math.
 
 ### Table of Contents
 
--   [Introduction](ICQCB_Introduction "wikilink") This is a short introduction
-    to the rest of the topics
--   [Applications](ICQCB_Applications "wikilink") A *very short* summary of
+-   [Introduction](ICQCB_Introduction.html "wikilink") This is a short
+    introduction to the rest of the topics
+-   [Applications](ICQCB_Applications.html "wikilink") A *very short* summary of
     the applications of Quantum Chemistry, or why do you want to get involved
     with this.
--   [Wave function](ICQCB_Wavefunction "wikilink") The concept of wave
+-   [Wave function](ICQCB_Wavefunction.html "wikilink") The concept of wave
     function is introduced here
--   [Atomic Orbitals](ICQCB_Orbitals "wikilink") An introduction to atomic
+-   [Atomic Orbitals](ICQCB_Orbitals.html "wikilink") An introduction to atomic
     orbitals
--   [Molecular Orbitals](ICQCB_Molecular_Orbitals "wikilink") An introduction
-    to molecular orbitals and the LCAO approach to computing them
--   [SCF Theory](ICQCB_SCF_Theory "wikilink") A quick introduction to Self
+-   [Molecular Orbitals](ICQCB_Molecular_Orbitals.html "wikilink") An
+    introduction to molecular orbitals and the LCAO approach to computing them
+-   [SCF Theory](ICQCB_SCF_Theory.html "wikilink") A quick introduction to Self
     Consistent Field Theory and the Variational Principle
--   [Relativity](ICQCB_Relativity "wikilink") Why and when should relativity
+-   [Relativity](ICQCB_Relativity.html "wikilink") Why and when should relativity
     be included in calculations
--   [Basis Sets](ICQCB_Basis_Sets "wikilink") What they are and how they
+-   [Basis Sets](ICQCB_Basis_Sets.html "wikilink") What they are and how they
     affect calculations
--   [Popular Basis sets](ICQCB_Popular_Basis_Sets "wikilink") Which are the
-    most commonly used basis sets (and the ones you want to know about)
--   [*Ab initio* methods](ICQCB_Ab_initio_methods "wikilink") A very short
+-   [Popular Basis sets](ICQCB_Popular_Basis_Sets.html "wikilink") Which are
+    the most commonly used basis sets (and the ones you want to know about)
+-   [*Ab initio* methods](ICQCB_Ab_initio_methods.html "wikilink") A very short
     catalogue of the main *ab intio* calculations and when to use each
--   [Semiempirical methods](ICQCB_Semiempirical_methods "wikilink") How to
-    speed up calculations with biomolecules using empirical knowledge
--   [DFT](ICQCB_DFT "wikilink") Density Functional Theory provides an
+-   [Semiempirical methods](ICQCB_Semiempirical_methods.html "wikilink") How
+    to speed up calculations with biomolecules using empirical knowledge
+-   [DFT](ICQCB_DFT.html "wikilink") Density Functional Theory provides an
     alternate formulation that is becoming very popular
--   [Linear scaling methods](ICQCB_Linear_Scaling "wikilink") How to deal with
-    large problems and apply CQC to biological macromolecules
--   [Practical applications](ICQCB_Practical_Applications "wikilink") A very
-    short list of some relevant applications of CQC in practice
--   [CQC in practice](ICQCB_CQC_in_practice "wikilink") Minimal practical
+-   [Linear scaling methods](ICQCB_Linear_Scaling.html "wikilink") How to deal
+    with large problems and apply CQC to biological macromolecules
+-   [Practical applications](ICQCB_Practical_Applications.html "wikilink") A
+    very short list of some relevant applications of CQC in practice
+-   [CQC in practice](ICQCB_CQC_in_practice.html "wikilink") Minimal practical
     advice on applying CQC methods in real life problems
--   [Available software](ICQCB_Available_software "wikilink") A minimal
+-   [Available software](ICQCB_Available_software.html "wikilink") A minimal
     (certainly **not** exhaustive) catalog of Free and Open Source Software
     you can use to get started
--   [FreeON introduction](ICQCB_FreeON_intro "wikilink") A short introduction
-    to electronic structure calculations with FreeON.
+-   [FreeON introduction](ICQCB_FreeON_intro.html "wikilink") A short
+    introduction to electronic structure calculations with FreeON

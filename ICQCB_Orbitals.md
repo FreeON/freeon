@@ -14,8 +14,8 @@ Atomic orbitals
 ---------------
 
 We can solve exactly Schrödinger equation for the Hydrogen atom. When we do,
-we observe that at least in its basal state (1s<sup>1</sup> and in the first
-excited state (2s<sup>1</sup>), the electronic density cloud has a spherical
+we observe that at least in its basal state (1s$${}^{1}$$ and in the first
+excited state (2s$${}^{1}$$), the electronic density cloud has a spherical
 distribution, which led to the use of the term *orbital* to describe these
 states.
 
@@ -29,8 +29,8 @@ time) as *diffused* over all the space. From this point of view, we consider
 that the regions where it is more likely to find the electron have a bigger
 *density of charge* than those where is it less likely found.
 
-We are now in a better position to interpret Ψ, the wavefunction. But first,
-let us take a different look.
+We are now in a better position to interpret $$\psi$$, the wavefunction. But
+first, let us take a different look.
 
 ### Statistics, amplitudes and probabilities
 
@@ -59,18 +59,14 @@ by the vector describing a state, what we get is the *probability density
 amplitude*. This is what we call the wavefunction.
 
 It is worth noting that this is an *amplitude*. To get the *probability*, we
-need to square its modulus. Hence the common nottation Ψ\* · Ψ to calculate
-the probability:
+need to square its modulus. Hence the common notation $$\Psi^{*} \cdot \Psi$$
+to calculate the probability:
 
-<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">
-Ψ(x,y,z,t) = probability amplitude
+-  $$ \Psi(x, y, z, t) $$ = probability amplitude
+-  $$ \Psi^{*} \cdot \Psi $$ = probability
+-  $$ \int \Psi^{*} \Psi dt $$ = 1
 
-Ψ\* · Ψ = probability
-
-∫ Ψ\* Ψ dτ = 1
-
-</div>
-The first line states the wave function in terms of space and time (t).
+The first line states the wave function in terms of space and time ($$t$$).
 
 The last line simply summarizes that since we are calculating a probability,
 the total sum of probabilities over all space (the integral) must be 1.
@@ -83,22 +79,20 @@ deep understanding of chemical problems. But that is a longer story.
 
 Once we know the probability of finding an electron, it is straightforward to
 imagine a simple way to compute the wave function of an element more complex
-than Hydrogen. Deriving the full theoretical treatment is untractable, but we
+than Hydrogen. Deriving the full theoretical treatment is intractable, but we
 can use our knowledge of basic statistics to derive a simple
 **approximation**.
 
 We can define the electronic charge distribution of polielectronic atoms
 treating each electron separately. We know they fit in orbitals and that each
 orbital can take up at most two electrons. So we can assign each electron its
-own oribital with its associated wave function, X<sub>i</sub>. Under this
-approximation, we can describe the total wave function of the system Ψ,
+own orbital with its associated wave function, $$X_{i}$$. Under this
+approximation, we can describe the total wave function of the system $$\Psi$$,
 combining the probabilities of finding each of the electrons in space as a
-product of the wave functions of each of the electrons X<sub>i</sub>.
+product of the wave functions of each of the electrons $$X_{i}$$.
 
-<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">
-Ψ = Χ<sub>1</sub> Χ<sub>2</sub> ··· Χ<sub>n</sub>
+$$ \Psi = Χ_{1} Χ_{2} \cdots Χ_{n} $$
 
-</div>
 ### Spin and antisymmetry
 
 Sadly for us, we know that things are not so simple: electrons have spin, and
