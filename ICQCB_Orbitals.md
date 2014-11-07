@@ -29,7 +29,7 @@ time) as *diffused* over all the space. From this point of view, we consider
 that the regions where it is more likely to find the electron have a bigger
 *density of charge* than those where is it less likely found.
 
-We are now in a better position to interpret $$\psi$$, the wavefunction. But
+We are now in a better position to interpret $$\Psi$$, the wavefunction. But
 first, let us take a different look.
 
 ### Statistics, amplitudes and probabilities
@@ -125,10 +125,8 @@ multiplying by 1/√n!. SInce the diagonals suffice to define the determinant,
 and the normalization value is obvious, we usually write it in simplified form
 as
 
-<div class="center" style="width:auto; margin-left:auto; margin-right:auto;">
-Ψ = Χ<sub>1</sub> Χ<sub>2</sub> ··· Χ<sub>n</sub>
+$$ \Psi = X_{1} X_{2} \cdots X_{n} $$
 
-</div>
 and remember that we actually refer to a normalized determinant.
 
 For instance, for Berillium (with 4 electrons and a structure 1s<sup>α</sup>,
@@ -177,7 +175,7 @@ can no longer decrease the energy.
 Finally, and before we jump into molecules, we need to understand a last
 concept: atomic orbitals should be ortonormal.
 
-∫ Χ<sub>i</sub>Χ<sub>j</sub> dτ = 0 if i ≠ j
+$$ \int X_{i} X_{j} d\tau = 0 $$ if $$ i \neq j $$
 
 However, since we normally use analytical functions to represent them, in
 practice there is certain degree of overlap between the orbital wave
