@@ -53,8 +53,8 @@ $$ \frac{\int \Psi^{*} A \Psi d\tau}{\int \Psi^{*} \Psi d\tau} $$
 
 Where $$\Psi^{*}$$ is the complex conjugate of the function, and thus
 $$\Psi^{*} \Psi$$ corresponds to the square of the function modulus, and where
-$$d\tau$$ represents ($$dx dy dz$$), *i.e.* we need to integrate over all
-space.
+$$d\tau$$ represents ($$dx \,\, dy \,\, dz$$), *i.e.* we need to integrate
+over all space.
 
 For energy, whose operator is $$H$$, the function would become
 
