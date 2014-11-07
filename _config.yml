@@ -1,0 +1,11 @@
+gems:
+  - jekyll-mentions
+
+footer-links:
+  github: nicolasbock
+
+baseurl: "/freeon"
+
+pages_list:
+  Main: "/freeon"
+  "An Introduction to QC": "/freeon/An_introduction_to_Computational_Quantum_Chemistry_for_Biologists"
