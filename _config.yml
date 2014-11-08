@@ -7,7 +7,7 @@ footer-links:
 baseurl: "/freeon"
 
 pages_list:
-  Main: "/freeon"
+  Main: "/"
   History: "History.html"
   Vision: "Vision.html"
   Users: "Users_Guide.html"
@@ -17,4 +17,4 @@ pages_list:
   Publications: "Publications.html"
   Citation: "Citing_FreeON.html"
   Authors: "Authors.html"
-  "An Introduction to QC": "/freeon/An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html"
+  "An Introduction to QC": "An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html"
