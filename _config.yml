@@ -7,7 +7,7 @@ footer-links:
 baseurl: "/freeon"
 
 pages_list:
-  Main: "/"
+  Main: "/freeon"
   History: "History.html"
   Vision: "Vision.html"
   Users: "Users_Guide.html"
