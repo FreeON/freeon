@@ -8,4 +8,13 @@ baseurl: "/freeon"
 
 pages_list:
   Main: "/freeon"
+  History: "History.html"
+  Vision: "Vision.html"
+  Users: "Users_Guide.html"
+  Developers: "Developers_Guide.html"
+  Collaboratory: "Collaboratory.html"
+  Solvers: "Solvers.html"
+  Publications: "Publications.html"
+  Citation: "Citing_FreeON.html"
+  Authors: "Authors.html"
   "An Introduction to QC": "/freeon/An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html"
