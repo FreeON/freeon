@@ -3,16 +3,18 @@ layout: default
 title: CH4.inp
 ---
 
-![This page will show you how to run a calculation on methane (CH<sub>4</sub>](CH4.png "This page will show you how to run a calculation on methane (CH4")
+![This page will show you how to run a calculation on methane (CH<sub>4</sub>](images/CH4.png "This page will show you how to run a calculation on methane (CH4")
 
 Calculation on methane CH<sub>4</sub>
 -------------------------------------
 
-This page will show you how to write a sample calculation for methane ground state.
+This page will show you how to write a sample calculation for methane ground
+state.
 
 ### The complete file
 
-You can find this file in the examples subdirectory of the [freeON](http://freeon.org) distribution.
+You can find this file in the examples subdirectory of the
+[FreeON](http://github.com/FreeON/freeon) distribution.
 
     # NWChem: -40.518383 hartree
 
@@ -42,11 +44,21 @@ You can find this file in the examples subdirectory of the [freeON](http://freeo
 
 ### Comments
 
-The first line in this file is a comment. FreeON will ignore any lines starting with a hash '\#' mark. This example starts with a comment where the energy calculated using [NWchem](http://www.nwchem-sw.org) is provided for your reference so that you can compare it with your own results using FreeON. Incidentally, the same calculation using [MPQC](http://www.mpqc.org) and the 6-311G\*\* basis set gives an energy of -105561.604 kJ/mol (-40.20629324 Hartree).
+The first line in this file is a comment. FreeON will ignore any lines
+starting with a hash '\#' mark. This example starts with a comment where the
+energy calculated using [NWchem](http://www.nwchem-sw.org) is provided for
+your reference so that you can compare it with your own results using FreeON.
+Incidentally, the same calculation using [MPQC](http://www.mpqc.org) and the
+6-311G\*\* basis set gives an energy of -105561.604 kJ/mol (-40.20629324
+Hartree).
 
 ### Options
 
-Calculations in FreeON are defined by specifying a number of options. This is done in a special section of the file, tagged between an opening *<BeginOptions>* tag and a closing *<EndOptions>* tag. Let us consider the options chosen for this calculation: first notice that they are stated in no predefined input order, you can arrange them as you wish.
+Calculations in FreeON are defined by specifying a number of options. This is
+done in a special section of the file, tagged between an opening
+*<BeginOptions>* tag and a closing *<EndOptions>* tag. Let us consider the
+options chosen for this calculation: first notice that they are stated in no
+predefined input order, you can arrange them as you wish.
 
     Charge=0
 
@@ -54,11 +66,17 @@ This is the total charge of the system, which in this case is zero.
 
     Multiplicity=1
 
-This indicates FreeON the [multiplicity](http://en.wikipedia.org/wiki/Multiplicity_(chemistry)) of the system. Since we do not have any unpaired electrons, the multiplicity of our system is 1.
+This indicates FreeON the
+[multiplicity](http://en.wikipedia.org/wiki/Multiplicity_(chemistry)) of the
+system. Since we do not have any unpaired electrons, the multiplicity of our
+system is 1.
 
     Guess=Superpos
 
-This telss FreeON that we want to start the calculation from an initial configuration computed using the SuperPos ([Superposition of Atomic Densities, SAD](http://igitur-archive.library.uu.nl/chem/2007-0302-200920/pdf18.pdf)) method.
+This telss FreeON that we want to start the calculation from an initial
+configuration computed using the SuperPos
+([Superposition of Atomic Densities, SAD](http://igitur-archive.library.uu.nl/chem/2007-0302-200920/pdf18.pdf))
+method.
 
     OutPut=XYZ
 
