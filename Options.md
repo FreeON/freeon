@@ -25,5 +25,3 @@ The following option keys and values are known.
 |OutPut|XYZ|The format of the output configuration file|
 |SCFConvergence|DIIS|Use the DIIS algorithm to speedup SCF convergence|
 |SCFMethod|RH|Use Roothan-Hall|
-
-[Category:Users Guide](Category:Users Guide "wikilink") [Category:Input File](Category:Input File "wikilink")
