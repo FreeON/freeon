@@ -4,22 +4,24 @@ title: Citing FreeON
 ---
 
 TeX Format
+----------
 
-~~~
-@misc{FreeON,
+{% highlight tex %}
+{{"@"}}misc{FreeON,
   author = {Bock, Nicolas and Challacombe, Matt and Gan, Chee~Kwan
     and Henkelman, Graeme and Nemeth, Karoly and Niklasson, A.~M.~N.
     and Odell, Anders and Schwegler, Eric and Tymczak, C.~J.
     and Weber, Valery},
-  title = {{\\sc FreeON}},
+  title = {{"{{"}}\sc FreeON}},
   year = 2014,
-  note = {{L}os {A}lamos {N}ational {L}aboratory (LA-CC 01-2;
-    LA-CC-04-086), Copyright University of California.},
+  note = {{"{"}}{L}os {A}lamos {N}ational {L}aboratory (LA-CC 01-2;
+  LA-CC-04-086), Copyright University of California.},
   url = {http://www.freeon.org/}
 }
-~~~
+{% endhighlight %}
 
 EndNote/RIS
+-----------
 
 ~~~
 TY  - GEN
