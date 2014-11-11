@@ -12,9 +12,9 @@ Collaborative Development
 -   [Democratized Science and Instrumentation](http://arielwaldman.com/2012/05/29/democratized-science-instrumentation/)
 -   Source code statistics at [ohloh](http://www.ohloh.net/p/freeon)
 
-Wiki
-----
+These pages
+-----------
 
-Everybody is welcome to edit and add information on this wiki, subject to
-modest editorial standards. Simply clone this repository and send us a pull
-request.
+Everybody is welcome to edit and add information to these pages, subject to
+modest editorial standards. Simply clone this repository on github, check out
+the `gh-pages` branch, edit away, and send us a pull request.
