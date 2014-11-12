@@ -5,8 +5,8 @@ title: CH4.inp
 
 ![This page will show you how to run a calculation on methane (CH<sub>4</sub>](images/CH4.png "This page will show you how to run a calculation on methane (CH4")
 
-Calculation on methane CH<sub>4</sub>
--------------------------------------
+Calculation on methane CH_4
+---------------------------
 
 This page will show you how to write a sample calculation for methane ground
 state.
