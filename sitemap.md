@@ -7,5 +7,5 @@ Sitemap
 -------
 
 {% for page in site.pages %}
--  [{{ page.name }}]({{ page.url }})
+-  [{{ page.title }}]({{ page.url }})
 {% endfor %}
