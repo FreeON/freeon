@@ -145,6 +145,8 @@ We continuously build and test FreeON for a variety of environments shown on
 the buildbot page [buildbot](http://www.freeon.org:8010) webpage. Note that we
 can rapidly test patches and work with authors to improve their submissions.
 
+{% include responsive_ad.html %}
+
 Structure of the Program Suite
 ------------------------------
 
