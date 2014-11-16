@@ -40,7 +40,7 @@
   <body>
     <header>
       <div class="inner">
-        <h1><a href="{{ site.url }}/" style="color:#fff">FreeON</a></h1>
+        <h1><a href="{{ site.baseurl }}/" style="color:#fff">FreeON</a></h1>
         <h2>Linear Scaling Electronic Structure</h2>
         <a href="https://github.com/FreeON/freeon" class="button">
           <small>View project on</small> GitHub
@@ -88,19 +88,10 @@
 
           <p>LA-CC-01-2, LA-CC-04-086</p>
 
-          <center>
-            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-            <!-- github spammpack add -->
-            <ins class="adsbygoogle"
-              style="display:inline-block;width:160px;height:600px"
-              data-ad-client="ca-pub-4328959315579213"
-              data-ad-slot="1272689850"></ins>
-            <script> (adsbygoogle = window.adsbygoogle || []).push({}); </script>
-          </center>
+          {% include responsive_ad.html %}
 
         </aside>
       </div>
-
     </div>
   </body>
 </html>
