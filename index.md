@@ -46,6 +46,11 @@ Here are a few recent ones:
 
 -   [freeon-1.0.8.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.8.tar.bz2)
 
+## License
+
+FreeON is licensed under the [GPLv2
+license](http://www.gnu.org/licenses/gpl-2.0.html).
+
 Project Stats
 -------------
 
