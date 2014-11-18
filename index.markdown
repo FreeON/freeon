@@ -1,10 +1,8 @@
 ---
-layout: default
 title: FreeON
 ---
 
-Introduction
-------------
+# Introduction
 
 FreeON is an experimental, open source
 ([GPL](http://www.gnu.org/licenses/gpl.html)) suite of programs for linear
@@ -22,8 +20,7 @@ for energies and forces have been implemented. Advanced features include
 $$O(N)$$ static and dynamic response, as well as time reversible Born
 Oppenheimer Molecular Dynamics (MD).
 
-Contents
---------
+# Contents
 
 -   [History](History.html "wikilink")
 -   [Vision](Vision.html "wikilink")
@@ -36,8 +33,7 @@ Contents
 -   [Citation](Citing_FreeON.html "wikilink")
 -   [Authors](Authors.html "wikilink")
 
-Download
---------
+# Download
 
 We periodically release snapshots of the development tree in the [Savannah
 FreeON Download Area](http://savannah.nongnu.org/files/?group=freeon)
@@ -46,23 +42,20 @@ Here are a few recent ones:
 
 -   [freeon-1.0.8.tar.bz2](http://download.savannah.gnu.org/releases/freeon/freeon-1.0.8.tar.bz2)
 
-## License
+# License
 
 FreeON is licensed under the [GPLv2
 license](http://www.gnu.org/licenses/gpl-2.0.html).
 
-Project Stats
--------------
+# Project Stats
 
 {% include openhub.html %}
 
-Education
----------
+# Education
 
 [An introduction to Computational Quantum Chemistry for Biologists](An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html "wikilink")
 
-Contact Us
-----------
+# Contact Us
 
 Please use our mailing lists or our bug tracker to ask questions or to report
 bugs. The mailing lists can be found here:
@@ -78,7 +71,6 @@ tracker system:
 
 -   [Issue Tracker](https://github.com/FreeON/freeon/issues)
 
-Wikipedia
----------
+# Wikipedia
 
 We are also on wikipedia: [FreeON](http://en.wikipedia.org/wiki/FreeON)

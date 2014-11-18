@@ -18,5 +18,12 @@ pages_list:
   Authors: "Authors.html"
   "An Introduction to QC": "An_introduction_to_Computational_Quantum_Chemistry_for_Biologists.html"
 
+defaults:
+  -
+    scope:
+      path: ""
+    values:
+      layout: "default"
+
 url: http://www.freeon.org/freeon
 baseurl: "/freeon"
