@@ -5,7 +5,10 @@ before_install:
   - sudo apt-get install -y gfortran liblapack3gf hdf5-tools libhdf5-serial-dev
 
 env:
-  - COMPONENT=Modules
   - COMPONENT=FreeON
+  - COMPONENT=SCFeqs
+  - COMPONENT=OneE
+  - COMPONENT=QCTC
+  - COMPONENT=HiCu
 
 script: ./travis/build-freeon.sh $COMPONENT
