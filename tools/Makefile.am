@@ -23,13 +23,13 @@ bin_PROGRAMS = \
 	standaloneBCSR
 
 printBCSR_SOURCES = printBCSR.F90
-printBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS)
+printBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS) $(BLAS_LIBS)
 
 standaloneBCSR_SOURCES = standaloneBCSR.F90
-standaloneBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS)
+standaloneBCSR_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS) $(BLAS_LIBS)
 
 plotDecay_SOURCES = plotDecay.F90
-plotDecay_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS)
+plotDecay_LDADD = $(top_builddir)/Modules/libfreeonmodules.la $(LAPACK_LIBS) $(BLAS_LIBS)
 
 convertBCSR_SOURCES = \
   convertBCSR.cc \
@@ -38,7 +38,7 @@ convertBCSR_SOURCES = \
   logger.cc \
   logger.h
 
-convertBCSR_LDADD = libbcsr.la $(LAPACK_LIBS)
+convertBCSR_LDADD = libbcsr.la $(LAPACK_LIBS) $(BLAS_LIBS)
 
 EXTRA_DIST = $(bin_SCRIPTS)
 

@@ -105,7 +105,7 @@ EXTRA_DIST = \
   PBCTensor/Majik_Kubic_WS2.Inc
 
 EXTRA_INCLUDES = -I$(top_builddir)/OneE -I$(top_srcdir)/Modules/MMA/LookUpTables_800_6x
-LDADD = $(LDADD_MODULES) libktrax.la $(LAPACK_LIBS)
+LDADD = $(LDADD_MODULES) libktrax.la $(LAPACK_LIBS) $(BLAS_LIBS)
 
 TAGS_FILES = \
 	$(top_srcdir)/Modules/*.c
