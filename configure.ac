@@ -781,12 +781,16 @@ END PROGRAM test_compiler
                   you use a version >= 4.2.0])])
 
 # Check for BLAS.
-AC_SEARCH_LIBS([dgemm], [blas], [],
-  [AC_MSG_FAILURE([specify the location of dgemm()])])
+PKG_CHECK_MODULES([BLAS],[blas],[],
+  AC_SEARCH_LIBS([dgemm], [blas], [],
+    [AC_MSG_FAILURE([specify the location of dgemm()])])
+  )
 
 # Check for LAPACK.
-AC_SEARCH_LIBS([dsyev], [lapack], [],
-  [AC_MSG_FAILURE([specify the library that contains dsyev()])])
+PKG_CHECK_MODULES([LAPACK],[lapack],[],
+  AC_SEARCH_LIBS([dsyev], [lapack], [],
+    [AC_MSG_FAILURE([specify the library that contains dsyev()])])
+  )
 
 AC_ARG_VAR([H5CC], [h5cc compiler wrapper command])
 

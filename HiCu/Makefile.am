@@ -27,7 +27,7 @@ EXTRA_DIST = \
   MMA/CubeRules/RuleD.Inc \
   MMA/CubeRules/RuleE.Inc
 
-LDADD = $(LDADD_MODULES)
+LDADD = $(LDADD_MODULES) $(LAPACK_LIBS)
 
 EXTRA_INCLUDES = -I$(top_srcdir)/Modules/MMA/Functionals
 

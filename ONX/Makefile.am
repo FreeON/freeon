@@ -61,6 +61,7 @@ EXTRA_INCLUDES = \
 
 LDADD = \
   $(LDADD_MODULES) \
+  $(LAPACK_LIBS) \
   $(builddir)/../TwoE/libfreeonTwoE.la
 
 TAGS_FILES = \
