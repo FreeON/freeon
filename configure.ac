@@ -781,25 +781,21 @@ END PROGRAM test_compiler
                   you use a version >= 4.2.0])])
 
 # Check for BLAS.
-PKG_CHECK_MODULES([BLAS],[blas],[],
+PKG_CHECK_MODULES([BLAS], [blas], [],
   AC_SEARCH_LIBS([dgemm], [blas], [],
     [AC_MSG_FAILURE([specify the location of dgemm()])])
   )
 
 # Check for LAPACK.
-PKG_CHECK_MODULES([LAPACK],[lapack],[],
+PKG_CHECK_MODULES([LAPACK], [lapack], [],
   AC_SEARCH_LIBS([dsyev], [lapack], [],
     [AC_MSG_FAILURE([specify the library that contains dsyev()])])
   )
 
 AC_ARG_VAR([H5CC], [h5cc compiler wrapper command])
 
-if test -z "${H5CC}"; then
-  H5CC=h5cc
-fi
-
 AC_MSG_CHECKING([for hdf5 version])
-HDF5_VERSION=$(eval $H5CC -showconfig | grep 'HDF5 Version:' | $AWK '{print $[]3}')
+HDF5_VERSION=$(eval ${H5CC:=h5cc} -showconfig | grep 'HDF5 Version:' | $AWK '{print $[]3}')
 AC_MSG_RESULT([${HDF5_VERSION}])
 AC_DEFINE_UNQUOTED(HDF5_VERSION, [${HDF5_VERSION}], [The hdf5 library version.])
 
