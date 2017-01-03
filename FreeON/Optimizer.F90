@@ -3055,7 +3055,7 @@ CONTAINS
     SELECT CASE(FromTo)
     CASE('CToWC');IFromTo=0
     CASE('WCToC');IFromTo=1
-    CASE DEFAULT; STOP'Err:WghtMtrx'
+    CASE DEFAULT; STOP 'Err:WghtMtrx'
     END SELECT
     DO AtB=1,NAtoms
        IF(IFromTo.EQ.0) THEN
